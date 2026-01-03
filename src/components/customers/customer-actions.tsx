@@ -57,7 +57,7 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger className="h-8 w-8 p-0 hover:bg-accent hover:text-accent-foreground rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+        <DropdownMenuTrigger className="inline-flex items-center justify-center h-8 w-8 p-0 hover:bg-accent hover:text-accent-foreground rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           <MoreHorizontal className="h-4 w-4" />
           <span className="sr-only">{language === "ar" ? "فتح القائمة" : "Open menu"}</span>
         </DropdownMenuTrigger>
