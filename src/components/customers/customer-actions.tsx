@@ -17,7 +17,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { MoreHorizontal, Edit, Archive, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
@@ -58,11 +57,9 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger>
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">{language === "ar" ? "فتح القائمة" : "Open menu"}</span>
-          </Button>
+        <DropdownMenuTrigger className="h-8 w-8 p-0 hover:bg-accent hover:text-accent-foreground rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+          <MoreHorizontal className="h-4 w-4" />
+          <span className="sr-only">{language === "ar" ? "فتح القائمة" : "Open menu"}</span>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align={dir === "rtl" ? "start" : "end"} className="w-48">

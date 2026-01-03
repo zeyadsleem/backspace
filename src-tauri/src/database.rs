@@ -115,6 +115,7 @@ pub fn init_db() -> Result<Connection> {
     Ok(conn)
 }
 
+#[allow(dead_code)]
 pub fn get_next_human_id(conn: &Connection, prefix: &str) -> Result<String> {
     let mut stmt = conn.prepare(
         "SELECT human_id FROM customers WHERE human_id LIKE ? ORDER BY human_id DESC LIMIT 1",
