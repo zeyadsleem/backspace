@@ -211,12 +211,12 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon: Icon }: StatCardProps) {
   return (
-    <Card>
-      <CardHeader className="flex justify-between pb-2">
+    <Card className="py-2">
+      <CardHeader className="flex justify-between pb-1">
         <CardTitle className="text-sm">{title}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-0">
         <div className="text-2xl font-bold">{value}</div>
       </CardContent>
     </Card>
