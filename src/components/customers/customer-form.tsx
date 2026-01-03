@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, User, Phone, Mail, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
+import { api, type Customer } from "@/lib/tauri-api";
 
 const customerSchema = z.object({
   humanId: z.string().min(1).max(20),
@@ -35,16 +36,6 @@ const customerSchema = z.object({
 });
 
 type CustomerFormData = z.infer<typeof customerSchema>;
-
-interface Customer {
-  id: string;
-  humanId: string;
-  name: string;
-  phone: string;
-  email?: string;
-  type: "visitor" | "member";
-  notes?: string;
-}
 
 interface CustomerFormProps {
   open: boolean;
@@ -59,16 +50,23 @@ export function CustomerForm({ open, onOpenChange, customer, mode = "create" }: 
 
   const mutation = useMutation({
     mutationFn: async (data: CustomerFormData) => {
-      const res = await fetch(
-        mode === "create" ? "/api/customers" : `/api/customers/${customer!.id}`,
-        {
-          method: mode === "create" ? "POST" : "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        },
-      );
-
-      if (!res.ok) throw new Error("Request failed");
+      if (mode === "create") {
+        return api.customers.create({
+          name: data.name,
+          phone: data.phone,
+          email: data.email || undefined,
+          customerType: data.type,
+          notes: data.notes,
+        });
+      } else {
+        return api.customers.update(customer!.id, {
+          name: data.name,
+          phone: data.phone,
+          email: data.email || undefined,
+          customerType: data.type,
+          notes: data.notes,
+        });
+      }
     },
     onSuccess: async () => {
       toast.success(
@@ -100,7 +98,7 @@ export function CustomerForm({ open, onOpenChange, customer, mode = "create" }: 
       name: customer?.name ?? "",
       phone: customer?.phone ?? "",
       email: customer?.email ?? "",
-      type: customer?.type ?? "visitor",
+      type: (customer?.customerType ?? "visitor") as "visitor" | "member",
       notes: customer?.notes ?? "",
     },
     onSubmit: ({ value }) => mutation.mutate(value),

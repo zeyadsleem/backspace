@@ -27,19 +27,11 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { CustomerForm } from "@/components/customers/customer-form";
 import { CustomerActions } from "@/components/customers/customer-actions";
+import { api, type Customer } from "@/lib/tauri-api";
 
 export const Route = createFileRoute("/customers")({
   component: CustomersPage,
 });
-
-type Customer = {
-  id: string;
-  name: string;
-  humanId: string;
-  phone: string;
-  type: "member" | "visitor";
-  createdAt: string;
-};
 
 export default function CustomersPage() {
   const { t, language, dir } = useI18n();
@@ -52,28 +44,19 @@ export default function CustomersPage() {
     isLoading,
     error,
   } = useQuery<Customer[]>({
-    queryKey: ["customers", "list", typeFilter],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (typeFilter !== "all") params.set("type", typeFilter);
-
-      const res = await fetch(`/api/customers?${params.toString()}`);
-      if (!res.ok) throw new Error("Failed to fetch customers");
-      return res.json();
-    },
+    queryKey: ["customers"],
+    queryFn: () => api.customers.list(),
   });
 
-  const { data: searchResults, isLoading: isSearching } = useQuery<Customer[]>({
-    queryKey: ["customers", "search", searchQuery],
-    queryFn: async () => {
-      const res = await fetch(`/api/customers/search?q=${encodeURIComponent(searchQuery)}`);
-      if (!res.ok) throw new Error("Failed to search customers");
-      return res.json();
-    },
-    enabled: searchQuery.length > 0,
-  });
-
-  const displayCustomers = searchQuery.length > 0 ? searchResults : customers;
+  const displayCustomers =
+    searchQuery.length > 0
+      ? customers?.filter(
+          (c) =>
+            c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            c.humanId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            c.phone.includes(searchQuery),
+        )
+      : customers;
 
   const getInitials = (name: string) =>
     name
@@ -135,7 +118,7 @@ export default function CustomersPage() {
               {isLoading ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
-                (customers?.filter((c) => c.type === "member").length ?? 0)
+                (customers?.filter((c) => c.customerType === "member").length ?? 0)
               )}
             </div>
           </CardContent>
@@ -151,7 +134,7 @@ export default function CustomersPage() {
               {isLoading ? (
                 <Skeleton className="h-8 w-16" />
               ) : (
-                (customers?.filter((c) => c.type === "visitor").length ?? 0)
+                (customers?.filter((c) => c.customerType === "visitor").length ?? 0)
               )}
             </div>
           </CardContent>
@@ -209,7 +192,7 @@ export default function CustomersPage() {
         </CardHeader>
 
         <CardContent>
-          {isLoading || isSearching ? (
+          {isLoading ? (
             <Skeleton className="h-32 w-full" />
           ) : error ? (
             <p className="text-center text-muted-foreground">Error loading data</p>
@@ -227,29 +210,35 @@ export default function CustomersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {displayCustomers.map((customer) => (
-                  <TableRow key={customer.id}>
-                    <TableCell>
-                      <Link to="/customers/$id" params={{ id: customer.id }} className="flex gap-3">
-                        <Avatar>
-                          <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{customer.name}</p>
-                          <p className="text-sm text-muted-foreground">{customer.humanId}</p>
-                        </div>
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Badge>{customer.type === "member" ? "Member" : "Visitor"}</Badge>
-                    </TableCell>
-                    <TableCell className="font-mono">{customer.phone}</TableCell>
-                    <TableCell>{formatDate(customer.createdAt)}</TableCell>
-                    <TableCell>
-                      <CustomerActions customer={customer} />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {displayCustomers
+                  .filter((c) => typeFilter === "all" || c.customerType === typeFilter)
+                  .map((customer) => (
+                    <TableRow key={customer.id}>
+                      <TableCell>
+                        <Link
+                          to="/customers/$id"
+                          params={{ id: customer.id }}
+                          className="flex gap-3"
+                        >
+                          <Avatar>
+                            <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{customer.name}</p>
+                            <p className="text-sm text-muted-foreground">{customer.humanId}</p>
+                          </div>
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Badge>{customer.customerType === "member" ? "Member" : "Visitor"}</Badge>
+                      </TableCell>
+                      <TableCell className="font-mono">{customer.phone}</TableCell>
+                      <TableCell>{formatDate(customer.createdAt)}</TableCell>
+                      <TableCell>
+                        <CustomerActions customer={customer} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           )}

@@ -22,16 +22,7 @@ import { MoreHorizontal, Edit, Archive, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
 import { CustomerForm } from "./customer-form";
-
-interface Customer {
-  id: string;
-  humanId: string;
-  name: string;
-  phone: string;
-  email?: string;
-  type: "visitor" | "member";
-  notes?: string;
-}
+import { api, type Customer } from "@/lib/tauri-api";
 
 interface CustomerActionsProps {
   customer: Customer;
@@ -42,31 +33,25 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
   const queryClient = useQueryClient();
 
   const [showEditForm, setShowEditForm] = useState(false);
-  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const archiveMutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/api/customers/${customer.id}/archive`, {
-        method: "POST",
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to archive customer");
-      }
+      await api.customers.delete(customer.id);
     },
     onSuccess: async () => {
-      toast.success(language === "ar" ? "تم أرشفة العميل بنجاح" : "Customer archived successfully");
+      toast.success(language === "ar" ? "تم حذف العميل بنجاح" : "Customer deleted successfully");
 
       await queryClient.invalidateQueries({
         queryKey: ["customers"],
         exact: false,
       });
 
-      setShowArchiveDialog(false);
+      setShowDeleteDialog(false);
     },
     onError: (error) => {
       console.error(error);
-      toast.error(language === "ar" ? "حدث خطأ في الأرشفة" : "Error archiving customer");
+      toast.error(language === "ar" ? "حدث خطأ في الحذف" : "Error deleting customer");
     },
   });
 
@@ -89,11 +74,11 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={() => setShowArchiveDialog(true)}
+            onClick={() => setShowDeleteDialog(true)}
             className="text-destructive focus:text-destructive"
           >
             <Archive className="h-4 w-4 mr-2" />
-            {language === "ar" ? "أرشفة" : "Archive"}
+            {language === "ar" ? "حذف" : "Delete"}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -106,34 +91,34 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
         mode="edit"
       />
 
-      {/* Archive Confirmation */}
-      <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+      {/* Delete Confirmation */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent dir={dir}>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <Archive className="h-5 w-5 text-destructive" />
-              {language === "ar" ? "أرشفة العميل" : "Archive Customer"}
+              {language === "ar" ? "حذف العميل" : "Delete Customer"}
             </AlertDialogTitle>
 
             <AlertDialogDescription>
               {language === "ar"
-                ? `هل أنت متأكد من أرشفة العميل "${customer.name}"؟ يمكن استرجاعه لاحقاً.`
-                : `Are you sure you want to archive "${customer.name}"? You can restore the customer later.`}
+                ? `هل أنت متأكد من حذف العميل "${customer.name}"؟ لا يمكن التراجع عن هذا الإجراء.`
+                : `Are you sure you want to delete "${customer.name}"? This action cannot be undone.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={archiveMutation.isPending}>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>
               {language === "ar" ? "إلغاء" : "Cancel"}
             </AlertDialogCancel>
 
             <AlertDialogAction
-              onClick={() => archiveMutation.mutate()}
-              disabled={archiveMutation.isPending}
+              onClick={() => deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {archiveMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {language === "ar" ? "أرشفة" : "Archive"}
+              {deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {language === "ar" ? "حذف" : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

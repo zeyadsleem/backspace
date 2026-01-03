@@ -29,21 +29,11 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { CustomerForm } from "@/components/customers/customer-form";
+import { api, type Customer } from "@/lib/tauri-api";
 
 export const Route = createFileRoute("/customers/$id")({
   component: CustomerProfilePage,
 });
-
-interface Customer {
-  id: string;
-  humanId: string;
-  name: string;
-  phone: string;
-  email?: string;
-  type: "member" | "visitor";
-  createdAt: string;
-  notes?: string;
-}
 
 export default function CustomerProfilePage() {
   const { id } = Route.useParams();
@@ -56,14 +46,9 @@ export default function CustomerProfilePage() {
     error,
   } = useQuery<Customer>({
     queryKey: ["customers", "detail", id],
-    queryFn: async () => {
-      const res = await fetch(`/api/customers/${id}`);
-      if (!res.ok) throw new Error("Failed to fetch customer");
-      return res.json();
-    },
+    queryFn: () => api.customers.get(id),
   });
 
-  /* Mock data (replace later with real APIs) */
   const mockSessions = [
     {
       id: "1",
@@ -185,7 +170,7 @@ export default function CustomerProfilePage() {
               <p className="font-semibold">{customer.name}</p>
               <p className="text-sm text-muted-foreground">{customer.humanId}</p>
               <Badge className="mt-1">
-                {customer.type === "member"
+                {customer.customerType === "member"
                   ? language === "ar"
                     ? "عضو"
                     : "Member"
