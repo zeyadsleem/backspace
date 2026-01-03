@@ -192,6 +192,7 @@ interface I18nContextType {
   toggleLanguage: () => void;
   t: <K extends keyof Translations>(key: K) => Translations[K];
   dir: "ltr" | "rtl";
+  lang: (ar: string, en: string) => string;
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
@@ -231,13 +232,15 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const dir = language === "ar" ? "rtl" : "ltr";
 
+  const lang = (ar: string, en: string) => (language === "ar" ? ar : en);
+
   React.useEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = dir;
   }, [language, dir]);
 
   return (
-    <I18nContext.Provider value={{ language, setLanguage, toggleLanguage, t, dir }}>
+    <I18nContext.Provider value={{ language, setLanguage, toggleLanguage, t, dir, lang }}>
       {children}
     </I18nContext.Provider>
   );

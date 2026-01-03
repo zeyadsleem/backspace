@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +28,9 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { CustomerForm } from "@/components/customers/customer-form";
-import { api, type Customer } from "@/lib/tauri-api";
+import { EmptyState } from "@/components/shared/empty-state";
+import { useCustomer } from "@/hooks/use-customers";
+import { getInitials, formatDate, formatCurrency, getCustomerTypeLabel } from "@/lib/formatters";
 
 export const Route = createFileRoute("/customers/$id")({
   component: CustomerProfilePage,
@@ -37,17 +38,10 @@ export const Route = createFileRoute("/customers/$id")({
 
 export default function CustomerProfilePage() {
   const { id } = Route.useParams();
-  const { t, language, dir } = useI18n();
+  const { t, language, dir, lang } = useI18n();
   const [showEditForm, setShowEditForm] = useState(false);
 
-  const {
-    data: customer,
-    isLoading,
-    error,
-  } = useQuery<Customer>({
-    queryKey: ["customers", "detail", id],
-    queryFn: () => api.customers.get(id),
-  });
+  const { data: customer, isLoading, error } = useCustomer(id);
 
   const mockSessions = [
     {
@@ -81,27 +75,6 @@ export default function CustomerProfilePage() {
     },
   ];
 
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-
-  const formatDate = (dateValue: string | number | Date) =>
-    new Date(dateValue).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-
-  const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat(language === "ar" ? "ar-EG" : "en-US", {
-      style: "currency",
-      currency: "EGP",
-    }).format(amount);
-
   if (isLoading) {
     return (
       <div className="container mx-auto p-8 space-y-8" dir={dir}>
@@ -119,21 +92,23 @@ export default function CustomerProfilePage() {
     return (
       <div className="container mx-auto p-8 text-center" dir={dir}>
         <User className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-        <p className="text-muted-foreground">
-          {language === "ar" ? "العميل غير موجود" : "Customer not found"}
-        </p>
-        <Link to="/customers">
-          <Button variant="outline" className="mt-4">
-            {language === "ar" ? "العودة للعملاء" : "Back to Customers"}
-          </Button>
-        </Link>
+        <EmptyState
+          icon={User}
+          title={lang("العميل غير موجود", "Customer not found")}
+          action={
+            <Link to="/customers">
+              <Button variant="outline" className="mt-4">
+                {lang("العودة للعملاء", "Back to Customers")}
+              </Button>
+            </Link>
+          }
+        />
       </div>
     );
   }
 
   return (
     <div className="container mx-auto p-8 space-y-8" dir={dir}>
-      {/* Header */}
       <div className="flex items-center gap-4">
         <Link to="/customers">
           <Button variant="outline" size="icon" className="h-11 w-11 rounded-2xl">
@@ -144,23 +119,22 @@ export default function CustomerProfilePage() {
         <div>
           <h1 className="text-xl font-bold">{t("customers").profile[language]}</h1>
           <p className="text-sm text-muted-foreground">
-            {language === "ar" ? "تفاصيل العميل" : "Customer details"}
+            {lang("تفاصيل العميل", "Customer details")}
           </p>
         </div>
 
         <div className="ml-auto">
           <Button size="sm" onClick={() => setShowEditForm(true)}>
             <Edit className="h-4 w-4 mr-2" />
-            {language === "ar" ? "تعديل" : "Edit"}
+            {lang("تعديل", "Edit")}
           </Button>
         </div>
       </div>
 
-      {/* Info Cards */}
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>{language === "ar" ? "العميل" : "Customer"}</CardTitle>
+            <CardTitle>{lang("العميل", "Customer")}</CardTitle>
           </CardHeader>
           <CardContent className="flex gap-4">
             <Avatar className="h-16 w-16">
@@ -170,13 +144,7 @@ export default function CustomerProfilePage() {
               <p className="font-semibold">{customer.name}</p>
               <p className="text-sm text-muted-foreground">{customer.humanId}</p>
               <Badge className="mt-1">
-                {customer.customerType === "member"
-                  ? language === "ar"
-                    ? "عضو"
-                    : "Member"
-                  : language === "ar"
-                    ? "زائر"
-                    : "Visitor"}
+                {getCustomerTypeLabel(customer.customerType, language)}
               </Badge>
             </div>
           </CardContent>
@@ -184,7 +152,7 @@ export default function CustomerProfilePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{language === "ar" ? "الاتصال" : "Contact"}</CardTitle>
+            <CardTitle>{lang("الاتصال", "Contact")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex gap-2">
@@ -199,29 +167,26 @@ export default function CustomerProfilePage() {
             )}
             <div className="flex gap-2">
               <Calendar className="h-4 w-4" />
-              <span>{formatDate(customer.createdAt)}</span>
+              <span>{formatDate(customer.createdAt, language)}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>{language === "ar" ? "الإحصائيات" : "Stats"}</CardTitle>
+            <CardTitle>{lang("الإحصائيات", "Stats")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{formatCurrency(1250)}</p>
-            <p className="text-sm text-muted-foreground">
-              {language === "ar" ? "إجمالي الإنفاق" : "Total Spent"}
-            </p>
+            <p className="text-2xl font-bold">{formatCurrency(1250, language)}</p>
+            <p className="text-sm text-muted-foreground">{lang("إجمالي الإنفاق", "Total Spent")}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Notes */}
       {customer.notes && (
         <Card>
           <CardHeader>
-            <CardTitle>{language === "ar" ? "ملاحظات" : "Notes"}</CardTitle>
+            <CardTitle>{lang("ملاحظات", "Notes")}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">{customer.notes}</p>
@@ -229,20 +194,19 @@ export default function CustomerProfilePage() {
         </Card>
       )}
 
-      {/* Tabs */}
       <Tabs defaultValue="sessions">
         <TabsList className="grid grid-cols-3">
           <TabsTrigger value="sessions">
             <Clock className="h-4 w-4 mr-2" />
-            {language === "ar" ? "الجلسات" : "Sessions"}
+            {lang("الجلسات", "Sessions")}
           </TabsTrigger>
           <TabsTrigger value="invoices">
             <FileText className="h-4 w-4 mr-2" />
-            {language === "ar" ? "الفواتير" : "Invoices"}
+            {lang("الفواتير", "Invoices")}
           </TabsTrigger>
           <TabsTrigger value="subscription">
             <CreditCard className="h-4 w-4 mr-2" />
-            {language === "ar" ? "الاشتراك" : "Subscription"}
+            {lang("الاشتراك", "Subscription")}
           </TabsTrigger>
         </TabsList>
 
@@ -250,19 +214,19 @@ export default function CustomerProfilePage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{language === "ar" ? "التاريخ" : "Date"}</TableHead>
-                <TableHead>{language === "ar" ? "المورد" : "Resource"}</TableHead>
-                <TableHead>{language === "ar" ? "المدة" : "Duration"}</TableHead>
-                <TableHead>{language === "ar" ? "المبلغ" : "Amount"}</TableHead>
+                <TableHead>{lang("التاريخ", "Date")}</TableHead>
+                <TableHead>{lang("المورد", "Resource")}</TableHead>
+                <TableHead>{lang("المدة", "Duration")}</TableHead>
+                <TableHead>{lang("المبلغ", "Amount")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {mockSessions.map((s) => (
                 <TableRow key={s.id}>
-                  <TableCell>{formatDate(s.date)}</TableCell>
+                  <TableCell>{formatDate(s.date, language)}</TableCell>
                   <TableCell>{s.resource}</TableCell>
                   <TableCell>{s.duration}</TableCell>
-                  <TableCell>{formatCurrency(s.amount)}</TableCell>
+                  <TableCell>{formatCurrency(s.amount, language)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -274,26 +238,23 @@ export default function CustomerProfilePage() {
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>{language === "ar" ? "التاريخ" : "Date"}</TableHead>
-                <TableHead>{language === "ar" ? "المبلغ" : "Amount"}</TableHead>
-                <TableHead>{language === "ar" ? "الحالة" : "Status"}</TableHead>
+                <TableHead>{lang("التاريخ", "Date")}</TableHead>
+                <TableHead>{lang("المبلغ", "Amount")}</TableHead>
+                <TableHead>{lang("الحالة", "Status")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {mockInvoices.map((i) => (
                 <TableRow key={i.id}>
                   <TableCell>#{i.id.padStart(4, "0")}</TableCell>
-                  <TableCell>{formatDate(i.date)}</TableCell>
-                  <TableCell>{formatCurrency(i.amount)}</TableCell>
+                  <TableCell>{formatDate(i.date, language)}</TableCell>
+                  <TableCell>{formatCurrency(i.amount, language)}</TableCell>
                   <TableCell>
                     <Badge variant={i.status === "paid" ? "default" : "destructive"}>
-                      {i.status === "paid"
-                        ? language === "ar"
-                          ? "مدفوعة"
-                          : "Paid"
-                        : language === "ar"
-                          ? "غير مدفوعة"
-                          : "Unpaid"}
+                      {lang(
+                        i.status === "paid" ? "مدفوعة" : "غير مدفوعة",
+                        i.status === "paid" ? "Paid" : "Unpaid",
+                      )}
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -303,13 +264,10 @@ export default function CustomerProfilePage() {
         </TabsContent>
 
         <TabsContent value="subscription">
-          <div className="text-center py-8 text-muted-foreground">
-            {language === "ar" ? "لا يوجد اشتراك نشط" : "No active subscription"}
-          </div>
+          <EmptyState title={lang("لا يوجد اشتراك نشط", "No active subscription")} />
         </TabsContent>
       </Tabs>
 
-      {/* Edit Form */}
       <CustomerForm
         open={showEditForm}
         onOpenChange={setShowEditForm}

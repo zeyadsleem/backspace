@@ -1,12 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SearchInput } from "@/components/ui/search-input";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -23,30 +21,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, User, Users, Filter } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { CustomerForm } from "@/components/customers/customer-form";
 import { CustomerActions } from "@/components/customers/customer-actions";
-import { api, type Customer } from "@/lib/tauri-api";
+import { PageHeader } from "@/components/shared/page-header";
+import { LoadingState } from "@/components/shared/loading-state";
+import { EmptyState } from "@/components/shared/empty-state";
+import { useCustomers } from "@/hooks/use-customers";
+import { getInitials, formatDate, getCustomerTypeLabel } from "@/lib/formatters";
 
 export const Route = createFileRoute("/customers")({
   component: CustomersPage,
 });
 
 export default function CustomersPage() {
-  const { t, language, dir } = useI18n();
+  const { t, language, dir, lang } = useI18n();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "visitor" | "member">("all");
 
-  const {
-    data: customers,
-    isLoading,
-    error,
-  } = useQuery<Customer[]>({
-    queryKey: ["customers"],
-    queryFn: () => api.customers.list(),
-  });
+  const { data: customers, isLoading, error } = useCustomers();
 
   const filteredCustomers = customers?.filter((c) => {
     const matchesSearch =
@@ -55,126 +49,50 @@ export default function CustomersPage() {
       c.humanId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.phone.includes(searchQuery);
 
-    const matchesType =
-      typeFilter === "all" || c.customerType === typeFilter;
+    const matchesType = typeFilter === "all" || c.customerType === typeFilter;
 
     return matchesSearch && matchesType;
   });
 
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-
-  const formatDate = (dateValue: string) =>
-    new Date(dateValue).toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-
-  const getTypeLabel = (type: string) => {
-    const labels: Record<string, { ar: string; en: string }> = {
-      member: { ar: "مشترك", en: "Member" },
-      visitor: { ar: "زائر", en: "Visitor" },
-    };
-    return labels[type]?.[language === "ar" ? "ar" : "en"] || type;
+  const stats = {
+    total: customers?.length ?? 0,
+    members: customers?.filter((c) => c.customerType === "member").length ?? 0,
+    visitors: customers?.filter((c) => c.customerType === "visitor").length ?? 0,
+    thisMonth:
+      customers?.filter((c) => {
+        const d = new Date(c.createdAt);
+        const now = new Date();
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }).length ?? 0,
   };
 
   return (
     <div className="container mx-auto p-8 space-y-8" dir={dir}>
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="scroll-m-20 text-2xl font-extrabold tracking-tight lg:text-3xl">
-            {t("customers").title[language]}
-          </h1>
-          <p className="text-base text-muted-foreground mt-1">
-            {t("customers").subtitle[language]}
-          </p>
-        </div>
+      <PageHeader
+        title={t("customers").title[language]}
+        subtitle={t("customers").subtitle[language]}
+        action={
+          <Button onClick={() => setShowCreateForm(true)}>
+            <Plus className="h-4 w-4" />
+            {lang("إضافة عميل", "Add Customer")}
+          </Button>
+        }
+      />
 
-        <Button onClick={() => setShowCreateForm(true)}>
-          <Plus className="h-4 w-4" />
-          {language === "ar" ? "إضافة عميل" : "Add Customer"}
-        </Button>
-      </div>
-
-      {/* Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex justify-between pb-2">
-            <CardTitle className="text-sm">
-              {language === "ar" ? "إجمالي العملاء" : "Total Customers"}
-            </CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? <Skeleton className="h-8 w-16" /> : (customers?.length ?? 0)}
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard
+          title={lang("إجمالي العملاء", "Total Customers")}
+          value={stats.total}
+          icon={Users}
+        />
 
-        <Card>
-          <CardHeader className="flex justify-between pb-2">
-            <CardTitle className="text-sm">{language === "ar" ? "مشتركين" : "Members"}</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? (
-                <Skeleton className="h-8 w-16" />
-              ) : (
-                (customers?.filter((c) => c.customerType === "member").length ?? 0)
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard title={lang("مشتركين", "Members")} value={stats.members} icon={User} />
 
-        <Card>
-          <CardHeader className="flex justify-between pb-2">
-            <CardTitle className="text-sm">{language === "ar" ? "الزوار" : "Visitors"}</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? (
-                <Skeleton className="h-8 w-16" />
-              ) : (
-                (customers?.filter((c) => c.customerType === "visitor").length ?? 0)
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard title={lang("الزوار", "Visitors")} value={stats.visitors} icon={User} />
 
-        <Card>
-          <CardHeader className="flex justify-between pb-2">
-            <CardTitle className="text-sm">
-              {language === "ar" ? "هذا الشهر" : "This Month"}
-            </CardTitle>
-            <Plus className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoading ? (
-                <Skeleton className="h-8 w-16" />
-              ) : (
-                (customers?.filter((c) => {
-                  const d = new Date(c.createdAt);
-                  const now = new Date();
-                  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-                }).length ?? 0)
-              )}
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard title={lang("هذا الشهر", "This Month")} value={stats.thisMonth} icon={Plus} />
       </div>
 
-      {/* Table */}
       <Card>
         <CardHeader className="border-b">
           <div className="flex items-center gap-3 justify-between w-full">
@@ -182,7 +100,7 @@ export default function CustomersPage() {
 
             <div className="flex gap-3">
               <SearchInput
-                placeholder={language === "ar" ? "بحث باسم أو رقم العميل..." : "Search by name or customer ID..."}
+                placeholder={lang("بحث باسم أو رقم العميل...", "Search by name or customer ID...")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-[320px]"
@@ -194,9 +112,9 @@ export default function CustomersPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{language === "ar" ? "الكل" : "All"}</SelectItem>
-                  <SelectItem value="member">{language === "ar" ? "مشترك" : "Member"}</SelectItem>
-                  <SelectItem value="visitor">{language === "ar" ? "زائر" : "Visitor"}</SelectItem>
+                  <SelectItem value="all">{lang("الكل", "All")}</SelectItem>
+                  <SelectItem value="member">{lang("مشترك", "Member")}</SelectItem>
+                  <SelectItem value="visitor">{lang("زائر", "Visitor")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -205,23 +123,27 @@ export default function CustomersPage() {
 
         <CardContent>
           {isLoading ? (
-            <Skeleton className="h-32 w-full" />
+            <LoadingState type="table" count={5} />
           ) : error ? (
-            <p className="text-center text-muted-foreground">
-              {language === "ar" ? "خطأ في تحميل البيانات" : "Error loading data"}
-            </p>
+            <EmptyState icon={User} title={lang("خطأ في تحميل البيانات", "Error loading data")} />
           ) : !filteredCustomers?.length ? (
-            <p className="text-center text-muted-foreground py-8">
-              {language === "ar" ? "لم يتم العثور على عملاء" : "No customers found"}
-            </p>
+            <EmptyState icon={User} title={lang("لم يتم العثور على عملاء", "No customers found")} />
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>{language === "ar" ? "العميل" : "Customer"}</TableHead>
-                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>{language === "ar" ? "النوع" : "Type"}</TableHead>
-                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>{language === "ar" ? "الهاتف" : "Phone"}</TableHead>
-                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>{language === "ar" ? "تاريخ الانضمام" : "Joined"}</TableHead>
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>
+                    {lang("العميل", "Customer")}
+                  </TableHead>
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>
+                    {lang("النوع", "Type")}
+                  </TableHead>
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>
+                    {lang("الهاتف", "Phone")}
+                  </TableHead>
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>
+                    {lang("تاريخ الانضمام", "Joined")}
+                  </TableHead>
                   <TableHead className={dir === "rtl" ? "text-right" : "text-right"} />
                 </TableRow>
               </TableHeader>
@@ -239,17 +161,27 @@ export default function CustomersPage() {
                         </Avatar>
                         <div>
                           <p className="font-medium">{customer.name}</p>
-                          <p className="text-sm text-muted-foreground font-mono">{customer.humanId}</p>
+                          <p className="text-sm text-muted-foreground font-mono">
+                            {customer.humanId}
+                          </p>
                         </div>
                       </Link>
                     </TableCell>
                     <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
-                      <Badge variant={customer.customerType === "visitor" ? "secondary" : "default"}>
-                        {getTypeLabel(customer.customerType)}
+                      <Badge
+                        variant={customer.customerType === "visitor" ? "secondary" : "default"}
+                      >
+                        {getCustomerTypeLabel(customer.customerType, language)}
                       </Badge>
                     </TableCell>
-                    <TableCell className={`font-mono ${dir === "rtl" ? "text-right" : "text-left"}`}>{customer.phone}</TableCell>
-                    <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>{formatDate(customer.createdAt)}</TableCell>
+                    <TableCell
+                      className={`font-mono ${dir === "rtl" ? "text-right" : "text-left"}`}
+                    >
+                      {customer.phone}
+                    </TableCell>
+                    <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
+                      {formatDate(customer.createdAt, language)}
+                    </TableCell>
                     <TableCell className={dir === "rtl" ? "text-right" : "text-right"}>
                       <CustomerActions customer={customer} />
                     </TableCell>
@@ -261,12 +193,32 @@ export default function CustomersPage() {
         </CardContent>
       </Card>
 
-      <CustomerForm 
-        open={showCreateForm} 
-        onOpenChange={setShowCreateForm} 
-        mode="create" 
+      <CustomerForm
+        open={showCreateForm}
+        onOpenChange={setShowCreateForm}
+        mode="create"
         defaultType="visitor"
       />
     </div>
+  );
+}
+
+interface StatCardProps {
+  title: string;
+  value: number;
+  icon: React.ElementType;
+}
+
+function StatCard({ title, value, icon: Icon }: StatCardProps) {
+  return (
+    <Card>
+      <CardHeader className="flex justify-between pb-2">
+        <CardTitle className="text-sm">{title}</CardTitle>
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+      </CardContent>
+    </Card>
   );
 }

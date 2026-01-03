@@ -7,28 +7,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Edit, Archive, Loader2 } from "lucide-react";
+import { MoreHorizontal, Edit, Archive } from "lucide-react";
 import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
 import { CustomerForm } from "./customer-form";
 import { api, type Customer } from "@/lib/tauri-api";
+import { DeleteConfirmDialog } from "@/components/shared/delete-confirm-dialog";
 
 interface CustomerActionsProps {
   customer: Customer;
 }
 
 export function CustomerActions({ customer }: CustomerActionsProps) {
-  const { language, dir } = useI18n();
+  const { language, dir, lang } = useI18n();
   const queryClient = useQueryClient();
 
   const [showEditForm, setShowEditForm] = useState(false);
@@ -39,7 +30,7 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
       await api.customers.delete(customer.id);
     },
     onSuccess: async () => {
-      toast.success(language === "ar" ? "تم حذف العميل بنجاح" : "Customer deleted successfully");
+      toast.success(lang("تم حذف العميل بنجاح", "Customer deleted successfully"));
 
       await queryClient.invalidateQueries({
         queryKey: ["customers"],
@@ -48,9 +39,8 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
 
       setShowDeleteDialog(false);
     },
-    onError: (error) => {
-      console.error(error);
-      toast.error(language === "ar" ? "حدث خطأ في الحذف" : "Error deleting customer");
+    onError: () => {
+      toast.error(lang("حدث خطأ في الحذف", "Error deleting customer"));
     },
   });
 
@@ -65,7 +55,7 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
         <DropdownMenuContent align={dir === "rtl" ? "start" : "end"} className="w-48">
           <DropdownMenuItem onClick={() => setShowEditForm(true)}>
             <Edit className="h-4 w-4 mr-2" />
-            {language === "ar" ? "تعديل" : "Edit"}
+            {lang("تعديل", "Edit")}
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />
@@ -75,12 +65,11 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
             className="text-destructive focus:text-destructive"
           >
             <Archive className="h-4 w-4 mr-2" />
-            {language === "ar" ? "حذف" : "Delete"}
+            {lang("حذف", "Delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Edit Customer */}
       <CustomerForm
         open={showEditForm}
         onOpenChange={setShowEditForm}
@@ -88,38 +77,18 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
         mode="edit"
       />
 
-      {/* Delete Confirmation */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent dir={dir}>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Archive className="h-5 w-5 text-destructive" />
-              {language === "ar" ? "حذف العميل" : "Delete Customer"}
-            </AlertDialogTitle>
-
-            <AlertDialogDescription>
-              {language === "ar"
-                ? `هل أنت متأكد من حذف العميل "${customer.name}"؟ لا يمكن التراجع عن هذا الإجراء.`
-                : `Are you sure you want to delete "${customer.name}"? This action cannot be undone.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMutation.isPending}>
-              {language === "ar" ? "إلغاء" : "Cancel"}
-            </AlertDialogCancel>
-
-            <AlertDialogAction
-              onClick={() => deleteMutation.mutate()}
-              disabled={deleteMutation.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleteMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {language === "ar" ? "حذف" : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={lang("حذف العميل", "Delete Customer")}
+        description={lang(
+          `هل أنت متأكد من حذف العميل "${customer.name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+          `Are you sure you want to delete "${customer.name}"? This action cannot be undone.`,
+        )}
+        onConfirm={() => deleteMutation.mutate()}
+        isLoading={deleteMutation.isPending}
+        icon={Archive}
+      />
     </>
   );
 }

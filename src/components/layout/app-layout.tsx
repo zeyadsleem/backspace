@@ -1,28 +1,15 @@
 import * as React from "react";
-import { Link, useLocation } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import {
-  LayoutDashboard,
-  Users,
-  // Clock,
-  Package,
-  // CreditCard,
-  // BarChart3,
-  Settings,
-  Menu,
-  PanelLeft,
-  Globe,
-} from "lucide-react";
+import { LayoutDashboard, Users, Package, Settings } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { NavItem } from "@/components/shared/nav-item";
+import { SidebarFooter } from "@/components/shared/sidebar-footer";
 
 const mainNavItems = [
   { href: "/", icon: LayoutDashboard, key: "dashboard" as const },
   { href: "/customers", icon: Users, key: "customers" as const },
-  // { href: "/sessions", icon: Clock, key: "sessions" as const },
-  // { href: "/inventory", icon: Package, key: "inventory" as const },
-  // { href: "/subscriptions", icon: CreditCard, key: "subscriptions" as const },
-  // { href: "/reports", icon: BarChart3, key: "reports" as const },
 ];
 
 const secondaryNavItems = [{ href: "/settings", icon: Settings, key: "settings" as const }];
@@ -32,7 +19,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     return localStorage.getItem("sidebarExpanded") !== "false";
   });
   const location = useLocation();
-  const { language, toggleLanguage, t, dir } = useI18n();
+  const { language, dir, t } = useI18n();
 
   const toggleExpanded = () => {
     const newState = !isExpanded;
@@ -97,46 +84,16 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 )}
               >
                 {mainNavItems.map((item) => {
-                  const Icon = item.icon;
                   const isActive = location.pathname === item.href;
-
-                  if (!isExpanded) {
-                    return (
-                      <Link
-                        key={item.key}
-                        to={item.href}
-                        className={cn(
-                          "flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200",
-                          isActive
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                        )}
-                        title={t("nav")[item.key][language]}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </Link>
-                    );
-                  }
-
                   return (
-                    <Link
+                    <NavItem
                       key={item.key}
-                      to={item.href}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200 group",
-                        isActive
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                      )}
-                    >
-                      <Icon
-                        className={cn(
-                          "h-5 w-5 shrink-0 transition-transform group-hover:scale-110",
-                          isActive ? "text-primary-foreground" : "text-muted-foreground/80",
-                        )}
-                      />
-                      <span className="truncate">{t("nav")[item.key][language]}</span>
-                    </Link>
+                      href={item.href}
+                      icon={item.icon}
+                      label={t("nav")[item.key][language]}
+                      isActive={isActive}
+                      isExpanded={isExpanded}
+                    />
                   );
                 })}
               </div>
@@ -157,46 +114,16 @@ function AppLayout({ children }: { children: React.ReactNode }) {
                 )}
               >
                 {secondaryNavItems.map((item) => {
-                  const Icon = item.icon;
                   const isActive = location.pathname === item.href;
-
-                  if (!isExpanded) {
-                    return (
-                      <Link
-                        key={item.key}
-                        to={item.href}
-                        className={cn(
-                          "flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-200",
-                          isActive
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                        )}
-                        title={t("nav")[item.key][language]}
-                      >
-                        <Icon className="h-5 w-5" />
-                      </Link>
-                    );
-                  }
-
                   return (
-                    <Link
+                    <NavItem
                       key={item.key}
-                      to={item.href}
-                      className={cn(
-                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-200 group",
-                        isActive
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                      )}
-                    >
-                      <Icon
-                        className={cn(
-                          "h-5 w-5 shrink-0 transition-transform group-hover:scale-110",
-                          isActive ? "text-primary-foreground" : "text-muted-foreground/80",
-                        )}
-                      />
-                      <span className="truncate">{t("nav")[item.key][language]}</span>
-                    </Link>
+                      href={item.href}
+                      icon={item.icon}
+                      label={t("nav")[item.key][language]}
+                      isActive={isActive}
+                      isExpanded={isExpanded}
+                    />
                   );
                 })}
               </div>
@@ -205,47 +132,20 @@ function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="mt-auto border-t p-3 space-y-1">
-          {isExpanded ? (
-            <>
-              <button
-                className="w-full flex items-center justify-start gap-3 px-3 py-2 hover:bg-muted transition-all rounded-lg text-muted-foreground font-semibold active:scale-95 text-start text-sm"
-                onClick={toggleLanguage}
-              >
-                <Globe className="h-5 w-5 text-muted-foreground/80" />
-                <span className="truncate">{language === "ar" ? "English" : "عربي"}</span>
-              </button>
-              <button
-                className="w-full flex items-center justify-start gap-3 px-3 py-2 hover:bg-muted transition-all rounded-lg font-semibold text-muted-foreground active:scale-95 text-start text-sm"
-                onClick={toggleExpanded}
-              >
-                <PanelLeft
-                  className={cn(
-                    "h-5 w-5 text-muted-foreground/80 transition-transform",
-                    dir === "rtl" && "rotate-180",
-                  )}
-                />
-                <span className="truncate">{language === "ar" ? "طي القائمة" : "Collapse"}</span>
-              </button>
-            </>
-          ) : (
-            <div className="flex flex-col items-center gap-2">
-              <button
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all active:scale-90"
-                onClick={toggleLanguage}
-                title={language === "ar" ? "English" : "عربي"}
-              >
-                <Globe className="h-5 w-5" />
-              </button>
-
-              <button
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-all active:scale-90"
-                onClick={toggleExpanded}
-                title={language === "ar" ? "توسيع" : "Expand"}
-              >
-                <Menu className="h-5 w-5 transition-transform" />
-              </button>
-            </div>
-          )}
+          <SidebarFooter
+            isExpanded={isExpanded}
+            dir={dir}
+            onToggleLanguage={() => {
+              if (typeof window !== "undefined") {
+                const newLang = language === "ar" ? "en" : "ar";
+                document.documentElement.lang = newLang;
+                document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
+                localStorage.setItem("language", newLang);
+                window.location.reload();
+              }
+            }}
+            onToggleExpand={toggleExpanded}
+          />
         </div>
       </aside>
 
