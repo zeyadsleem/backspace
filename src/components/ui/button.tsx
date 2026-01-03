@@ -22,7 +22,8 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 gap-2 px-4 ltr:has-data-[icon=inline-end]:pr-3 ltr:has-data-[icon=inline-start]:pl-3 rtl:has-data-[icon=inline-end]:pl-3 rtl:has-data-[icon=inline-start]:pr-3",
+        default:
+          "h-9 gap-2 px-4 ltr:has-data-[icon=inline-end]:pr-3 ltr:has-data-[icon=inline-start]:pl-3 rtl:has-data-[icon=inline-end]:pl-3 rtl:has-data-[icon=inline-start]:pr-3",
         xs: "h-7 gap-1 px-2 text-xs ltr:has-data-[icon=inline-end]:pr-1.5 ltr:has-data-[icon=inline-start]:pl-1.5 rtl:has-data-[icon=inline-end]:pl-1.5 rtl:has-data-[icon=inline-start]:pr-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 gap-1.5 px-3 ltr:has-data-[icon=inline-end]:pr-2.5 ltr:has-data-[icon=inline-start]:pl-2.5 rtl:has-data-[icon=inline-end]:pl-2.5 rtl:has-data-[icon=inline-start]:pr-2.5 [&_svg:not([class*='size-'])]:size-3.5",
         lg: "h-10 gap-2 px-6 text-base ltr:has-data-[icon=inline-end]:pr-5 ltr:has-data-[icon=inline-start]:pl-5 rtl:has-data-[icon=inline-end]:pl-5 rtl:has-data-[icon=inline-start]:pr-5",
