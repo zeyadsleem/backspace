@@ -131,22 +131,22 @@ export default function InventoryPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("inventory").item[language]}
                 </TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("inventory").sku[language]}
                 </TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("inventory").category[language]}
                 </TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("inventory").quantity[language]}
                 </TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("inventory").unit_price[language]}
                 </TableHead>
-                <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-right rtl:text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("common").actions[language]}
                 </TableHead>
               </TableRow>
@@ -196,7 +196,7 @@ export default function InventoryPage() {
                       </DrawerTrigger>
                       <DrawerContent dir={dir}>
                         <div className="mx-auto w-full max-w-2xl">
-                          <DrawerHeader className="text-left border-b pb-4">
+                          <DrawerHeader className="ltr:text-left rtl:text-right border-b pb-4">
                             <DrawerTitle className="text-base font-bold">
                               {t("inventory").movement_history[language]} - {item.name}
                             </DrawerTitle>
@@ -211,7 +211,7 @@ export default function InventoryPage() {
                                     </p>
                                     <p className="text-xs text-muted-foreground">{item.sku}</p>
                                   </div>
-                                  <div className="text-right">
+                                  <div className="ltr:text-right rtl:text-left">
                                     <p className="text-lg font-bold text-primary">
                                       {item.currentQuantity}
                                     </p>
@@ -224,16 +224,16 @@ export default function InventoryPage() {
                                 <Table>
                                   <TableHeader>
                                     <TableRow className="hover:bg-transparent">
-                                      <TableHead className="text-xs font-bold uppercase tracking-widest">
+                                      <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                                         {t("inventory").type[language]}
                                       </TableHead>
-                                      <TableHead className="text-xs font-bold uppercase tracking-widest">
+                                      <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                                         {t("inventory").quantity[language]}
                                       </TableHead>
-                                      <TableHead className="text-xs font-bold uppercase tracking-widest">
+                                      <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                                         {t("inventory").reason[language]}
                                       </TableHead>
-                                      <TableHead className="text-xs font-bold uppercase tracking-widest">
+                                      <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                                         {t("customers").date[language]}
                                       </TableHead>
                                     </TableRow>

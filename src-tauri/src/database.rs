@@ -1,11 +1,39 @@
 use rusqlite::{Connection, Result};
+use std::fs;
 use std::sync::Mutex;
+use tauri::State;
 
 pub struct DbConn(pub Mutex<Connection>);
 
 pub fn init_db() -> Result<Connection> {
     let conn = Connection::open("backspace.db")?;
 
+    create_tables(&conn)?;
+
+    Ok(conn)
+}
+
+pub fn reset_database_impl() -> Result<()> {
+    let db_path = "backspace.db";
+    if fs::metadata(db_path).is_ok() {
+        fs::remove_file(db_path).map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+    }
+    let conn = Connection::open(db_path)?;
+    create_tables(&conn)?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn reset_database(state: State<DbConn>) -> Result<(), String> {
+    reset_database_impl().map_err(|e| e.to_string())?;
+    
+    let conn = Connection::open("backspace.db").map_err(|e| e.to_string())?;
+    *state.0.lock().unwrap() = conn;
+    
+    Ok(())
+}
+
+fn create_tables(conn: &Connection) -> Result<()> {
     conn.execute(
         "CREATE TABLE IF NOT EXISTS customers (
             id TEXT PRIMARY KEY,
@@ -112,26 +140,5 @@ pub fn init_db() -> Result<Connection> {
         [],
     )?;
 
-    Ok(conn)
-}
-
-#[allow(dead_code)]
-pub fn get_next_human_id(conn: &Connection, prefix: &str) -> Result<String> {
-    let mut stmt = conn.prepare(
-        "SELECT human_id FROM customers WHERE human_id LIKE ? ORDER BY human_id DESC LIMIT 1",
-    )?;
-    
-    let pattern = format!("{}%", prefix);
-    let mut rows = stmt.query(&[&pattern])?;
-    
-    if let Some(row) = rows.next()? {
-        let last_id: String = row.get(0)?;
-        if let Some(num_str) = last_id.strip_prefix(prefix) {
-            if let Ok(num) = num_str.parse::<i32>() {
-                return Ok(format!("{}{:04}", prefix, num + 1));
-            }
-        }
-    }
-    
-    Ok(format!("{}{:04}", prefix, 1))
+    Ok(())
 }

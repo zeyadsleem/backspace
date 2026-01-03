@@ -35,4 +35,7 @@ export const api = {
     update: (id: string, data: UpdateCustomer) => invoke<Customer>("update_customer", { id, data }),
     delete: (id: string) => invoke<void>("delete_customer", { id }),
   },
+  database: {
+    reset: () => invoke<void>("reset_database"),
+  },
 };

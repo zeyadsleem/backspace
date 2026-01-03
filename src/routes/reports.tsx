@@ -125,19 +125,19 @@ export default function ReportsPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-xs font-bold uppercase tracking-widest">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                       {t("reports").period[language]}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                       {t("reports").revenue[language]}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                       {t("reports").session_count[language]}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                       {t("reports").customer_count[language]}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                       {t("reports").avg_per_session[language]}
                     </TableHead>
                   </TableRow>
@@ -201,19 +201,19 @@ export default function ReportsPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-xs font-bold uppercase tracking-widest w-[80px]">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest w-[80px]">
                       {t("reports").rank[language]}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                       {language === "ar" ? "العميل" : "Customer"}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                       {t("reports").total_spent[language]}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest">
                       {t("reports").session_count[language]}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest text-right">
+                    <TableHead className="ltr:text-right rtl:text-left text-xs font-bold uppercase tracking-widest">
                       {t("reports").avg_per_session[language]}
                     </TableHead>
                   </TableRow>

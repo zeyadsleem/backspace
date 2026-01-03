@@ -48,15 +48,18 @@ export default function CustomersPage() {
     queryFn: () => api.customers.list(),
   });
 
-  const displayCustomers =
-    searchQuery.length > 0
-      ? customers?.filter(
-          (c) =>
-            c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.humanId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.phone.includes(searchQuery),
-        )
-      : customers;
+  const filteredCustomers = customers?.filter((c) => {
+    const matchesSearch =
+      searchQuery.trim() === "" ||
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.humanId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.phone.includes(searchQuery);
+
+    const matchesType =
+      typeFilter === "all" || c.customerType === typeFilter;
+
+    return matchesSearch && matchesType;
+  });
 
   const getInitials = (name: string) =>
     name
@@ -73,10 +76,18 @@ export default function CustomersPage() {
       day: "numeric",
     });
 
+  const getTypeLabel = (type: string) => {
+    const labels: Record<string, { ar: string; en: string }> = {
+      member: { ar: "مشترك", en: "Member" },
+      visitor: { ar: "زائر", en: "Visitor" },
+    };
+    return labels[type]?.[language === "ar" ? "ar" : "en"] || type;
+  };
+
   return (
     <div className="container mx-auto p-8 space-y-8" dir={dir}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="scroll-m-20 text-2xl font-extrabold tracking-tight lg:text-3xl">
             {t("customers").title[language]}
@@ -87,8 +98,8 @@ export default function CustomersPage() {
         </div>
 
         <Button onClick={() => setShowCreateForm(true)}>
-          <Plus className={cn("h-4 w-4", dir === "rtl" ? "ml-2" : "mr-2")} />
-          {t("customers").create[language]}
+          <Plus className="h-4 w-4" />
+          {language === "ar" ? "إضافة عميل" : "Add Customer"}
         </Button>
       </div>
 
@@ -110,7 +121,7 @@ export default function CustomersPage() {
 
         <Card>
           <CardHeader className="flex justify-between pb-2">
-            <CardTitle className="text-sm">{language === "ar" ? "الأعضاء" : "Members"}</CardTitle>
+            <CardTitle className="text-sm">{language === "ar" ? "مشتركين" : "Members"}</CardTitle>
             <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -166,27 +177,28 @@ export default function CustomersPage() {
       {/* Table */}
       <Card>
         <CardHeader className="border-b">
-          <div className="flex justify-between gap-4">
+          <div className="flex items-center gap-3 justify-between w-full">
             <CardTitle>{t("customers").all[language]}</CardTitle>
 
             <div className="flex gap-3">
+              <SearchInput
+                placeholder={language === "ar" ? "بحث باسم أو رقم العميل..." : "Search by name or customer ID..."}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-[320px]"
+              />
+
               <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as any)}>
                 <SelectTrigger className="w-[140px]">
                   <Filter className="h-4 w-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="member">Members</SelectItem>
-                  <SelectItem value="visitor">Visitors</SelectItem>
+                  <SelectItem value="all">{language === "ar" ? "الكل" : "All"}</SelectItem>
+                  <SelectItem value="member">{language === "ar" ? "مشترك" : "Member"}</SelectItem>
+                  <SelectItem value="visitor">{language === "ar" ? "زائر" : "Visitor"}</SelectItem>
                 </SelectContent>
               </Select>
-
-              <SearchInput
-                placeholder={t("common").search[language]}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
             </div>
           </div>
         </CardHeader>
@@ -195,57 +207,66 @@ export default function CustomersPage() {
           {isLoading ? (
             <Skeleton className="h-32 w-full" />
           ) : error ? (
-            <p className="text-center text-muted-foreground">Error loading data</p>
-          ) : !displayCustomers?.length ? (
-            <p className="text-center text-muted-foreground">No customers found</p>
+            <p className="text-center text-muted-foreground">
+              {language === "ar" ? "خطأ في تحميل البيانات" : "Error loading data"}
+            </p>
+          ) : !filteredCustomers?.length ? (
+            <p className="text-center text-muted-foreground py-8">
+              {language === "ar" ? "لم يتم العثور على عملاء" : "No customers found"}
+            </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead />
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>{language === "ar" ? "العميل" : "Customer"}</TableHead>
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>{language === "ar" ? "النوع" : "Type"}</TableHead>
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>{language === "ar" ? "الهاتف" : "Phone"}</TableHead>
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>{language === "ar" ? "تاريخ الانضمام" : "Joined"}</TableHead>
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-right"} />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {displayCustomers
-                  .filter((c) => typeFilter === "all" || c.customerType === typeFilter)
-                  .map((customer) => (
-                    <TableRow key={customer.id}>
-                      <TableCell>
-                        <Link
-                          to="/customers/$id"
-                          params={{ id: customer.id }}
-                          className="flex gap-3"
-                        >
-                          <Avatar>
-                            <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{customer.name}</p>
-                            <p className="text-sm text-muted-foreground">{customer.humanId}</p>
-                          </div>
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Badge>{customer.customerType === "member" ? "Member" : "Visitor"}</Badge>
-                      </TableCell>
-                      <TableCell className="font-mono">{customer.phone}</TableCell>
-                      <TableCell>{formatDate(customer.createdAt)}</TableCell>
-                      <TableCell>
-                        <CustomerActions customer={customer} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                {filteredCustomers.map((customer) => (
+                  <TableRow key={customer.id}>
+                    <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
+                      <Link
+                        to="/customers/$id"
+                        params={{ id: customer.id }}
+                        className={`flex gap-3 ${dir === "rtl" ? "flex-row" : ""}`}
+                      >
+                        <Avatar>
+                          <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{customer.name}</p>
+                          <p className="text-sm text-muted-foreground font-mono">{customer.humanId}</p>
+                        </div>
+                      </Link>
+                    </TableCell>
+                    <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
+                      <Badge variant={customer.customerType === "visitor" ? "secondary" : "default"}>
+                        {getTypeLabel(customer.customerType)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className={`font-mono ${dir === "rtl" ? "text-right" : "text-left"}`}>{customer.phone}</TableCell>
+                    <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>{formatDate(customer.createdAt)}</TableCell>
+                    <TableCell className={dir === "rtl" ? "text-right" : "text-right"}>
+                      <CustomerActions customer={customer} />
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           )}
         </CardContent>
       </Card>
 
-      <CustomerForm open={showCreateForm} onOpenChange={setShowCreateForm} mode="create" />
+      <CustomerForm 
+        open={showCreateForm} 
+        onOpenChange={setShowCreateForm} 
+        mode="create" 
+        defaultType="visitor"
+      />
     </div>
   );
 }

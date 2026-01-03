@@ -27,6 +27,7 @@ pub fn run() {
       commands::create_customer,
       commands::update_customer,
       commands::delete_customer,
+      database::reset_database,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

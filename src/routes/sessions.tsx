@@ -86,19 +86,19 @@ export default function SessionsPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("sessions").customer[language]}
                 </TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("customers").resource[language]}
                 </TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("sessions").started_at[language]}
                 </TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("customers").duration[language]}
                 </TableHead>
-                <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="ltr:text-right rtl:text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("common").actions[language]}
                 </TableHead>
               </TableRow>
@@ -136,7 +136,7 @@ export default function SessionsPage() {
                       </DrawerTrigger>
                       <DrawerContent dir={dir}>
                         <div className="mx-auto w-full max-w-lg">
-                          <DrawerHeader className="text-left">
+                          <DrawerHeader className="ltr:text-left rtl:text-right">
                             <DrawerTitle className="text-lg font-bold">
                               {t("sessions").end_session_title[language]}
                             </DrawerTitle>
@@ -195,13 +195,13 @@ export default function SessionsPage() {
                                   <Table>
                                     <TableHeader>
                                       <TableRow className="hover:bg-transparent">
-                                        <TableHead className="text-sm font-semibold">
+                                        <TableHead className="ltr:text-left rtl:text-right text-sm font-semibold">
                                           {t("inventory").item[language]}
                                         </TableHead>
-                                        <TableHead className="text-sm font-semibold">
+                                        <TableHead className="ltr:text-left rtl:text-right text-sm font-semibold">
                                           {language === "ar" ? "الكمية" : "Qty"}
                                         </TableHead>
-                                        <TableHead className="text-right text-sm font-semibold">
+                                        <TableHead className="ltr:text-right rtl:text-left text-sm font-semibold">
                                           {t("customers").amount[language]}
                                         </TableHead>
                                       </TableRow>

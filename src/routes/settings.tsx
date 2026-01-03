@@ -155,9 +155,9 @@ export default function SettingsPage() {
                       id="hourlyRate"
                       type="number"
                       defaultValue="50"
-                      className="h-9 text-sm font-bold ps-10 rounded-md bg-muted/50 border-2 focus-visible:ring-primary/30"
+                      className="h-9 text-sm font-bold ltr:ps-10 rtl:pe-10 ltr:pe-3 rtl:ps-3 rounded-md bg-muted/50 border-2 focus-visible:ring-primary/30"
                     />
-                    <div className="absolute top-0 start-0 bottom-0 flex items-center justify-center w-10 border-e-2 text-muted-foreground font-bold bg-muted/60 rounded-s-md text-xs">
+                    <div className="absolute top-0 bottom-0 flex items-center justify-center w-10 text-muted-foreground font-bold bg-muted/60 text-xs ltr:start-0 rtl:end-0 ltr:rounded-s-md rtl:rounded-e-md ltr:border-e-2 rtl:border-s-2">
                       $
                     </div>
                   </div>
@@ -174,9 +174,9 @@ export default function SettingsPage() {
                       id="roomRate"
                       type="number"
                       defaultValue="100"
-                      className="h-9 text-sm font-bold ps-10 rounded-md bg-muted/50 border-2 focus-visible:ring-primary/30"
+                      className="h-9 text-sm font-bold ltr:ps-10 rtl:pe-10 ltr:pe-3 rtl:ps-3 rounded-md bg-muted/50 border-2 focus-visible:ring-primary/30"
                     />
-                    <div className="absolute top-0 start-0 bottom-0 flex items-center justify-center w-10 border-e-2 text-muted-foreground font-bold bg-muted/60 rounded-s-md text-xs">
+                    <div className="absolute top-0 bottom-0 flex items-center justify-center w-10 text-muted-foreground font-bold bg-muted/60 text-xs ltr:start-0 rtl:end-0 ltr:rounded-s-md rtl:rounded-e-md ltr:border-e-2 rtl:border-s-2">
                       $
                     </div>
                   </div>

@@ -157,16 +157,16 @@ export default function SubscriptionsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     {t("subscriptions").name[language]}
                   </TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     {t("subscriptions").duration_days[language]}
                   </TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     {t("subscriptions").price[language]}
                   </TableHead>
-                  <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                  <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     {t("common").status[language]}
                   </TableHead>
                 </TableRow>
@@ -222,16 +222,16 @@ export default function SubscriptionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {language === "ar" ? "العميل" : "Customer"}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {t("subscriptions").type[language]}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {t("subscriptions").valid_until[language]}
                     </TableHead>
-                    <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {t("common").status[language]}
                     </TableHead>
                   </TableRow>
