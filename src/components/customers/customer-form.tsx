@@ -94,7 +94,7 @@ export function CustomerForm({ open, onOpenChange, customer, mode = "create" }: 
     },
   });
 
-  const form = useForm<CustomerFormData>({
+  const form = useForm({
     defaultValues: {
       humanId: customer?.humanId ?? "",
       name: customer?.name ?? "",
@@ -116,7 +116,7 @@ export function CustomerForm({ open, onOpenChange, customer, mode = "create" }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]" dir={dir}>
+      <DialogContent className="sm:max-w-2xl" dir={dir}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="h-5 w-5" />

@@ -63,7 +63,7 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-3xl border-2 bg-background p-6 hover:shadow-xl transition-all duration-300 flex items-center gap-4",
+        "group relative overflow-hidden rounded-2xl border-2 bg-background p-6 hover:shadow-xl transition-all duration-300 flex items-center gap-4",
         className,
       )}
     >
@@ -75,7 +75,7 @@ export function StatCard({
       />
       <div
         className={cn(
-          "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl transition-transform group-hover:scale-110",
+          "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110",
           styles.bg,
           styles.text,
         )}
@@ -83,7 +83,7 @@ export function StatCard({
         <Icon className="h-6 w-6" />
       </div>
       <div className="flex-1 min-w-0 space-y-1.5 z-10">
-        <h3 className="text-[13px] font-extrabold text-foreground/80 uppercase tracking-wider truncate">
+        <h3 className="text-xs font-extrabold text-foreground/80 uppercase tracking-wider truncate">
           {title}
         </h3>
         <div className="flex items-baseline gap-1.5 flex-wrap">
@@ -91,7 +91,7 @@ export function StatCard({
           {subtitle && (
             <span
               className={cn(
-                "text-[11px] font-bold truncate flex items-center gap-1",
+                "text-xs font-bold truncate flex items-center gap-1",
                 color === "emerald" ? "text-[var(--color-emerald)]" : "text-muted-foreground/60",
               )}
             >
@@ -104,7 +104,7 @@ export function StatCard({
         <Badge
           variant="outline"
           className={cn(
-            "hidden xl:flex absolute top-4 end-4 text-[9px] font-black uppercase tracking-widest px-2 py-0 z-10",
+            "hidden xl:flex absolute top-4 end-4 text-[10px] font-black uppercase tracking-widest px-2 py-0 z-10",
             styles.text,
             styles.border,
             styles.badgeBg,

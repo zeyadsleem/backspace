@@ -101,9 +101,9 @@ export default function SubscriptionsPage() {
               {t("subscriptions").create_type[language]}
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[400px] rounded-xl border">
+          <DialogContent className="sm:max-w-[400px] rounded-lg border">
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold">
+              <DialogTitle className="text-base font-bold">
                 {t("subscriptions").create_type_title[language]}
               </DialogTitle>
             </DialogHeader>
@@ -138,7 +138,7 @@ export default function SubscriptionsPage() {
                 </Label>
                 <Input id="maxHours" type="number" placeholder="8" className="h-9" />
               </div>
-              <Button className="w-full h-10 font-bold rounded-lg shadow-sm mt-2">
+              <Button className="w-full h-9 font-bold rounded-md shadow-sm mt-2">
                 {t("subscriptions").create[language]}
               </Button>
             </div>
@@ -146,10 +146,10 @@ export default function SubscriptionsPage() {
         </Dialog>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        <Card className="rounded-xl border shadow-sm">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="rounded-lg border shadow-sm">
           <CardHeader className="pb-3 border-b">
-            <CardTitle className="text-lg font-bold">
+            <CardTitle className="text-sm font-extrabold">
               {t("subscriptions").subscription_types[language]}
             </CardTitle>
           </CardHeader>
@@ -157,16 +157,16 @@ export default function SubscriptionsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     {t("subscriptions").name[language]}
                   </TableHead>
-                  <TableHead className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     {t("subscriptions").duration_days[language]}
                   </TableHead>
-                  <TableHead className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     {t("subscriptions").price[language]}
                   </TableHead>
-                  <TableHead className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">
+                  <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                     {t("common").status[language]}
                   </TableHead>
                 </TableRow>
@@ -208,9 +208,9 @@ export default function SubscriptionsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-xl border shadow-sm overflow-hidden flex flex-col">
+        <Card className="rounded-lg border shadow-sm overflow-hidden flex flex-col">
           <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-3 border-b">
-            <CardTitle className="text-lg font-bold">
+            <CardTitle className="text-sm font-extrabold">
               {t("subscriptions").active_subscriptions[language]}
             </CardTitle>
             <div className="relative w-full sm:w-64">
@@ -222,16 +222,16 @@ export default function SubscriptionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {language === "ar" ? "العميل" : "Customer"}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {t("subscriptions").type[language]}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {t("subscriptions").valid_until[language]}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest text-muted-foreground">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
                       {t("common").status[language]}
                     </TableHead>
                   </TableRow>

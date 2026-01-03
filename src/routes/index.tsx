@@ -39,7 +39,7 @@ export default function DashboardPage() {
           value="4,875"
           subtitle={
             <>
-              <span className="h-1.5 w-1.5 rounded-full bg-(--color-emerald) animate-pulse" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-emerald)] animate-pulse" />
               {t("dashboard").from_yesterday[language]}
             </>
           }

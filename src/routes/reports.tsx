@@ -115,9 +115,9 @@ export default function ReportsPage() {
             />
           </div>
 
-          <Card className="rounded-xl border-2">
+          <Card className="rounded-lg border-2">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold">
+              <CardTitle className="text-lg font-bold">
                 {t("reports").revenue_by_period[language]}
               </CardTitle>
             </CardHeader>
@@ -125,19 +125,19 @@ export default function ReportsPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest">
                       {t("reports").period[language]}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest">
                       {t("reports").revenue[language]}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest">
                       {t("reports").session_count[language]}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest">
                       {t("reports").customer_count[language]}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest">
                       {t("reports").avg_per_session[language]}
                     </TableHead>
                   </TableRow>
@@ -165,23 +165,23 @@ export default function ReportsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="revenue" className="space-y-6 outline-none">
-          <Card className="rounded-xl border shadow-sm">
+        <TabsContent value="revenue" className="space-y-4 outline-none">
+          <Card className="rounded-lg border shadow-sm">
             <CardHeader className="pb-3 border-b">
-              <CardTitle className="text-lg font-bold">
+              <CardTitle className="text-sm font-extrabold">
                 {t("reports").revenue_trends[language]}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center h-80 border-2 border-dashed rounded-2xl bg-muted/20">
+              <div className="flex items-center justify-center h-80 border-2 border-dashed rounded-lg bg-muted/20">
                 <div className="text-center">
-                  <TrendingUp className="h-16 w-16 mx-auto mb-6 text-muted-foreground/30" />
-                  <p className="text-xl font-bold text-muted-foreground">
+                  <TrendingUp className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
+                  <p className="text-base font-bold text-muted-foreground">
                     {language === "ar"
                       ? "سيتم عرض المخطط هنا"
                       : "Revenue chart will be displayed here"}
                   </p>
-                  <p className="text-base text-muted-foreground/60 mt-2">
+                  <p className="text-sm text-muted-foreground/60 mt-2">
                     {language === "ar" ? "اتصل بمصدر البيانات" : "Connect to your data source"}
                   </p>
                 </div>
@@ -190,10 +190,10 @@ export default function ReportsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="customers" className="space-y-6 outline-none">
-          <Card className="rounded-xl border shadow-sm">
+        <TabsContent value="customers" className="space-y-4 outline-none">
+          <Card className="rounded-lg border shadow-sm">
             <CardHeader className="pb-3 border-b">
-              <CardTitle className="text-lg font-bold">
+              <CardTitle className="text-sm font-extrabold">
                 {t("reports").top_customers[language]}
               </CardTitle>
             </CardHeader>
@@ -201,19 +201,19 @@ export default function ReportsPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest w-[80px]">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest w-[80px]">
                       {t("reports").rank[language]}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest">
                       {language === "ar" ? "العميل" : "Customer"}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest">
                       {t("reports").total_spent[language]}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest">
                       {t("reports").session_count[language]}
                     </TableHead>
-                    <TableHead className="text-[12px] font-bold uppercase tracking-widest text-right">
+                    <TableHead className="text-xs font-bold uppercase tracking-widest text-right">
                       {t("reports").avg_per_session[language]}
                     </TableHead>
                   </TableRow>
@@ -247,15 +247,15 @@ export default function ReportsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="usage" className="space-y-6 outline-none">
-          <Card className="rounded-xl border shadow-sm">
+        <TabsContent value="usage" className="space-y-4 outline-none">
+          <Card className="rounded-lg border shadow-sm">
             <CardHeader className="pb-3 border-b">
-              <CardTitle className="text-lg font-bold">
+              <CardTitle className="text-sm font-extrabold">
                 {t("reports").resource_utilization[language]}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-8 p-4">
+              <div className="space-y-4 p-4">
                 {[
                   { name: language === "ar" ? "منطقة المقاعد" : "Seat Area", usage: 75, total: 30 },
                   {
@@ -272,7 +272,7 @@ export default function ReportsPage() {
                   <div key={resource.name} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-bold">{resource.name}</span>
-                      <span className="text-[12px] font-bold text-primary">
+                      <span className="text-xs font-bold text-primary">
                         {resource.usage}% {t("reports").utilization_percent[language]}
                       </span>
                     </div>

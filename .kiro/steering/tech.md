@@ -1,114 +1,68 @@
 # Technology Stack
 
-## Runtime & Package Management
+## Runtime & Build
 
-- **Bun**: Primary runtime environment and package manager
-- **Node.js**: Compatible runtime for development tools
-- **Turborepo**: Monorepo build system with optimized caching
+- **Bun**: Package manager and runtime for frontend
+- **Rust**: Backend runtime (Tauri)
+- **Tauri v2**: Desktop application framework
+- **Vite**: Frontend build tool
 
 ## Frontend Stack
 
-- **React 19**: UI framework with latest features
-- **TypeScript**: Type-safe development across all packages
-- **TanStack Router**: File-based routing with full type safety
-- **TanStack Query**: Server state management and caching
-- **TailwindCSS 4**: Utility-first CSS framework
-- **shadcn/ui**: Reusable component library
-- **Vite**: Build tool and development server
-- **Tauri**: Desktop application framework
+- **React 19**: UI framework
+- **TypeScript**: Type-safe development
+- **TanStack Router**: File-based routing with type safety
+- **TanStack Query**: Server state management
+- **TanStack Form**: Form management
+- **shadcn/ui**: Component library
+- **TailwindCSS 4**: Styling
+- **Playwright**: E2E testing
 
 ## Backend Stack
 
-- **Elysia**: High-performance, type-safe web framework
-- **oRPC**: End-to-end type-safe APIs with OpenAPI integration
-- **Better Auth**: Authentication system
-- **Drizzle ORM**: TypeScript-first database toolkit
-- **SQLite/Turso**: Database engine
-- **Zod**: Schema validation and type inference
+- **Tauri**: Desktop framework with command system
+- **Rust**: Backend language
+- **libsql**: SQLite database driver
+- **Zod**: Schema validation
+- **Serde**: Serialization/deserialization
+- **tauri-plugin-commands**: Tauri command system
 
 ## Development Tools
 
-- **Oxlint**: Fast linting (replaces ESLint)
-- **Oxfmt**: Fast formatting (replaces Prettier)
-- **Husky**: Git hooks for code quality
-- **lint-staged**: Run linters on staged files only
+- **oxlint**: Fast linting
+- **oxfmt**: Fast formatting
+- **Husky**: Git hooks
+- **lint-staged**: Run linters on staged files
 
-## Common Commands
+## Commands
 
 ### Development
 
 ```bash
-# Start all applications
-bun run dev
-
-# Start specific apps
-bun run dev:web      # Frontend only
-bun run dev:server   # Backend only
-
-# Desktop development
-cd apps/web && bun run desktop:dev
+bun run dev              # Start Vite dev server (port 3001)
+bun run desktop:dev      # Start Tauri development
 ```
 
-### Database Operations
+### Build
 
 ```bash
-# Push schema changes
-bun run db:push
-
-# Open database studio
-bun run db:studio
-
-# Generate migrations
-bun run db:generate
-
-# Run migrations
-bun run db:migrate
-
-# Start local SQLite
-bun run db:local
+bun run build            # Production build
+bun run desktop:build    # Build desktop application
 ```
 
-### Build & Deploy
+### Code Quality
 
 ```bash
-# Build all packages
-bun run build
-
-# Type checking
-bun run check-types
-
-# Linting and formatting
-bun run check
-
-# Desktop build
-cd apps/web && bun run desktop:build
+bun run lint             # Run oxlint
+bun run format           # Format code with oxfmt
+bun run check            # Run lint + format
+bun run check-types      # TypeScript type checking
 ```
 
 ### Testing
 
 ```bash
-# Run tests (server)
-cd apps/server && bun test
-
-# Watch mode
-cd apps/server && bun test --watch
-
-# Coverage
-cd apps/server && bun test --coverage
+bun run test             # Run Playwright tests
+bun run test:ui          # Run Playwright with UI
+bun run test:headed      # Run Playwright headed
 ```
-
-## Package Management
-
-Uses Bun workspaces with catalog dependencies for version consistency:
-
-- Shared dependencies defined in root `package.json` catalog
-- Workspace packages use `workspace:*` for internal dependencies
-- Common versions managed centrally (TypeScript, Zod, etc.)
-
-## Environment Setup
-
-Each app has its own environment configuration:
-
-- `apps/server/.env` - Backend configuration
-- `apps/web/.env` - Frontend configuration
-- Use `.env.example` files as templates

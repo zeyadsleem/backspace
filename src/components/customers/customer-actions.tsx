@@ -25,7 +25,12 @@ import { CustomerForm } from "./customer-form";
 
 interface Customer {
   id: string;
+  humanId: string;
   name: string;
+  phone: string;
+  email?: string;
+  type: "visitor" | "member";
+  notes?: string;
 }
 
 interface CustomerActionsProps {
@@ -68,7 +73,7 @@ export function CustomerActions({ customer }: CustomerActionsProps) {
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger>
           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
             <MoreHorizontal className="h-4 w-4" />
             <span className="sr-only">{language === "ar" ? "فتح القائمة" : "Open menu"}</span>

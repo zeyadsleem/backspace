@@ -116,10 +116,10 @@ export default function InventoryPage() {
         </Button>
       </div>
 
-      <Card className="rounded-xl border shadow-sm">
+      <Card className="rounded-lg border shadow-sm">
         <CardHeader className="pb-3 border-b">
           <div className="flex items-center justify-between gap-4">
-            <CardTitle className="text-lg font-bold">
+            <CardTitle className="text-sm font-extrabold">
               {t("inventory").stock_items[language]}
             </CardTitle>
             <div className="relative w-full max-w-sm">
@@ -131,22 +131,22 @@ export default function InventoryPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("inventory").item[language]}
                 </TableHead>
-                <TableHead className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("inventory").sku[language]}
                 </TableHead>
-                <TableHead className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("inventory").category[language]}
                 </TableHead>
-                <TableHead className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("inventory").quantity[language]}
                 </TableHead>
-                <TableHead className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("inventory").unit_price[language]}
                 </TableHead>
-                <TableHead className="text-right text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                <TableHead className="text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {t("common").actions[language]}
                 </TableHead>
               </TableRow>
@@ -189,7 +189,7 @@ export default function InventoryPage() {
                   <TableCell className="text-right">
                     <Drawer>
                       <DrawerTrigger>
-                        <Button variant="ghost" size="sm" className="font-semibold text-base">
+                        <Button variant="ghost" size="sm" className="font-semibold">
                           <History className="h-4 w-4" />
                           {t("inventory").history[language]}
                         </Button>
@@ -197,25 +197,25 @@ export default function InventoryPage() {
                       <DrawerContent dir={dir}>
                         <div className="mx-auto w-full max-w-2xl">
                           <DrawerHeader className="text-left border-b pb-4">
-                            <DrawerTitle className="text-lg font-bold">
+                            <DrawerTitle className="text-base font-bold">
                               {t("inventory").movement_history[language]} - {item.name}
                             </DrawerTitle>
                           </DrawerHeader>
                           <div className="p-4">
                             <ScrollArea className="h-[60vh] pr-4">
-                              <div className="space-y-6">
-                                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl border">
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border">
                                   <div>
                                     <p className="text-sm font-bold">
                                       {t("inventory").current_stock[language]}
                                     </p>
-                                    <p className="text-[12px] text-muted-foreground">{item.sku}</p>
+                                    <p className="text-xs text-muted-foreground">{item.sku}</p>
                                   </div>
                                   <div className="text-right">
-                                    <p className="text-2xl font-bold text-primary">
+                                    <p className="text-lg font-bold text-primary">
                                       {item.currentQuantity}
                                     </p>
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
                                       {language === "ar" ? "وحدات" : "units"}
                                     </p>
                                   </div>
@@ -224,16 +224,16 @@ export default function InventoryPage() {
                                 <Table>
                                   <TableHeader>
                                     <TableRow className="hover:bg-transparent">
-                                      <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                                      <TableHead className="text-xs font-bold uppercase tracking-widest">
                                         {t("inventory").type[language]}
                                       </TableHead>
-                                      <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                                      <TableHead className="text-xs font-bold uppercase tracking-widest">
                                         {t("inventory").quantity[language]}
                                       </TableHead>
-                                      <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                                      <TableHead className="text-xs font-bold uppercase tracking-widest">
                                         {t("inventory").reason[language]}
                                       </TableHead>
-                                      <TableHead className="text-[12px] font-bold uppercase tracking-widest">
+                                      <TableHead className="text-xs font-bold uppercase tracking-widest">
                                         {t("customers").date[language]}
                                       </TableHead>
                                     </TableRow>
@@ -276,7 +276,7 @@ export default function InventoryPage() {
                                         <TableCell className="text-sm font-medium py-2">
                                           {movement.reason}
                                         </TableCell>
-                                        <TableCell className="text-[12px] text-muted-foreground font-medium py-2">
+                                        <TableCell className="text-xs text-muted-foreground font-medium py-2">
                                           {new Date(movement.date).toLocaleString()}
                                         </TableCell>
                                       </TableRow>
@@ -287,7 +287,7 @@ export default function InventoryPage() {
                                 <div className="flex gap-3 pt-4">
                                   <Button
                                     variant="outline"
-                                    className="flex-1 h-10 text-sm font-bold"
+                                    className="flex-1 h-9 text-sm font-bold"
                                     size="default"
                                   >
                                     <PlusIcon className="h-4 w-4" />
@@ -295,7 +295,7 @@ export default function InventoryPage() {
                                   </Button>
                                   <Button
                                     variant="outline"
-                                    className="flex-1 h-10 text-sm font-bold"
+                                    className="flex-1 h-9 text-sm font-bold"
                                     size="default"
                                   >
                                     <MinusIcon className="h-4 w-4" />

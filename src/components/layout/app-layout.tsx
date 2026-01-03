@@ -53,13 +53,13 @@ function AppLayout({ children }: { children: React.ReactNode }) {
             className={cn(
               "flex items-center gap-3 transition-all duration-300 w-full",
               isExpanded
-                ? "bg-muted/50 border border-border/40 rounded-2xl p-2 px-3 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.07)]"
+                ? "bg-muted/50 border border-border/40 rounded-lg p-2 px-3 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.07)]"
                 : "px-2 justify-center",
             )}
           >
             <div
               className={cn(
-                "flex items-center justify-center rounded-xl transition-all duration-300 shrink-0",
+                "flex items-center justify-center rounded-md transition-all duration-300 shrink-0",
                 isExpanded
                   ? "h-8 w-8 bg-primary text-primary-foreground shadow-sm"
                   : "h-11 w-11 bg-primary/10 text-primary",
@@ -86,7 +86,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
           <div className={cn("space-y-8", !isExpanded && "flex flex-col items-center")}>
             <div className="space-y-1 w-full">
               {isExpanded && (
-                <p className="px-3 text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-2">
+                <p className="px-3 text-xs font-extrabold uppercase tracking-widest text-muted-foreground/60 mb-2">
                   {t("main").dashboard[language]}
                 </p>
               )}
