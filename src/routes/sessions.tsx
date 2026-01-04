@@ -36,6 +36,7 @@ import { useResources } from "@/hooks/use-resources";
 import { PageHeader } from "@/components/shared/page-header";
 import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
+import { CustomerQuickViewDialog } from "@/components/customers/customer-quick-view-dialog";
 import { formatDuration } from "@/lib/formatters";
 
 export const Route = createFileRoute("/sessions")({
@@ -133,19 +134,24 @@ export default function SessionsPage() {
                     className="border-b transition-colors hover:bg-muted/50"
                   >
                     <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="text-sm font-bold">
-                            {session.customerName.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-bold text-sm">{session.customerName}</p>
-                          <p className="text-xs text-muted-foreground font-mono">
-                            {session.customerHumanId}
-                          </p>
-                        </div>
-                      </div>
+                      <CustomerQuickViewDialog
+                        customerId={session.customerId}
+                        trigger={
+                          <div className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-md">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="text-sm font-bold">
+                                {session.customerName.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-bold text-sm">{session.customerName}</p>
+                              <p className="text-xs text-muted-foreground font-mono">
+                                {session.customerHumanId}
+                              </p>
+                            </div>
+                          </div>
+                        }
+                      />
                     </TableCell>
                     <TableCell className="text-sm font-medium">{session.resourceName}</TableCell>
                     <TableCell className="text-sm text-muted-foreground font-medium">
