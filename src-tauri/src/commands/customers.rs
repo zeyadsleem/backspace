@@ -14,6 +14,7 @@ pub struct Customer {
     pub email: Option<String>,
     pub customer_type: String,
     pub notes: Option<String>,
+    pub balance: f64,
     pub created_at: String,
 }
 
@@ -46,7 +47,8 @@ fn customer_from_row(row: &rusqlite::Row) -> Result<Customer, rusqlite::Error> {
         email: row.get(4)?,
         customer_type: row.get(5)?,
         notes: row.get(6)?,
-        created_at: row.get(7)?,
+        balance: row.get(7)?,
+        created_at: row.get(8)?,
     })
 }
 
@@ -79,7 +81,7 @@ pub fn get_customers(state: State<DbConn>) -> Result<Vec<Customer>, String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     
     let mut stmt = conn
-        .prepare("SELECT id, human_id, name, phone, email, customer_type, notes, created_at FROM customers ORDER BY created_at DESC")
+        .prepare("SELECT id, human_id, name, phone, email, customer_type, notes, balance, created_at FROM customers ORDER BY created_at DESC")
         .map_err(|e| e.to_string())?;
     
     let customer_iter = stmt
@@ -99,7 +101,7 @@ pub fn get_customer(state: State<DbConn>, id: String) -> Result<Customer, String
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     
     let mut stmt = conn
-        .prepare("SELECT id, human_id, name, phone, email, customer_type, notes, created_at FROM customers WHERE id = ?")
+        .prepare("SELECT id, human_id, name, phone, email, customer_type, notes, balance, created_at FROM customers WHERE id = ?")
         .map_err(|e| e.to_string())?;
     
     let customer = stmt
@@ -118,8 +120,8 @@ pub fn create_customer(state: State<DbConn>, data: CreateCustomer) -> Result<Cus
     let created_at = chrono::Utc::now().to_rfc3339();
     
     conn.execute(
-        "INSERT INTO customers (id, human_id, name, phone, email, customer_type, notes, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        params![&id, &human_id, &data.name, &data.phone, &data.email as &dyn rusqlite::ToSql, &data.customer_type, &data.notes as &dyn rusqlite::ToSql, &created_at],
+        "INSERT INTO customers (id, human_id, name, phone, email, customer_type, notes, balance, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        params![&id, &human_id, &data.name, &data.phone, &data.email as &dyn rusqlite::ToSql, &data.customer_type, &data.notes as &dyn rusqlite::ToSql, 0.0f64, &created_at],
     ).map_err(|e| e.to_string())?;
     
     Ok(Customer {
@@ -130,6 +132,7 @@ pub fn create_customer(state: State<DbConn>, data: CreateCustomer) -> Result<Cus
         email: data.email,
         customer_type: data.customer_type,
         notes: data.notes,
+        balance: 0.0,
         created_at,
     })
 }
@@ -171,7 +174,7 @@ pub fn update_customer(state: State<DbConn>, id: String, data: UpdateCustomer) -
     }
     
     let mut stmt = conn
-        .prepare("SELECT id, human_id, name, phone, email, customer_type, notes, created_at FROM customers WHERE id = ?")
+        .prepare("SELECT id, human_id, name, phone, email, customer_type, notes, balance, created_at FROM customers WHERE id = ?")
         .map_err(|e| e.to_string())?;
     
     let customer = stmt

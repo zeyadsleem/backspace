@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,6 +10,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -19,9 +21,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Clock, Coffee, Banknote, Plus, Receipt } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { useActiveSessions } from "@/hooks/use-sessions";
+import { useActiveSessions, useStartSession, useEndSession } from "@/hooks/use-sessions";
+import { useCustomers } from "@/hooks/use-customers";
+import { useResources } from "@/hooks/use-resources";
 import { PageHeader } from "@/components/shared/page-header";
 import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -32,8 +43,35 @@ export const Route = createFileRoute("/sessions")({
 });
 
 export default function SessionsPage() {
-  const { t, language, dir } = useI18n();
+  const { t, language, dir, lang } = useI18n();
+  const [showStartDialog, setShowStartDialog] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState("");
+  const [selectedResource, setSelectedResource] = useState("");
   const { data: activeSessions, isLoading, error } = useActiveSessions();
+  const { data: customers } = useCustomers();
+  const { data: resources } = useResources();
+  const startSession = useStartSession();
+  const endSession = useEndSession();
+
+  const availableResources = resources?.filter((r) => r.isAvailable) || [];
+
+  const handleStartSession = () => {
+    if (!selectedCustomer || !selectedResource) return;
+
+    startSession.mutate(
+      {
+        customerId: selectedCustomer,
+        resourceId: selectedResource,
+      },
+      {
+        onSuccess: () => {
+          setShowStartDialog(false);
+          setSelectedCustomer("");
+          setSelectedResource("");
+        },
+      },
+    );
+  };
 
   return (
     <div className="container mx-auto p-8 space-y-8" dir={dir}>
@@ -41,7 +79,7 @@ export default function SessionsPage() {
         title={t("sessions").title[language]}
         subtitle={t("sessions").subtitle[language]}
         action={
-          <Button size="default">
+          <Button size="default" onClick={() => setShowStartDialog(true)}>
             <Plus className="h-4 w-4" />
             {t("sessions").new[language]}
           </Button>
@@ -71,19 +109,19 @@ export default function SessionsPage() {
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>
                     {t("sessions").customer[language]}
                   </TableHead>
-                  <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>
                     {language === "ar" ? "المورد" : "Resource"}
                   </TableHead>
-                  <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>
                     {t("sessions").started_at[language]}
                   </TableHead>
-                  <TableHead className="ltr:text-left rtl:text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <TableHead className={dir === "rtl" ? "text-right" : "text-left"}>
                     {t("customers").duration[language]}
                   </TableHead>
-                  <TableHead className="ltr:text-right rtl:text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  <TableHead className={dir === "rtl" ? "text-left" : "text-right"}>
                     {language === "ar" ? "إجراءات" : "Actions"}
                   </TableHead>
                 </TableRow>
@@ -119,7 +157,7 @@ export default function SessionsPage() {
                         {formatDuration(session.startedAt)}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className={dir === "rtl" ? "text-left" : "text-right"}>
                       <Drawer>
                         <DrawerTrigger>
                           <Button variant="outline" size="sm" className="font-semibold">
@@ -182,13 +220,10 @@ export default function SessionsPage() {
                                       <span className="text-muted-foreground">
                                         {language === "ar" ? "السعر بالساعة" : "Rate Per Hour"}
                                       </span>
-                                      <span className="font-semibold">ج.م 50.00 / hour</span>
-                                    </div>
-                                    <div className="flex justify-between text-base font-bold pt-2 border-t border-dashed">
-                                      <span>
-                                        {language === "ar" ? "المجموع الفرعي" : "Subtotal"}
+                                      <span className="font-semibold">
+                                        ج.م {session.resourceType === "room" ? "150.00" : "50.00"} /
+                                        hour
                                       </span>
-                                      <span>ج.م 112.50</span>
                                     </div>
                                   </div>
 
@@ -213,10 +248,14 @@ export default function SessionsPage() {
                                       <Banknote className="h-5 w-5" />
                                       {language === "ar" ? "الإجمالي" : "Total"}
                                     </span>
-                                    <span>ج.م 112.50</span>
+                                    <span>ج.م {calculateAmount(session.startedAt)}</span>
                                   </div>
 
-                                  <Button className="w-full text-sm h-9" size="default">
+                                  <Button
+                                    className="w-full text-sm h-9"
+                                    size="default"
+                                    onClick={() => endSession.mutate(session.id)}
+                                  >
                                     <Receipt className="h-4 w-4" />
                                     {t("sessions").confirm_paid_cash[language]}
                                   </Button>
@@ -234,6 +273,80 @@ export default function SessionsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={showStartDialog} onOpenChange={setShowStartDialog}>
+        <DialogContent className="sm:max-w-[425px] rounded-lg border">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold">
+              {lang("بدء جلسة جديدة", "Start New Session")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-bold">{lang("العميل", "Customer")}</label>
+              <Select value={selectedCustomer} onValueChange={(v) => v && setSelectedCustomer(v)}>
+                <SelectTrigger className="h-9">
+                  <SelectValue>
+                    {selectedCustomer
+                      ? customers?.find((c) => c.id === selectedCustomer)?.name
+                      : lang("اختر العميل", "Select customer")}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {customers?.map((customer) => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name} ({customer.humanId})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold">{lang("المورد", "Resource")}</label>
+              <Select value={selectedResource} onValueChange={(v) => v && setSelectedResource(v)}>
+                <SelectTrigger className="h-9">
+                  <SelectValue>
+                    {selectedResource
+                      ? resources?.find((r) => r.id === selectedResource)?.name
+                      : lang("اختر المورد", "Select resource")}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {availableResources.length === 0 ? (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      {lang("لا توجد موارد متاحة", "No available resources")}
+                    </div>
+                  ) : (
+                    availableResources.map((resource) => (
+                      <SelectItem key={resource.id} value={resource.id}>
+                        {resource.name} ({lang("متاح", "Available")})
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              className="w-full h-9 font-bold"
+              size="default"
+              onClick={handleStartSession}
+              disabled={!selectedCustomer || !selectedResource || startSession.isPending}
+            >
+              {lang("بدء الجلسة", "Start Session")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
+}
+
+function calculateAmount(startedAt: string): string {
+  const start = new Date(startedAt).getTime();
+  const now = Date.now();
+  const hours = (now - start) / (1000 * 60 * 60);
+  const amount = Math.ceil(hours * 50);
+  return amount.toFixed(2);
 }

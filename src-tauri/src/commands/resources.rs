@@ -10,6 +10,7 @@ pub struct Resource {
     pub name: String,
     pub resource_type: String,
     pub is_available: bool,
+    pub rate_per_hour: f64,
     pub created_at: String,
 }
 
@@ -26,6 +27,7 @@ pub struct UpdateResource {
     pub name: Option<String>,
     pub resource_type: Option<String>,
     pub is_available: Option<bool>,
+    pub rate_per_hour: Option<f64>,
 }
 
 fn resource_from_row(row: &rusqlite::Row) -> Result<Resource, rusqlite::Error> {
@@ -34,7 +36,8 @@ fn resource_from_row(row: &rusqlite::Row) -> Result<Resource, rusqlite::Error> {
         name: row.get(1)?,
         resource_type: row.get(2)?,
         is_available: row.get::<_, i32>(3)? == 1,
-        created_at: row.get(4)?,
+        rate_per_hour: row.get(4)?,
+        created_at: row.get(5)?,
     })
 }
 
@@ -43,7 +46,7 @@ pub fn get_resources(state: State<DbConn>) -> Result<Vec<Resource>, String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     
     let mut stmt = conn
-        .prepare("SELECT id, name, resource_type, is_available, created_at FROM resources ORDER BY created_at DESC")
+        .prepare("SELECT id, name, resource_type, is_available, rate_per_hour, created_at FROM resources ORDER BY created_at DESC")
         .map_err(|e| e.to_string())?;
     
     let resource_iter = stmt
@@ -63,7 +66,7 @@ pub fn get_resource(state: State<DbConn>, id: String) -> Result<Resource, String
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     
     let mut stmt = conn
-        .prepare("SELECT id, name, resource_type, is_available, created_at FROM resources WHERE id = ?")
+        .prepare("SELECT id, name, resource_type, is_available, rate_per_hour, created_at FROM resources WHERE id = ?")
         .map_err(|e| e.to_string())?;
     
     let resource = stmt
@@ -81,8 +84,8 @@ pub fn create_resource(state: State<DbConn>, data: CreateResource) -> Result<Res
     let created_at = chrono::Utc::now().to_rfc3339();
     
     conn.execute(
-        "INSERT INTO resources (id, name, resource_type, is_available, created_at) VALUES (?, ?, ?, ?, ?)",
-        params![&id, &data.name, &data.resource_type, 1i32, &created_at],
+        "INSERT INTO resources (id, name, resource_type, is_available, rate_per_hour, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        params![&id, &data.name, &data.resource_type, 1i32, 50.0f64, &created_at],
     ).map_err(|e| e.to_string())?;
     
     Ok(Resource {
@@ -90,6 +93,7 @@ pub fn create_resource(state: State<DbConn>, data: CreateResource) -> Result<Res
         name: data.name,
         resource_type: data.resource_type,
         is_available: true,
+        rate_per_hour: 50.0,
         created_at,
     })
 }
@@ -113,6 +117,10 @@ pub fn update_resource(state: State<DbConn>, id: String, data: UpdateResource) -
         updates.push("is_available = ?");
         values.push(Box::new(if is_available { 1i32 } else { 0i32 }));
     }
+    if let Some(rate_per_hour) = data.rate_per_hour {
+        updates.push("rate_per_hour = ?");
+        values.push(Box::new(rate_per_hour));
+    }
     
     if !updates.is_empty() {
         let query = format!("UPDATE resources SET {} WHERE id = ?", updates.join(", "));
@@ -123,7 +131,7 @@ pub fn update_resource(state: State<DbConn>, id: String, data: UpdateResource) -
     }
     
     let mut stmt = conn
-        .prepare("SELECT id, name, resource_type, is_available, created_at FROM resources WHERE id = ?")
+        .prepare("SELECT id, name, resource_type, is_available, rate_per_hour, created_at FROM resources WHERE id = ?")
         .map_err(|e| e.to_string())?;
     
     let resource = stmt

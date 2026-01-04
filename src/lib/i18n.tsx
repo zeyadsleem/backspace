@@ -209,16 +209,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const setLanguage = useCallback((_lang: Language) => {
     setLanguageState(_lang);
     localStorage.setItem("language", _lang);
-    document.documentElement.lang = _lang;
-    document.documentElement.dir = _lang === "ar" ? "rtl" : "ltr";
   }, []);
 
   const toggleLanguage = useCallback(() => {
     setLanguageState((prev) => {
       const newLang = prev === "ar" ? "en" : "ar";
       localStorage.setItem("language", newLang);
-      document.documentElement.lang = newLang;
-      document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
       return newLang;
     });
   }, []);
@@ -235,7 +231,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const lang = (ar: string, en: string) => (language === "ar" ? ar : en);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     document.documentElement.lang = language;
     document.documentElement.dir = dir;
   }, [language, dir]);

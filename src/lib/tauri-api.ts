@@ -77,6 +77,110 @@ export interface CreateSession {
   resourceId: string;
 }
 
+export interface Inventory {
+  id: string;
+  name: string;
+  quantity: number;
+  minStock: number;
+  price: number;
+  createdAt: string;
+}
+
+export interface CreateInventory {
+  name: string;
+  quantity: number;
+  minStock: number;
+  price: number;
+}
+
+export interface UpdateInventory {
+  name?: string;
+  quantity?: number;
+  minStock?: number;
+  price?: number;
+}
+
+export interface Subscription {
+  id: string;
+  customerId: string;
+  customerName: string | null;
+  customerHumanId: string | null;
+  planType: string;
+  startDate: string;
+  endDate: string | null;
+  hoursAllowance: number | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateSubscription {
+  customerId: string;
+  planType: string;
+  startDate: string;
+  endDate: string | null;
+  hoursAllowance: number | null;
+}
+
+export interface UpdateSubscription {
+  planType?: string;
+  startDate?: string;
+  endDate?: string | null;
+  hoursAllowance?: number | null;
+  isActive?: boolean;
+}
+
+export interface Invoice {
+  id: string;
+  customerId: string;
+  customerName: string | null;
+  customerHumanId: string | null;
+  amount: number;
+  status: string;
+  dueDate: string;
+  paidDate: string | null;
+  createdAt: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
+export interface InvoiceWithItems {
+  id: string;
+  customerId: string;
+  customerName: string | null;
+  customerHumanId: string | null;
+  amount: number;
+  status: string;
+  dueDate: string;
+  paidDate: string | null;
+  createdAt: string;
+  items: InvoiceItem[];
+}
+
+export interface CreateInvoice {
+  customerId: string;
+  amount: number;
+  status: string;
+  dueDate: string;
+  items: CreateInvoiceItem[];
+}
+
+export interface CreateInvoiceItem {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface UpdateInvoice {
+  status?: string;
+  paidDate?: string;
+}
+
 export const api = {
   customers: {
     list: () => invoke<Customer[]>("get_customers"),
@@ -98,6 +202,29 @@ export const api = {
     getActive: () => invoke<SessionWithDetails[]>("get_active_sessions"),
     start: (data: CreateSession) => invoke<Session>("start_session", { data }),
     end: (id: string) => invoke<SessionWithDetails>("end_session", { id }),
+  },
+  inventory: {
+    list: () => invoke<Inventory[]>("get_inventory"),
+    get: (id: string) => invoke<Inventory>("get_inventory_item", { id }),
+    create: (data: CreateInventory) => invoke<Inventory>("create_inventory", { data }),
+    update: (id: string, data: UpdateInventory) =>
+      invoke<Inventory>("update_inventory", { id, data }),
+    delete: (id: string) => invoke<void>("delete_inventory", { id }),
+  },
+  subscriptions: {
+    list: () => invoke<Subscription[]>("get_subscriptions"),
+    get: (id: string) => invoke<Subscription>("get_subscription", { id }),
+    create: (data: CreateSubscription) => invoke<Subscription>("create_subscription", { data }),
+    update: (id: string, data: UpdateSubscription) =>
+      invoke<Subscription>("update_subscription", { id, data }),
+    delete: (id: string) => invoke<void>("delete_subscription", { id }),
+  },
+  invoices: {
+    list: () => invoke<Invoice[]>("get_invoices"),
+    get: (id: string) => invoke<InvoiceWithItems>("get_invoice", { id }),
+    create: (data: CreateInvoice) => invoke<Invoice>("create_invoice", { data }),
+    update: (id: string, data: UpdateInvoice) => invoke<Invoice>("update_invoice", { id, data }),
+    delete: (id: string) => invoke<void>("delete_invoice", { id }),
   },
   database: {
     reset: () => invoke<void>("reset_database"),

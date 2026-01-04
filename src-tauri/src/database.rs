@@ -43,6 +43,7 @@ fn create_tables(conn: &Connection) -> Result<()> {
             email TEXT,
             customer_type TEXT NOT NULL,
             notes TEXT,
+            balance REAL NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL
         )",
         [],
@@ -54,6 +55,7 @@ fn create_tables(conn: &Connection) -> Result<()> {
             name TEXT NOT NULL,
             resource_type TEXT NOT NULL,
             is_available INTEGER NOT NULL DEFAULT 1,
+            rate_per_hour REAL NOT NULL DEFAULT 50,
             created_at TEXT NOT NULL
         )",
         [],
@@ -68,6 +70,7 @@ fn create_tables(conn: &Connection) -> Result<()> {
             ended_at TEXT,
             duration_minutes INTEGER,
             amount REAL,
+            created_at TEXT NOT NULL,
             FOREIGN KEY (customer_id) REFERENCES customers(id),
             FOREIGN KEY (resource_id) REFERENCES resources(id)
         )",
@@ -136,6 +139,22 @@ fn create_tables(conn: &Connection) -> Result<()> {
             unit_price REAL NOT NULL,
             total REAL NOT NULL,
             FOREIGN KEY (invoice_id) REFERENCES invoices(id)
+        )",
+        [],
+    )?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS transactions (
+            id TEXT PRIMARY KEY,
+            customer_id TEXT NOT NULL,
+            session_id TEXT,
+            type TEXT NOT NULL,
+            amount REAL NOT NULL,
+            balance_after REAL NOT NULL,
+            description TEXT,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (customer_id) REFERENCES customers(id),
+            FOREIGN KEY (session_id) REFERENCES sessions(id)
         )",
         [],
     )?;

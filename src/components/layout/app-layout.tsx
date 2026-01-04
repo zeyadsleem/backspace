@@ -21,7 +21,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     return localStorage.getItem("sidebarExpanded") !== "false";
   });
   const location = useLocation();
-  const { language, dir, t } = useI18n();
+  const { language, dir, t, toggleLanguage } = useI18n();
 
   const toggleExpanded = () => {
     const newState = !isExpanded;
@@ -137,15 +137,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarFooter
             isExpanded={isExpanded}
             dir={dir}
-            onToggleLanguage={() => {
-              if (typeof window !== "undefined") {
-                const newLang = language === "ar" ? "en" : "ar";
-                document.documentElement.lang = newLang;
-                document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
-                localStorage.setItem("language", newLang);
-                window.location.reload();
-              }
-            }}
+            onToggleLanguage={toggleLanguage}
             onToggleExpand={toggleExpanded}
           />
         </div>
