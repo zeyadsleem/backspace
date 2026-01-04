@@ -1,11 +1,22 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 
 interface LoadingStateProps {
-  type?: "card" | "table" | "list";
+  type?: "card" | "table" | "list" | "spinner";
   count?: number;
+  text?: string;
 }
 
-export function LoadingState({ type = "card", count = 1 }: LoadingStateProps) {
+export function LoadingState({ type = "card", count = 1, text }: LoadingStateProps) {
+  if (type === "spinner") {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 gap-3">
+        <Spinner className="h-8 w-8 text-primary" />
+        {text && <p className="text-sm text-muted-foreground">{text}</p>}
+      </div>
+    );
+  }
+
   if (type === "table") {
     return (
       <div className="space-y-2">
