@@ -8,8 +8,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Spinner } from "@/components/ui/spinner";
 import type { LucideIcon } from "lucide-react";
-import { Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 interface DeleteConfirmDialogProps {
@@ -35,24 +35,26 @@ export function DeleteConfirmDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent dir={dir}>
+      <AlertDialogContent dir={dir} className="rounded-lg border-2">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
+          <AlertDialogTitle className="flex items-center gap-2 text-base font-bold">
             {Icon && <Icon className="h-5 w-5 text-destructive" />}
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogDescription className="text-sm">
+            {description}
+          </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>
+        <AlertDialogFooter className="gap-2">
+          <AlertDialogCancel disabled={isLoading} className="h-9">
             {language === "ar" ? "إلغاء" : "Cancel"}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isLoading}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="h-9 bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
           >
-            {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {isLoading && <Spinner className="h-4 w-4" />}
             {language === "ar" ? "حذف" : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>

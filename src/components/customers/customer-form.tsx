@@ -10,7 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, User, Phone, Mail, FileText, Check } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { User, Phone, Mail, FileText, Check } from "lucide-react";
 import { FormField } from "@/components/shared/form-field";
 import { CustomerSuccessDialog } from "./customer-success-dialog";
 import { useCustomerForm } from "@/hooks/use-customer-form";
@@ -174,8 +175,7 @@ export function CustomerForm({
                 </Button>
 
                 <Button onClick={form.handleSubmit} disabled={mutation.isPending} className="gap-2">
-                  {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  <Check className="h-4 w-4" />
+                  {mutation.isPending ? <Spinner className="h-4 w-4" /> : <Check className="h-4 w-4" />}
                   {language === "ar" ? "إنشاء الزائر" : "Create Visitor"}
                 </Button>
               </DialogFooter>
@@ -253,8 +253,7 @@ export function CustomerForm({
                 </Button>
 
                 <Button onClick={form.handleSubmit} disabled={mutation.isPending} className="gap-2">
-                  {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  <Check className="h-4 w-4" />
+                  {mutation.isPending ? <Spinner className="h-4 w-4" /> : <Check className="h-4 w-4" />}
                   {language === "ar" ? "إنشاء المشترك" : "Create Member"}
                 </Button>
               </DialogFooter>

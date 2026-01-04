@@ -16,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Check, MapPin } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { Check, MapPin } from "lucide-react";
 import { useResourceForm } from "@/hooks/use-resource-form";
 import { useI18n } from "@/lib/i18n";
 import type { Resource } from "@/lib/tauri-api";
@@ -111,8 +112,7 @@ export function ResourceForm({ open, onOpenChange, resource, mode = "create" }: 
             </Button>
 
             <Button onClick={form.handleSubmit} disabled={mutation.isPending} className="gap-2">
-              {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              <Check className="h-4 w-4" />
+              {mutation.isPending ? <Spinner className="h-4 w-4" /> : <Check className="h-4 w-4" />}
               {mode === "create"
                 ? language === "ar"
                   ? "إنشاء"
