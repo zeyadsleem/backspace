@@ -31,7 +31,7 @@ interface ResourceFormProps {
 
 export function ResourceForm({ open, onOpenChange, resource, mode = "create" }: ResourceFormProps) {
   const { language, dir } = useI18n();
-  const { form, mutation } = useResourceForm(resource, mode);
+  const { form, mutation } = useResourceForm(resource, mode, () => onOpenChange(false));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
