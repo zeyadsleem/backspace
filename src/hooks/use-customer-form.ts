@@ -6,11 +6,11 @@ import { api, type Customer, type CreateCustomer } from "@/lib/tauri-api";
 import { useI18n } from "@/lib/i18n";
 
 const customerSchema = z.object({
-  name: z.string().min(2).max(100),
-  phone: z.string().min(10).max(20),
-  email: z.string().email().optional().or(z.literal("")),
+  name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
+  phone: z.string().min(10, "Phone must be at least 10 digits").max(20, "Phone is too long"),
+  email: z.string().email("Invalid email format").optional().or(z.literal("")),
   customerType: z.enum(["visitor", "member"]),
-  notes: z.string().max(1000).optional(),
+  notes: z.string().max(1000, "Notes are too long").optional(),
 });
 
 type CustomerFormData = z.infer<typeof customerSchema>;
@@ -31,30 +31,49 @@ export function useCustomerForm(
       customerType: (customer?.customerType ?? "visitor") as "visitor" | "member",
       notes: customer?.notes ?? "",
     },
+    validators: {
+      onChange: ({ value }) => {
+        const result = customerSchema.safeParse(value);
+        if (!result.success) {
+          const fieldErrors: Record<string, string> = {};
+          for (const issue of result.error.issues) {
+            const path = issue.path.join(".");
+            fieldErrors[path] = issue.message;
+          }
+          return fieldErrors;
+        }
+        return undefined;
+      },
+    },
     onSubmit: async ({ value }) => {
-      mutation.mutate(value);
+      const result = customerSchema.safeParse(value);
+      if (!result.success) {
+        toast.error(language === "ar" ? "يرجى تصحيح الأخطاء" : "Please fix the errors");
+        return;
+      }
+      mutation.mutate(result.data);
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (data: CustomerFormData) => {
       const createData: CreateCustomer = {
-        name: data.name,
-        phone: data.phone,
-        email: data.email || undefined,
+        name: data.name.trim(),
+        phone: data.phone.trim(),
+        email: data.email?.trim() || undefined,
         customerType: data.customerType,
-        notes: data.notes || undefined,
+        notes: data.notes?.trim() || undefined,
       };
 
       if (mode === "create") {
         return api.customers.create(createData);
       } else {
         return api.customers.update(customer!.id, {
-          name: data.name,
-          phone: data.phone,
-          email: data.email || undefined,
+          name: data.name.trim(),
+          phone: data.phone.trim(),
+          email: data.email?.trim() || undefined,
           customerType: data.customerType,
-          notes: data.notes || undefined,
+          notes: data.notes?.trim() || undefined,
         });
       }
     },
@@ -77,10 +96,11 @@ export function useCustomerForm(
       onSuccess?.(result);
       form.reset();
     },
-    onError: () => {
-      toast.error(language === "ar" ? "حدث خطأ" : "An error occurred");
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "An error occurred";
+      toast.error(language === "ar" ? `حدث خطأ: ${message}` : message);
     },
   });
 
-  return { form, mutation };
+  return { form, mutation, customerSchema };
 }

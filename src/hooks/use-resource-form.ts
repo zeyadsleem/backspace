@@ -6,7 +6,7 @@ import { api, type Resource, type CreateResource } from "@/lib/tauri-api";
 import { useI18n } from "@/lib/i18n";
 
 const resourceSchema = z.object({
-  name: z.string().min(2).max(100),
+  name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
   resourceType: z.enum(["seat", "desk", "room"]),
 });
 
@@ -25,15 +25,34 @@ export function useResourceForm(
       name: resource?.name ?? "",
       resourceType: (resource?.resourceType ?? "seat") as "seat" | "desk" | "room",
     },
+    validators: {
+      onChange: ({ value }) => {
+        const result = resourceSchema.safeParse(value);
+        if (!result.success) {
+          const fieldErrors: Record<string, string> = {};
+          for (const issue of result.error.issues) {
+            const path = issue.path.join(".");
+            fieldErrors[path] = issue.message;
+          }
+          return fieldErrors;
+        }
+        return undefined;
+      },
+    },
     onSubmit: async ({ value }) => {
-      mutation.mutate(value);
+      const result = resourceSchema.safeParse(value);
+      if (!result.success) {
+        toast.error(language === "ar" ? "يرجى تصحيح الأخطاء" : "Please fix the errors");
+        return;
+      }
+      mutation.mutate(result.data);
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (data: ResourceFormData) => {
       const createData: CreateResource = {
-        name: data.name,
+        name: data.name.trim(),
         resourceType: data.resourceType,
       };
 
@@ -41,7 +60,7 @@ export function useResourceForm(
         return api.resources.create(createData);
       } else {
         return api.resources.update(resource!.id, {
-          name: data.name,
+          name: data.name.trim(),
           resourceType: data.resourceType,
         });
       }
@@ -65,10 +84,11 @@ export function useResourceForm(
       onSuccess?.(result);
       form.reset();
     },
-    onError: () => {
-      toast.error(language === "ar" ? "حدث خطأ" : "An error occurred");
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : "An error occurred";
+      toast.error(language === "ar" ? `حدث خطأ: ${message}` : message);
     },
   });
 
-  return { form, mutation };
+  return { form, mutation, resourceSchema };
 }

@@ -30,6 +30,52 @@ pub struct UpdateResource {
     pub rate_per_hour: Option<f64>,
 }
 
+fn validate_resource_data(data: &CreateResource) -> Result<(), String> {
+    // Validate name
+    let name = data.name.trim();
+    if name.len() < 2 {
+        return Err("Name must be at least 2 characters".to_string());
+    }
+    if name.len() > 100 {
+        return Err("Name is too long (max 100 characters)".to_string());
+    }
+
+    // Validate resource type
+    let valid_types = ["seat", "desk", "room"];
+    if !valid_types.contains(&data.resource_type.as_str()) {
+        return Err("Resource type must be 'seat', 'desk', or 'room'".to_string());
+    }
+
+    Ok(())
+}
+
+fn validate_update_resource_data(data: &UpdateResource) -> Result<(), String> {
+    if let Some(name) = &data.name {
+        let name = name.trim();
+        if name.len() < 2 {
+            return Err("Name must be at least 2 characters".to_string());
+        }
+        if name.len() > 100 {
+            return Err("Name is too long (max 100 characters)".to_string());
+        }
+    }
+
+    if let Some(resource_type) = &data.resource_type {
+        let valid_types = ["seat", "desk", "room"];
+        if !valid_types.contains(&resource_type.as_str()) {
+            return Err("Resource type must be 'seat', 'desk', or 'room'".to_string());
+        }
+    }
+
+    if let Some(rate) = data.rate_per_hour {
+        if rate < 0.0 {
+            return Err("Rate per hour cannot be negative".to_string());
+        }
+    }
+
+    Ok(())
+}
+
 fn resource_from_row(row: &rusqlite::Row) -> Result<Resource, rusqlite::Error> {
     Ok(Resource {
         id: row.get(0)?,
@@ -78,19 +124,23 @@ pub fn get_resource(state: State<DbConn>, id: String) -> Result<Resource, String
 
 #[tauri::command]
 pub fn create_resource(state: State<DbConn>, data: CreateResource) -> Result<Resource, String> {
+    // Validate input data
+    validate_resource_data(&data)?;
+    
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     
     let id = uuid::Uuid::new_v4().to_string();
     let created_at = chrono::Utc::now().to_rfc3339();
+    let name = data.name.trim().to_string();
     
     conn.execute(
         "INSERT INTO resources (id, name, resource_type, is_available, rate_per_hour, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-        params![&id, &data.name, &data.resource_type, 1i32, 50.0f64, &created_at],
+        params![&id, &name, &data.resource_type, 1i32, 50.0f64, &created_at],
     ).map_err(|e| e.to_string())?;
     
     Ok(Resource {
         id,
-        name: data.name,
+        name,
         resource_type: data.resource_type,
         is_available: true,
         rate_per_hour: 50.0,
@@ -100,6 +150,9 @@ pub fn create_resource(state: State<DbConn>, data: CreateResource) -> Result<Res
 
 #[tauri::command]
 pub fn update_resource(state: State<DbConn>, id: String, data: UpdateResource) -> Result<Resource, String> {
+    // Validate input data
+    validate_update_resource_data(&data)?;
+    
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     
     let mut updates = Vec::new();
@@ -107,7 +160,7 @@ pub fn update_resource(state: State<DbConn>, id: String, data: UpdateResource) -
     
     if let Some(name) = &data.name {
         updates.push("name = ?");
-        values.push(Box::new(name.clone()));
+        values.push(Box::new(name.trim().to_string()));
     }
     if let Some(resource_type) = &data.resource_type {
         updates.push("resource_type = ?");

@@ -1,7 +1,7 @@
 use crate::database::DbConn;
 use serde::{Deserialize, Serialize};
 use tauri::State;
-use rusqlite::params;
+use rusqlite::{params, OptionalExtension};
 use chrono::{DateTime, Utc};
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -39,6 +39,20 @@ pub struct SessionWithDetails {
 pub struct CreateSession {
     pub customer_id: String,
     pub resource_id: String,
+}
+
+fn validate_session_data(data: &CreateSession) -> Result<(), String> {
+    // Validate customer_id
+    if data.customer_id.trim().is_empty() {
+        return Err("Customer ID is required".to_string());
+    }
+    
+    // Validate resource_id
+    if data.resource_id.trim().is_empty() {
+        return Err("Resource ID is required".to_string());
+    }
+    
+    Ok(())
 }
 
 
@@ -141,7 +155,52 @@ pub fn get_active_sessions(state: State<DbConn>) -> Result<Vec<SessionWithDetail
 
 #[tauri::command]
 pub fn start_session(state: State<DbConn>, data: CreateSession) -> Result<Session, String> {
+    // Validate input data
+    validate_session_data(&data)?;
+    
     let conn = state.0.lock().map_err(|e| e.to_string())?;
+
+    // Check if customer exists
+    let customer_exists: bool = conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM customers WHERE id = ?)",
+            params![&data.customer_id],
+            |row| row.get(0),
+        )
+        .map_err(|e| e.to_string())?;
+    
+    if !customer_exists {
+        return Err("Customer not found".to_string());
+    }
+
+    // Check if resource exists and is available
+    let resource_available: Option<bool> = conn
+        .query_row(
+            "SELECT is_available FROM resources WHERE id = ?",
+            params![&data.resource_id],
+            |row| Ok(row.get::<_, i32>(0)? == 1),
+        )
+        .optional()
+        .map_err(|e| e.to_string())?;
+    
+    match resource_available {
+        None => return Err("Resource not found".to_string()),
+        Some(false) => return Err("Resource is not available".to_string()),
+        Some(true) => {}
+    }
+
+    // Check if customer already has an active session
+    let has_active_session: bool = conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM sessions WHERE customer_id = ? AND ended_at IS NULL)",
+            params![&data.customer_id],
+            |row| row.get(0),
+        )
+        .map_err(|e| e.to_string())?;
+    
+    if has_active_session {
+        return Err("Customer already has an active session".to_string());
+    }
 
     let id = uuid::Uuid::new_v4().to_string();
     let started_at = chrono::Utc::now().to_rfc3339();

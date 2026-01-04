@@ -38,6 +38,97 @@ pub struct UpdateCustomer {
     pub notes: Option<String>,
 }
 
+fn validate_customer_data(data: &CreateCustomer) -> Result<(), String> {
+    // Validate name
+    let name = data.name.trim();
+    if name.len() < 2 {
+        return Err("Name must be at least 2 characters".to_string());
+    }
+    if name.len() > 100 {
+        return Err("Name is too long (max 100 characters)".to_string());
+    }
+
+    // Validate phone
+    let phone = data.phone.trim();
+    if phone.len() < 10 {
+        return Err("Phone must be at least 10 digits".to_string());
+    }
+    if phone.len() > 20 {
+        return Err("Phone is too long (max 20 characters)".to_string());
+    }
+    if !phone.chars().all(|c| c.is_ascii_digit() || c == '+' || c == '-' || c == ' ') {
+        return Err("Phone contains invalid characters".to_string());
+    }
+
+    // Validate email if provided
+    if let Some(email) = &data.email {
+        let email = email.trim();
+        if !email.is_empty() && !email.contains('@') {
+            return Err("Invalid email format".to_string());
+        }
+    }
+
+    // Validate customer type
+    if data.customer_type != "visitor" && data.customer_type != "member" {
+        return Err("Customer type must be 'visitor' or 'member'".to_string());
+    }
+
+    // Validate notes if provided
+    if let Some(notes) = &data.notes {
+        if notes.len() > 1000 {
+            return Err("Notes are too long (max 1000 characters)".to_string());
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_update_customer_data(data: &UpdateCustomer) -> Result<(), String> {
+    if let Some(name) = &data.name {
+        let name = name.trim();
+        if name.len() < 2 {
+            return Err("Name must be at least 2 characters".to_string());
+        }
+        if name.len() > 100 {
+            return Err("Name is too long (max 100 characters)".to_string());
+        }
+    }
+
+    if let Some(phone) = &data.phone {
+        let phone = phone.trim();
+        if phone.len() < 10 {
+            return Err("Phone must be at least 10 digits".to_string());
+        }
+        if phone.len() > 20 {
+            return Err("Phone is too long (max 20 characters)".to_string());
+        }
+        if !phone.chars().all(|c| c.is_ascii_digit() || c == '+' || c == '-' || c == ' ') {
+            return Err("Phone contains invalid characters".to_string());
+        }
+    }
+
+    if let Some(email) = &data.email {
+        let email = email.trim();
+        if !email.is_empty() && !email.contains('@') {
+            return Err("Invalid email format".to_string());
+        }
+    }
+
+    if let Some(customer_type) = &data.customer_type {
+        if customer_type != "visitor" && customer_type != "member" {
+            return Err("Customer type must be 'visitor' or 'member'".to_string());
+        }
+    }
+
+    if let Some(notes) = &data.notes {
+        if notes.len() > 1000 {
+            return Err("Notes are too long (max 1000 characters)".to_string());
+        }
+    }
+
+    Ok(())
+}
+
 fn customer_from_row(row: &rusqlite::Row) -> Result<Customer, rusqlite::Error> {
     Ok(Customer {
         id: row.get(0)?,
@@ -113,25 +204,34 @@ pub fn get_customer(state: State<DbConn>, id: String) -> Result<Customer, String
 
 #[tauri::command]
 pub fn create_customer(state: State<DbConn>, data: CreateCustomer) -> Result<Customer, String> {
+    // Validate input data
+    validate_customer_data(&data)?;
+    
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     
     let id = uuid::Uuid::new_v4().to_string();
     let human_id = get_next_human_id(&conn)?;
     let created_at = chrono::Utc::now().to_rfc3339();
     
+    // Trim and sanitize data
+    let name = data.name.trim().to_string();
+    let phone = data.phone.trim().to_string();
+    let email = data.email.as_ref().map(|e| e.trim().to_string()).filter(|e| !e.is_empty());
+    let notes = data.notes.as_ref().map(|n| n.trim().to_string()).filter(|n| !n.is_empty());
+    
     conn.execute(
         "INSERT INTO customers (id, human_id, name, phone, email, customer_type, notes, balance, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        params![&id, &human_id, &data.name, &data.phone, &data.email as &dyn rusqlite::ToSql, &data.customer_type, &data.notes as &dyn rusqlite::ToSql, 0.0f64, &created_at],
+        params![&id, &human_id, &name, &phone, &email as &dyn rusqlite::ToSql, &data.customer_type, &notes as &dyn rusqlite::ToSql, 0.0f64, &created_at],
     ).map_err(|e| e.to_string())?;
     
     Ok(Customer {
         id,
         human_id,
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
+        name,
+        phone,
+        email,
         customer_type: data.customer_type,
-        notes: data.notes,
+        notes,
         balance: 0.0,
         created_at,
     })
@@ -139,6 +239,9 @@ pub fn create_customer(state: State<DbConn>, data: CreateCustomer) -> Result<Cus
 
 #[tauri::command]
 pub fn update_customer(state: State<DbConn>, id: String, data: UpdateCustomer) -> Result<Customer, String> {
+    // Validate input data
+    validate_update_customer_data(&data)?;
+    
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     
     let mut updates = Vec::new();
@@ -146,15 +249,16 @@ pub fn update_customer(state: State<DbConn>, id: String, data: UpdateCustomer) -
     
     if let Some(name) = &data.name {
         updates.push("name = ?");
-        values.push(Box::new(name.clone()));
+        values.push(Box::new(name.trim().to_string()));
     }
     if let Some(phone) = &data.phone {
         updates.push("phone = ?");
-        values.push(Box::new(phone.clone()));
+        values.push(Box::new(phone.trim().to_string()));
     }
     if let Some(email) = &data.email {
         updates.push("email = ?");
-        values.push(Box::new(email.clone()));
+        let trimmed = email.trim().to_string();
+        values.push(Box::new(if trimmed.is_empty() { None } else { Some(trimmed) }));
     }
     if let Some(customer_type) = &data.customer_type {
         updates.push("customer_type = ?");
@@ -162,7 +266,8 @@ pub fn update_customer(state: State<DbConn>, id: String, data: UpdateCustomer) -
     }
     if let Some(notes) = &data.notes {
         updates.push("notes = ?");
-        values.push(Box::new(notes.clone()));
+        let trimmed = notes.trim().to_string();
+        values.push(Box::new(if trimmed.is_empty() { None } else { Some(trimmed) }));
     }
     
     if !updates.is_empty() {
