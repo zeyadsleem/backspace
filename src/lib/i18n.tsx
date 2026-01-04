@@ -10,6 +10,7 @@ export interface Translations {
     sessions: { ar: string; en: string; desc: { ar: string; en: string } };
     inventory: { ar: string; en: string; desc: { ar: string; en: string } };
     subscriptions: { ar: string; en: string; desc: { ar: string; en: string } };
+    invoices: { ar: string; en: string; desc: { ar: string; en: string } };
     reports: { ar: string; en: string; desc: { ar: string; en: string } };
     settings: { ar: string; en: string; desc: { ar: string; en: string } };
   };
@@ -111,6 +112,24 @@ export interface Translations {
     valid_until: { ar: string; en: string };
     current_subscription: { ar: string; en: string };
     type: { ar: string; en: string };
+  };
+  invoices: {
+    title: { ar: string; en: string };
+    subtitle: { ar: string; en: string };
+    create: { ar: string; en: string };
+    all_invoices: { ar: string; en: string };
+    customer: { ar: string; en: string };
+    amount: { ar: string; en: string };
+    status: { ar: string; en: string };
+    due_date: { ar: string; en: string };
+    paid_date: { ar: string; en: string };
+    items: { ar: string; en: string };
+    description: { ar: string; en: string };
+    quantity: { ar: string; en: string };
+    unit_price: { ar: string; en: string };
+    total: { ar: string; en: string };
+    mark_as_paid: { ar: string; en: string };
+    print: { ar: string; en: string };
   };
   reports: {
     title: { ar: string; en: string };
@@ -284,6 +303,11 @@ function getTranslations(_language: Language): Translations {
         en: "Subscriptions",
         desc: { ar: "إدارة خطط الاشتراك والتعيينات", en: "Manage subscription plans" },
       },
+      invoices: {
+        ar: "الفواتير",
+        en: "Invoices",
+        desc: { ar: "إدارة الفواتير والمدفوعات", en: "Manage invoices and payments" },
+      },
       reports: {
         ar: "التقارير",
         en: "Reports",
@@ -399,6 +423,24 @@ function getTranslations(_language: Language): Translations {
       valid_until: { ar: "صالح حتى", en: "Valid Until" },
       current_subscription: { ar: "الاشتراك الحالي", en: "Current Subscription" },
       type: { ar: "النوع", en: "Type" },
+    },
+    invoices: {
+      title: { ar: "الفواتير", en: "Invoices" },
+      subtitle: { ar: "إدارة الفواتير والمدفوعات", en: "Manage invoices and payments" },
+      create: { ar: "إنشاء فاتورة", en: "Create Invoice" },
+      all_invoices: { ar: "جميع الفواتير", en: "All Invoices" },
+      customer: { ar: "العميل", en: "Customer" },
+      amount: { ar: "المبلغ", en: "Amount" },
+      status: { ar: "الحالة", en: "Status" },
+      due_date: { ar: "تاريخ الاستحقاق", en: "Due Date" },
+      paid_date: { ar: "تاريخ الدفع", en: "Paid Date" },
+      items: { ar: "العناصر", en: "Items" },
+      description: { ar: "الوصف", en: "Description" },
+      quantity: { ar: "الكمية", en: "Quantity" },
+      unit_price: { ar: "سعر الوحدة", en: "Unit Price" },
+      total: { ar: "الإجمالي", en: "Total" },
+      mark_as_paid: { ar: "وضع علامة تم الدفع", en: "Mark as Paid" },
+      print: { ar: "طباعة", en: "Print" },
     },
     reports: {
       title: { ar: "التقارير", en: "Reports" },
