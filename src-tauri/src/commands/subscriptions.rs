@@ -38,6 +38,56 @@ pub struct UpdateSubscription {
     pub is_active: Option<bool>,
 }
 
+fn validate_subscription_data(data: &CreateSubscription) -> Result<(), String> {
+    // Validate customer_id
+    if data.customer_id.trim().is_empty() {
+        return Err("Customer ID is required".to_string());
+    }
+
+    // Validate plan_type
+    let valid_plans = ["weekly", "half-monthly", "monthly", "quarterly", "yearly"];
+    if !valid_plans.contains(&data.plan_type.as_str()) {
+        return Err("Invalid plan type. Must be: weekly, half-monthly, monthly, quarterly, or yearly".to_string());
+    }
+
+    // Validate start_date format (basic check)
+    if data.start_date.trim().is_empty() {
+        return Err("Start date is required".to_string());
+    }
+
+    // Validate hours_allowance if provided
+    if let Some(hours) = data.hours_allowance {
+        if hours < 0 {
+            return Err("Hours allowance cannot be negative".to_string());
+        }
+        if hours > 744 {
+            return Err("Hours allowance cannot exceed 744 hours (31 days)".to_string());
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_update_subscription_data(data: &UpdateSubscription) -> Result<(), String> {
+    if let Some(plan_type) = &data.plan_type {
+        let valid_plans = ["weekly", "half-monthly", "monthly", "quarterly", "yearly"];
+        if !valid_plans.contains(&plan_type.as_str()) {
+            return Err("Invalid plan type. Must be: weekly, half-monthly, monthly, quarterly, or yearly".to_string());
+        }
+    }
+
+    if let Some(hours) = data.hours_allowance {
+        if hours < 0 {
+            return Err("Hours allowance cannot be negative".to_string());
+        }
+        if hours > 744 {
+            return Err("Hours allowance cannot exceed 744 hours (31 days)".to_string());
+        }
+    }
+
+    Ok(())
+}
+
 fn subscription_from_row(row: &rusqlite::Row) -> Result<Subscription, rusqlite::Error> {
     Ok(Subscription {
         id: row.get(0)?,
@@ -104,7 +154,23 @@ pub fn get_subscription(state: State<DbConn>, id: String) -> Result<Subscription
 
 #[tauri::command]
 pub fn create_subscription(state: State<DbConn>, data: CreateSubscription) -> Result<Subscription, String> {
+    // Validate input data
+    validate_subscription_data(&data)?;
+    
     let conn = state.0.lock().map_err(|e| e.to_string())?;
+
+    // Check if customer exists
+    let customer_exists: bool = conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM customers WHERE id = ?)",
+            params![&data.customer_id],
+            |row| row.get(0),
+        )
+        .map_err(|e| e.to_string())?;
+    
+    if !customer_exists {
+        return Err("Customer not found".to_string());
+    }
     
     let id = uuid::Uuid::new_v4().to_string();
     let created_at = chrono::Utc::now().to_rfc3339();
@@ -130,6 +196,9 @@ pub fn create_subscription(state: State<DbConn>, data: CreateSubscription) -> Re
 
 #[tauri::command]
 pub fn update_subscription(state: State<DbConn>, id: String, data: UpdateSubscription) -> Result<Subscription, String> {
+    // Validate input data
+    validate_update_subscription_data(&data)?;
+    
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     
     let mut updates = Vec::new();

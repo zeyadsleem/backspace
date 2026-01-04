@@ -67,6 +67,62 @@ pub struct UpdateInvoice {
     pub paid_date: Option<String>,
 }
 
+fn validate_invoice_data(data: &CreateInvoice) -> Result<(), String> {
+    // Validate customer_id
+    if data.customer_id.trim().is_empty() {
+        return Err("Customer ID is required".to_string());
+    }
+
+    // Validate amount
+    if data.amount < 0.0 {
+        return Err("Amount cannot be negative".to_string());
+    }
+
+    // Validate status
+    let valid_statuses = ["pending", "paid", "overdue", "cancelled"];
+    if !valid_statuses.contains(&data.status.as_str()) {
+        return Err("Invalid status. Must be: pending, paid, overdue, or cancelled".to_string());
+    }
+
+    // Validate due_date
+    if data.due_date.trim().is_empty() {
+        return Err("Due date is required".to_string());
+    }
+
+    // Validate items
+    if data.items.is_empty() {
+        return Err("Invoice must have at least one item".to_string());
+    }
+
+    for (i, item) in data.items.iter().enumerate() {
+        if item.description.trim().is_empty() {
+            return Err(format!("Item {} description is required", i + 1));
+        }
+        if item.description.len() > 500 {
+            return Err(format!("Item {} description is too long (max 500 characters)", i + 1));
+        }
+        if item.quantity <= 0 {
+            return Err(format!("Item {} quantity must be positive", i + 1));
+        }
+        if item.unit_price < 0.0 {
+            return Err(format!("Item {} unit price cannot be negative", i + 1));
+        }
+    }
+
+    Ok(())
+}
+
+fn validate_update_invoice_data(data: &UpdateInvoice) -> Result<(), String> {
+    if let Some(status) = &data.status {
+        let valid_statuses = ["pending", "paid", "overdue", "cancelled"];
+        if !valid_statuses.contains(&status.as_str()) {
+            return Err("Invalid status. Must be: pending, paid, overdue, or cancelled".to_string());
+        }
+    }
+
+    Ok(())
+}
+
 fn invoice_from_row(row: &rusqlite::Row) -> Result<Invoice, rusqlite::Error> {
     Ok(Invoice {
         id: row.get(0)?,
@@ -164,7 +220,23 @@ pub fn get_invoice(state: State<DbConn>, id: String) -> Result<InvoiceWithItems,
 
 #[tauri::command]
 pub fn create_invoice(state: State<DbConn>, data: CreateInvoice) -> Result<Invoice, String> {
+    // Validate input data
+    validate_invoice_data(&data)?;
+    
     let conn = state.0.lock().map_err(|e| e.to_string())?;
+
+    // Check if customer exists
+    let customer_exists: bool = conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM customers WHERE id = ?)",
+            params![&data.customer_id],
+            |row| row.get(0),
+        )
+        .map_err(|e| e.to_string())?;
+    
+    if !customer_exists {
+        return Err("Customer not found".to_string());
+    }
     
     let id = uuid::Uuid::new_v4().to_string();
     let created_at = chrono::Utc::now().to_rfc3339();
@@ -199,6 +271,9 @@ pub fn create_invoice(state: State<DbConn>, data: CreateInvoice) -> Result<Invoi
 
 #[tauri::command]
 pub fn update_invoice(state: State<DbConn>, id: String, data: UpdateInvoice) -> Result<Invoice, String> {
+    // Validate input data
+    validate_update_invoice_data(&data)?;
+    
     let conn = state.0.lock().map_err(|e| e.to_string())?;
     
     let mut updates = Vec::new();
