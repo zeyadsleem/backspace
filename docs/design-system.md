@@ -415,3 +415,57 @@ When creating a new component, verify it follows these rules:
 - **Colors**: `src/index.css` (lines 7-116)
 - **Theme**: `components.json`
 - **Base components**: `src/components/ui/`
+
+---
+
+## Testing
+
+### Testing Strategy
+
+- **E2E Testing**: Playwright for end-to-end user flows
+- **Test Location**: `tests/` directory
+- **Test Structure**: Organized by feature (e.g., `tests/customers/`)
+
+### Test Patterns
+
+```typescript
+// Basic test structure
+test.describe("Feature Name", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/route");
+  });
+
+  test("should do something", async ({ page }) => {
+    // Test implementation
+  });
+});
+```
+
+### Test Fixtures
+
+```typescript
+// Use fixtures for test data
+import { test } from "../fixtures/test-data";
+
+test("should use customer data", async ({ customerData }) => {
+  // Use customerData fixture
+});
+```
+
+### Accessibility Testing
+
+```typescript
+// Test accessibility elements
+await expect(page.getByRole("button", { name: /submit/i })).toBeVisible();
+await expect(page.getByLabel(/email/i)).toBeVisible();
+```
+
+### Testing Checklist
+
+- [ ] Tests use fixtures for consistent test data
+- [ ] Tests use role-based selectors for accessibility
+- [ ] Tests verify success/error messages
+- [ ] Tests clean up after themselves
+- [ ] Tests are independent and can run in parallel
+- [ ] Tests cover happy paths and error cases
+- [ ] Tests verify UI updates after actions

@@ -6,6 +6,7 @@ export interface Translations {
   nav: {
     dashboard: { ar: string; en: string; desc: { ar: string; en: string } };
     customers: { ar: string; en: string; desc: { ar: string; en: string } };
+    resources: { ar: string; en: string; desc: { ar: string; en: string } };
     sessions: { ar: string; en: string; desc: { ar: string; en: string } };
     inventory: { ar: string; en: string; desc: { ar: string; en: string } };
     subscriptions: { ar: string; en: string; desc: { ar: string; en: string } };
@@ -266,6 +267,11 @@ function getTranslations(_language: Language): Translations {
         ar: "العملاء",
         en: "Customers",
         desc: { ar: "إدارة العملاء والاشتراكات", en: "Manage customers and subscriptions" },
+      },
+      resources: {
+        ar: "الموارد",
+        en: "Resources",
+        desc: { ar: "إدارة المقاعد والمكاتب والغرف", en: "Manage seats, desks and rooms" },
       },
       sessions: {
         ar: "الجلسات",

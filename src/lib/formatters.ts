@@ -84,3 +84,17 @@ export function getSubscriptionStatusLabel(status: string, language: "ar" | "en"
   };
   return labels[status]?.[language] || status;
 }
+
+export function formatDuration(startTime: string): string {
+  const start = new Date(startTime);
+  const now = new Date();
+  const diffMs = now.getTime() - start.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const hours = Math.floor(diffMins / 60);
+  const minutes = diffMins % 60;
+
+  if (hours === 0) {
+    return `${minutes}m`;
+  }
+  return `${hours}h ${minutes}m`;
+}

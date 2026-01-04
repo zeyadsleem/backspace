@@ -12,11 +12,11 @@
 - **React 19**: UI framework
 - **TypeScript**: Type-safe development
 - **TanStack Router**: File-based routing with type safety
-- **TanStack Query**: Server state management
+- **TanStack Query**: Server state management with Tauri commands
 - **TanStack Form**: Form management
 - **shadcn/ui**: Component library
 - **TailwindCSS 4**: Styling
-- **Playwright**: E2E testing
+- **Playwright**: E2E testing (in progress)
 
 ## Backend Stack
 

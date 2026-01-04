@@ -27,6 +27,16 @@ pub fn run() {
       commands::create_customer,
       commands::update_customer,
       commands::delete_customer,
+      commands::get_resources,
+      commands::get_resource,
+      commands::create_resource,
+      commands::update_resource,
+      commands::delete_resource,
+      commands::get_sessions,
+      commands::get_session,
+      commands::get_active_sessions,
+      commands::start_session,
+      commands::end_session,
       database::reset_database,
     ])
     .run(tauri::generate_context!())

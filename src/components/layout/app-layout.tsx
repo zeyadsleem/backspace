@@ -2,7 +2,7 @@ import * as React from "react";
 import { useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { LayoutDashboard, Users, Package, Settings } from "lucide-react";
+import { LayoutDashboard, Users, MapPin, Clock, Package, Settings } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { NavItem } from "@/components/shared/nav-item";
 import { SidebarFooter } from "@/components/shared/sidebar-footer";
@@ -10,6 +10,8 @@ import { SidebarFooter } from "@/components/shared/sidebar-footer";
 const mainNavItems = [
   { href: "/", icon: LayoutDashboard, key: "dashboard" as const },
   { href: "/customers", icon: Users, key: "customers" as const },
+  { href: "/resources", icon: MapPin, key: "resources" as const },
+  { href: "/sessions", icon: Clock, key: "sessions" as const },
 ];
 
 const secondaryNavItems = [{ href: "/settings", icon: Settings, key: "settings" as const }];

@@ -12,43 +12,48 @@ Leverage existing frontend and connect Tauri backend quickly. Frontend is alread
 - ✅ Customers pages (list, detail, form)
 - ✅ Navigation and layout
 - ✅ Bilingual support (AR/EN)
-- ✅ Using fetch() with mock API endpoints
+- ✅ Connected to Tauri API (tauri-api.ts)
 
-**Backend (Empty):**
+**Backend (Customers Complete):**
 
 - ✅ Tauri setup done
-- ❌ No commands implemented
-- ❌ No database
+- ✅ Database setup (SQLite + rusqlite)
+- ✅ Customer commands implemented (CRUD)
+- ❌ Resources commands not implemented
+- ❌ Sessions commands not implemented
+- ❌ Inventory commands not implemented
+- ❌ Subscriptions commands not implemented
+- ❌ Invoices commands not implemented
 
 ## Fast Implementation Strategy
 
-### Step 1: Setup Database (Rust) - 1 Day
+### Step 1: Setup Database (Rust) - ✅ Complete
 
-- [ ] Install SQLite dependencies (rusqlite or libsql)
-- [ ] Create database schema (customers, sessions, resources, etc.)
-- [ ] Create database connection in Tauri
-- [ ] Add migration setup
+- [x] Install SQLite dependencies (rusqlite or libsql)
+- [x] Create database schema (customers, sessions, resources, etc.)
+- [x] Create database connection in Tauri
+- [x] Add migration setup
 
-### Step 2: Create Type Definitions - 0.5 Day
+### Step 2: Create Type Definitions - ✅ Complete
 
-- [ ] Create shared types file in Rust (Customer, Session, etc.)
-- [ ] Use serde for JSON serialization
-- [ ] Keep types consistent with frontend interfaces
+- [x] Create shared types file in Rust (Customer, Session, etc.)
+- [x] Use serde for JSON serialization
+- [x] Keep types consistent with frontend interfaces
 
-### Step 3: Implement Customer Commands - 1 Day
+### Step 3: Implement Customer Commands - ✅ Complete
 
-- [ ] `get_customers()` - List all customers
-- [ ] `get_customer(id)` - Get single customer
-- [ ] `create_customer(data)` - Create new customer
-- [ ] `update_customer(id, data)` - Update customer
-- [ ] `delete_customer(id)` - Delete customer
+- [x] `get_customers()` - List all customers
+- [x] `get_customer(id)` - Get single customer
+- [x] `create_customer(data)` - Create new customer
+- [x] `update_customer(id, data)` - Update customer
+- [x] `delete_customer(id)` - Delete customer
 
-### Step 4: Connect Frontend to Tauri - 0.5 Day
+### Step 4: Connect Frontend to Tauri - ✅ Complete
 
-- [ ] Install @tauri-apps/api
-- [ ] Create Tauri API wrapper (`src/lib/tauri-api.ts`)
-- [ ] Replace fetch() calls with invoke()
-- [ ] Update TanStack Query to use Tauri commands
+- [x] Install @tauri-apps/api
+- [x] Create Tauri API wrapper (`src/lib/tauri-api.ts`)
+- [x] Replace fetch() calls with invoke()
+- [x] Update TanStack Query to use Tauri commands
 
 ### Step 5: Implement Remaining Commands - 3 Days
 
@@ -90,6 +95,7 @@ Leverage existing frontend and connect Tauri backend quickly. Frontend is alread
 
 ### Step 7: Testing & Polish - 1 Day
 
+- [ ] Set up Playwright tests for customer flows
 - [ ] Test all flows end-to-end
 - [ ] Add error handling with toasts
 - [ ] Fix RTL issues
@@ -258,8 +264,61 @@ CREATE TABLE invoice_items (
 
 ## Immediate Next Steps
 
-1. Create `src-tauri/src/commands/` directory
-2. Add rusqlite to Cargo.toml
-3. Implement first command: `get_customers`
-4. Test invoke from frontend
-5. Repeat for other commands
+1. Set up Playwright tests for customer CRUD operations
+2. Test customer list, create, update, delete flows
+3. Implement Resources commands
+4. Implement Sessions commands
+5. Implement Inventory commands
+6. Implement Subscriptions commands
+7. Implement Invoices commands
+8. Create remaining frontend pages
+9. End-to-end testing and polish
+
+## Playwright Testing
+
+### Test Structure
+
+```
+tests/
+├── customers/
+│   ├── list.spec.ts       # Test customer list page
+│   ├── create.spec.ts     # Test create customer flow
+│   ├── update.spec.ts     # Test update customer flow
+│   └── delete.spec.ts     # Test delete customer flow
+└── fixtures/
+    └── test-data.ts       # Test data helpers
+```
+
+### Test Commands
+
+```bash
+bun run test              # Run Playwright tests
+bun run test:ui           # Run Playwright with UI
+bun run test:headed       # Run Playwright headed
+```
+
+### Key Test Scenarios
+
+1. **Customer List**
+   - Verify page loads
+   - Verify table displays customers
+   - Verify search functionality
+   - Verify pagination (if applicable)
+
+2. **Create Customer**
+   - Click add button
+   - Fill form with valid data
+   - Submit and verify success
+   - Verify customer appears in list
+
+3. **Update Customer**
+   - Navigate to customer detail
+   - Edit customer information
+   - Submit and verify changes
+   - Verify updated data in list
+
+4. **Delete Customer**
+   - Navigate to customer detail
+   - Click delete
+   - Confirm deletion
+   - Verify customer removed from list

@@ -4,8 +4,8 @@
 
 ## Core Features
 
-- **Customer Management**: Handle visitors and subscribers with comprehensive profiles
-- **Resource Management**: Manage seats and rooms with real-time availability tracking
+- **Customer Management**: Handle visitors and subscribers with comprehensive profiles (✅ Complete)
+- **Resource Management**: Manage seats and rooms with real-time availability tracking (⏳ Next)
 - **Session Management**: Track workspace usage sessions from start to finish
 - **Consumption Tracking**: Monitor and bill for additional services (snacks, drinks, etc.)
 - **Inventory Management**: Track stock levels and movements with low-stock alerts
