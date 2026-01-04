@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Banknote, Package, Globe, Bell, Moon, Sun, Monitor, Palette } from "lucide-react";
+import { Banknote, Globe, Bell, Moon, Sun, Monitor, Palette, Tag } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
@@ -188,36 +188,87 @@ export default function SettingsPage() {
           <Card className="border-2 shadow-sm rounded-lg">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
-                <Package className="h-4 w-4 text-primary" />
+                <Tag className="h-4 w-4 text-primary" />
                 <h3 className="text-sm font-extrabold">
-                  {t("settings").inventory_settings[language]}
+                  {t("settings").currency_pricing[language]} -{" "}
+                  {t("settings").currency_pricing[language]}
                 </h3>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="space-y-2">
                   <Label
-                    htmlFor="lowStockThreshold"
+                    htmlFor="regularCustomerDiscount"
                     className="text-xs font-extrabold text-muted-foreground uppercase tracking-wide"
                   >
-                    {t("settings").low_stock_threshold[language]}
+                    {language === "ar" ? "خصم العملاء المنتظمين" : "Regular Customer Discount"}
                   </Label>
-                  <Input
-                    id="lowStockThreshold"
-                    type="number"
-                    defaultValue="5"
-                    className="h-9 text-sm font-bold rounded-md bg-muted/50 border-2 focus-visible:ring-primary/30"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="regularCustomerDiscount"
+                      type="number"
+                      defaultValue="0"
+                      className="h-9 text-sm font-bold ltr:ps-10 rtl:pe-10 ltr:pe-3 rtl:ps-3 rounded-md bg-muted/50 border-2 focus-visible:ring-primary/30"
+                    />
+                    <div className="absolute top-0 bottom-0 flex items-center justify-center w-10 text-muted-foreground font-bold bg-muted/60 text-xs ltr:start-0 rtl:end-0 ltr:rounded-s-md rtl:rounded-e-md ltr:border-e-2 rtl:border-s-2">
+                      %
+                    </div>
+                  </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="longTermDiscount"
+                    className="text-xs font-extrabold text-muted-foreground uppercase tracking-wide"
+                  >
+                    {language === "ar"
+                      ? "خصم الاشتراكات طويلة الأمد"
+                      : "Long-term Subscription Discount"}
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="longTermDiscount"
+                      type="number"
+                      defaultValue="10"
+                      className="h-9 text-sm font-bold ltr:ps-10 rtl:pe-10 ltr:pe-3 rtl:ps-3 rounded-md bg-muted/50 border-2 focus-visible:ring-primary/30"
+                    />
+                    <div className="absolute top-0 bottom-0 flex items-center justify-center w-10 text-muted-foreground font-bold bg-muted/60 text-xs ltr:start-0 rtl:end-0 ltr:rounded-s-md rtl:rounded-e-md ltr:border-e-2 rtl:border-s-2">
+                      %
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="promotionDiscount"
+                    className="text-xs font-extrabold text-muted-foreground uppercase tracking-wide"
+                  >
+                    {language === "ar" ? "خصم كود الترويجي" : "Promo Code Discount"}
+                  </Label>
+                  <div className="relative">
+                    <Input
+                      id="promotionDiscount"
+                      type="number"
+                      defaultValue="5"
+                      className="h-9 text-sm font-bold ltr:ps-10 rtl:pe-10 ltr:pe-3 rtl:ps-3 rounded-md bg-muted/50 border-2 focus-visible:ring-primary/30"
+                    />
+                    <div className="absolute top-0 bottom-0 flex items-center justify-center w-10 text-muted-foreground font-bold bg-muted/60 text-xs ltr:start-0 rtl:end-0 ltr:rounded-s-md rtl:rounded-e-md ltr:border-e-2 rtl:border-s-2">
+                      %
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between p-3 rounded-md border bg-muted/30">
                   <div className="flex-1">
-                    <Label htmlFor="autoRestock" className="text-sm font-bold cursor-pointer">
-                      {t("settings").auto_restock[language]}
+                    <Label htmlFor="autoApplyDiscount" className="text-sm font-bold cursor-pointer">
+                      {language === "ar" ? "تطبيق الخصومات تلقائياً" : "Auto-apply Discounts"}
                     </Label>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {t("settings").auto_restock_desc[language]}
+                      {language === "ar"
+                        ? "تطبيق أفضل خصم متاح تلقائياً"
+                        : "Automatically apply best available discount"}
                     </p>
                   </div>
-                  <Switch id="autoRestock" defaultChecked className="scale-100" />
+                  <Switch id="autoApplyDiscount" defaultChecked className="scale-100" />
                 </div>
               </div>
             </CardContent>

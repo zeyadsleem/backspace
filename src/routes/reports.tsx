@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -82,7 +81,6 @@ export default function ReportsPage() {
               value={overviewStats?.totalRevenue.toLocaleString() ?? "0"}
               subtitle={language === "ar" ? "هذا الشهر" : "This Month"}
               icon={Banknote}
-              badge={t("reports").revenue[language]}
               color="emerald"
             />
             <StatCard
@@ -90,7 +88,6 @@ export default function ReportsPage() {
               value={overviewStats?.totalSessions?.toString() ?? "0"}
               subtitle={language === "ar" ? "هذا الشهر" : "This Month"}
               icon={Clock}
-              badge={t("nav").sessions[language]}
               color="blue"
             />
             <StatCard
@@ -98,7 +95,6 @@ export default function ReportsPage() {
               value={overviewStats?.activeCustomes?.toString() ?? "0"}
               subtitle={language === "ar" ? "هذا الشهر" : "This Month"}
               icon={Users}
-              badge={t("nav").customers[language]}
               color="purple"
             />
             <StatCard
@@ -106,7 +102,6 @@ export default function ReportsPage() {
               value={overviewStats?.averageSessionAmount?.toFixed(2) ?? "0.00"}
               subtitle={t("reports").per_session[language]}
               icon={Clock}
-              badge={language === "ar" ? "الإنتاجية" : "Productivity"}
               color="amber"
             />
           </div>
@@ -220,12 +215,10 @@ export default function ReportsPage() {
                       key={customer.rank}
                       className="border-b transition-colors hover:bg-muted/50"
                     >
-                      <TableCell className="py-3">
-                        <Badge variant="secondary" className="px-2 py-0.5 font-bold text-[10px]">
-                          #{customer.rank}
-                        </Badge>
+                      <TableCell className="py-3">#{customer.rank}</TableCell>
+                      <TableCell className="text-sm font-bold py-3 cursor-pointer hover:text-primary transition-colors">
+                        {customer.name}
                       </TableCell>
-                      <TableCell className="text-sm font-bold py-3">{customer.name}</TableCell>
                       <TableCell className="text-sm font-bold py-3">
                         ج.م {customer.totalSpent.toLocaleString()}
                       </TableCell>

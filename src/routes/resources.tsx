@@ -19,13 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, MapPin, Filter } from "lucide-react";
+import { Plus, MapPin, Filter, CheckCircle, XCircle, Armchair } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { ResourceForm } from "@/components/customers/resource-form";
 import { ResourceActions } from "@/components/customers/resource-actions";
 import { PageHeader } from "@/components/shared/page-header";
 import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
+import { StatCard } from "@/components/stat-card";
 import { useResources } from "@/hooks/use-resources";
 import { formatDate } from "@/lib/formatters";
 
@@ -75,13 +76,26 @@ export default function ResourcesPage() {
           title={lang("إجمالي الموارد", "Total Resources")}
           value={stats.total}
           icon={MapPin}
+          color="blue"
         />
-
-        <StatCard title={lang("متاح", "Available")} value={stats.available} icon={MapPin} />
-
-        <StatCard title={lang("قيد الاستخدام", "In Use")} value={stats.inUse} icon={MapPin} />
-
-        <StatCard title={lang("مقاعد", "Seats")} value={stats.seats} icon={MapPin} />
+        <StatCard
+          title={lang("متاح", "Available")}
+          value={stats.available}
+          icon={CheckCircle}
+          color="emerald"
+        />
+        <StatCard
+          title={lang("قيد الاستخدام", "In Use")}
+          value={stats.inUse}
+          icon={XCircle}
+          color="orange"
+        />
+        <StatCard
+          title={lang("مقاعد", "Seats")}
+          value={stats.seats}
+          icon={Armchair}
+          color="purple"
+        />
       </div>
 
       <Card>
@@ -179,26 +193,6 @@ export default function ResourcesPage() {
 
       <ResourceForm open={showCreateForm} onOpenChange={setShowCreateForm} mode="create" />
     </div>
-  );
-}
-
-interface StatCardProps {
-  title: string;
-  value: number;
-  icon: React.ElementType;
-}
-
-function StatCard({ title, value, icon: Icon }: StatCardProps) {
-  return (
-    <Card className="py-2">
-      <CardHeader className="flex justify-between pb-1">
-        <CardTitle className="text-sm">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="text-2xl font-bold">{value}</div>
-      </CardContent>
-    </Card>
   );
 }
 

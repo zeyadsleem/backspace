@@ -20,7 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
-import { Download, X, FileText, Printer, Eye } from "lucide-react";
+import { Download, X, FileText, Printer } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { api } from "@/lib/tauri-api";
 import { formatDate, formatCurrency } from "@/lib/formatters";
