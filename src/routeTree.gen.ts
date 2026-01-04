@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SessionsRouteImport } from './routes/sessions'
+import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as ReportsRouteImport } from './routes/reports'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as CustomersRouteImport } from './routes/customers'
@@ -31,6 +32,11 @@ const SettingsRoute = SettingsRouteImport.update({
 const SessionsRoute = SessionsRouteImport.update({
   id: '/sessions',
   path: '/sessions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsRoute = ReportsRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/customers': typeof CustomersRouteWithChildren
   '/inventory': typeof InventoryRoute
   '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
   '/sessions': typeof SessionsRoute
   '/settings': typeof SettingsRoute
   '/subscriptions': typeof SubscriptionsRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/customers': typeof CustomersRouteWithChildren
   '/inventory': typeof InventoryRoute
   '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
   '/sessions': typeof SessionsRoute
   '/settings': typeof SettingsRoute
   '/subscriptions': typeof SubscriptionsRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/customers': typeof CustomersRouteWithChildren
   '/inventory': typeof InventoryRoute
   '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
   '/sessions': typeof SessionsRoute
   '/settings': typeof SettingsRoute
   '/subscriptions': typeof SubscriptionsRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/inventory'
     | '/reports'
+    | '/resources'
     | '/sessions'
     | '/settings'
     | '/subscriptions'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/inventory'
     | '/reports'
+    | '/resources'
     | '/sessions'
     | '/settings'
     | '/subscriptions'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/customers'
     | '/inventory'
     | '/reports'
+    | '/resources'
     | '/sessions'
     | '/settings'
     | '/subscriptions'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   CustomersRoute: typeof CustomersRouteWithChildren
   InventoryRoute: typeof InventoryRoute
   ReportsRoute: typeof ReportsRoute
+  ResourcesRoute: typeof ResourcesRoute
   SessionsRoute: typeof SessionsRoute
   SettingsRoute: typeof SettingsRoute
   SubscriptionsRoute: typeof SubscriptionsRoute
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/sessions'
       fullPath: '/sessions'
       preLoaderRoute: typeof SessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reports': {
@@ -211,6 +231,7 @@ const rootRouteChildren: RootRouteChildren = {
   CustomersRoute: CustomersRouteWithChildren,
   InventoryRoute: InventoryRoute,
   ReportsRoute: ReportsRoute,
+  ResourcesRoute: ResourcesRoute,
   SessionsRoute: SessionsRoute,
   SettingsRoute: SettingsRoute,
   SubscriptionsRoute: SubscriptionsRoute,
