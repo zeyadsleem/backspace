@@ -20,14 +20,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, User, Users, Filter } from "lucide-react";
+import { Plus, User, Users, Filter, CalendarPlus } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { CustomerForm } from "@/components/customers/customer-form";
 import { CustomerActions } from "@/components/customers/customer-actions";
 import { PageHeader } from "@/components/shared/page-header";
 import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
+import { StatCard } from "@/components/stat-card";
 import { useCustomers } from "@/hooks/use-customers";
+import { CustomerQuickViewDialog } from "@/components/customers/customer-quick-view-dialog";
 import { getInitials, formatDate, getCustomerTypeLabel } from "@/lib/formatters";
 
 export const Route = createFileRoute("/customers")({
@@ -84,13 +86,26 @@ export default function CustomersPage() {
           title={lang("إجمالي العملاء", "Total Customers")}
           value={stats.total}
           icon={Users}
+          color="blue"
         />
-
-        <StatCard title={lang("مشتركين", "Members")} value={stats.members} icon={User} />
-
-        <StatCard title={lang("الزوار", "Visitors")} value={stats.visitors} icon={User} />
-
-        <StatCard title={lang("هذا الشهر", "This Month")} value={stats.thisMonth} icon={Plus} />
+        <StatCard
+          title={lang("مشتركين", "Members")}
+          value={stats.members}
+          icon={User}
+          color="emerald"
+        />
+        <StatCard
+          title={lang("الزوار", "Visitors")}
+          value={stats.visitors}
+          icon={User}
+          color="purple"
+        />
+        <StatCard
+          title={lang("هذا الشهر", "This Month")}
+          value={stats.thisMonth}
+          icon={CalendarPlus}
+          color="orange"
+        />
       </div>
 
       <Card>
@@ -151,21 +166,22 @@ export default function CustomersPage() {
                 {filteredCustomers.map((customer) => (
                   <TableRow key={customer.id}>
                     <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
-                      <Link
-                        to="/customers/$id"
-                        params={{ id: customer.id }}
-                        className={`flex gap-3 ${dir === "rtl" ? "flex-row" : ""}`}
-                      >
-                        <Avatar>
-                          <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">{customer.name}</p>
-                          <p className="text-sm text-muted-foreground font-mono">
-                            {customer.humanId}
-                          </p>
-                        </div>
-                      </Link>
+                      <CustomerQuickViewDialog
+                        customerId={customer.id}
+                        trigger={
+                          <div className={`flex gap-3 ${dir === "rtl" ? "flex-row" : ""}`}>
+                            <Avatar>
+                              <AvatarFallback>{getInitials(customer.name)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{customer.name}</p>
+                              <p className="text-sm text-muted-foreground font-mono">
+                                {customer.humanId}
+                              </p>
+                            </div>
+                          </div>
+                        }
+                      />
                     </TableCell>
                     <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
                       <Badge
@@ -200,25 +216,5 @@ export default function CustomersPage() {
         defaultType="visitor"
       />
     </div>
-  );
-}
-
-interface StatCardProps {
-  title: string;
-  value: number;
-  icon: React.ElementType;
-}
-
-function StatCard({ title, value, icon: Icon }: StatCardProps) {
-  return (
-    <Card className="py-2">
-      <CardHeader className="flex justify-between pb-1">
-        <CardTitle className="text-sm">{title}</CardTitle>
-        <Icon className="h-4 w-4 text-muted-foreground" />
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="text-2xl font-bold">{value}</div>
-      </CardContent>
-    </Card>
   );
 }

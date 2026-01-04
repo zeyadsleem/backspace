@@ -20,14 +20,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, CheckCircle, XCircle, Receipt, Download } from "lucide-react";
+import { CheckCircle, XCircle, Receipt, Download, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { useInvoices, useUpdateInvoice } from "@/hooks/use-invoices";
 import { PageHeader } from "@/components/shared/page-header";
 import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
+import { StatCard } from "@/components/stat-card";
 import { formatDate } from "@/lib/formatters";
+import { InvoiceDetailsDialog } from "@/components/invoices/voice-details-dialog";
+import { CustomerQuickViewDialog } from "@/components/customers/customer-quick-view-dialog";
 
 export const Route = createFileRoute("/invoices")({
   component: InvoicesPage,
@@ -68,12 +71,6 @@ export default function InvoicesPage() {
       <PageHeader
         title={t("invoices").title[language]}
         subtitle={t("invoices").subtitle[language]}
-        action={
-          <Button size="default">
-            <Plus className="h-4 w-4" />
-            {t("invoices").create[language]}
-          </Button>
-        }
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -81,6 +78,7 @@ export default function InvoicesPage() {
           title={lang("إجمالي الفواتير", "Total Invoices")}
           value={stats.total}
           icon={Receipt}
+          color="purple"
         />
         <StatCard
           title={lang("فواتير مدفوعة", "Paid Invoices")}
@@ -161,21 +159,26 @@ export default function InvoicesPage() {
                   >
                     <TableCell className="text-sm font-bold py-3">
                       {invoice.customerName ? (
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-sm font-bold">
-                              {invoice.customerName.substring(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-sm font-bold">{invoice.customerName}</p>
-                            {invoice.customerHumanId && (
-                              <p className="text-xs text-muted-foreground font-mono">
-                                {invoice.customerHumanId}
-                              </p>
-                            )}
-                          </div>
-                        </div>
+                        <CustomerQuickViewDialog
+                          customerId={invoice.customerId}
+                          trigger={
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="text-sm font-bold">
+                                  {invoice.customerName.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="text-sm font-bold">{invoice.customerName}</p>
+                                {invoice.customerHumanId && (
+                                  <p className="text-xs text-muted-foreground font-mono">
+                                    {invoice.customerHumanId}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          }
+                        />
                       ) : (
                         lang("عميل غير معروف", "Unknown")
                       )}
@@ -208,6 +211,15 @@ export default function InvoicesPage() {
                     </TableCell>
                     <TableCell className={dir === "rtl" ? "text-right" : "text-right"}>
                       <div className="flex items-center gap-2 justify-end">
+                        <InvoiceDetailsDialog
+                          invoiceId={invoice.id}
+                          trigger={
+                            <Button variant="outline" size="sm">
+                              <Eye className="h-4 w-4 mr-2" />
+                              {lang("عرض", "View")}
+                            </Button>
+                          }
+                        />
                         {invoice.status === "unpaid" && (
                           <Button
                             variant="outline"
@@ -264,32 +276,5 @@ export default function InvoicesPage() {
         </Dialog>
       )}
     </div>
-  );
-}
-
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ElementType;
-  color?: "emerald" | "orange" | "blue";
-}
-
-function StatCard({ title, value, icon: Icon, color }: StatCardProps) {
-  const colorClasses = {
-    emerald: "text-[var(--color-emerald)]",
-    orange: "text-[var(--color-orange)]",
-    blue: "text-[var(--color-blue)]",
-  };
-
-  return (
-    <Card className="py-2">
-      <CardHeader className="flex justify-between pb-1">
-        <CardTitle className="text-sm">{title}</CardTitle>
-        <Icon className={cn("h-4 w-4", color && colorClasses[color], "text-muted-foreground")} />
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className={cn("text-2xl font-bold", color && colorClasses[color])}>{value}</div>
-      </CardContent>
-    </Card>
   );
 }
