@@ -43,7 +43,7 @@ export function FormField({
         onChange={(e) => field.handleChange(e.target.value)}
         onBlur={field.handleBlur}
         placeholder={placeholder}
-        aria-invalid={hasError}
+        aria-invalid={hasError ? "true" : undefined}
         className={cn("h-9", type === "textarea" && "h-auto", hasError && "border-destructive", className)}
       />
       {hasError && errorMessage && (
