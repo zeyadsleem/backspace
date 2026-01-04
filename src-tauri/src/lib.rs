@@ -52,6 +52,10 @@ pub fn run() {
       commands::create_invoice,
       commands::update_invoice,
       commands::delete_invoice,
+      commands::get_daily_revenue,
+      commands::get_top_customers,
+      commands::get_resource_utilization,
+      commands::get_overview_stats,
       database::reset_database,
     ])
     .run(tauri::generate_context!())

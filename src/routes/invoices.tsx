@@ -24,7 +24,6 @@ import { Plus, CheckCircle, XCircle, Receipt, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { useInvoices, useUpdateInvoice } from "@/hooks/use-invoices";
-import { useCustomers } from "@/hooks/use-customers";
 import { PageHeader } from "@/components/shared/page-header";
 import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";

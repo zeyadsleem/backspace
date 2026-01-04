@@ -181,6 +181,33 @@ export interface UpdateInvoice {
   paidDate?: string;
 }
 
+export interface DailyRevenue {
+  period: string;
+  revenue: number;
+  sessions: number;
+  customers: number;
+}
+
+export interface TopCustomer {
+  rank: number;
+  name: string;
+  totalSpent: number;
+  sessions: number;
+}
+
+export interface ResourceUtilization {
+  name: string;
+  usage: number;
+  total: number;
+}
+
+export interface OverviewStats {
+  totalRevenue: number;
+  totalSessions: number;
+  activeCustomes: number;
+  averageSessionAmount: number;
+}
+
 export const api = {
   customers: {
     list: () => invoke<Customer[]>("get_customers"),
@@ -225,6 +252,12 @@ export const api = {
     create: (data: CreateInvoice) => invoke<Invoice>("create_invoice", { data }),
     update: (id: string, data: UpdateInvoice) => invoke<Invoice>("update_invoice", { id, data }),
     delete: (id: string) => invoke<void>("delete_invoice", { id }),
+  },
+  reports: {
+    getDailyRevenue: () => invoke<DailyRevenue[]>("get_daily_revenue"),
+    getTopCustomers: (limit?: number) => invoke<TopCustomer[]>("get_top_customers", { limit }),
+    getResourceUtilization: () => invoke<ResourceUtilization[]>("get_resource_utilization"),
+    getOverviewStats: () => invoke<OverviewStats>("get_overview_stats"),
   },
   database: {
     reset: () => invoke<void>("reset_database"),

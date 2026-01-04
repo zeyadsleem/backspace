@@ -14,27 +14,23 @@ import {
 import { Download, TrendingUp, Users, Banknote, Clock } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { StatCard } from "@/components/stat-card";
+import {
+  useDailyRevenue,
+  useTopCustomers,
+  useResourceUtilization,
+  useOverviewStats,
+} from "@/hooks/use-reports";
 
 export const Route = createFileRoute("/reports")({
   component: ReportsPage,
 });
 
-const mockRevenueData = [
-  { period: "Today", revenue: 4875, sessions: 12, customers: 8 },
-  { period: "This Week", revenue: 24375, sessions: 68, customers: 42 },
-  { period: "This Month", revenue: 97500, sessions: 312, customers: 185 },
-];
-
-const mockTopCustomers = [
-  { rank: 1, name: "Ahmed Ali", totalSpent: 6250, sessions: 25 },
-  { rank: 2, name: "Sarah Johnson", totalSpent: 4900, sessions: 18 },
-  { rank: 3, name: "Mohamed Hassan", totalSpent: 4375, sessions: 15 },
-  { rank: 4, name: "Fatima Ahmed", totalSpent: 3600, sessions: 12 },
-  { rank: 5, name: "Omar Ibrahim", totalSpent: 3250, sessions: 11 },
-];
-
 export default function ReportsPage() {
-  const { t, language, dir } = useI18n();
+  const { t, language, dir, lang } = useI18n();
+  const { data: overviewStats } = useOverviewStats();
+  const { data: dailyRevenue } = useDailyRevenue();
+  const { data: topCustomers } = useTopCustomers(10);
+  const { data: resourceUtilization } = useResourceUtilization();
 
   return (
     <div className="container mx-auto p-8 space-y-8" dir={dir}>
@@ -83,7 +79,7 @@ export default function ReportsPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatCard
               title={t("reports").total_revenue[language]}
-              value="97,500"
+              value={overviewStats?.totalRevenue.toLocaleString() ?? "0"}
               subtitle={language === "ar" ? "هذا الشهر" : "This Month"}
               icon={Banknote}
               badge={t("reports").revenue[language]}
@@ -91,7 +87,7 @@ export default function ReportsPage() {
             />
             <StatCard
               title={t("reports").total_sessions[language]}
-              value="312"
+              value={overviewStats?.totalSessions?.toString() ?? "0"}
               subtitle={language === "ar" ? "هذا الشهر" : "This Month"}
               icon={Clock}
               badge={t("nav").sessions[language]}
@@ -99,7 +95,7 @@ export default function ReportsPage() {
             />
             <StatCard
               title={t("reports").active_customers[language]}
-              value="185"
+              value={overviewStats?.activeCustomes?.toString() ?? "0"}
               subtitle={language === "ar" ? "هذا الشهر" : "This Month"}
               icon={Users}
               badge={t("nav").customers[language]}
@@ -107,7 +103,7 @@ export default function ReportsPage() {
             />
             <StatCard
               title={t("reports").average_session[language]}
-              value="312.50"
+              value={overviewStats?.averageSessionAmount?.toFixed(2) ?? "0.00"}
               subtitle={t("reports").per_session[language]}
               icon={Clock}
               badge={language === "ar" ? "الإنتاجية" : "Productivity"}
@@ -143,7 +139,7 @@ export default function ReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockRevenueData.map((data) => (
+                  {dailyRevenue?.map((data) => (
                     <TableRow
                       key={data.period}
                       className="border-b transition-colors hover:bg-muted/50"
@@ -155,7 +151,7 @@ export default function ReportsPage() {
                       <TableCell className="text-sm font-medium py-3">{data.sessions}</TableCell>
                       <TableCell className="text-sm font-medium py-3">{data.customers}</TableCell>
                       <TableCell className="text-sm font-bold py-3">
-                        ج.م {(data.revenue / data.sessions).toFixed(2)}
+                        ج.م {data.sessions > 0 ? (data.revenue / data.sessions).toFixed(2) : "0.00"}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -219,7 +215,7 @@ export default function ReportsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockTopCustomers.map((customer) => (
+                  {topCustomers?.map((customer) => (
                     <TableRow
                       key={customer.rank}
                       className="border-b transition-colors hover:bg-muted/50"
@@ -237,7 +233,10 @@ export default function ReportsPage() {
                         {customer.sessions}
                       </TableCell>
                       <TableCell className="text-sm font-bold text-right py-3">
-                        ج.م {(customer.totalSpent / customer.sessions).toFixed(2)}
+                        ج.م{" "}
+                        {customer.sessions > 0
+                          ? (customer.totalSpent / customer.sessions).toFixed(2)
+                          : "0.00"}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -256,34 +255,28 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4 p-4">
-                {[
-                  { name: language === "ar" ? "منطقة المقاعد" : "Seat Area", usage: 75, total: 30 },
-                  {
-                    name: language === "ar" ? "غرف الاجتماعات" : "Meeting Rooms",
-                    usage: 60,
-                    total: 5,
-                  },
-                  {
-                    name: language === "ar" ? "أكشاك الهاتف" : "Phone Booths",
-                    usage: 90,
-                    total: 3,
-                  },
-                ].map((resource) => (
-                  <div key={resource.name} className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold">{resource.name}</span>
-                      <span className="text-xs font-bold text-primary">
-                        {resource.usage}% {t("reports").utilization_percent[language]}
-                      </span>
+                {resourceUtilization?.length ? (
+                  resourceUtilization.map((resource) => (
+                    <div key={resource.name} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-bold">{resource.name}</span>
+                        <span className="text-xs font-bold text-primary">
+                          {resource.usage.toFixed(1)}% {t("reports").utilization_percent[language]}
+                        </span>
+                      </div>
+                      <div className="h-2.5 bg-muted rounded-full overflow-hidden border">
+                        <div
+                          className="h-full bg-primary transition-all shadow-[0_0_10px_rgba(var(--primary),0.3)]"
+                          style={{ width: `${Math.min(resource.usage, 100)}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="h-2.5 bg-muted rounded-full overflow-hidden border">
-                      <div
-                        className="h-full bg-primary transition-all shadow-[0_0_10px_rgba(var(--primary),0.3)]"
-                        style={{ width: `${resource.usage}%` }}
-                      />
-                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-sm text-muted-foreground">
+                    {lang("لا توجد بيانات", "No data available")}
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
