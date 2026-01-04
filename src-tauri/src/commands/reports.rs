@@ -1,7 +1,6 @@
 use crate::database::DbConn;
 use serde::{Deserialize, Serialize};
 use tauri::State;
-use rusqlite::params;
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
