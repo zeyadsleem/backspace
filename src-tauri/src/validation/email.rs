@@ -22,6 +22,7 @@ const DISPOSABLE_DOMAINS: &[&str] = &[
     "fakeinbox.com",
 ];
 
+#[allow(dead_code)]
 /// Email validation result
 #[derive(Debug, Clone)]
 pub struct EmailValidationResult {
@@ -149,11 +150,13 @@ pub fn validate_email(email: &str) -> EmailValidationResult {
     }
 }
 
+#[allow(dead_code)]
 /// Check if email is valid (simple boolean check)
 pub fn is_valid_email(email: &str) -> bool {
     validate_email(email).is_valid
 }
 
+#[allow(dead_code)]
 /// Validate email and require it (not optional)
 pub fn validate_required_email(email: &str) -> EmailValidationResult {
     if email.trim().is_empty() {

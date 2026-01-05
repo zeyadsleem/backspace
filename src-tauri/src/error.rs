@@ -77,5 +77,6 @@ impl From<AppError> for String {
     }
 }
 
+#[allow(dead_code)]
 /// Result type alias for application operations
 pub type AppResult<T> = Result<T, AppError>;

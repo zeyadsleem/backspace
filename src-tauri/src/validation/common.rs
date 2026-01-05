@@ -2,6 +2,7 @@
 
 use crate::error::{AppError, ValidationError};
 
+#[allow(dead_code)]
 /// Validate string length
 pub fn validate_string_length(
     value: &str,
@@ -30,6 +31,7 @@ pub fn validate_string_length(
     Ok(())
 }
 
+#[allow(dead_code)]
 /// Validate required string
 pub fn validate_required(value: &str, field: &str) -> Result<(), AppError> {
     if value.trim().is_empty() {
@@ -42,6 +44,7 @@ pub fn validate_required(value: &str, field: &str) -> Result<(), AppError> {
     Ok(())
 }
 
+#[allow(dead_code)]
 /// Validate positive number
 pub fn validate_positive<T: PartialOrd + Default + std::fmt::Display>(
     value: T,
@@ -57,6 +60,7 @@ pub fn validate_positive<T: PartialOrd + Default + std::fmt::Display>(
     Ok(())
 }
 
+#[allow(dead_code)]
 /// Validate non-negative number
 pub fn validate_non_negative<T: PartialOrd + Default + std::fmt::Display>(
     value: T,
@@ -72,6 +76,7 @@ pub fn validate_non_negative<T: PartialOrd + Default + std::fmt::Display>(
     Ok(())
 }
 
+#[allow(dead_code)]
 /// Validate enum value
 pub fn validate_enum<'a>(
     value: &str,
@@ -88,6 +93,7 @@ pub fn validate_enum<'a>(
     Ok(())
 }
 
+#[allow(dead_code)]
 /// Validate UUID format
 pub fn validate_uuid(value: &str, field: &str) -> Result<(), AppError> {
     if uuid::Uuid::parse_str(value).is_err() {

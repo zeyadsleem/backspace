@@ -8,4 +8,3 @@ pub mod common;
 
 pub use egyptian_phone::*;
 pub use email::*;
-pub use common::*;

@@ -23,6 +23,7 @@ static EGYPTIAN_LANDLINE_REGEX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"^(\+20|0)?[2-9]\d{8,9}$").unwrap()
 });
 
+#[allow(dead_code)]
 /// Phone validation result
 #[derive(Debug, Clone)]
 pub struct PhoneValidationResult {
@@ -137,6 +138,7 @@ pub fn validate_egyptian_phone(phone: &str) -> PhoneValidationResult {
     }
 }
 
+#[allow(dead_code)]
 /// Check if phone is valid Egyptian number (simple boolean check)
 pub fn is_valid_egyptian_phone(phone: &str) -> bool {
     validate_egyptian_phone(phone).is_valid

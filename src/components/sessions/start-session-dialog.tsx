@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Search, User, Monitor, DoorOpen, Check, Clock, Banknote } from "lucide-react";
+import { Search, User, Monitor, DoorOpen, Check, Clock } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useCustomers } from "@/hooks/use-customers";
 import { useResources } from "@/hooks/use-resources";
