@@ -64,18 +64,6 @@ All colors are defined in `src/index.css` using OKLCH color space. Use CSS varia
 --color-amber-border: oklch(0.88 0.04 70);
 ```
 
-### Usage
-
-```tsx
-// ✅ Correct - use CSS variables
-<div className="bg-[var(--color-emerald-bg)] text-[var(--color-emerald)]" />
-
-// ❌ Incorrect - hard-coded colors
-<div className="bg-emerald-500 text-emerald-600" />
-```
-
----
-
 ## Typography
 
 ### Font Family
@@ -106,26 +94,7 @@ All colors are defined in `src/index.css` using OKLCH color space. Use CSS varia
 | `font-medium`    | Body text, descriptions      |
 | `font-normal`    | Regular text                 |
 
-### Usage Examples
-
-```tsx
-// Page title
-<h1 className="text-2xl font-extrabold tracking-tight">Page Title</h1>
-
-// Card/Section title
-<h2 className="text-sm font-extrabold">Card Title</h2>
-
-// Table headers
-<TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-  Header
-</TableHead>
-
-// Badge
-<Badge className="text-[10px] font-bold px-2 py-0.5">Label</Badge>
-
-// Input label
-<Label className="text-sm font-bold">Label</Label>
-```
+````
 
 ---
 
@@ -154,27 +123,6 @@ All colors are defined in `src/index.css` using OKLCH color space. Use CSS varia
 | Button         | `px-4 py-2` (default)           |
 | Input          | `px-3 py-1`                     |
 
-### Usage Examples
-
-```tsx
-// Card container
-<div className="space-y-4">
-  {/* Card content */}
-</div>
-
-// Icon with text
-<div className="flex items-center gap-2">
-  <Icon className="h-4 w-4" />
-  <span>Text</span>
-</div>
-
-// Grid layout
-<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-  {/* Cards */}
-</div>
-```
-
----
 
 ## Border Radius
 
@@ -188,7 +136,7 @@ All colors are defined in `src/index.css` using OKLCH color space. Use CSS varia
 --radius-2xl: calc(var(--radius) + 8px);  /* 1.5rem */
 --radius-3xl: calc(var(--radius) + 12px); /* 2rem */
 --radius-4xl: calc(var(--radius) + 16px); /* 2.5rem */
-```
+````
 
 ### Component Border Radius
 
@@ -202,127 +150,6 @@ All colors are defined in `src/index.css` using OKLCH color space. Use CSS varia
 | Table cells    | 0        | `rounded-none` |
 | Avatar         | 9999px   | `rounded-full` |
 
-### Usage Examples
-
-```tsx
-// Card
-<Card className="rounded-lg border shadow-sm">...</Card>
-
-// Button
-<Button className="rounded-md">...</Button>
-
-// Input
-<Input className="rounded-md">...</Input>
-
-// Badge
-<Badge className="rounded-4xl px-2 py-0.5">Label</Badge>
-```
-
----
-
-## Component Patterns
-
-### Cards
-
-```tsx
-<Card className="rounded-lg border shadow-sm">
-  <CardHeader className="pb-3 border-b">
-    <CardTitle className="text-sm font-extrabold">
-      Card Title
-    </CardTitle>
-  </CardHeader>
-  <CardContent className="p-4">
-    {/* Card content */}
-  </CardContent>
-</Card>
-```
-
-### Tables
-
-```tsx
-<Table>
-  <TableHeader>
-    <TableRow className="hover:bg-transparent">
-      <TableHead className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-        Header
-      </TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    <TableRow className="border-b transition-colors hover:bg-muted/50">
-      <TableCell className="text-sm font-medium py-3">
-        Content
-      </TableCell>
-    </TableRow>
-  </TableBody>
-</Table>
-```
-
-### Buttons
-
-```tsx
-// Primary action
-<Button size="default">
-  <Icon className="h-4 w-4" />
-  Action
-</Button>
-
-// Secondary/outline action
-<Button variant="outline" size="sm">
-  <Icon className="h-4 w-4" />
-  Action
-</Button>
-
-// Icon only
-<Button variant="ghost" size="icon-sm">
-  <Icon className="h-4 w-4" />
-</Button>
-```
-
-### Inputs
-
-```tsx
-<div className="space-y-2">
-  <Label className="text-sm font-bold">Label</Label>
-  <Input className="h-9" />
-</div>
-```
-
-### Dialogs/Drawers
-
-```tsx
-<DialogContent className="rounded-lg border">
-  <DialogHeader>
-    <DialogTitle className="text-base font-bold">
-      Dialog Title
-    </DialogTitle>
-  </DialogHeader>
-  <div className="p-4 pt-0">
-    {/* Content */}
-  </div>
-</DialogContent>
-```
-
-### Badges
-
-```tsx
-<Badge variant="outline" className="px-2 py-0.5 text-[10px] font-bold">
-  Label
-</Badge>
-```
-
-### Tabs
-
-```tsx
-<TabsList className="h-10 p-1 bg-muted/50 border rounded-lg">
-  <TabsTrigger className="px-4 font-bold rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm text-sm">
-    Tab
-  </TabsTrigger>
-</TabsList>
-```
-
----
-
 ## Icons
 
 ### Icon Sizes
@@ -333,48 +160,6 @@ All colors are defined in `src/index.css` using OKLCH color space. Use CSS varia
 | Section header icon      | `h-4 w-4`      | 16px |
 | Large icon (hero)        | `h-5 w-5`      | 20px |
 | Extra large              | `h-6 w-6`      | 24px |
-
-```tsx
-// With text
-<div className="flex items-center gap-2">
-  <Icon className="h-4 w-4" />
-  <span>Text</span>
-</div>
-
-// Section header
-<h3 className="text-sm font-extrabold flex items-center gap-2">
-  <Icon className="h-4 w-4" />
-  Title
-</h3>
-```
-
----
-
-## Page Layout
-
-```tsx
-<div className="container mx-auto p-6 space-y-4" dir={dir}>
-  {/* Page header */}
-  <div className="flex items-center justify-between">
-    <div>
-      <h1 className="text-2xl font-extrabold tracking-tight">
-        Page Title
-      </h1>
-      <p className="text-base text-muted-foreground mt-1">
-        Page subtitle
-      </p>
-    </div>
-    <Button size="default">Action</Button>
-  </div>
-
-  {/* Page content */}
-  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-    {/* Cards */}
-  </div>
-</div>
-```
-
----
 
 ## Quick Reference
 
@@ -417,55 +202,3 @@ When creating a new component, verify it follows these rules:
 - **Base components**: `src/components/ui/`
 
 ---
-
-## Testing
-
-### Testing Strategy
-
-- **E2E Testing**: Playwright for end-to-end user flows
-- **Test Location**: `tests/` directory
-- **Test Structure**: Organized by feature (e.g., `tests/customers/`)
-
-### Test Patterns
-
-```typescript
-// Basic test structure
-test.describe("Feature Name", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/route");
-  });
-
-  test("should do something", async ({ page }) => {
-    // Test implementation
-  });
-});
-```
-
-### Test Fixtures
-
-```typescript
-// Use fixtures for test data
-import { test } from "../fixtures/test-data";
-
-test("should use customer data", async ({ customerData }) => {
-  // Use customerData fixture
-});
-```
-
-### Accessibility Testing
-
-```typescript
-// Test accessibility elements
-await expect(page.getByRole("button", { name: /submit/i })).toBeVisible();
-await expect(page.getByLabel(/email/i)).toBeVisible();
-```
-
-### Testing Checklist
-
-- [ ] Tests use fixtures for consistent test data
-- [ ] Tests use role-based selectors for accessibility
-- [ ] Tests verify success/error messages
-- [ ] Tests clean up after themselves
-- [ ] Tests are independent and can run in parallel
-- [ ] Tests cover happy paths and error cases
-- [ ] Tests verify UI updates after actions
