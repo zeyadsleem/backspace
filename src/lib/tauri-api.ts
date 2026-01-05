@@ -16,6 +16,7 @@ export interface CreateCustomer {
   phone: string;
   email?: string;
   customerType: string;
+  planType?: string;
   notes?: string;
 }
 
@@ -24,6 +25,7 @@ export interface UpdateCustomer {
   phone?: string;
   email?: string;
   customerType?: string;
+  planType?: string;
   notes?: string;
 }
 

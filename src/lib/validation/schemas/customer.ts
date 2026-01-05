@@ -55,6 +55,16 @@ const customerTypeSchema = z.enum(["visitor", "member"], {
 });
 
 /**
+ * Plan type validation (optional, only for members)
+ */
+const planTypeSchema = z
+  .enum(["weekly", "half-monthly", "monthly"], {
+    message:
+      "نوع الخطة يجب أن يكون أسبوعي، نصف شهري، أو شهري | Plan type must be weekly, half-monthly, or monthly",
+  })
+  .optional();
+
+/**
  * Notes validation
  */
 const notesSchema = z
@@ -73,6 +83,7 @@ export const createCustomerSchema = z.object({
   phone: egyptianPhoneSchema,
   email: optionalEmailSchema,
   customerType: customerTypeSchema,
+  planType: planTypeSchema,
   notes: notesSchema,
 });
 
@@ -84,6 +95,7 @@ export const updateCustomerSchema = z.object({
   phone: egyptianPhoneSchema.optional(),
   email: optionalEmailSchema,
   customerType: customerTypeSchema.optional(),
+  planType: planTypeSchema.optional(),
   notes: notesSchema,
 });
 

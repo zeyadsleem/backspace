@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
-import { User, Phone, Mail, FileText, Check, AlertCircle } from "lucide-react";
+import { User, Phone, Mail, FileText, Check, AlertCircle, Calendar } from "lucide-react";
 import { FormField } from "@/components/shared/form-field";
 import { CustomerSuccessDialog } from "./customer-success-dialog";
 import { useCustomerForm } from "@/hooks/use-customer-form";
@@ -21,6 +21,7 @@ import {
   validateEgyptianPhone,
   formatEgyptianPhone,
 } from "@/lib/validation/validators/egyptian-phone";
+import { PLAN_TYPE_LABELS } from "@/lib/validation/schemas/subscription";
 import type { Customer } from "@/lib/tauri-api";
 
 interface CustomerFormProps {
@@ -30,6 +31,8 @@ interface CustomerFormProps {
   mode?: "create" | "edit";
   defaultType?: "visitor" | "member";
 }
+
+type PlanType = "weekly" | "half-monthly" | "monthly";
 
 export function CustomerForm({
   open,
@@ -43,6 +46,46 @@ export function CustomerForm({
   const [activeTab, setActiveTab] = useState<"visitor" | "member">(
     (customer?.customerType as "visitor" | "member") || defaultType,
   );
+  const [step, setStep] = useState<1 | 2>(mode === "edit" ? 2 : 1);
+  const [selectedPlanType, setSelectedPlanType] = useState<PlanType | null>(null);
+
+  const PLAN_TYPES: PlanType[] = ["weekly", "half-monthly", "monthly"];
+
+  const { form, mutation } = useCustomerForm(
+    customer,
+    mode,
+    mode === "create" ? setCreatedCustomer : undefined,
+  );
+
+  const handleTabChange = (tab: "visitor" | "member") => {
+    setActiveTab(tab);
+    form.setFieldValue("customerType", tab);
+    if (tab === "visitor") {
+      setStep(2);
+    } else {
+      setStep(1);
+    }
+  };
+
+  const handlePlanSelect = (planType: PlanType) => {
+    setSelectedPlanType(planType);
+    form.setFieldValue("planType", planType);
+    setStep(2);
+  };
+
+  const handleBack = () => {
+    if (activeTab === "member") {
+      setStep(1);
+      setSelectedPlanType(null);
+      form.setFieldValue("planType", undefined);
+    }
+  };
+
+  const resetForm = () => {
+    setStep(mode === "edit" ? 2 : 1);
+    setSelectedPlanType(null);
+    setActiveTab(customer?.customerType === "member" ? "member" : "visitor");
+  };
 
   // Real-time validation states
   const [phoneValidation, setPhoneValidation] = useState<{
@@ -50,12 +93,6 @@ export function CustomerForm({
     carrier: string | null;
     error: string | null;
   }>({ isValid: true, carrier: null, error: null });
-
-  const { form, mutation } = useCustomerForm(
-    customer,
-    mode,
-    mode === "create" ? setCreatedCustomer : undefined,
-  );
 
   // Real-time phone validation
   const handlePhoneChange = useCallback(
@@ -80,6 +117,8 @@ export function CustomerForm({
     [language],
   );
 
+  const isFormValid = phoneValidation.isValid;
+
   if (createdCustomer) {
     return (
       <CustomerSuccessDialog
@@ -88,19 +127,13 @@ export function CustomerForm({
         onOpenChange={(open) => {
           if (!open) {
             setCreatedCustomer(null);
+            resetForm();
             onOpenChange(false);
           }
         }}
       />
     );
   }
-
-  const handleTabChange = (tab: "visitor" | "member") => {
-    setActiveTab(tab);
-    form.setFieldValue("customerType", tab);
-  };
-
-  const isFormValid = phoneValidation.isValid;
 
   const renderFormContent = () => (
     <Card>
@@ -189,7 +222,15 @@ export function CustomerForm({
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        if (!open) {
+          resetForm();
+        }
+        onOpenChange(open);
+      }}
+    >
       <DialogContent className="sm:max-w-2xl" dir={dir}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
@@ -199,7 +240,9 @@ export function CustomerForm({
               : lang("تعديل بيانات العميل", "Edit Customer")}
           </DialogTitle>
           <DialogDescription>
-            {lang("أدخل بيانات العميل", "Enter customer details")}
+            {step === 1 && activeTab === "member"
+              ? lang("اختر نوع الاشتراك", "Select subscription type")
+              : lang("أدخل بيانات العميل", "Enter customer details")}
           </DialogDescription>
         </DialogHeader>
 
@@ -208,93 +251,171 @@ export function CustomerForm({
           onValueChange={(v) => handleTabChange(v as "visitor" | "member")}
           className="w-full"
         >
-          <TabsList className="gap-1 bg-muted p-1 rounded-lg">
-            <TabsTrigger value="visitor">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                {lang("زائر", "Visitor")}
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="member">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                {lang("مشترك", "Member")}
-              </div>
-            </TabsTrigger>
-          </TabsList>
+          {mode === "create" && (
+            <TabsList className="gap-1 bg-muted p-1 rounded-lg">
+              <TabsTrigger value="visitor">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {lang("زائر", "Visitor")}
+                </div>
+              </TabsTrigger>
+              <TabsTrigger value="member">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {lang("مشترك", "Member")}
+                </div>
+              </TabsTrigger>
+            </TabsList>
+          )}
 
           <TabsContent value="visitor" className="mt-6">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                form.handleSubmit();
-              }}
-              className="space-y-4"
-            >
-              {renderFormContent()}
+            {step === 2 && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  form.handleSubmit();
+                }}
+                className="space-y-4"
+              >
+                {renderFormContent()}
 
-              <DialogFooter className="gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={mutation.isPending}
-                  className="ltr:mr-auto rtl:ml-auto"
-                >
-                  {lang("إلغاء", "Cancel")}
-                </Button>
+                <DialogFooter className="gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                    disabled={mutation.isPending}
+                    className="ltr:mr-auto rtl:ml-auto"
+                  >
+                    {lang("إلغاء", "Cancel")}
+                  </Button>
 
-                <Button
-                  type="submit"
-                  disabled={mutation.isPending || !isFormValid}
-                  className="gap-2"
-                >
-                  {mutation.isPending ? (
-                    <Spinner className="h-4 w-4" />
-                  ) : (
-                    <Check className="h-4 w-4" />
-                  )}
-                  {lang("إنشاء الزائر", "Create Visitor")}
-                </Button>
-              </DialogFooter>
-            </form>
+                  <Button
+                    type="submit"
+                    disabled={mutation.isPending || !isFormValid}
+                    className="gap-2"
+                  >
+                    {mutation.isPending ? (
+                      <Spinner className="h-4 w-4" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
+                    {lang("إنشاء الزائر", "Create Visitor")}
+                  </Button>
+                </DialogFooter>
+              </form>
+            )}
           </TabsContent>
 
           <TabsContent value="member" className="mt-6">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                form.handleSubmit();
-              }}
-              className="space-y-4"
-            >
-              {renderFormContent()}
+            {step === 1 && mode === "create" ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {PLAN_TYPES.map((planType) => (
+                    <Card
+                      key={planType}
+                      className={`cursor-pointer transition-all hover:shadow-lg ${
+                        selectedPlanType === planType
+                          ? "ring-2 ring-primary shadow-lg"
+                          : "hover:border-primary"
+                      }`}
+                      onClick={() => handlePlanSelect(planType)}
+                    >
+                      <CardContent className="p-6 flex flex-col items-center text-center gap-3">
+                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Calendar className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">
+                            {
+                              PLAN_TYPE_LABELS[planType]?.[
+                                language as keyof (typeof PLAN_TYPE_LABELS)[typeof planType]
+                              ]
+                            }
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {lang(
+                              `${PLAN_TYPE_LABELS[planType]?.days} يوم`,
+                              `${PLAN_TYPE_LABELS[planType]?.days} days`,
+                            )}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
 
-              <DialogFooter className="gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                  disabled={mutation.isPending}
-                  className="ltr:mr-auto rtl:ml-auto"
+                <DialogFooter className="gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                    className="ltr:mr-auto rtl:ml-auto"
+                  >
+                    {lang("إلغاء", "Cancel")}
+                  </Button>
+                </DialogFooter>
+              </div>
+            ) : (
+              step === 2 && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    form.handleSubmit();
+                  }}
+                  className="space-y-4"
                 >
-                  {lang("إلغاء", "Cancel")}
-                </Button>
-
-                <Button
-                  type="submit"
-                  disabled={mutation.isPending || !isFormValid}
-                  className="gap-2"
-                >
-                  {mutation.isPending ? (
-                    <Spinner className="h-4 w-4" />
-                  ) : (
-                    <Check className="h-4 w-4" />
+                  {selectedPlanType && (
+                    <div className="flex items-center gap-2 mb-4 p-3 bg-primary/10 rounded-lg">
+                      <Calendar className="h-4 w-4 text-primary" />
+                      <span className="text-sm font-medium">
+                        {lang(
+                          `نوع الاشتراك: ${PLAN_TYPE_LABELS[selectedPlanType]?.[language as keyof (typeof PLAN_TYPE_LABELS)[typeof selectedPlanType]]}`,
+                          `Subscription: ${PLAN_TYPE_LABELS[selectedPlanType]?.[language as keyof (typeof PLAN_TYPE_LABELS)[typeof selectedPlanType]]}`,
+                        )}
+                      </span>
+                    </div>
                   )}
-                  {lang("إنشاء المشترك", "Create Member")}
-                </Button>
-              </DialogFooter>
-            </form>
+
+                  {renderFormContent()}
+
+                  <DialogFooter className="gap-2">
+                    {mode === "create" && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleBack}
+                        disabled={mutation.isPending}
+                      >
+                        {lang("رجوع", "Back")}
+                      </Button>
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => onOpenChange(false)}
+                      disabled={mutation.isPending}
+                      className="ltr:mr-auto rtl:ml-auto"
+                    >
+                      {lang("إلغاء", "Cancel")}
+                    </Button>
+
+                    <Button
+                      type="submit"
+                      disabled={mutation.isPending || !isFormValid}
+                      className="gap-2"
+                    >
+                      {mutation.isPending ? (
+                        <Spinner className="h-4 w-4" />
+                      ) : (
+                        <Check className="h-4 w-4" />
+                      )}
+                      {lang("إنشاء المشترك", "Create Member")}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              )
+            )}
           </TabsContent>
         </Tabs>
       </DialogContent>

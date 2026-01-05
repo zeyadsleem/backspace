@@ -15,6 +15,7 @@ type CustomerFormData = {
   phone: string;
   email: string;
   customerType: "visitor" | "member";
+  planType?: "weekly" | "half-monthly" | "monthly";
   notes: string;
 };
 
@@ -32,6 +33,7 @@ export function useCustomerForm(
       phone: customer?.phone ?? "",
       email: customer?.email ?? "",
       customerType: (customer?.customerType ?? "visitor") as "visitor" | "member",
+      planType: undefined as "weekly" | "half-monthly" | "monthly" | undefined,
       notes: customer?.notes ?? "",
     } as CustomerFormData,
     onSubmit: async ({ value }) => {
@@ -58,6 +60,7 @@ export function useCustomerForm(
         phone: normalizedPhone,
         email: data.email?.trim() || undefined,
         customerType: data.customerType,
+        planType: data.planType,
         notes: data.notes?.trim() || undefined,
       };
 
@@ -69,6 +72,7 @@ export function useCustomerForm(
           phone: normalizedPhone,
           email: data.email?.trim() || undefined,
           customerType: data.customerType,
+          planType: data.planType,
           notes: data.notes?.trim() || undefined,
         });
       }
