@@ -1,14 +1,22 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { CreditCard, CheckCircle, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CreditCard, CheckCircle, XCircle, Filter } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import { PageHeader } from "@/components/shared/page-header";
 import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { formatDate } from "@/lib/formatters";
+import {
+  PLAN_TYPES,
+  PLAN_TYPE_LABELS,
+  getPlanTypeLabel,
+  type PlanType,
+} from "@/lib/validation/schemas/subscription";
 
 export const Route = createFileRoute("/subscriptions")({
   component: SubscriptionsPage,
@@ -17,6 +25,14 @@ export const Route = createFileRoute("/subscriptions")({
 export default function SubscriptionsPage() {
   const { t, language, dir, lang } = useI18n();
   const { data: subscriptions, isLoading, error } = useSubscriptions();
+  const [selectedPlanType, setSelectedPlanType] = useState<PlanType | "all">("all");
+  const [showActiveOnly, setShowActiveOnly] = useState(false);
+
+  const filteredSubscriptions = subscriptions?.filter((sub) => {
+    if (selectedPlanType !== "all" && sub.planType !== selectedPlanType) return false;
+    if (showActiveOnly && !sub.isActive) return false;
+    return true;
+  });
 
   return (
     <div className="container mx-auto p-8 space-y-8" dir={dir}>
@@ -24,6 +40,48 @@ export default function SubscriptionsPage() {
         title={t("subscriptions").title[language]}
         subtitle={t("subscriptions").subtitle[language]}
       />
+
+      {/* Filters */}
+      <Card className="border-2 shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Filter className="h-4 w-4" />
+              {lang("فلترة:", "Filter:")}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={selectedPlanType === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedPlanType("all")}
+              >
+                {lang("الكل", "All")}
+              </Button>
+              {PLAN_TYPES.map((type) => (
+                <Button
+                  key={type}
+                  variant={selectedPlanType === type ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedPlanType(type)}
+                >
+                  {PLAN_TYPE_LABELS[type][language]}
+                </Button>
+              ))}
+            </div>
+
+            <div className="ms-auto">
+              <Button
+                variant={showActiveOnly ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowActiveOnly(!showActiveOnly)}
+              >
+                {lang("النشطة فقط", "Active Only")}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
@@ -33,22 +91,23 @@ export default function SubscriptionsPage() {
                 {lang("الاشتراكات النشطة", "Active Subscriptions")}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4">
               {isLoading ? (
                 <LoadingState type="table" count={5} />
               ) : error ? (
                 <EmptyState
                   icon={CreditCard}
                   title={lang("خطأ في تحميل البيانات", "Error loading data")}
+                  description={String(error)}
                 />
-              ) : !subscriptions?.length ? (
+              ) : !filteredSubscriptions?.length ? (
                 <EmptyState
                   icon={CreditCard}
-                  title={lang("لا توجد اشتراكات نشطة", "No active subscriptions")}
+                  title={lang("لا توجد اشتراكات", "No subscriptions found")}
                 />
               ) : (
                 <div className="space-y-3">
-                  {subscriptions.map((sub) => (
+                  {filteredSubscriptions.map((sub) => (
                     <Card key={sub.id} className="border-2 hover:shadow-md transition-all">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between gap-4">
@@ -74,8 +133,16 @@ export default function SubscriptionsPage() {
                                   variant={sub.isActive ? "default" : "secondary"}
                                   className="text-[10px] font-bold px-2 py-0.5"
                                 >
-                                  {sub.planType}
+                                  {getPlanTypeLabel(sub.planType as PlanType, language)}
                                 </Badge>
+                                {!sub.isActive && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-[10px] text-muted-foreground"
+                                  >
+                                    {lang("منتهي", "Expired")}
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           </div>

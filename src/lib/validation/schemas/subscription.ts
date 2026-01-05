@@ -7,7 +7,7 @@ import { z } from "zod";
 /**
  * Subscription plan types
  */
-export const PLAN_TYPES = ["weekly", "half-monthly", "monthly", "quarterly", "yearly"] as const;
+export const PLAN_TYPES = ["weekly", "half-monthly", "monthly"] as const;
 export type PlanType = (typeof PLAN_TYPES)[number];
 
 /**
@@ -17,8 +17,6 @@ export const PLAN_TYPE_LABELS: Record<PlanType, { ar: string; en: string; days: 
   weekly: { ar: "أسبوعي", en: "Weekly", days: 7 },
   "half-monthly": { ar: "نصف شهري", en: "Half Monthly", days: 15 },
   monthly: { ar: "شهري", en: "Monthly", days: 30 },
-  quarterly: { ar: "ربع سنوي", en: "Quarterly", days: 90 },
-  yearly: { ar: "سنوي", en: "Yearly", days: 365 },
 };
 
 /**

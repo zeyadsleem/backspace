@@ -2,17 +2,7 @@ import * as React from "react";
 import { useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import {
-  LayoutDashboard,
-  Users,
-  MapPin,
-  Clock,
-  Package,
-  Receipt,
-  CreditCard,
-  BarChart3,
-  Settings,
-} from "lucide-react";
+import { LayoutDashboard, Users, MapPin, Clock, Package, CreditCard, Settings } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { NavItem } from "@/components/shared/nav-item";
 import { SidebarFooter } from "@/components/shared/sidebar-footer";
@@ -27,8 +17,6 @@ const mainNavItems = [
 const secondaryNavItems = [
   { href: "/inventory", icon: Package, key: "inventory" as const },
   { href: "/subscriptions", icon: CreditCard, key: "subscriptions" as const },
-  { href: "/invoices", icon: Receipt, key: "invoices" as const },
-  { href: "/reports", icon: BarChart3, key: "reports" as const },
   { href: "/settings", icon: Settings, key: "settings" as const },
 ];
 

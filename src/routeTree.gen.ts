@@ -13,8 +13,6 @@ import { Route as SubscriptionsRouteImport } from './routes/subscriptions'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SessionsRouteImport } from './routes/sessions'
 import { Route as ResourcesRouteImport } from './routes/resources'
-import { Route as ReportsRouteImport } from './routes/reports'
-import { Route as InvoicesRouteImport } from './routes/invoices'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as CustomersRouteImport } from './routes/customers'
 import { Route as IndexRouteImport } from './routes/index'
@@ -38,16 +36,6 @@ const SessionsRoute = SessionsRouteImport.update({
 const ResourcesRoute = ResourcesRouteImport.update({
   id: '/resources',
   path: '/resources',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsRoute = ReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InvoicesRoute = InvoicesRouteImport.update({
-  id: '/invoices',
-  path: '/invoices',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InventoryRoute = InventoryRouteImport.update({
@@ -75,8 +63,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/customers': typeof CustomersRouteWithChildren
   '/inventory': typeof InventoryRoute
-  '/invoices': typeof InvoicesRoute
-  '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/sessions': typeof SessionsRoute
   '/settings': typeof SettingsRoute
@@ -87,8 +73,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/customers': typeof CustomersRouteWithChildren
   '/inventory': typeof InventoryRoute
-  '/invoices': typeof InvoicesRoute
-  '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/sessions': typeof SessionsRoute
   '/settings': typeof SettingsRoute
@@ -100,8 +84,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/customers': typeof CustomersRouteWithChildren
   '/inventory': typeof InventoryRoute
-  '/invoices': typeof InvoicesRoute
-  '/reports': typeof ReportsRoute
   '/resources': typeof ResourcesRoute
   '/sessions': typeof SessionsRoute
   '/settings': typeof SettingsRoute
@@ -114,8 +96,6 @@ export interface FileRouteTypes {
     | '/'
     | '/customers'
     | '/inventory'
-    | '/invoices'
-    | '/reports'
     | '/resources'
     | '/sessions'
     | '/settings'
@@ -126,8 +106,6 @@ export interface FileRouteTypes {
     | '/'
     | '/customers'
     | '/inventory'
-    | '/invoices'
-    | '/reports'
     | '/resources'
     | '/sessions'
     | '/settings'
@@ -138,8 +116,6 @@ export interface FileRouteTypes {
     | '/'
     | '/customers'
     | '/inventory'
-    | '/invoices'
-    | '/reports'
     | '/resources'
     | '/sessions'
     | '/settings'
@@ -151,8 +127,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CustomersRoute: typeof CustomersRouteWithChildren
   InventoryRoute: typeof InventoryRoute
-  InvoicesRoute: typeof InvoicesRoute
-  ReportsRoute: typeof ReportsRoute
   ResourcesRoute: typeof ResourcesRoute
   SessionsRoute: typeof SessionsRoute
   SettingsRoute: typeof SettingsRoute
@@ -187,20 +161,6 @@ declare module '@tanstack/react-router' {
       path: '/resources'
       fullPath: '/resources'
       preLoaderRoute: typeof ResourcesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reports': {
-      id: '/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof ReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/invoices': {
-      id: '/invoices'
-      path: '/invoices'
-      fullPath: '/invoices'
-      preLoaderRoute: typeof InvoicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/inventory': {
@@ -250,8 +210,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CustomersRoute: CustomersRouteWithChildren,
   InventoryRoute: InventoryRoute,
-  InvoicesRoute: InvoicesRoute,
-  ReportsRoute: ReportsRoute,
   ResourcesRoute: ResourcesRoute,
   SessionsRoute: SessionsRoute,
   SettingsRoute: SettingsRoute,

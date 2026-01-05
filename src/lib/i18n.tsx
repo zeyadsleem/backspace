@@ -10,8 +10,6 @@ export interface Translations {
     sessions: { ar: string; en: string; desc: { ar: string; en: string } };
     inventory: { ar: string; en: string; desc: { ar: string; en: string } };
     subscriptions: { ar: string; en: string; desc: { ar: string; en: string } };
-    invoices: { ar: string; en: string; desc: { ar: string; en: string } };
-    reports: { ar: string; en: string; desc: { ar: string; en: string } };
     settings: { ar: string; en: string; desc: { ar: string; en: string } };
   };
   main: {
@@ -47,7 +45,6 @@ export interface Translations {
     profile: { ar: string; en: string };
     overview: { ar: string; en: string };
     sessions: { ar: string; en: string };
-    invoices: { ar: string; en: string };
     subscription: { ar: string; en: string };
     member_since: { ar: string; en: string };
     this_month: { ar: string; en: string };
@@ -112,49 +109,6 @@ export interface Translations {
     valid_until: { ar: string; en: string };
     current_subscription: { ar: string; en: string };
     type: { ar: string; en: string };
-  };
-  invoices: {
-    title: { ar: string; en: string };
-    subtitle: { ar: string; en: string };
-    create: { ar: string; en: string };
-    all_invoices: { ar: string; en: string };
-    customer: { ar: string; en: string };
-    amount: { ar: string; en: string };
-    status: { ar: string; en: string };
-    due_date: { ar: string; en: string };
-    paid_date: { ar: string; en: string };
-    items: { ar: string; en: string };
-    description: { ar: string; en: string };
-    quantity: { ar: string; en: string };
-    unit_price: { ar: string; en: string };
-    total: { ar: string; en: string };
-    mark_as_paid: { ar: string; en: string };
-    print: { ar: string; en: string };
-  };
-  reports: {
-    title: { ar: string; en: string };
-    subtitle: { ar: string; en: string };
-    export_report: { ar: string; en: string };
-    overview: { ar: string; en: string };
-    revenue: { ar: string; en: string };
-    customers: { ar: string; en: string };
-    usage: { ar: string; en: string };
-    total_revenue: { ar: string; en: string };
-    total_sessions: { ar: string; en: string };
-    active_customers: { ar: string; en: string };
-    average_session: { ar: string; en: string };
-    per_session: { ar: string; en: string };
-    revenue_by_period: { ar: string; en: string };
-    period: { ar: string; en: string };
-    session_count: { ar: string; en: string };
-    customer_count: { ar: string; en: string };
-    avg_per_session: { ar: string; en: string };
-    revenue_trends: { ar: string; en: string };
-    top_customers: { ar: string; en: string };
-    total_spent: { ar: string; en: string };
-    rank: { ar: string; en: string };
-    resource_utilization: { ar: string; en: string };
-    utilization_percent: { ar: string; en: string };
   };
   settings: {
     title: { ar: string; en: string };
@@ -303,16 +257,6 @@ function getTranslations(_language: Language): Translations {
         en: "Subscriptions",
         desc: { ar: "إدارة خطط الاشتراك والتعيينات", en: "Manage subscription plans" },
       },
-      invoices: {
-        ar: "الفواتير",
-        en: "Invoices",
-        desc: { ar: "إدارة الفواتير والمدفوعات", en: "Manage invoices and payments" },
-      },
-      reports: {
-        ar: "التقارير",
-        en: "Reports",
-        desc: { ar: "التحليلات ورؤى الأعمال", en: "Analytics and business insights" },
-      },
       settings: {
         ar: "الإعدادات",
         en: "Settings",
@@ -352,7 +296,6 @@ function getTranslations(_language: Language): Translations {
       profile: { ar: "ملف العميل", en: "Customer Profile" },
       overview: { ar: "نظرة عامة", en: "Overview" },
       sessions: { ar: "الجلسات", en: "Sessions" },
-      invoices: { ar: "الفواتير", en: "Invoices" },
       subscription: { ar: "الاشتراك", en: "Subscription" },
       member_since: { ar: "عميل منذ", en: "Member since" },
       this_month: { ar: "هذا الشهر", en: "This month" },
@@ -424,49 +367,6 @@ function getTranslations(_language: Language): Translations {
       current_subscription: { ar: "الاشتراك الحالي", en: "Current Subscription" },
       type: { ar: "النوع", en: "Type" },
     },
-    invoices: {
-      title: { ar: "الفواتير", en: "Invoices" },
-      subtitle: { ar: "إدارة الفواتير والمدفوعات", en: "Manage invoices and payments" },
-      create: { ar: "إنشاء فاتورة", en: "Create Invoice" },
-      all_invoices: { ar: "جميع الفواتير", en: "All Invoices" },
-      customer: { ar: "العميل", en: "Customer" },
-      amount: { ar: "المبلغ", en: "Amount" },
-      status: { ar: "الحالة", en: "Status" },
-      due_date: { ar: "تاريخ الاستحقاق", en: "Due Date" },
-      paid_date: { ar: "تاريخ الدفع", en: "Paid Date" },
-      items: { ar: "العناصر", en: "Items" },
-      description: { ar: "الوصف", en: "Description" },
-      quantity: { ar: "الكمية", en: "Quantity" },
-      unit_price: { ar: "سعر الوحدة", en: "Unit Price" },
-      total: { ar: "الإجمالي", en: "Total" },
-      mark_as_paid: { ar: "وضع علامة تم الدفع", en: "Mark as Paid" },
-      print: { ar: "طباعة", en: "Print" },
-    },
-    reports: {
-      title: { ar: "التقارير", en: "Reports" },
-      subtitle: { ar: "التحليلات ورؤى الأعمال", en: "Analytics and business insights" },
-      export_report: { ar: "تصدير التقرير", en: "Export Report" },
-      overview: { ar: "نظرة عامة", en: "Overview" },
-      revenue: { ar: "الإيرادات", en: "Revenue" },
-      customers: { ar: "العملاء", en: "Customers" },
-      usage: { ar: "الاستخدام", en: "Usage" },
-      total_revenue: { ar: "إجمالي الإيرادات", en: "Total Revenue" },
-      total_sessions: { ar: "إجمالي الجلسات", en: "Total Sessions" },
-      active_customers: { ar: "العملاء النشطين", en: "Active Customers" },
-      average_session: { ar: "متوسط الجلسة", en: "Average Session" },
-      per_session: { ar: "لكل جلسة", en: "Per session" },
-      revenue_by_period: { ar: "الإيرادات حسب الفترة", en: "Revenue by Period" },
-      period: { ar: "الفترة", en: "Period" },
-      session_count: { ar: "الجلسات", en: "Sessions" },
-      customer_count: { ar: "العملاء", en: "Customers" },
-      avg_per_session: { ar: "متوسط/جلسة", en: "Avg/Session" },
-      revenue_trends: { ar: "اتجاهات الإيرادات", en: "Revenue Trends" },
-      top_customers: { ar: "أفضل العملاء", en: "Top Customers" },
-      total_spent: { ar: "إجمالي المصروف", en: "Total Spent" },
-      rank: { ar: "الترتيب", en: "Rank" },
-      resource_utilization: { ar: "استخدام الموارد", en: "Resource Utilization" },
-      utilization_percent: { ar: "الاستخدام", en: "Utilization" },
-    },
     settings: {
       title: { ar: "الإعدادات", en: "Settings" },
       subtitle: { ar: "إعداد مساحة العمل", en: "Configure your workspace" },
@@ -502,8 +402,8 @@ function getTranslations(_language: Language): Translations {
       },
       payment_reminders: { ar: "تذكيرات الدفع", en: "Payment Reminders" },
       payment_reminders_cash: {
-        ar: "تذكير العملاء بالفواتير غير المدفوعة (دفع كاش فقط)",
-        en: "Remind customers of unpaid invoices (Cash payments only)",
+        ar: "تذكير العملاء بالمدفوعات المستحقة (دفع كاش فقط)",
+        en: "Remind customers of outstanding payments (Cash payments only)",
       },
       stock_alerts: { ar: "تنبيهات المخزون", en: "Stock Alerts" },
       stock_alerts_desc: {

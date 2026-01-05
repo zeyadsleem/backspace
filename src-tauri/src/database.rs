@@ -111,10 +111,30 @@ fn create_tables(conn: &Connection) -> Result<()> {
             end_date TEXT,
             hours_allowance INTEGER,
             is_active INTEGER NOT NULL DEFAULT 1,
+            created_at TEXT NOT NULL,
             FOREIGN KEY (customer_id) REFERENCES customers(id)
         )",
         [],
     )?;
+
+    // Migration: Add created_at column if it doesn't exist
+    let has_created_at: bool = conn
+        .prepare("SELECT COUNT(*) FROM pragma_table_info('subscriptions') WHERE name='created_at'")
+        .and_then(|mut stmt| stmt.query_row([], |row| row.get::<_, i32>(0)))
+        .map(|count| count > 0)
+        .unwrap_or(false);
+    
+    if !has_created_at {
+        let _ = conn.execute(
+            "ALTER TABLE subscriptions ADD COLUMN created_at TEXT NOT NULL DEFAULT ''",
+            [],
+        );
+        // Update existing rows with current timestamp
+        let _ = conn.execute(
+            "UPDATE subscriptions SET created_at = datetime('now') WHERE created_at = ''",
+            [],
+        );
+    }
 
     conn.execute(
         "CREATE TABLE IF NOT EXISTS invoices (

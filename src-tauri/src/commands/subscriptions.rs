@@ -45,9 +45,9 @@ fn validate_subscription_data(data: &CreateSubscription) -> Result<(), String> {
     }
 
     // Validate plan_type
-    let valid_plans = ["weekly", "half-monthly", "monthly", "quarterly", "yearly"];
+    let valid_plans = ["weekly", "half-monthly", "monthly"];
     if !valid_plans.contains(&data.plan_type.as_str()) {
-        return Err("Invalid plan type. Must be: weekly, half-monthly, monthly, quarterly, or yearly".to_string());
+        return Err("Invalid plan type. Must be: weekly, half-monthly, or monthly".to_string());
     }
 
     // Validate start_date format (basic check)
@@ -70,9 +70,9 @@ fn validate_subscription_data(data: &CreateSubscription) -> Result<(), String> {
 
 fn validate_update_subscription_data(data: &UpdateSubscription) -> Result<(), String> {
     if let Some(plan_type) = &data.plan_type {
-        let valid_plans = ["weekly", "half-monthly", "monthly", "quarterly", "yearly"];
+        let valid_plans = ["weekly", "half-monthly", "monthly"];
         if !valid_plans.contains(&plan_type.as_str()) {
-            return Err("Invalid plan type. Must be: weekly, half-monthly, monthly, quarterly, or yearly".to_string());
+            return Err("Invalid plan type. Must be: weekly, half-monthly, or monthly".to_string());
         }
     }
 

@@ -29,7 +29,7 @@ import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatCard } from "@/components/stat-card";
 import { useCustomers } from "@/hooks/use-customers";
-import { CustomerQuickViewDialog } from "@/components/customers/customer-quick-view-dialog";
+import { CustomerViewDialog } from "@/components/customers/customer-view-dialog";
 import { getInitials, formatDate, getCustomerTypeLabel } from "@/lib/formatters";
 
 export const Route = createFileRoute("/customers")({
@@ -166,7 +166,7 @@ export default function CustomersPage() {
                 {filteredCustomers.map((customer) => (
                   <TableRow key={customer.id}>
                     <TableCell className={dir === "rtl" ? "text-right" : "text-left"}>
-                      <CustomerQuickViewDialog
+                      <CustomerViewDialog
                         customerId={customer.id}
                         trigger={
                           <div className={`flex gap-3 ${dir === "rtl" ? "flex-row" : ""}`}>
