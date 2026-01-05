@@ -231,7 +231,7 @@ export function CustomerForm({
         onOpenChange(open);
       }}
     >
-      <DialogContent className="sm:max-w-2xl" dir={dir}>
+      <DialogContent className="sm:max-w-2xl min-h-[580px]" dir={dir}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
             <User className="h-5 w-5" />
@@ -268,7 +268,7 @@ export function CustomerForm({
             </TabsList>
           )}
 
-          <TabsContent value="visitor" className="mt-6">
+          <TabsContent value="visitor" className="mt-6 min-h-[400px]">
             {step === 2 && (
               <form
                 onSubmit={(e) => {
@@ -307,14 +307,14 @@ export function CustomerForm({
             )}
           </TabsContent>
 
-          <TabsContent value="member" className="mt-6">
+          <TabsContent value="member" className="mt-6 min-h-[400px]">
             {step === 1 && mode === "create" ? (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {PLAN_TYPES.map((planType) => (
                     <Card
                       key={planType}
-                      className={`cursor-pointer transition-all hover:shadow-lg ${
+                      className={`cursor-pointer hover:shadow-lg ${
                         selectedPlanType === planType
                           ? "ring-2 ring-primary shadow-lg"
                           : "hover:border-primary"
