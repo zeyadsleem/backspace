@@ -1,4 +1,5 @@
 use crate::database::DbConn;
+use crate::validation::{validate_egyptian_phone, validate_email, normalize_phone};
 use serde::{Deserialize, Serialize};
 use tauri::State;
 use rusqlite::params;
@@ -42,41 +43,46 @@ fn validate_customer_data(data: &CreateCustomer) -> Result<(), String> {
     // Validate name
     let name = data.name.trim();
     if name.len() < 2 {
-        return Err("Name must be at least 2 characters".to_string());
+        return Err("الاسم يجب أن يكون حرفين على الأقل | Name must be at least 2 characters".to_string());
     }
     if name.len() > 100 {
-        return Err("Name is too long (max 100 characters)".to_string());
+        return Err("الاسم طويل جداً | Name is too long (max 100 characters)".to_string());
     }
 
-    // Validate phone
-    let phone = data.phone.trim();
-    if phone.len() < 10 {
-        return Err("Phone must be at least 10 digits".to_string());
-    }
-    if phone.len() > 20 {
-        return Err("Phone is too long (max 20 characters)".to_string());
-    }
-    if !phone.chars().all(|c| c.is_ascii_digit() || c == '+' || c == '-' || c == ' ') {
-        return Err("Phone contains invalid characters".to_string());
+    // Validate phone using Egyptian phone validation
+    let phone_result = validate_egyptian_phone(&data.phone);
+    if !phone_result.is_valid {
+        return Err(format!(
+            "{} | {}",
+            phone_result.error_ar.unwrap_or_default(),
+            phone_result.error.unwrap_or_default()
+        ));
     }
 
     // Validate email if provided
     if let Some(email) = &data.email {
         let email = email.trim();
-        if !email.is_empty() && !email.contains('@') {
-            return Err("Invalid email format".to_string());
+        if !email.is_empty() {
+            let email_result = validate_email(email);
+            if !email_result.is_valid {
+                return Err(format!(
+                    "{} | {}",
+                    email_result.error_ar.unwrap_or_default(),
+                    email_result.error.unwrap_or_default()
+                ));
+            }
         }
     }
 
     // Validate customer type
     if data.customer_type != "visitor" && data.customer_type != "member" {
-        return Err("Customer type must be 'visitor' or 'member'".to_string());
+        return Err("نوع العميل يجب أن يكون زائر أو مشترك | Customer type must be 'visitor' or 'member'".to_string());
     }
 
     // Validate notes if provided
     if let Some(notes) = &data.notes {
         if notes.len() > 1000 {
-            return Err("Notes are too long (max 1000 characters)".to_string());
+            return Err("الملاحظات طويلة جداً | Notes are too long (max 1000 characters)".to_string());
         }
     }
 
@@ -87,42 +93,47 @@ fn validate_update_customer_data(data: &UpdateCustomer) -> Result<(), String> {
     if let Some(name) = &data.name {
         let name = name.trim();
         if name.len() < 2 {
-            return Err("Name must be at least 2 characters".to_string());
+            return Err("الاسم يجب أن يكون حرفين على الأقل | Name must be at least 2 characters".to_string());
         }
         if name.len() > 100 {
-            return Err("Name is too long (max 100 characters)".to_string());
+            return Err("الاسم طويل جداً | Name is too long (max 100 characters)".to_string());
         }
     }
 
     if let Some(phone) = &data.phone {
-        let phone = phone.trim();
-        if phone.len() < 10 {
-            return Err("Phone must be at least 10 digits".to_string());
-        }
-        if phone.len() > 20 {
-            return Err("Phone is too long (max 20 characters)".to_string());
-        }
-        if !phone.chars().all(|c| c.is_ascii_digit() || c == '+' || c == '-' || c == ' ') {
-            return Err("Phone contains invalid characters".to_string());
+        let phone_result = validate_egyptian_phone(phone);
+        if !phone_result.is_valid {
+            return Err(format!(
+                "{} | {}",
+                phone_result.error_ar.unwrap_or_default(),
+                phone_result.error.unwrap_or_default()
+            ));
         }
     }
 
     if let Some(email) = &data.email {
         let email = email.trim();
-        if !email.is_empty() && !email.contains('@') {
-            return Err("Invalid email format".to_string());
+        if !email.is_empty() {
+            let email_result = validate_email(email);
+            if !email_result.is_valid {
+                return Err(format!(
+                    "{} | {}",
+                    email_result.error_ar.unwrap_or_default(),
+                    email_result.error.unwrap_or_default()
+                ));
+            }
         }
     }
 
     if let Some(customer_type) = &data.customer_type {
         if customer_type != "visitor" && customer_type != "member" {
-            return Err("Customer type must be 'visitor' or 'member'".to_string());
+            return Err("نوع العميل يجب أن يكون زائر أو مشترك | Customer type must be 'visitor' or 'member'".to_string());
         }
     }
 
     if let Some(notes) = &data.notes {
         if notes.len() > 1000 {
-            return Err("Notes are too long (max 1000 characters)".to_string());
+            return Err("الملاحظات طويلة جداً | Notes are too long (max 1000 characters)".to_string());
         }
     }
 
@@ -215,7 +226,9 @@ pub fn create_customer(state: State<DbConn>, data: CreateCustomer) -> Result<Cus
     
     // Trim and sanitize data
     let name = data.name.trim().to_string();
-    let phone = data.phone.trim().to_string();
+    // Normalize phone to +20 format
+    let phone_result = validate_egyptian_phone(&data.phone);
+    let phone = phone_result.normalized.unwrap_or_else(|| normalize_phone(&data.phone));
     let email = data.email.as_ref().map(|e| e.trim().to_string()).filter(|e| !e.is_empty());
     let notes = data.notes.as_ref().map(|n| n.trim().to_string()).filter(|n| !n.is_empty());
     

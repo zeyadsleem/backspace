@@ -41,16 +41,17 @@ export function DeleteConfirmDialog({
             {Icon && <Icon className="h-5 w-5 text-destructive" />}
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-sm">
-            {description}
-          </AlertDialogDescription>
+          <AlertDialogDescription className="text-sm">{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2">
           <AlertDialogCancel disabled={isLoading} className="h-9">
             {language === "ar" ? "إلغاء" : "Cancel"}
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
             disabled={isLoading}
             className="h-9 bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
           >

@@ -20,7 +20,7 @@ interface ResourceActionsProps {
 }
 
 export function ResourceActions({ resource }: ResourceActionsProps) {
-  const { language, dir, lang } = useI18n();
+  const { dir, lang } = useI18n();
   const queryClient = useQueryClient();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);

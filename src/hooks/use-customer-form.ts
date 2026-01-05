@@ -1,19 +1,22 @@
 import { useForm } from "@tanstack/react-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { z } from "zod";
 import { toast } from "sonner";
 import { api, type Customer, type CreateCustomer } from "@/lib/tauri-api";
 import { useI18n } from "@/lib/i18n";
+import {
+  createCustomerSchema,
+  updateCustomerSchema,
+  getValidationErrors,
+} from "@/lib/validation/schemas/customer";
+import { validateEgyptianPhone, normalizePhone } from "@/lib/validation/validators/egyptian-phone";
 
-const customerSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
-  phone: z.string().min(10, "Phone must be at least 10 digits").max(20, "Phone is too long"),
-  email: z.string().email("Invalid email format").optional().or(z.literal("")),
-  customerType: z.enum(["visitor", "member"]),
-  notes: z.string().max(1000, "Notes are too long").optional(),
-});
-
-type CustomerFormData = z.infer<typeof customerSchema>;
+type CustomerFormData = {
+  name: string;
+  phone: string;
+  email: string;
+  customerType: "visitor" | "member";
+  notes: string;
+};
 
 export function useCustomerForm(
   customer?: Customer,
@@ -30,36 +33,29 @@ export function useCustomerForm(
       email: customer?.email ?? "",
       customerType: (customer?.customerType ?? "visitor") as "visitor" | "member",
       notes: customer?.notes ?? "",
-    },
-    validators: {
-      onChange: ({ value }) => {
-        const result = customerSchema.safeParse(value);
-        if (!result.success) {
-          const fieldErrors: Record<string, string> = {};
-          for (const issue of result.error.issues) {
-            const path = issue.path.join(".");
-            fieldErrors[path] = issue.message;
-          }
-          return fieldErrors;
-        }
-        return undefined;
-      },
-    },
+    } as CustomerFormData,
     onSubmit: async ({ value }) => {
-      const result = customerSchema.safeParse(value);
+      const schema = mode === "create" ? createCustomerSchema : updateCustomerSchema;
+      const result = schema.safeParse(value);
       if (!result.success) {
-        toast.error(language === "ar" ? "يرجى تصحيح الأخطاء" : "Please fix the errors");
+        const errors = getValidationErrors(result);
+        const firstError = Object.values(errors)[0];
+        toast.error(firstError);
         return;
       }
-      mutation.mutate(result.data);
+      mutation.mutate(value);
     },
   });
 
   const mutation = useMutation({
     mutationFn: async (data: CustomerFormData) => {
+      // Normalize phone number
+      const phoneResult = validateEgyptianPhone(data.phone);
+      const normalizedPhone = phoneResult.normalized || normalizePhone(data.phone);
+
       const createData: CreateCustomer = {
         name: data.name.trim(),
-        phone: data.phone.trim(),
+        phone: normalizedPhone,
         email: data.email?.trim() || undefined,
         customerType: data.customerType,
         notes: data.notes?.trim() || undefined,
@@ -70,7 +66,7 @@ export function useCustomerForm(
       } else {
         return api.customers.update(customer!.id, {
           name: data.name.trim(),
-          phone: data.phone.trim(),
+          phone: normalizedPhone,
           email: data.email?.trim() || undefined,
           customerType: data.customerType,
           notes: data.notes?.trim() || undefined,
@@ -102,5 +98,5 @@ export function useCustomerForm(
     },
   });
 
-  return { form, mutation, customerSchema };
+  return { form, mutation, createCustomerSchema, validateEgyptianPhone };
 }

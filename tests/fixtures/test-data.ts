@@ -13,7 +13,7 @@ type TestFixtures = {
 };
 
 export const test = base.extend<TestFixtures>({
-  customerData: async ({}, use) => {
+  customerData: async (_, use) => {
     const timestamp = Date.now();
     const data: CustomerData = {
       name: `Test Customer ${timestamp}`,

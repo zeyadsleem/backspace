@@ -2,8 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { CreditCard, CheckCircle, XCircle, Clock } from "lucide-react";
+import { CreditCard, CheckCircle, XCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useSubscriptions } from "@/hooks/use-subscriptions";
 import { PageHeader } from "@/components/shared/page-header";
@@ -19,49 +18,6 @@ export default function SubscriptionsPage() {
   const { t, language, dir, lang } = useI18n();
   const { data: subscriptions, isLoading, error } = useSubscriptions();
 
-  const subscriptionTypes = [
-    {
-      id: "weekly",
-      name: lang("أسبوعي", "Weekly"),
-      duration: lang("7 أيام", "7 days"),
-      price: 300,
-      hoursPerDay: 4,
-      icon: CreditCard,
-    },
-    {
-      id: "half-monthly",
-      name: lang("نصف شهر", "Half Month"),
-      duration: lang("15 يوم", "15 days"),
-      price: 500,
-      hoursPerDay: 5,
-      icon: CreditCard,
-    },
-    {
-      id: "monthly",
-      name: lang("شهري", "Monthly"),
-      duration: lang("30 يوم", "30 days"),
-      price: 800,
-      hoursPerDay: 6,
-      icon: CreditCard,
-    },
-    {
-      id: "quarterly",
-      name: lang("ربع سنوي", "Quarterly"),
-      duration: lang("90 يوم", "90 days"),
-      price: 2000,
-      hoursPerDay: 8,
-      icon: CreditCard,
-    },
-    {
-      id: "yearly",
-      name: lang("سنوي", "Yearly"),
-      duration: lang("365 يوم", "365 days"),
-      price: 7000,
-      hoursPerDay: 10,
-      icon: CreditCard,
-    },
-  ];
-
   return (
     <div className="container mx-auto p-8 space-y-8" dir={dir}>
       <PageHeader
@@ -71,59 +27,6 @@ export default function SubscriptionsPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="border-2 shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base font-extrabold flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-primary" />
-                {lang("أنواع الاشتراكات", "Subscription Types")}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {subscriptionTypes.map((type) => (
-                  <Card
-                    key={type.id}
-                    className="hover:shadow-lg hover:border-primary/30 hover:scale-[1.02] transition-all duration-200 border-2 cursor-pointer group"
-                  >
-                    <CardHeader className="space-y-2 pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                          <type.icon className="h-5 w-5 text-primary" />
-                        </div>
-                        <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5">
-                          {type.duration}
-                        </Badge>
-                      </div>
-                      <CardTitle className="text-lg font-bold">{type.name}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-0 space-y-3">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-extrabold text-primary">
-                          ج.م {type.price}
-                        </span>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">
-                            {lang("أقصى", "Max")} {type.hoursPerDay} {lang("ساعة/يوم", "hours/day")}
-                          </span>
-                        </div>
-                        <Button
-                          variant="outline"
-                          className="w-full h-9 font-bold"
-                          onClick={() => {}}
-                        >
-                          {lang("عرض التفاصيل", "View Details")}
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
           <Card className="border-2 shadow-sm">
             <CardHeader className="pb-3 border-b">
               <CardTitle className="text-sm font-extrabold">

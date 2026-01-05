@@ -1,5 +1,7 @@
 mod database;
 mod commands;
+mod error;
+mod validation;
 
 use database::DbConn;
 use tauri::Manager;

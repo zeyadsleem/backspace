@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { useInventory } from "@/hooks/use-inventory";
 import { PageHeader } from "@/components/shared/page-header";
 import { LoadingState } from "@/components/shared/loading-state";
 import { EmptyState } from "@/components/shared/empty-state";
+import { InventoryForm } from "@/components/inventory/inventory-form";
 
 export const Route = createFileRoute("/inventory")({
   component: InventoryPage,
@@ -24,6 +26,7 @@ export const Route = createFileRoute("/inventory")({
 export default function InventoryPage() {
   const { t, language, dir, lang } = useI18n();
   const { data: inventory, isLoading, error } = useInventory();
+  const [formOpen, setFormOpen] = useState(false);
 
   return (
     <div className="container mx-auto p-8 space-y-8" dir={dir}>
@@ -31,7 +34,7 @@ export default function InventoryPage() {
         title={t("inventory").title[language]}
         subtitle={t("inventory").subtitle[language]}
         action={
-          <Button size="default">
+          <Button size="default" onClick={() => setFormOpen(true)}>
             <Plus className="h-4 w-4" />
             {t("inventory").add_item[language]}
           </Button>
@@ -112,6 +115,8 @@ export default function InventoryPage() {
           )}
         </CardContent>
       </Card>
+
+      <InventoryForm open={formOpen} onOpenChange={setFormOpen} />
     </div>
   );
 }

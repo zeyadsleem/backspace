@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,11 +11,16 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { User, Phone, Mail, FileText, Check } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { User, Phone, Mail, FileText, Check, AlertCircle } from "lucide-react";
 import { FormField } from "@/components/shared/form-field";
 import { CustomerSuccessDialog } from "./customer-success-dialog";
 import { useCustomerForm } from "@/hooks/use-customer-form";
 import { useI18n } from "@/lib/i18n";
+import {
+  validateEgyptianPhone,
+  formatEgyptianPhone,
+} from "@/lib/validation/validators/egyptian-phone";
 import type { Customer } from "@/lib/tauri-api";
 
 interface CustomerFormProps {
@@ -33,16 +38,46 @@ export function CustomerForm({
   mode = "create",
   defaultType = "visitor",
 }: CustomerFormProps) {
-  const { language, dir } = useI18n();
+  const { language, dir, lang } = useI18n();
   const [createdCustomer, setCreatedCustomer] = useState<Customer | null>(null);
   const [activeTab, setActiveTab] = useState<"visitor" | "member">(
     (customer?.customerType as "visitor" | "member") || defaultType,
   );
 
+  // Real-time validation states
+  const [phoneValidation, setPhoneValidation] = useState<{
+    isValid: boolean;
+    carrier: string | null;
+    error: string | null;
+  }>({ isValid: true, carrier: null, error: null });
+
   const { form, mutation } = useCustomerForm(
     customer,
     mode,
     mode === "create" ? setCreatedCustomer : undefined,
+  );
+
+  // Real-time phone validation
+  const handlePhoneChange = useCallback(
+    (value: string, fieldOnChange: (value: string) => void) => {
+      fieldOnChange(value);
+
+      if (!value || value.trim() === "") {
+        setPhoneValidation({ isValid: false, carrier: null, error: null });
+        return;
+      }
+
+      const result = validateEgyptianPhone(value);
+      setPhoneValidation({
+        isValid: result.isValid,
+        carrier: result.carrier,
+        error: result.isValid
+          ? null
+          : (language === "ar" ? result.error?.split("|")[0] : result.error?.split("|")[1]) ||
+            result.error,
+      });
+    },
+    [language],
   );
 
   if (createdCustomer) {
@@ -65,6 +100,94 @@ export function CustomerForm({
     form.setFieldValue("customerType", tab);
   };
 
+  const isFormValid = phoneValidation.isValid;
+
+  const renderFormContent = () => (
+    <Card>
+      <CardContent className="pt-6 space-y-4">
+        {/* Name Field */}
+        <form.Field name="name">
+          {(field) => (
+            <FormField
+              label={lang("الاسم الكامل", "Full Name")}
+              icon={User}
+              field={field}
+              required
+              placeholder={lang("أدخل اسم العميل", "Enter customer name")}
+            />
+          )}
+        </form.Field>
+
+        {/* Phone Field with Real-time Validation */}
+        <form.Field name="phone">
+          {(field) => (
+            <div className="space-y-2">
+              <FormField
+                label={lang("رقم الهاتف", "Phone Number")}
+                icon={Phone}
+                field={{
+                  ...field,
+                  handleChange: (value: string) => handlePhoneChange(value, field.handleChange),
+                }}
+                required
+                placeholder={lang("01012345678", "01012345678")}
+              />
+              {/* Phone validation feedback */}
+              {field.state.value && (
+                <div className="flex items-center gap-2 text-xs">
+                  {phoneValidation.isValid ? (
+                    <>
+                      <Check className="h-3 w-3 text-emerald-500" />
+                      <span className="text-emerald-600">
+                        {formatEgyptianPhone(field.state.value)}
+                      </span>
+                      {phoneValidation.carrier && (
+                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                          {phoneValidation.carrier}
+                        </Badge>
+                      )}
+                    </>
+                  ) : phoneValidation.error ? (
+                    <>
+                      <AlertCircle className="h-3 w-3 text-destructive" />
+                      <span className="text-destructive">{phoneValidation.error}</span>
+                    </>
+                  ) : null}
+                </div>
+              )}
+            </div>
+          )}
+        </form.Field>
+
+        {/* Email Field */}
+        <form.Field name="email">
+          {(field) => (
+            <FormField
+              label={lang("البريد الإلكتروني", "Email")}
+              icon={Mail}
+              type="email"
+              placeholder={lang("اختياري", "Optional")}
+              field={field}
+            />
+          )}
+        </form.Field>
+
+        {/* Notes Field */}
+        <form.Field name="notes">
+          {(field) => (
+            <FormField
+              label={lang("ملاحظات", "Notes")}
+              icon={FileText}
+              type="textarea"
+              placeholder={lang("أي ملاحظات إضافية...", "Any additional notes...")}
+              field={field}
+            />
+          )}
+        </form.Field>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl" dir={dir}>
@@ -72,15 +195,11 @@ export function CustomerForm({
           <DialogTitle className="flex items-center gap-2 text-xl">
             <User className="h-5 w-5" />
             {mode === "create"
-              ? language === "ar"
-                ? "إضافة عميل جديد"
-                : "Add New Customer"
-              : language === "ar"
-                ? "تعديل بيانات العميل"
-                : "Edit Customer"}
+              ? lang("إضافة عميل جديد", "Add New Customer")
+              : lang("تعديل بيانات العميل", "Edit Customer")}
           </DialogTitle>
           <DialogDescription>
-            {language === "ar" ? "أدخل بيانات العميل" : "Enter customer details"}
+            {lang("أدخل بيانات العميل", "Enter customer details")}
           </DialogDescription>
         </DialogHeader>
 
@@ -93,13 +212,13 @@ export function CustomerForm({
             <TabsTrigger value="visitor">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                {language === "ar" ? "زائر" : "Visitor"}
+                {lang("زائر", "Visitor")}
               </div>
             </TabsTrigger>
             <TabsTrigger value="member">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                {language === "ar" ? "مشترك" : "Member"}
+                {lang("مشترك", "Member")}
               </div>
             </TabsTrigger>
           </TabsList>
@@ -112,71 +231,30 @@ export function CustomerForm({
               }}
               className="space-y-4"
             >
-              <Card>
-                <CardContent className="pt-6 space-y-4">
-                  <form.Field name="name">
-                    {(field) => (
-                      <FormField
-                        label={language === "ar" ? "الاسم الكامل" : "Full Name"}
-                        icon={User}
-                        field={field}
-                        required
-                      />
-                    )}
-                  </form.Field>
-
-                  <form.Field name="phone">
-                    {(field) => (
-                      <FormField
-                        label={language === "ar" ? "رقم الهاتف" : "Phone Number"}
-                        icon={Phone}
-                        field={field}
-                        required
-                      />
-                    )}
-                  </form.Field>
-
-                  <form.Field name="email">
-                    {(field) => (
-                      <FormField
-                        label="Email"
-                        icon={Mail}
-                        type="email"
-                        placeholder={language === "ar" ? "اختياري" : "Optional"}
-                        field={field}
-                      />
-                    )}
-                  </form.Field>
-
-                  <form.Field name="notes">
-                    {(field) => (
-                      <FormField
-                        label={language === "ar" ? "ملاحظات" : "Notes"}
-                        icon={FileText}
-                        type="textarea"
-                        placeholder={
-                          language === "ar" ? "أي ملاحظات إضافية..." : "Any additional notes..."
-                        }
-                        field={field}
-                      />
-                    )}
-                  </form.Field>
-                </CardContent>
-              </Card>
+              {renderFormContent()}
 
               <DialogFooter className="gap-2">
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                   disabled={mutation.isPending}
                   className="ltr:mr-auto rtl:ml-auto"
                 >
-                  {language === "ar" ? "إلغاء" : "Cancel"}
+                  {lang("إلغاء", "Cancel")}
                 </Button>
 
-                <Button onClick={form.handleSubmit} disabled={mutation.isPending} className="gap-2">
-                  {mutation.isPending ? <Spinner className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-                  {language === "ar" ? "إنشاء الزائر" : "Create Visitor"}
+                <Button
+                  type="submit"
+                  disabled={mutation.isPending || !isFormValid}
+                  className="gap-2"
+                >
+                  {mutation.isPending ? (
+                    <Spinner className="h-4 w-4" />
+                  ) : (
+                    <Check className="h-4 w-4" />
+                  )}
+                  {lang("إنشاء الزائر", "Create Visitor")}
                 </Button>
               </DialogFooter>
             </form>
@@ -190,71 +268,30 @@ export function CustomerForm({
               }}
               className="space-y-4"
             >
-              <Card>
-                <CardContent className="pt-6 space-y-4">
-                  <form.Field name="name">
-                    {(field) => (
-                      <FormField
-                        label={language === "ar" ? "الاسم الكامل" : "Full Name"}
-                        icon={User}
-                        field={field}
-                        required
-                      />
-                    )}
-                  </form.Field>
-
-                  <form.Field name="phone">
-                    {(field) => (
-                      <FormField
-                        label={language === "ar" ? "رقم الهاتف" : "Phone Number"}
-                        icon={Phone}
-                        field={field}
-                        required
-                      />
-                    )}
-                  </form.Field>
-
-                  <form.Field name="email">
-                    {(field) => (
-                      <FormField
-                        label="Email"
-                        icon={Mail}
-                        type="email"
-                        placeholder={language === "ar" ? "اختياري" : "Optional"}
-                        field={field}
-                      />
-                    )}
-                  </form.Field>
-
-                  <form.Field name="notes">
-                    {(field) => (
-                      <FormField
-                        label={language === "ar" ? "ملاحظات" : "Notes"}
-                        icon={FileText}
-                        type="textarea"
-                        placeholder={
-                          language === "ar" ? "أي ملاحظات إضافية..." : "Any additional notes..."
-                        }
-                        field={field}
-                      />
-                    )}
-                  </form.Field>
-                </CardContent>
-              </Card>
+              {renderFormContent()}
 
               <DialogFooter className="gap-2">
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                   disabled={mutation.isPending}
                   className="ltr:mr-auto rtl:ml-auto"
                 >
-                  {language === "ar" ? "إلغاء" : "Cancel"}
+                  {lang("إلغاء", "Cancel")}
                 </Button>
 
-                <Button onClick={form.handleSubmit} disabled={mutation.isPending} className="gap-2">
-                  {mutation.isPending ? <Spinner className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-                  {language === "ar" ? "إنشاء المشترك" : "Create Member"}
+                <Button
+                  type="submit"
+                  disabled={mutation.isPending || !isFormValid}
+                  className="gap-2"
+                >
+                  {mutation.isPending ? (
+                    <Spinner className="h-4 w-4" />
+                  ) : (
+                    <Check className="h-4 w-4" />
+                  )}
+                  {lang("إنشاء المشترك", "Create Member")}
                 </Button>
               </DialogFooter>
             </form>
