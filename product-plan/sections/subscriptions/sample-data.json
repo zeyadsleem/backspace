@@ -1,0 +1,74 @@
+{
+  "_meta": {
+    "models": {
+      "subscriptions": "Day-based access plans that grant customers unlimited session access for a specific period (7, 15, or 30 days)."
+    },
+    "relationships": [
+      "Each Subscription belongs to one Customer",
+      "A Customer can have multiple Subscriptions over time",
+      "Active subscriptions make session costs zero for the customer"
+    ]
+  },
+  "subscriptions": [
+    {
+      "id": "sub-001",
+      "customerId": "cust-001",
+      "customerName": "Ahmed Hassan",
+      "planType": "monthly",
+      "startDate": "2026-01-01",
+      "endDate": "2026-01-31",
+      "isActive": true,
+      "daysRemaining": 25,
+      "createdAt": "2025-12-28T10:00:00Z"
+    },
+    {
+      "id": "sub-002",
+      "customerId": "cust-002",
+      "customerName": "Sara Mohamed",
+      "planType": "weekly",
+      "startDate": "2026-01-03",
+      "endDate": "2026-01-10",
+      "isActive": true,
+      "daysRemaining": 4,
+      "createdAt": "2026-01-02T14:00:00Z"
+    },
+    {
+      "id": "sub-003",
+      "customerId": "cust-004",
+      "customerName": "Fatma Ibrahim",
+      "planType": "half-monthly",
+      "startDate": "2025-12-25",
+      "endDate": "2026-01-09",
+      "isActive": true,
+      "daysRemaining": 3,
+      "createdAt": "2025-12-24T11:00:00Z"
+    },
+    {
+      "id": "sub-004",
+      "customerId": "cust-005",
+      "customerName": "Youssef Kamal",
+      "planType": "monthly",
+      "startDate": "2025-12-15",
+      "endDate": "2026-01-14",
+      "isActive": true,
+      "daysRemaining": 8,
+      "createdAt": "2025-12-14T09:00:00Z"
+    },
+    {
+      "id": "sub-005",
+      "customerId": "cust-003",
+      "customerName": "Mohamed Ali",
+      "planType": "weekly",
+      "startDate": "2025-12-20",
+      "endDate": "2025-12-27",
+      "isActive": false,
+      "daysRemaining": 0,
+      "createdAt": "2025-12-19T16:00:00Z"
+    }
+  ],
+  "planTypes": [
+    { "id": "weekly", "labelEn": "Weekly", "labelAr": "أسبوعي", "days": 7 },
+    { "id": "half-monthly", "labelEn": "Half-Monthly", "labelAr": "نصف شهري", "days": 15 },
+    { "id": "monthly", "labelEn": "Monthly", "labelAr": "شهري", "days": 30 }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "_meta": {
+    "models": {
+      "metrics": "Key performance indicators displayed on the dashboard including revenue, session counts, and utilization rates.",
+      "revenueBreakdown": "Revenue split between session fees and inventory sales for the current period.",
+      "lowStockAlerts": "Inventory items that have fallen below their minimum stock threshold.",
+      "recentActivity": "Latest operations performed in the system for the activity feed.",
+      "revenueChart": "Historical revenue data points for the trend chart."
+    },
+    "relationships": [
+      "Metrics aggregate data from Sessions, Customers, Subscriptions, and Resources",
+      "Revenue breakdown sums Session amounts and InventoryConsumption totals",
+      "Low stock alerts reference Inventory items below their min_stock threshold",
+      "Recent activity logs reference Sessions, Invoices, and Customers"
+    ]
+  },
+  "metrics": {
+    "todayRevenue": 2450.00,
+    "sessionRevenue": 1800.00,
+    "inventoryRevenue": 650.00,
+    "activeSessions": 8,
+    "newCustomersToday": 3,
+    "activeSubscriptions": 12,
+    "resourceUtilization": 67
+  },
+  "lowStockAlerts": [
+    { "id": "inv-001", "name": "Nescafé", "quantity": 2, "minStock": 5 },
+    { "id": "inv-002", "name": "Chips (Cheese)", "quantity": 1, "minStock": 10 }
+  ],
+  "recentActivity": [
+    { "id": "act-001", "type": "session_start", "description": "Ahmed started session on Seat A3", "timestamp": "2026-01-06T14:30:00Z" },
+    { "id": "act-002", "type": "inventory_add", "description": "Coffee added to Sara's session", "timestamp": "2026-01-06T14:15:00Z" },
+    { "id": "act-003", "type": "session_end", "description": "Mohamed ended session - 150 EGP", "timestamp": "2026-01-06T14:00:00Z" },
+    { "id": "act-004", "type": "customer_new", "description": "New customer: Fatma Ali registered", "timestamp": "2026-01-06T13:45:00Z" },
+    { "id": "act-005", "type": "invoice_paid", "description": "Invoice INV-0042 marked as paid", "timestamp": "2026-01-06T13:30:00Z" }
+  ],
+  "revenueChart": [
+    { "date": "2026-01-01", "sessions": 1200, "inventory": 450 },
+    { "date": "2026-01-02", "sessions": 1450, "inventory": 520 },
+    { "date": "2026-01-03", "sessions": 980, "inventory": 380 },
+    { "date": "2026-01-04", "sessions": 1680, "inventory": 610 },
+    { "date": "2026-01-05", "sessions": 1520, "inventory": 490 },
+    { "date": "2026-01-06", "sessions": 1800, "inventory": 650 }
+  ]
+}

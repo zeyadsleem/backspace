@@ -1,13 +1,13 @@
 {
-  "$schema": "https://schema.tauri.app/config/2",
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "backspace",
   "version": "0.1.0",
-  "identifier": "com.backspace.app",
+  "identifier": "com.tauri.dev",
   "build": {
-    "frontendDist": "../dist",
-    "devUrl": "http://localhost:3001",
-    "beforeDevCommand": "bun run dev",
-    "beforeBuildCommand": "bun run build"
+    "frontendDist": "../build",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "bun dev",
+    "beforeBuildCommand": "bun build"
   },
   "app": {
     "windows": [

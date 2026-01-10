@@ -1,0 +1,95 @@
+{
+  "_meta": {
+    "models": {
+      "customers": "People who use the coworking space, either as visitors or subscribers with various plan types.",
+      "customerHistory": "Historical records of a customer's sessions, subscriptions, invoices, and inventory consumptions."
+    },
+    "relationships": [
+      "Each Customer has many Sessions (usage records)",
+      "Each Customer has many Subscriptions (access plans)",
+      "Each Customer has many Invoices (billing records)",
+      "Customer history aggregates all related records chronologically"
+    ]
+  },
+  "customers": [
+    {
+      "id": "cust-001",
+      "humanId": "C-001",
+      "name": "Ahmed Hassan",
+      "phone": "01012345678",
+      "email": "ahmed.hassan@email.com",
+      "customerType": "monthly",
+      "balance": 0,
+      "notes": "Prefers quiet area near window",
+      "createdAt": "2025-10-15T09:00:00Z",
+      "totalSessions": 45,
+      "totalSpent": 3250.00
+    },
+    {
+      "id": "cust-002",
+      "humanId": "C-002",
+      "name": "Sara Mohamed",
+      "phone": "01123456789",
+      "email": "sara.m@company.com",
+      "customerType": "weekly",
+      "balance": -50.00,
+      "notes": "",
+      "createdAt": "2025-11-20T14:30:00Z",
+      "totalSessions": 12,
+      "totalSpent": 890.00
+    },
+    {
+      "id": "cust-003",
+      "humanId": "C-003",
+      "name": "Mohamed Ali",
+      "phone": "01234567890",
+      "email": null,
+      "customerType": "visitor",
+      "balance": 25.00,
+      "notes": "Referred by Ahmed Hassan",
+      "createdAt": "2025-12-01T11:00:00Z",
+      "totalSessions": 5,
+      "totalSpent": 425.00
+    },
+    {
+      "id": "cust-004",
+      "humanId": "C-004",
+      "name": "Fatma Ibrahim",
+      "phone": "01098765432",
+      "email": "fatma.ibrahim@gmail.com",
+      "customerType": "half-monthly",
+      "balance": 0,
+      "notes": "Freelance designer, needs large desk",
+      "createdAt": "2025-12-10T16:00:00Z",
+      "totalSessions": 8,
+      "totalSpent": 620.00
+    },
+    {
+      "id": "cust-005",
+      "humanId": "C-005",
+      "name": "Youssef Kamal",
+      "phone": "01156789012",
+      "email": "y.kamal@startup.io",
+      "customerType": "monthly",
+      "balance": 150.00,
+      "notes": "Startup founder, often books meeting room",
+      "createdAt": "2025-09-05T10:00:00Z",
+      "totalSessions": 62,
+      "totalSpent": 5100.00
+    },
+    {
+      "id": "cust-006",
+      "humanId": "C-006",
+      "name": "Nour El-Din",
+      "phone": "01267890123",
+      "email": null,
+      "customerType": "visitor",
+      "balance": 0,
+      "notes": "",
+      "createdAt": "2026-01-05T13:00:00Z",
+      "totalSessions": 1,
+      "totalSpent": 75.00
+    }
+  ],
+  "customerTypes": ["visitor", "weekly", "half-monthly", "monthly"]
+}

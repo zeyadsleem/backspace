@@ -1,0 +1,82 @@
+/* Design Tokens for Backspace */
+
+:root {
+  /* Colors - Using Tailwind color names */
+  --color-primary: amber;
+  --color-secondary: emerald;
+  --color-neutral: stone;
+
+  /* Primary Color Scale (Amber) */
+  --color-primary-50: #fffbeb;
+  --color-primary-100: #fef3c7;
+  --color-primary-200: #fde68a;
+  --color-primary-300: #fcd34d;
+  --color-primary-400: #fbbf24;
+  --color-primary-500: #f59e0b;
+  --color-primary-600: #d97706;
+  --color-primary-700: #b45309;
+  --color-primary-800: #92400e;
+  --color-primary-900: #78350f;
+
+  /* Secondary Color Scale (Emerald) */
+  --color-secondary-50: #ecfdf5;
+  --color-secondary-100: #d1fae5;
+  --color-secondary-200: #a7f3d0;
+  --color-secondary-300: #6ee7b7;
+  --color-secondary-400: #34d399;
+  --color-secondary-500: #10b981;
+  --color-secondary-600: #059669;
+  --color-secondary-700: #047857;
+  --color-secondary-800: #065f46;
+  --color-secondary-900: #064e3b;
+
+  /* Neutral Color Scale (Stone) */
+  --color-neutral-50: #fafaf9;
+  --color-neutral-100: #f5f5f4;
+  --color-neutral-200: #e7e5e4;
+  --color-neutral-300: #d6d3d1;
+  --color-neutral-400: #a8a29e;
+  --color-neutral-500: #78716c;
+  --color-neutral-600: #57534e;
+  --color-neutral-700: #44403c;
+  --color-neutral-800: #292524;
+  --color-neutral-900: #1c1917;
+
+  /* Typography */
+  --font-heading: 'Noto Sans', sans-serif;
+  --font-body: 'Noto Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Spacing */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+}
+
+/* Dark Mode */
+.dark {
+  --color-neutral-50: #1c1917;
+  --color-neutral-100: #292524;
+  --color-neutral-200: #44403c;
+  --color-neutral-300: #57534e;
+  --color-neutral-400: #78716c;
+  --color-neutral-500: #a8a29e;
+  --color-neutral-600: #d6d3d1;
+  --color-neutral-700: #e7e5e4;
+  --color-neutral-800: #f5f5f4;
+  --color-neutral-900: #fafaf9;
+}

@@ -1,0 +1,52 @@
+{
+  "_meta": {
+    "models": {
+      "activeSessions": "Currently ongoing sessions with real-time tracking of elapsed time and costs.",
+      "sessionHistory": "Completed sessions with final duration, costs, and inventory consumption records.",
+      "inventoryConsumptions": "Items consumed during a session with quantity and price locked at consumption time."
+    },
+    "relationships": [
+      "Each Session belongs to one Customer and one Resource",
+      "Each Session has many InventoryConsumptions (items added during the session)",
+      "Active sessions have no ended_at timestamp",
+      "Completed sessions have duration_minutes and amount calculated"
+    ]
+  },
+  "activeSessions": [
+    {
+      "id": "sess-001",
+      "customerId": "cust-001",
+      "customerName": "Ahmed Hassan",
+      "resourceId": "res-002",
+      "resourceName": "Seat A2",
+      "resourceRate": 25.00,
+      "startedAt": "2026-01-06T12:30:00Z",
+      "isSubscribed": true,
+      "inventoryConsumptions": [
+        { "id": "cons-001", "itemName": "Coffee", "quantity": 1, "price": 15.00, "addedAt": "2026-01-06T12:45:00Z" },
+        { "id": "cons-002", "itemName": "Chips (Cheese)", "quantity": 1, "price": 10.00, "addedAt": "2026-01-06T13:30:00Z" }
+      ],
+      "inventoryTotal": 25.00
+    },
+    {
+      "id": "sess-002",
+      "customerId": "cust-003",
+      "customerName": "Mohamed Ali",
+      "resourceId": "res-005",
+      "resourceName": "Seat B2",
+      "resourceRate": 30.00,
+      "startedAt": "2026-01-06T13:00:00Z",
+      "isSubscribed": false,
+      "inventoryConsumptions": [
+        { "id": "cons-003", "itemName": "Tea", "quantity": 2, "price": 10.00, "addedAt": "2026-01-06T13:15:00Z" }
+      ],
+      "inventoryTotal": 20.00
+    }
+  ],
+  "availableInventory": [
+    { "id": "inv-001", "name": "Tea", "price": 10.00, "quantity": 25 },
+    { "id": "inv-002", "name": "Coffee", "price": 15.00, "quantity": 18 },
+    { "id": "inv-003", "name": "Nescafé", "price": 12.00, "quantity": 2 },
+    { "id": "inv-004", "name": "Pepsi", "price": 15.00, "quantity": 30 }
+  ]
+}

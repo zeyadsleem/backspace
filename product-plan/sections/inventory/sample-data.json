@@ -1,0 +1,153 @@
+{
+  "_meta": {
+    "models": {
+      "inventory": "Consumable items available for purchase during sessions, organized by category with dynamic pricing and stock tracking."
+    },
+    "relationships": [
+      "Inventory items are referenced by InventoryConsumptions when added to sessions",
+      "Price at consumption time is locked in InventoryConsumption records"
+    ]
+  },
+  "inventory": [
+    {
+      "id": "inv-001",
+      "name": "Tea",
+      "category": "beverage",
+      "price": 10.00,
+      "quantity": 25,
+      "minStock": 10,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-002",
+      "name": "Coffee",
+      "category": "beverage",
+      "price": 15.00,
+      "quantity": 18,
+      "minStock": 10,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-003",
+      "name": "Nescafé",
+      "category": "beverage",
+      "price": 12.00,
+      "quantity": 2,
+      "minStock": 5,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-004",
+      "name": "Pepsi",
+      "category": "beverage",
+      "price": 15.00,
+      "quantity": 30,
+      "minStock": 15,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-005",
+      "name": "7Up",
+      "category": "beverage",
+      "price": 15.00,
+      "quantity": 28,
+      "minStock": 15,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-006",
+      "name": "Orange Juice",
+      "category": "beverage",
+      "price": 20.00,
+      "quantity": 12,
+      "minStock": 8,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-007",
+      "name": "Water Bottle",
+      "category": "beverage",
+      "price": 5.00,
+      "quantity": 50,
+      "minStock": 20,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-008",
+      "name": "Chips (Cheese)",
+      "category": "snack",
+      "price": 10.00,
+      "quantity": 1,
+      "minStock": 10,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-009",
+      "name": "Chips (Salt)",
+      "category": "snack",
+      "price": 10.00,
+      "quantity": 15,
+      "minStock": 10,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-010",
+      "name": "Chocolate Bar",
+      "category": "snack",
+      "price": 8.00,
+      "quantity": 20,
+      "minStock": 10,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-011",
+      "name": "Biscuits Pack",
+      "category": "snack",
+      "price": 12.00,
+      "quantity": 18,
+      "minStock": 8,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-012",
+      "name": "Mixed Nuts",
+      "category": "snack",
+      "price": 25.00,
+      "quantity": 8,
+      "minStock": 5,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-013",
+      "name": "Sandwich",
+      "category": "meal",
+      "price": 25.00,
+      "quantity": 8,
+      "minStock": 5,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-014",
+      "name": "Instant Noodles",
+      "category": "meal",
+      "price": 15.00,
+      "quantity": 22,
+      "minStock": 10,
+      "createdAt": "2025-08-01T00:00:00Z"
+    },
+    {
+      "id": "inv-015",
+      "name": "Toast",
+      "category": "meal",
+      "price": 20.00,
+      "quantity": 0,
+      "minStock": 5,
+      "createdAt": "2025-08-01T00:00:00Z"
+    }
+  ],
+  "categories": [
+    { "id": "beverage", "labelEn": "Beverages", "labelAr": "مشروبات" },
+    { "id": "snack", "labelEn": "Snacks", "labelAr": "وجبات خفيفة" },
+    { "id": "meal", "labelEn": "Meals", "labelAr": "وجبات" }
+  ]
+}
