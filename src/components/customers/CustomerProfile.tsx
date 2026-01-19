@@ -11,9 +11,10 @@ interface CustomerProfileProps {
   onEdit?: () => void
   onDelete?: () => void
   onBack?: () => void
+  onViewInvoice?: (id: string) => void
 }
 
-export function CustomerProfile({ customer, invoices = [], history = [], onEdit, onDelete, onBack }: CustomerProfileProps) {
+export function CustomerProfile({ customer, invoices = [], history = [], onEdit, onDelete, onBack, onViewInvoice }: CustomerProfileProps) {
   const t = useTranslation()
   const language = useLanguage()
   const isRTL = useAppStore((state) => state.isRTL)
@@ -124,7 +125,7 @@ export function CustomerProfile({ customer, invoices = [], history = [], onEdit,
                  <div className="col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase text-end">{t('actions')}</div>
                </div>
                <div className="divide-y divide-stone-100 dark:divide-stone-800">
-                 {invoices.map(invoice => <InvoiceRow key={invoice.id} invoice={invoice} />)}
+                 {invoices.map(invoice => <InvoiceRow key={invoice.id} invoice={invoice} onView={() => onViewInvoice?.(invoice.id)} />)}
                </div>
              </div>
           ) : (

@@ -56,6 +56,7 @@ interface AppState {
   theme: ThemeOption
   language: LanguageOption
   isRTL: boolean
+  sidebarCollapsed: boolean
 }
 
 interface AppActions {
@@ -65,6 +66,7 @@ interface AppActions {
   // Theme & Language actions
   setTheme: (theme: ThemeOption) => void
   setLanguage: (language: LanguageOption) => void
+  setSidebarCollapsed: (collapsed: boolean) => void
   
   // Customer actions
   addCustomer: (customer: Omit<Customer, 'id' | 'humanId' | 'createdAt' | 'totalSessions' | 'totalSpent'>) => void
@@ -88,6 +90,7 @@ interface AppActions {
   addSubscription: (customerId: string, planType: string, startDate: string) => void
   updateSubscription: (id: string, data: Partial<Subscription>) => void
   deactivateSubscription: (id: string) => void
+  reactivateSubscription: (id: string) => void
   
   // Inventory actions
   addInventoryItem: (item: Omit<InventoryItem, 'id' | 'createdAt'>) => void
@@ -144,6 +147,7 @@ const initialState: AppState = {
   theme: 'system',
   language: 'en',
   isRTL: false,
+  sidebarCollapsed: false,
 }
 
 export const useAppStore = create<AppStore>()(
@@ -168,7 +172,7 @@ export const useAppStore = create<AppStore>()(
             timestamp: new Date().toISOString(),
           }
           state.recentActivity.unshift(activity)
-          state.recentActivity = state.recentActivity.slice(0, 20)
+          state.recentActivity = state.recentActivity.slice(0, 50)
         }))
       },
       
@@ -243,12 +247,17 @@ export const useAppStore = create<AppStore>()(
           document.body.classList.remove('rtl')
         }
       },
+
+      setSidebarCollapsed: (collapsed: boolean) => {
+        set({ sidebarCollapsed: collapsed })
+      },
       
       // Customer actions
       addCustomer: (data) => {
+        const customerId = get().generateId()
         const newCustomer: Customer = {
           ...data,
-          id: get().generateId(),
+          id: customerId,
           humanId: `C-${String(get().customers.length + 1).padStart(3, '0')}`,
           createdAt: new Date().toISOString(),
           totalSessions: 0,
@@ -257,10 +266,63 @@ export const useAppStore = create<AppStore>()(
         
         set(produce((state: AppState) => {
           state.customers.push(newCustomer)
+
+          // If the customer is a member, automatically create a subscription
+          if (data.customerType !== 'visitor') {
+            const plan = state.planTypes.find(p => p.id === data.customerType)
+            if (plan) {
+              const startDate = new Date().toISOString().split('T')[0]
+              const endDate = new Date()
+              endDate.setDate(endDate.getDate() + plan.days)
+
+              const newSubscription: Subscription = {
+                id: get().generateId(),
+                customerId: customerId,
+                customerName: data.name,
+                planType: data.customerType as any,
+                startDate,
+                endDate: endDate.toISOString().split('T')[0],
+                isActive: true,
+                status: 'active',
+                daysRemaining: plan.days,
+                createdAt: new Date().toISOString(),
+              }
+              state.subscriptions.push(newSubscription)
+
+              // Generate Invoice
+              const invoice: Invoice = {
+                id: get().generateId(),
+                invoiceNumber: `INV-${String(state.invoices.length + 1).padStart(4, '0')}`,
+                customerId: customerId,
+                customerName: data.name,
+                customerPhone: data.phone,
+                sessionId: null,
+                amount: plan.price,
+                discount: 0,
+                total: plan.price,
+                paidAmount: 0,
+                status: 'unpaid',
+                dueDate: startDate,
+                paidDate: null,
+                createdAt: new Date().toISOString(),
+                lineItems: [
+                  {
+                    description: `Subscription - ${plan.labelEn} (${plan.days} days)`,
+                    quantity: 1,
+                    rate: plan.price,
+                    amount: plan.price,
+                  }
+                ],
+                payments: [],
+              }
+              state.invoices.push(invoice)
+            }
+          }
         }))
         
         get().addActivity('customer_new', `New customer: ${data.name} registered`)
         get().updateTopCustomers()
+        get().updateDashboardMetrics()
       },
       
       updateCustomer: (id: string, data: Partial<Customer>) => {
@@ -614,6 +676,7 @@ export const useAppStore = create<AppStore>()(
           startDate,
           endDate: end.toISOString().split('T')[0],
           isActive: true,
+          status: 'active',
           daysRemaining: plan.days,
           createdAt: new Date().toISOString(),
         }
@@ -666,12 +729,20 @@ export const useAppStore = create<AppStore>()(
           if (index !== -1) {
             Object.assign(state.subscriptions[index], data)
             
-            // Recalculate days remaining if end date changes
+            // Recalculate status and days remaining
             const sub = state.subscriptions[index]
             const end = new Date(sub.endDate)
             const now = new Date()
-            const diffTime = Math.max(0, end.getTime() - now.getTime())
+            now.setHours(0, 0, 0, 0)
+            
+            const diffTime = end.getTime() - now.getTime()
             sub.daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+            
+            if (sub.isActive) {
+              sub.status = sub.daysRemaining < 0 ? 'expired' : 'active'
+            } else {
+              sub.status = 'inactive'
+            }
           }
         }))
         get().updateDashboardMetrics()
@@ -682,8 +753,64 @@ export const useAppStore = create<AppStore>()(
           const index = state.subscriptions.findIndex(s => s.id === id)
           if (index !== -1) {
             state.subscriptions[index].isActive = false
+            state.subscriptions[index].status = 'inactive'
           }
         }))
+        get().updateDashboardMetrics()
+      },
+
+      reactivateSubscription: (id: string) => {
+        set(produce((state: AppState) => {
+          const index = state.subscriptions.findIndex(s => s.id === id)
+          if (index === -1) return
+
+          const sub = state.subscriptions[index]
+          const plan = state.planTypes.find(p => p.id === sub.planType)
+          if (!plan) return
+
+          const now = new Date()
+          now.setHours(0, 0, 0, 0)
+          
+          const newStart = now.toISOString().split('T')[0]
+          const newEnd = new Date(now)
+          newEnd.setDate(newEnd.getDate() + plan.days)
+          
+          sub.startDate = newStart
+          sub.endDate = newEnd.toISOString().split('T')[0]
+          sub.daysRemaining = plan.days
+          sub.isActive = true
+          sub.status = 'active'
+
+          // Generate Renewal Invoice
+          const invoice: Invoice = {
+            id: get().generateId(),
+            invoiceNumber: `INV-${String(state.invoices.length + 1).padStart(4, '0')}`,
+            customerId: sub.customerId,
+            customerName: sub.customerName,
+            customerPhone: state.customers.find(c => c.id === sub.customerId)?.phone || '',
+            sessionId: null,
+            amount: plan.price,
+            discount: 0,
+            total: plan.price,
+            paidAmount: 0,
+            status: 'unpaid',
+            dueDate: newStart,
+            paidDate: null,
+            createdAt: new Date().toISOString(),
+            lineItems: [
+              {
+                description: `Subscription Renewal - ${plan.labelEn} (${plan.days} days)`,
+                quantity: 1,
+                rate: plan.price,
+                amount: plan.price,
+              }
+            ],
+            payments: [],
+          }
+          state.invoices.push(invoice)
+        }))
+        
+        get().addActivity('subscription_new', `Subscription renewed for ${get().subscriptions.find(s => s.id === id)?.customerName}`)
         get().updateDashboardMetrics()
       },
       
@@ -797,6 +924,7 @@ export const useAppStore = create<AppStore>()(
         theme: state.theme,
         language: state.language,
         isRTL: state.isRTL,
+        sidebarCollapsed: state.sidebarCollapsed,
       }),
     }
   )

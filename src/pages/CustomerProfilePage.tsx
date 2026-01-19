@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/stores/useAppStore'
 import { CustomerProfile } from '@/components/customers'
 import { CustomerDialog } from '@/components/customers'
+import { InvoiceDialog } from '@/components/invoices/InvoiceDialog'
 import { DeleteConfirmDialog } from '@/components/shared'
 import { useTranslation } from '@/stores/hooks'
 import type { CustomerType } from '@/types'
@@ -21,6 +22,7 @@ export function CustomerProfilePage() {
   
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null)
 
   const customer = customers.find(c => c.id === id)
   if (!customer) return <div className="p-6">{t('customerNotFound')}</div>
@@ -32,6 +34,8 @@ export function CustomerProfilePage() {
   const customerHistory = operationHistory
     .filter(op => op.customerId === id)
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    
+  const selectedInvoice = selectedInvoiceId ? invoices.find(i => i.id === selectedInvoiceId) : null
 
   const handleEdit = () => {
     setShowEditDialog(true)
@@ -66,6 +70,7 @@ export function CustomerProfilePage() {
           onEdit={handleEdit}
           onDelete={handleDelete}
           onBack={() => navigate('/customers')}
+          onViewInvoice={(id) => setSelectedInvoiceId(id)}
         />
       </div>
 
@@ -83,6 +88,14 @@ export function CustomerProfilePage() {
         onSubmit={handleUpdateCustomer}
         onClose={() => setShowEditDialog(false)}
       />
+      
+      {selectedInvoice && (
+        <InvoiceDialog
+          isOpen={!!selectedInvoice}
+          invoice={selectedInvoice}
+          onClose={() => setSelectedInvoiceId(null)}
+        />
+      )}
 
       <DeleteConfirmDialog
         isOpen={showDeleteDialog}

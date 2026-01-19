@@ -84,6 +84,8 @@ export interface CompletedSession {
 
 export type PlanType = 'weekly' | 'half-monthly' | 'monthly'
 
+export type SubscriptionStatus = 'active' | 'expired' | 'inactive'
+
 export interface Subscription {
   id: string
   customerId: string
@@ -92,6 +94,7 @@ export interface Subscription {
   startDate: string
   endDate: string
   isActive: boolean
+  status: SubscriptionStatus
   daysRemaining: number
   createdAt: string
 }

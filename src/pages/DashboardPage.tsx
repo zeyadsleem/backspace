@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Dashboard } from '@/components/dashboard'
 import { StartSessionDialog } from '@/components/sessions/StartSessionDialog'
 import { CustomerDialog } from '@/components/customers/CustomerDialog'
+import { InvoiceDialog } from '@/components/invoices/InvoiceDialog'
+import { PaymentDialog } from '@/components/invoices/PaymentDialog'
 import { useAppStore } from '@/stores/useAppStore'
 import type { CustomerType } from '@/types'
 
@@ -12,14 +14,18 @@ export function DashboardPage() {
   const navigate = useNavigate()
   const [showStartSessionDialog, setShowStartSessionDialog] = useState(false)
   const [showNewCustomerDialog, setShowNewCustomerDialog] = useState(false)
+  const [viewInvoiceId, setViewInvoiceId] = useState<string | null>(null)
+  const [paymentInvoiceId, setPaymentInvoiceId] = useState<string | null>(null)
   
   // Get data from store
   const {
     customers,
     resources,
     subscriptions,
+    invoices,
     startSession,
     addCustomer,
+    recordPayment,
     t
   } = useAppStore()
 
@@ -38,6 +44,9 @@ export function DashboardPage() {
     setShowNewCustomerDialog(false)
   }
 
+  const viewInvoice = viewInvoiceId ? invoices.find(i => i.id === viewInvoiceId) ?? null : null
+  const paymentInvoice = paymentInvoiceId ? invoices.find(i => i.id === paymentInvoiceId) ?? null : null
+
   return (
     <>
       <Dashboard
@@ -45,6 +54,7 @@ export function DashboardPage() {
         onNewCustomer={() => setShowNewCustomerDialog(true)}
         onNavigateToSection={(section) => navigate(`/${section}`)}
         onViewInventoryItem={(id) => navigate(`/inventory?highlight=${id}`)}
+        onViewInvoice={(id) => setViewInvoiceId(id)}
       />
       
       <StartSessionDialog
@@ -62,6 +72,20 @@ export function DashboardPage() {
         customerTypes={customerTypes}
         onSubmit={handleCreateCustomer}
         onClose={() => setShowNewCustomerDialog(false)}
+      />
+
+      <InvoiceDialog
+        isOpen={!!viewInvoiceId}
+        invoice={viewInvoice}
+        onClose={() => setViewInvoiceId(null)}
+        onRecordPayment={() => { setPaymentInvoiceId(viewInvoiceId); setViewInvoiceId(null) }}
+      />
+
+      <PaymentDialog
+        isOpen={!!paymentInvoiceId}
+        invoice={paymentInvoice}
+        onSubmit={(data) => { if (paymentInvoiceId) recordPayment(paymentInvoiceId, data.amount, data.method, data.date, data.notes); setPaymentInvoiceId(null) }}
+        onClose={() => setPaymentInvoiceId(null)}
       />
     </>
   )

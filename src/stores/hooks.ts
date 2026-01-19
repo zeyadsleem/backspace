@@ -29,16 +29,45 @@ export const useDashboardMetrics = (): DashboardMetrics => {
   const activeSessions = useAppStore(state => state.activeSessions)
   const subscriptions = useAppStore(state => state.subscriptions)
   const resources = useAppStore(state => state.resources)
-  const baseDashboardMetrics = useAppStore(state => state.dashboardMetrics)
+  const invoices = useAppStore(state => state.invoices)
+  const customers = useAppStore(state => state.customers)
 
-  return useMemo(() => ({
-    ...baseDashboardMetrics,
-    activeSessions: activeSessions.length,
-    activeSubscriptions: subscriptions.filter(s => s.isActive).length,
-    resourceUtilization: resources.length > 0 
-      ? Math.round((resources.filter(r => !r.isAvailable).length / resources.length) * 100) 
-      : 0,
-  }), [activeSessions.length, subscriptions, resources, baseDashboardMetrics])
+  return useMemo(() => {
+    const today = new Date().toISOString().split('T')[0]
+    
+    // Calculate today's invoices
+    const todayInvoices = invoices.filter(inv => inv.createdAt.startsWith(today))
+    
+    let sessionRev = 0
+    let inventoryRev = 0
+    
+    todayInvoices.forEach(inv => {
+      inv.lineItems.forEach(item => {
+        // Simple logic: if description contains 'Session' or 'اشتراك' or 'Subscription' it's session/service revenue
+        const desc = item.description.toLowerCase()
+        if (desc.includes('session') || desc.includes('جلسة') || desc.includes('subscription') || desc.includes('اشتراك')) {
+          sessionRev += item.amount
+        } else {
+          inventoryRev += item.amount
+        }
+      })
+    })
+
+    const todayTotal = sessionRev + inventoryRev
+    const newCustomersToday = customers.filter(c => c.createdAt.startsWith(today)).length
+
+    return {
+      todayRevenue: todayTotal,
+      sessionRevenue: sessionRev,
+      inventoryRevenue: inventoryRev,
+      activeSessions: activeSessions.length,
+      newCustomersToday,
+      activeSubscriptions: subscriptions.filter(s => s.isActive).length,
+      resourceUtilization: resources.length > 0 
+        ? Math.round((resources.filter(r => !r.isAvailable).length / resources.length) * 100) 
+        : 0,
+    }
+  }, [activeSessions.length, subscriptions, resources, invoices, customers])
 }
 
 export const useLowStockAlerts = (): LowStockAlert[] => {

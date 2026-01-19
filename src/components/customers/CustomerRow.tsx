@@ -39,10 +39,10 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <p className="font-medium text-stone-900 dark:text-stone-100 truncate">{customer.name}</p>
+            <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">{customer.name}</p>
             <span className="md:hidden text-xs font-mono text-stone-400">{customer.humanId}</span>
           </div>
-          {customer.email && <p className="text-xs text-stone-500 dark:text-stone-400 truncate">{customer.email}</p>}
+          {customer.email && <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">{customer.email}</p>}
         </div>
       </div>
       <div className="col-span-1 md:col-span-2 flex items-center">

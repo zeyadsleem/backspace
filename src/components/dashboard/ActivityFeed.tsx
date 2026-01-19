@@ -33,9 +33,9 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
   }
 
   return (
-    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl flex flex-col h-96">
+    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl flex flex-col h-full overflow-hidden">
       {/* Header - Fixed */}
-      <div className="flex-shrink-0 flex items-center gap-2 p-5 border-b border-stone-200 dark:border-stone-800">
+      <div className="flex-shrink-0 flex items-center gap-2 p-4 border-b border-stone-200 dark:border-stone-800">
         <div className="p-2 bg-stone-100 dark:bg-stone-800 rounded-lg">
           <Activity className="h-4 w-4 text-stone-600 dark:text-stone-400" />
         </div>
@@ -43,7 +43,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       </div>
       
       {/* Content - Scrollable */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin p-5">
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-4 hover:scrollbar-thumb-stone-400 transition-colors">
         <div className="space-y-3">
           {activities.length === 0 ? (
             <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-8">{t('noRecentActivity')}</p>
@@ -54,11 +54,11 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
               return (
                 <div key={activity.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors">
                   <div className={`p-1.5 rounded-lg flex-shrink-0 ${config.bg}`}>
-                    <Icon className={`h-3.5 w-3.5 ${config.color}`} />
+                    <Icon className={`h-3 w-3 ${config.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-stone-700 dark:text-stone-300 line-clamp-2">{activity.description}</p>
-                    <p className="text-xs text-stone-500 dark:text-stone-500 mt-0.5">{formatTime(activity.timestamp)}</p>
+                    <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed font-medium">{activity.description}</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-500 mt-1">{formatTime(activity.timestamp)}</p>
                   </div>
                 </div>
               )

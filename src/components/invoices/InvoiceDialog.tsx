@@ -1,7 +1,7 @@
-import type { Invoice } from '@/types'
-import { X, FileText, Calendar, User, CreditCard } from 'lucide-react'
+import type { Invoice, InvoiceStatus } from '@/types'
+import { X, FileText, CreditCard } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
-import { RTLIcon } from '@/components/ui/RTLIcon'
+import { cn } from '@/lib/utils'
 
 interface InvoiceDialogProps {
   isOpen: boolean
@@ -10,70 +10,123 @@ interface InvoiceDialogProps {
   onRecordPayment?: () => void
 }
 
+const statusConfig: Record<InvoiceStatus, { color: string; bg: string }> = {
+  paid: { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+  unpaid: { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/20' },
+  pending: { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+}
+
 export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: InvoiceDialogProps) {
   const t = useAppStore((state) => state.t)
   const isRTL = useAppStore((state) => state.isRTL)
   
   if (!isOpen || !invoice) return null
 
-  const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', { 
+    month: 'short', 
+    day: 'numeric',
+    year: 'numeric'
+  })
+  
   const formatCurrency = (amount: number) => `${amount.toLocaleString()} ${t('egpCurrency')}`
   const remainingAmount = invoice.total - invoice.paidAmount
+  const status = statusConfig[invoice.status]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative z-10 my-8 w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl dark:bg-stone-900">
-        <div className={`mb-6 flex items-center justify-between`}>
-          <div className={`flex items-center gap-3 ${isRTL ? '' : 'flex-row-reverse'}`}>
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30"><RTLIcon><FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" /></RTLIcon></div>
-            <div className={isRTL ? 'text-end' : 'text-start'}>
-              <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100 uppercase tracking-tight">{invoice.invoiceNumber}</h2>
-              <p className="text-sm text-stone-500 dark:text-stone-400">{t('createdOn')} {formatDate(invoice.createdAt)}</p>
-            </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
+      
+      <div className="relative z-10 w-full max-w-lg rounded-xl bg-white shadow-xl dark:bg-stone-900 overflow-hidden">
+        {/* Header - Simple */}
+        <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-amber-600" />
+            <span className="text-lg font-bold text-stone-900 dark:text-stone-100">{invoice.invoiceNumber}</span>
           </div>
-          <button type="button" onClick={onClose} className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300">
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className={`flex items-center gap-2 ${isRTL ? '' : 'flex-row-reverse'}`}><RTLIcon><User className="h-4 w-4 text-stone-400" /></RTLIcon><div className={isRTL ? 'text-end' : 'text-start'}><p className="text-xs text-stone-500">{t('customer')}</p><p className="font-medium text-stone-900 dark:text-stone-100">{invoice.customerName}</p></div></div>
-            <div className={`flex items-center gap-2 ${isRTL ? '' : 'flex-row-reverse'}`}><RTLIcon><Calendar className="h-4 w-4 text-stone-400" /></RTLIcon><div className={isRTL ? 'text-end' : 'text-start'}><p className="text-xs text-stone-500">{t('dueDate')}</p><p className="font-medium text-stone-900 dark:text-stone-100">{formatDate(invoice.dueDate)}</p></div></div>
-          </div>
-
-          <div className="border border-stone-200 dark:border-stone-700 rounded-lg overflow-hidden">
-            <div className={`grid grid-cols-12 gap-2 px-4 py-2 bg-stone-50 dark:bg-stone-800 text-xs font-semibold text-stone-500 uppercase ${isRTL ? 'text-end' : 'text-start'}`}>
-              <div className="col-span-6">{t('description')}</div><div className={`col-span-2 ${isRTL ? 'text-end' : 'text-start'}`}>{t('quantity')}</div><div className={`col-span-2 ${isRTL ? 'text-end' : 'text-start'}`}>{t('rate')}</div><div className={`col-span-2 ${isRTL ? 'text-end' : 'text-start'}`}>{t('amount')}</div>
+        <div className="p-4 space-y-4">
+          {/* Info Grid */}
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wide">{t('customer')}</p>
+              <p className="font-semibold text-stone-900 dark:text-stone-100">{invoice.customerName}</p>
             </div>
-            <div className="divide-y divide-stone-100 dark:divide-stone-800">
-              {invoice.lineItems.map((item, i) => (
-                <div key={i} className={`grid grid-cols-12 gap-2 px-4 py-3 text-sm ${isRTL ? 'text-end' : 'text-start'}`}>
-                  <div className="col-span-6 text-stone-900 dark:text-stone-100">{item.description}</div>
-                  <div className={`col-span-2 text-stone-600 dark:text-stone-400 ${isRTL ? 'text-end' : 'text-start'}`}>{item.quantity}</div>
-                  <div className={`col-span-2 text-stone-600 dark:text-stone-400 ${isRTL ? 'text-end' : 'text-start'}`}>{item.rate}</div>
-                  <div className={`col-span-2 font-medium text-stone-900 dark:text-stone-100 ${isRTL ? 'text-end' : 'text-start'}`}>{item.amount}</div>
-                </div>
-              ))}
+            <div className="space-y-0.5 text-end">
+              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wide">{t('status')}</p>
+              <div>
+                <span className={cn("px-2 py-0.5 text-[10px] font-bold rounded-full uppercase", status.bg, status.color)}>
+                  {t(invoice.status)}
+                </span>
+              </div>
             </div>
-          </div>
-
-          <div className={`flex ${isRTL ? 'justify-end' : 'justify-start'}`}>
-            <div className={`w-64 space-y-2 text-sm ${isRTL ? 'text-end' : 'text-start'}`}>
-              <div className="flex justify-between"><span className="text-stone-500">{t('subtotal')}</span><span className="text-stone-900 dark:text-stone-100">{formatCurrency(invoice.amount)}</span></div>
-              {invoice.discount > 0 && <div className="flex justify-between text-emerald-600"><span>{t('discount')}</span><span>-{formatCurrency(invoice.discount)}</span></div>}
-              <div className="flex justify-between border-t pt-2 font-semibold"><span className="text-stone-900 dark:text-stone-100">{t('total')}</span><span className="text-amber-600">{formatCurrency(invoice.total)}</span></div>
-              <div className="flex justify-between"><span className="text-stone-500">{t('paid')}</span><span className="text-emerald-600">{formatCurrency(invoice.paidAmount)}</span></div>
-              {remainingAmount > 0 && <div className="flex justify-between font-semibold"><span className="text-stone-900 dark:text-stone-100">{t('balanceDue')}</span><span className="text-red-600">{formatCurrency(remainingAmount)}</span></div>}
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wide">{t('date')}</p>
+              <p className="text-xs text-stone-600 dark:text-stone-400 font-medium">{formatDate(invoice.createdAt)}</p>
+            </div>
+            <div className="space-y-0.5 text-end">
+              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wide">{t('dueDate')}</p>
+              <p className="text-xs text-stone-600 dark:text-stone-400 font-medium">{formatDate(invoice.dueDate)}</p>
             </div>
           </div>
 
-          {invoice.status !== 'paid' && (
-            <div className={`flex justify-start pt-4 border-t border-stone-200 dark:border-stone-700`}>
-              <button onClick={onRecordPayment} className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors ${isRTL ? '' : 'flex-row-reverse'}`}><RTLIcon><CreditCard className="h-4 w-4" /></RTLIcon>{t('recordPayment')}</button>
+          {/* Items Table - Simplified */}
+          <div className="border border-stone-100 dark:border-stone-800 rounded-lg overflow-hidden">
+            <table className="w-full text-xs">
+              <thead className="bg-stone-50 dark:bg-stone-800/50 text-stone-500 font-bold uppercase">
+                <tr>
+                  <th className="px-3 py-2 text-start">{t('description')}</th>
+                  <th className="px-3 py-2 text-end">{t('amount')}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-50 dark:divide-stone-800/50">
+                {invoice.lineItems.map((item, i) => (
+                  <tr key={i}>
+                    <td className="px-3 py-2 text-stone-700 dark:text-stone-300">{item.description}</td>
+                    <td className="px-3 py-2 text-end font-mono font-medium">{item.amount.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Summary - Compact */}
+          <div className="space-y-1.5 border-t border-stone-100 dark:border-stone-800 pt-3">
+            <div className="flex justify-between text-xs">
+              <span className="text-stone-500 font-medium">{t('total')}</span>
+              <span className="font-bold text-stone-900 dark:text-stone-100 font-mono">{formatCurrency(invoice.total)}</span>
             </div>
-          )}
+            <div className="flex justify-between text-xs text-emerald-600 font-medium">
+              <span>{t('paid')}</span>
+              <span className="font-mono">{formatCurrency(invoice.paidAmount)}</span>
+            </div>
+            {remainingAmount > 0 && (
+              <div className="flex justify-between text-sm font-bold text-red-600 border-t border-dashed border-stone-200 dark:border-stone-700 pt-2 mt-1">
+                <span>{t('balanceDue')}</span>
+                <span className="font-mono">{formatCurrency(remainingAmount)}</span>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Action Button */}
+        {invoice.status !== 'paid' && onRecordPayment && (
+          <div className="px-5 py-4 bg-stone-50 dark:bg-stone-800/50 border-t border-stone-100 dark:border-stone-800">
+            <button
+              onClick={onRecordPayment}
+              className="w-full flex items-center justify-center gap-2 py-2 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-all active:scale-[0.98]"
+            >
+              <CreditCard className="h-4 w-4" />
+              <span>{t('recordPayment')}</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
 }
+
+

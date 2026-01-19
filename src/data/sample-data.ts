@@ -211,7 +211,7 @@ export const sampleData = {
   settings: {
     company: {
       name: 'Backspace Coworking',
-      address: '123 Tahrir Square, Cairo, Egypt',
+      address: 'Tanta, Egypt',
       phone: '02-12345678',
       email: 'info@backspace.eg',
     },

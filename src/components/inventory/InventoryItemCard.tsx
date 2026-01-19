@@ -70,15 +70,12 @@ export function InventoryItemCard({ item, category, onEdit, onDelete, onAdjustQu
         {/* 3. Stock Status Row */}
         <div className={`px-3 py-2.5 rounded-xl border ${config.bg} ${config.border} flex items-center justify-between`}>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-medium text-stone-500 uppercase tracking-tight">{t('stock')}</span>
-            <div className="flex items-baseline gap-1.5">
-                <span className={`text-base font-bold ${config.color}`}>{item.quantity}</span>
-                <span className="text-[11px] text-stone-400">/ {item.minStock}</span>
-            </div>
+            <span className="text-sm font-bold text-stone-800 dark:text-stone-100">
+                {item.quantity} / {item.minStock}
+            </span>
           </div>
           <div className={`flex items-center gap-1.5 ${config.color}`}>
             {config.icon}
-            <span className="text-[11px] font-semibold uppercase tracking-tight">{t(status)}</span>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { MainNav } from './MainNav'
 import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useAppStore } from '@/stores/useAppStore'
 
 interface NavigationItem {
   label: string
@@ -24,7 +25,8 @@ export function AppShell({
   onNavigate,
   isRTL = false,
 }: AppShellProps) {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const sidebarCollapsed = useAppStore(state => state.sidebarCollapsed)
+  const setSidebarCollapsed = useAppStore(state => state.setSidebarCollapsed)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
@@ -116,7 +118,7 @@ export function AppShell({
           ${isRTL ? (sidebarCollapsed ? 'lg:mr-16' : 'lg:mr-60') : (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60')}
         `}
       >
-        <div className="flex-1 overflow-y-auto scrollbar-thin flex flex-col pb-8">
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {children}
         </div>
       </main>

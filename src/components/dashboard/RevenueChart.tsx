@@ -20,7 +20,6 @@ export function RevenueChart({ data }: RevenueChartProps) {
   const total = totalSessions + totalInventory
 
   const formatCurrency = (amount: number) => {
-    // Use English numerals for better readability
     return new Intl.NumberFormat('en-EG', { 
       style: 'decimal', 
       minimumFractionDigits: 0 
@@ -32,8 +31,8 @@ export function RevenueChart({ data }: RevenueChartProps) {
   }
 
   return (
-    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5">
-      <div className="flex items-center justify-between mb-5">
+    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-5 flex flex-col h-full">
+      <div className="flex-shrink-0 flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
             <TrendingUp className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -55,7 +54,8 @@ export function RevenueChart({ data }: RevenueChartProps) {
           ))}
         </div>
       </div>
-      <div className="flex gap-4 mb-4">
+      
+      <div className="flex-shrink-0 flex gap-4 mb-4">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-amber-500" />
           <span className="text-xs text-stone-600 dark:text-stone-400">{t('sessionsLabel')} ({formatCurrency(totalSessions)} {t('egp')})</span>
@@ -65,17 +65,18 @@ export function RevenueChart({ data }: RevenueChartProps) {
           <span className="text-xs text-stone-600 dark:text-stone-400">{t('inventoryLabel')} ({formatCurrency(totalInventory)} {t('egp')})</span>
         </div>
       </div>
-      <div className="h-48 flex items-end gap-2">
+      
+      <div className="flex-1 min-h-0 flex items-end gap-2 pt-4">
         {data.map((point, index) => {
           const sessionHeight = (point.sessions / maxValue) * 100
           const inventoryHeight = (point.inventory / maxValue) * 100
           return (
-            <div key={index} className="flex-1 flex flex-col items-center gap-1">
-              <div className="w-full flex flex-col-reverse items-center" style={{ height: '160px' }}>
+            <div key={index} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+              <div className="w-full flex flex-col-reverse items-center flex-1 min-h-0">
                 <div className="w-full max-w-10 bg-amber-500 rounded-t transition-all duration-300" style={{ height: `${sessionHeight}%` }} title={`${t('sessionsLabel')}: ${formatCurrency(point.sessions)} ${t('egp')}`} />
                 <div className="w-full max-w-10 bg-emerald-500 rounded-t transition-all duration-300" style={{ height: `${inventoryHeight}%` }} title={`${t('inventoryLabel')}: ${formatCurrency(point.inventory)} ${t('egp')}`} />
               </div>
-              <span className="text-[10px] text-stone-500 dark:text-stone-400 text-center">{formatDate(point.date)}</span>
+              <span className="text-[10px] text-stone-500 dark:text-stone-400 text-center flex-shrink-0 mt-1">{formatDate(point.date)}</span>
             </div>
           )
         })}
