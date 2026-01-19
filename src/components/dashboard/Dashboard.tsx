@@ -31,7 +31,7 @@ export function Dashboard({ onNewCustomer, onStartSession, onNavigateToSection, 
   return (
     <div className="h-full flex flex-col">
       {/* Fixed Content */}
-      <div className="flex-shrink-0 p-6 space-y-6 max-w-7xl mx-auto w-full">
+      <div className="flex-shrink-0 p-6 space-y-6 w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className={isRTL ? 'text-end' : 'text-start'}>
@@ -54,7 +54,7 @@ export function Dashboard({ onNewCustomer, onStartSession, onNavigateToSection, 
       </div>
       
       {/* Scrollable Activity Feed */}
-      <div className="flex-1 p-6 pt-0 max-w-7xl mx-auto w-full">
+      <div className="flex-1 p-6 pt-0 w-full">
         <ActivityFeed activities={recentActivity} />
       </div>
     </div>

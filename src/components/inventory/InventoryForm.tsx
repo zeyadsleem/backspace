@@ -4,7 +4,6 @@ import { Loader2, Package, DollarSign, Hash } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 import { inventorySchema, type InventoryFormData } from '@/lib/validations'
 import type { InventoryCategory } from '@/types'
-import { RTLIcon } from '../ui/RTLIcon'
 
 interface InventoryFormProps {
   initialData?: { 
@@ -58,10 +57,8 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Name Field */}
         <div className="space-y-1.5">
-          <label htmlFor="name" className={`flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`}>
-            <RTLIcon>
-              <Package className="h-4 w-4" />
-            </RTLIcon>
+          <label htmlFor="name" className="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+            <Package className="h-4 w-4" />
             <span>{t('itemName') || 'Item Name'}</span>
             <span className="text-red-500">*</span>
           </label>
@@ -85,10 +82,8 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
 
         {/* Price Field */}
         <div className="space-y-1.5">
-          <label htmlFor="price" className={`flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`}>
-            <RTLIcon>
-              <DollarSign className="h-4 w-4" />
-            </RTLIcon>
+          <label htmlFor="price" className="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+            <DollarSign className="h-4 w-4" />
             <span>{t('price') || `Price (${t('egp')})`}</span>
             <span className="text-red-500">*</span>
           </label>
@@ -112,10 +107,8 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
 
         {/* Quantity Field */}
         <div className="space-y-1.5">
-          <label htmlFor="quantity" className={`flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`}>
-            <RTLIcon>
-              <Hash className="h-4 w-4" />
-            </RTLIcon>
+          <label htmlFor="quantity" className="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+            <Hash className="h-4 w-4" />
             <span>{t('quantity') || 'Quantity'}</span>
             <span className="text-red-500">*</span>
           </label>
@@ -138,10 +131,8 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
 
         {/* Min Stock Field */}
         <div className="space-y-1.5">
-          <label htmlFor="minStock" className={`flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-start'}`}>
-            <RTLIcon>
-              <Hash className="h-4 w-4" />
-            </RTLIcon>
+          <label htmlFor="minStock" className="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+            <Hash className="h-4 w-4" />
             <span>{t('minStock') || 'Minimum Stock'}</span>
             <span className="text-red-500">*</span>
           </label>
@@ -191,7 +182,7 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
       </div>
 
       {/* Action Buttons */}
-      <div className={`flex gap-3 pt-4 ${isRTL ? '' : 'flex-row-reverse'}`}>
+      <div className="flex gap-3 pt-4">
         <button
           type="button"
           onClick={handleReset}

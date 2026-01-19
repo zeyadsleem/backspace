@@ -101,13 +101,14 @@ export interface PlanTypeOption {
   labelEn: string
   labelAr: string
   days: number
+  price: number
 }
 
 // -----------------------------------------------------------------------------
 // Inventory
 // -----------------------------------------------------------------------------
 
-export type InventoryCategory = 'beverage' | 'snack' | 'meal'
+export type InventoryCategory = 'beverage' | 'snack' | 'other'
 
 export interface InventoryItem {
   id: string
@@ -197,11 +198,18 @@ export interface AppearanceSettings {
   language: LanguageOption
 }
 
+export interface DiscountSettings {
+  enabled: boolean
+  value: number
+  label: string
+}
+
 export interface Settings {
   company: CompanySettings
   regional: RegionalSettings
   tax: TaxSettings
   appearance: AppearanceSettings
+  discounts: DiscountSettings
 }
 
 // -----------------------------------------------------------------------------
@@ -295,7 +303,7 @@ export interface LowStockAlert {
 
 export interface RecentActivity {
   id: string
-  type: 'session_start' | 'session_end' | 'inventory_add' | 'customer_new' | 'invoice_paid' | 'subscription_new'
+  type: 'session_start' | 'session_end' | 'inventory_add' | 'customer_new' | 'invoice_paid' | 'subscription_new' | 'invoice_created'
   description: string
   timestamp: string
 }

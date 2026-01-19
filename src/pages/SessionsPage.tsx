@@ -9,8 +9,10 @@ export function SessionsPage() {
   const subscriptions = useAppStore((state) => state.subscriptions)
   const inventory = useAppStore((state) => state.inventory)
   const startSession = useAppStore((state) => state.startSession)
-  const endSession = useAppStore((state) => state.endSession)
   const addInventoryToSession = useAppStore((state) => state.addInventoryToSession)
+  const updateInventoryInSession = useAppStore((state) => state.updateInventoryInSession)
+  const removeInventoryFromSession = useAppStore((state) => state.removeInventoryFromSession)
+  const endSessionWithPayment = useAppStore((state) => state.endSessionWithPayment)
   const [showStartDialog, setShowStartDialog] = useState(false)
 
   return (
@@ -24,7 +26,15 @@ export function SessionsPage() {
             addInventoryToSession(sessionId, item.inventoryId, item.quantity)
           })
         }}
-        onEndSession={endSession}
+        onUpdateInventory={(sessionId, consumptionId, newQuantity) => {
+          updateInventoryInSession(sessionId, consumptionId, newQuantity)
+        }}
+        onRemoveInventory={(sessionId, consumptionId) => {
+          removeInventoryFromSession(sessionId, consumptionId)
+        }}
+        onEndSession={(sessionId, paymentData) => {
+          endSessionWithPayment(sessionId, paymentData)
+        }}
         onStartSession={() => setShowStartDialog(true)}
       />
       <StartSessionDialog

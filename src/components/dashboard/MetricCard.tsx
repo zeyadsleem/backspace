@@ -37,7 +37,7 @@ export function MetricCard({ title, value, subtitle, icon, variant = 'default', 
       onClick={onClick}
       className={`w-full p-4 rounded-xl border transition-all duration-200 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] ${styles.container} ${onClick ? 'cursor-pointer' : 'cursor-default'} ${isRTL ? 'text-right' : 'text-left'}`}
     >
-      <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse justify-between' : 'justify-between'}`}>
+      <div className="flex items-start justify-between gap-3">
         <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}>
           <p className="text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wide">{title}</p>
           <p className={`text-2xl font-bold mt-1 ${styles.value}`}>{value}</p>

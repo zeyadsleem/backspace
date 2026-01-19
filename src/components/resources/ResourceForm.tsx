@@ -1,10 +1,9 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, Monitor, DollarSign } from 'lucide-react'
+import { Loader2, Monitor } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 import { resourceSchema, type ResourceFormData } from '@/lib/validations'
 import type { ResourceType } from '@/types'
-import { RTLIcon } from '../ui/RTLIcon'
 
 interface ResourceFormProps {
   initialData?: { name: string; resourceType: ResourceType; ratePerHour: number }
@@ -51,27 +50,13 @@ export function ResourceForm({ initialData, onSubmit, onCancel, isLoading = fals
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Name Field */}
         <div className="space-y-1.5">
-          <label htmlFor="name" className={`flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300 ${isRTL ? 'justify-start' : 'justify-start'}`}>
-            {isRTL ? (
-              <>
-                <RTLIcon>
-                  <Monitor className="h-4 w-4" />
-                </RTLIcon>
-                <span>{t('resourceName') || 'Resource Name'}</span>
-                <span className="text-red-500">*</span>
-              </>
-            ) : (
-              <>
-                <RTLIcon>
-                  <Monitor className="h-4 w-4" />
-                </RTLIcon>
-                <span>{t('resourceName') || 'Resource Name'}</span>
-                <span className="text-red-500">*</span>
-              </>
-            )}
+          <label htmlFor="name" className="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+            <Monitor className="h-4 w-4" />
+            <span>{t('resourceName') || 'Resource Name'}</span>
+            <span className="text-red-500">*</span>
           </label>
           <div className={isRTL ? 'rtl-input-wrapper' : 'ltr-input-wrapper'}>
             <input
@@ -89,45 +74,6 @@ export function ResourceForm({ initialData, onSubmit, onCancel, isLoading = fals
             />
           </div>
           {errors.name && <p className={`text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-end' : 'text-start'}`}>{errors.name.message}</p>}
-        </div>
-
-        {/* Rate Per Hour Field */}
-        <div className="space-y-1.5">
-          <label htmlFor="ratePerHour" className={`flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300 ${isRTL ? 'justify-start' : 'justify-start'}`}>
-            {isRTL ? (
-              <>
-                <RTLIcon>
-                  <DollarSign className="h-4 w-4" />
-                </RTLIcon>
-                <span>{t('ratePerHour') || `Rate Per Hour (${t('egp')})`}</span>
-                <span className="text-red-500">*</span>
-              </>
-            ) : (
-              <>
-                <RTLIcon>
-                  <DollarSign className="h-4 w-4" />
-                </RTLIcon>
-                <span>{t('ratePerHour') || `Rate Per Hour (${t('egp')})`}</span>
-                <span className="text-red-500">*</span>
-              </>
-            )}
-          </label>
-          <input
-            id="ratePerHour"
-            type="number"
-            step="0.01"
-            min="0"
-            {...register('ratePerHour', { valueAsNumber: true })}
-            placeholder="0.00"
-            dir="ltr"
-            className={`h-10 w-full rounded-md border px-3 text-sm focus:outline-none focus:ring-1 dark:bg-stone-800 dark:text-stone-100 ${
-              errors.ratePerHour 
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                : 'border-stone-300 focus:border-amber-500 focus:ring-amber-500 dark:border-stone-600'
-            }`}
-            disabled={isLoading}
-          />
-          {errors.ratePerHour && <p className={`text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-end' : 'text-start'}`}>{errors.ratePerHour.message}</p>}
         </div>
       </div>
 

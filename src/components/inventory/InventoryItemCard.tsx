@@ -1,5 +1,5 @@
 import type { InventoryItem, CategoryOption } from '@/types'
-import { Minus, Plus, Pencil, Trash2 } from 'lucide-react'
+import { Minus, Plus, Pencil, Trash2, Package, Coffee, Cookie, Box, AlertCircle } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 
 interface InventoryItemCardProps {
@@ -22,45 +22,85 @@ export function InventoryItemCard({ item, category, onEdit, onDelete, onAdjustQu
 
   const status = getStockStatus()
   const statusConfig = {
-    'in-stock': { label: t('inStock'), color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
-    'low-stock': { label: t('lowStock'), color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30' },
-    'out-of-stock': { label: t('outOfStock'), color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/30' },
+    'in-stock': { color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', icon: null },
+    'low-stock': { color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', icon: <AlertCircle className="w-3.5 h-3.5" /> },
+    'out-of-stock': { color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100', icon: <AlertCircle className="w-3.5 h-3.5" /> },
   }
   const config = statusConfig[status]
 
+  const categoryIcons = {
+    beverage: <Coffee className="w-4 h-4" />,
+    snack: <Cookie className="w-4 h-4" />,
+    other: <Box className="w-4 h-4" />,
+  }
+
   return (
-    <div className={`bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden hover:shadow-md transition-all ${status === 'out-of-stock' ? 'opacity-75' : ''}`}>
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <h3 className="font-semibold text-stone-900 dark:text-stone-100">{item.name}</h3>
-            <p className="text-xs text-stone-500 dark:text-stone-400">{isRTL ? category.labelAr : category.labelEn}</p>
+    <div className={`group bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl flex flex-col h-full w-full shadow-sm overflow-hidden transition-all hover:border-stone-300 dark:hover:border-stone-700 ${status === 'out-of-stock' ? 'opacity-90' : ''}`}>
+      
+      {/* 1. Header with Category Tint */}
+      <div className="p-3 flex items-center justify-between border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-800/30">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center justify-center text-stone-400 shadow-sm">
+            {categoryIcons[item.category as keyof typeof categoryIcons] || <Package className="w-4 h-4" />}
           </div>
-          <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${config.bg} ${config.color}`}>{config.label}</span>
+          <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-widest">
+            {isRTL ? category.labelAr : category.labelEn}
+          </span>
         </div>
-        <div className="flex items-baseline gap-1 mt-3">
-          <span className="text-2xl font-bold text-amber-600 dark:text-amber-400">{item.price}</span>
-          <span className="text-sm text-stone-500 dark:text-stone-400">{t('egp')}</span>
+        <div className="flex items-center gap-1">
+          <button onClick={onEdit} className="p-1.5 text-stone-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-all">
+            <Pencil className="w-4 h-4" />
+          </button>
+          <button onClick={onDelete} className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
+            <Trash2 className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-stone-50 dark:bg-stone-800/50 border-t border-stone-100 dark:border-stone-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs text-stone-500 dark:text-stone-400">{t('quantity')}</p>
-            <p className="text-sm text-stone-600 dark:text-stone-400">{t('minStock')}: {item.minStock}</p>
+      {/* 2. Main Body */}
+      <div className="p-4 flex-grow flex flex-col gap-4">
+        <div className="flex justify-between items-start gap-3">
+          <h3 className="text-base font-medium text-stone-800 dark:text-stone-100 leading-tight truncate">{item.name}</h3>
+          <div className="px-2.5 py-1 bg-[#FFFBEB] dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded-lg flex-shrink-0">
+            <span className="text-lg font-bold text-amber-700 dark:text-amber-400">{item.price}</span>
+            <span className="text-[11px] font-medium text-amber-600/70 ms-1 uppercase">{t('egp')}</span>
           </div>
+        </div>
+
+        {/* 3. Stock Status Row */}
+        <div className={`px-3 py-2.5 rounded-xl border ${config.bg} ${config.border} flex items-center justify-between`}>
           <div className="flex items-center gap-2">
-            <button onClick={() => onAdjustQuantity?.(-1)} disabled={item.quantity <= 0} className="p-1.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"><Minus className="h-4 w-4" /></button>
-            <span className={`w-12 text-center text-lg font-bold ${status === 'out-of-stock' ? 'text-red-600 dark:text-red-400' : status === 'low-stock' ? 'text-amber-600 dark:text-amber-400' : 'text-stone-900 dark:text-stone-100'}`}>{item.quantity}</span>
-            <button onClick={() => onAdjustQuantity?.(1)} className="p-1.5 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"><Plus className="h-4 w-4" /></button>
+            <span className="text-[11px] font-medium text-stone-500 uppercase tracking-tight">{t('stock')}</span>
+            <div className="flex items-baseline gap-1.5">
+                <span className={`text-base font-bold ${config.color}`}>{item.quantity}</span>
+                <span className="text-[11px] text-stone-400">/ {item.minStock}</span>
+            </div>
+          </div>
+          <div className={`flex items-center gap-1.5 ${config.color}`}>
+            {config.icon}
+            <span className="text-[11px] font-semibold uppercase tracking-tight">{t(status)}</span>
           </div>
         </div>
       </div>
 
-      <div className="px-4 py-2 border-t border-stone-100 dark:border-stone-800 flex justify-end gap-1">
-        <button onClick={onEdit} className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors" title={t('edit')}><Pencil className="h-4 w-4" /></button>
-        <button onClick={onDelete} className="p-2 text-stone-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title={t('delete')}><Trash2 className="h-4 w-4" /></button>
+      {/* 4. Refined Footer Adjuster */}
+      <div className="p-2 border-t border-stone-100 dark:border-stone-800 flex items-center gap-2 bg-stone-50/30 dark:bg-stone-900/50">
+        <button 
+          onClick={() => onAdjustQuantity?.(-1)} 
+          disabled={item.quantity <= 0}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-400 hover:text-red-600 hover:border-red-100 shadow-sm transition-all disabled:opacity-30"
+        >
+          <Minus className="w-4 h-4" />
+        </button>
+        <div className="flex-1 text-center font-medium text-stone-600 dark:text-stone-300 text-sm">
+            {item.quantity}
+        </div>
+        <button 
+          onClick={() => onAdjustQuantity?.(1)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-400 hover:text-emerald-600 hover:border-emerald-100 shadow-sm transition-all"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
       </div>
     </div>
   )

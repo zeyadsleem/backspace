@@ -1,14 +1,13 @@
 import type { UtilizationData } from '@/types'
-import { Download, Clock } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 
 interface UtilizationReportProps {
   utilizationData: UtilizationData
   onResourceClick?: (id: string) => void
-  onExport?: () => void
 }
 
-export function UtilizationReport({ utilizationData, onResourceClick, onExport }: UtilizationReportProps) {
+export function UtilizationReport({ utilizationData, onResourceClick }: UtilizationReportProps) {
   const t = useAppStore((state) => state.t)
   
   const formatDuration = (minutes: number) => {

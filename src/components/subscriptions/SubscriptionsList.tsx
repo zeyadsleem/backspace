@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Subscription, PlanType, PlanTypeOption } from '@/types'
 import { SubscriptionCard } from './SubscriptionCard'
-import { Plus, CreditCard } from 'lucide-react'
+import { Plus, CreditCard, Filter } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 
 interface SubscriptionsListProps {
@@ -16,7 +16,6 @@ export function SubscriptionsList({
   subscriptions,
   planTypes,
   onView,
-  onDeactivate,
   onCreate,
 }: SubscriptionsListProps) {
   const t = useAppStore((state) => state.t)
@@ -37,7 +36,7 @@ export function SubscriptionsList({
   const expiringCount = subscriptions.filter((s) => s.isActive && s.daysRemaining <= 3).length
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="flex flex-col p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">
@@ -67,12 +66,15 @@ export function SubscriptionsList({
             </button>
           ))}
         </div>
-        <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as PlanType | 'all')} className="px-3 py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500">
-          <option value="all">{t('allPlans')}</option>
-          {planTypes.map((plan) => (
-            <option key={plan.id} value={plan.id}>{isRTL ? plan.labelAr : plan.labelEn}</option>
-          ))}
-        </select>
+        <div className="relative">
+          <Filter className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 start-3" />
+          <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as PlanType | 'all')} className="py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 appearance-none cursor-pointer ps-10 pe-8 text-start">
+            <option value="all">{t('allPlans')}</option>
+            {planTypes.map((plan) => (
+              <option key={plan.id} value={plan.id}>{isRTL ? plan.labelAr : plan.labelEn}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {filteredSubscriptions.length === 0 ? (
@@ -92,7 +94,7 @@ export function SubscriptionsList({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch">
           {filteredSubscriptions.map((subscription) => {
             const planType = planTypes.find((p) => p.id === subscription.planType)!
-            return <SubscriptionCard key={subscription.id} subscription={subscription} planType={planType} onView={() => onView?.(subscription.id)} onDeactivate={() => onDeactivate?.(subscription.id)} />
+            return <SubscriptionCard key={subscription.id} subscription={subscription} planType={planType} onView={() => onView?.(subscription.id)} />
           })}
         </div>
       )}

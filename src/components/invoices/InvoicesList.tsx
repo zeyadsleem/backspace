@@ -9,10 +9,9 @@ interface InvoicesListProps {
   onView?: (id: string) => void
   onRecordPayment?: (id: string) => void
   onCreate?: () => void
-  onExport?: () => void
 }
 
-export function InvoicesList({ invoices, onView, onRecordPayment, onCreate, onExport }: InvoicesListProps) {
+export function InvoicesList({ invoices, onView, onRecordPayment, onCreate }: InvoicesListProps) {
   const t = useAppStore((state) => state.t)
   const isRTL = useAppStore((state) => state.isRTL)
   const [searchQuery, setSearchQuery] = useState('')
@@ -29,21 +28,21 @@ export function InvoicesList({ invoices, onView, onRecordPayment, onCreate, onEx
   const paidAmount = filteredInvoices.reduce((sum, i) => sum + i.paidAmount, 0)
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="h-full flex flex-col p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className={isRTL ? 'text-end' : 'text-start'}>
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('invoices')}</h1>
           <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{t('totalAmount')}: {totalAmount.toLocaleString()} {t('egpCurrency')} · {t('collectedAmount')}: {paidAmount.toLocaleString()} {t('egpCurrency')}</p>
         </div>
         <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <button onClick={onCreate} className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors ${isRTL ? '' : 'flex-row-reverse'}`}><Plus className="h-4 w-4" />{t('newInvoice')}</button>
+          <button onClick={onCreate} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"><Plus className="h-4 w-4" />{t('newInvoice')}</button>
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 ${isRTL ? 'end-3' : 'start-3'}`} />
-          <input type="text" placeholder={t('searchInvoices')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className={`w-full py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 ${isRTL ? 'pe-4 ps-10 text-end' : 'ps-10 pe-4 text-start'}`} />
+          <Search className="absolute top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 start-3" />
+          <input type="text" placeholder={t('searchInvoices')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 ps-10 pe-4 text-start" />
         </div>
         <div className="flex bg-stone-100 dark:bg-stone-800 rounded-lg p-1">
           {(['all', 'paid', 'unpaid', 'pending'] as const).map((status) => (
@@ -57,18 +56,18 @@ export function InvoicesList({ invoices, onView, onRecordPayment, onCreate, onEx
           <div className="p-4 bg-stone-100 dark:bg-stone-800 rounded-full mb-4"><FileText className="h-8 w-8 text-stone-400" /></div>
           <h3 className="text-lg font-medium text-stone-900 dark:text-stone-100">{searchQuery || statusFilter !== 'all' ? t('noInvoicesFound') : t('noInvoicesYet')}</h3>
           <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{searchQuery || statusFilter !== 'all' ? t('tryAdjustingFilters') : t('createFirstInvoice')}</p>
-          {!searchQuery && statusFilter === 'all' && <button onClick={onCreate} className={`mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors ${isRTL ? '' : 'flex-row-reverse'}`}><Plus className="h-4 w-4" />{t('createInvoice')}</button>}
+          {!searchQuery && statusFilter === 'all' && <button onClick={onCreate} className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"><Plus className="h-4 w-4" />{t('createInvoice')}</button>}
         </div>
       ) : (
-        <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden flex flex-col max-h-96">
+        <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden flex flex-col flex-1 min-h-0">
           {/* Table Header - Fixed */}
-          <div className={`flex-shrink-0 hidden md:grid grid-cols-12 gap-4 px-4 py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-800 ${isRTL ? 'text-end' : 'text-start'}`}>
+          <div className="flex-shrink-0 hidden md:grid grid-cols-12 gap-4 px-4 py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-800 text-start">
             <div className="col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase">{t('invoiceNumber')}</div>
             <div className="col-span-3 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase">{t('customer')}</div>
-            <div className={`col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase ${isRTL ? 'text-start' : 'text-end'}`}>{t('amount')}</div>
+            <div className="col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase text-center">{t('amount')}</div>
             <div className="col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase">{t('status')}</div>
             <div className="col-span-1 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase">{t('dueDate')}</div>
-            <div className={`col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase ${isRTL ? 'text-start' : 'text-end'}`}>{t('actions')}</div>
+            <div className="col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase text-end">{t('actions')}</div>
           </div>
           
           {/* Table Body - Scrollable */}

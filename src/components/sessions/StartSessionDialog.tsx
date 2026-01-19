@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Customer, Resource, Subscription } from '@/types'
-import { X, Loader2, User, Monitor, Clock, CreditCard } from 'lucide-react'
+import { X, Loader2, User, Monitor, Clock } from 'lucide-react'
 import { useTranslation } from '@/stores/hooks'
 import { useAppStore } from '@/stores/useAppStore'
 
@@ -21,7 +21,6 @@ export function StartSessionDialog({ isOpen, customers, resources, subscriptions
   const [selectedCustomer, setSelectedCustomer] = useState<string>('')
   const [selectedResource, setSelectedResource] = useState<string>('')
   const [searchCustomer, setSearchCustomer] = useState('')
-  const [errors, setErrors] = useState<Record<string, string>>({})
 
   if (!isOpen) return null
 
@@ -33,107 +32,165 @@ export function StartSessionDialog({ isOpen, customers, resources, subscriptions
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const newErrors: Record<string, string> = {}
-    if (!selectedCustomer) newErrors.customer = t('pleaseSelectCustomer')
-    if (!selectedResource) newErrors.resource = t('pleaseSelectResource')
-    setErrors(newErrors)
-    if (Object.keys(newErrors).length === 0) onSubmit?.({ customerId: selectedCustomer, resourceId: selectedResource })
+    if (selectedCustomer && selectedResource) {
+      onSubmit?.({ customerId: selectedCustomer, resourceId: selectedResource })
+    }
   }
 
-  const handleClose = () => { onClose?.(); onCancel?.() }
+  const handleClose = () => { 
+    setSelectedCustomer('')
+    setSelectedResource('')
+    setSearchCustomer('')
+    onClose?.()
+    onCancel?.() 
+  }
+
+
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50 dark:bg-black/70" onClick={handleClose} />
-      <div className={`relative z-10 w-full max-w-3xl rounded-lg bg-white p-6 shadow-xl dark:bg-stone-900 ${isRTL ? 'rtl-dialog' : 'ltr-dialog'}`}>
-        <div className={`mb-6 flex items-center justify-between ${isRTL ? '' : 'flex-row-reverse'}`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
+      <div className={`relative z-10 w-full max-w-3xl rounded-xl bg-white dark:bg-stone-900 shadow-2xl flex flex-col max-h-[80vh] ${isRTL ? 'rtl-dialog' : 'ltr-dialog'}`}>
+        
+        {/* Header */}
+        <div className="flex-shrink-0 flex items-center justify-between p-5 border-b border-stone-200 dark:border-stone-800">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30"><Clock className="h-5 w-5 text-amber-600 dark:text-amber-400" /></div>
-            <h2 className={`text-lg font-semibold text-stone-900 dark:text-stone-100 ${isRTL ? 'text-end' : 'text-start'}`}>{t('startNewSession')}</h2>
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+              <Clock className="h-5 w-5" />
+            </div>
+            <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100">{t('startNewSession')}</h2>
           </div>
-          <button type="button" onClick={handleClose} className="rounded-md p-1 text-stone-400 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"><X className="h-5 w-5" /></button>
+          <button type="button" onClick={handleClose} className="rounded-full p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300 transition-colors">
+            <X className="h-5 w-5" />
+          </button>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Customer Selection */}
-            <div className="space-y-2">
-              <label className={`flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300 ${isRTL ? 'justify-start' : 'justify-start'}`}>
-                {isRTL ? (
-                  <>
-                    <User className="h-4 w-4" />
-                    <span>{t('selectCustomer')}</span>
-                    <span className="text-red-500">*</span>
-                  </>
-                ) : (
-                  <>
-                    <User className="h-4 w-4" />
-                    <span>{t('selectCustomer')}</span>
-                    <span className="text-red-500">*</span>
-                  </>
-                )}
-              </label>
-              <input type="text" value={searchCustomer} onChange={(e) => setSearchCustomer(e.target.value)} placeholder={t('searchByNameOrId')} dir={isRTL ? 'rtl' : 'ltr'} className={`h-9 w-full rounded-md border border-stone-300 px-3 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 ${isRTL ? 'rtl-text-input' : 'ltr-text-input'}`} />
-              <div className="max-h-40 overflow-y-auto rounded-md border border-stone-200 dark:border-stone-700">
-                {filteredCustomers.length === 0 ? (
-                  <p className={`p-3 text-center text-sm text-stone-500 dark:text-stone-400 ${isRTL ? 'text-end' : 'text-start'}`}>{t('noCustomersFound')}</p>
-                ) : (
-                  filteredCustomers.map((customer) => {
-                    const customerIsSubscribed = subscriptions.some(s => s.customerId === customer.id && s.isActive)
-                    return (
-                      <button key={customer.id} type="button" onClick={() => setSelectedCustomer(customer.id)} className={`flex w-full items-center justify-between p-3 transition-colors ${isRTL ? '' : 'flex-row-reverse'} ${isRTL ? 'text-start' : 'text-end'} ${selectedCustomer === customer.id ? 'bg-amber-50 dark:bg-amber-900/20' : 'hover:bg-stone-50 dark:hover:bg-stone-800'}`}>
-                        <div className={isRTL ? 'text-start' : 'text-end'}><p className="text-sm font-medium text-stone-900 dark:text-stone-100">{customer.name}</p><p className="text-xs text-stone-500 dark:text-stone-400">{customer.humanId}</p></div>
-                        {customerIsSubscribed && <span className={`flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 ${isRTL ? '' : 'flex-row-reverse'}`}><CreditCard className="h-3 w-3" />{t('subscribed')}</span>}
-                      </button>
-                    )
-                  })
-                )}
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            
+            <div className="grid grid-cols-2 gap-6">
+              {/* Customer Selection */}
+              <div className="flex flex-col gap-3">
+                <label className="flex items-center gap-2 text-[13px] font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                  <User className="h-3.5 w-3.5" />
+                  <span>{t('selectCustomer')}</span>
+                </label>
+                
+                <input 
+                  type="text" 
+                  value={searchCustomer} 
+                  onChange={(e) => setSearchCustomer(e.target.value)} 
+                  placeholder={t('searchByNameOrId')} 
+                  className={`h-11 w-full rounded-lg border border-stone-200 px-4 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 ${isRTL ? 'text-right' : 'text-left'}`} 
+                />
+
+                <div className="h-64 overflow-y-auto rounded-lg border border-stone-100 dark:border-stone-800 bg-stone-50/30 dark:bg-stone-900/30 scrollbar-thin">
+                  {filteredCustomers.length === 0 ? (
+                    <div className="h-full flex items-center justify-center p-4 text-center text-stone-400 opacity-70">
+                      <p className="text-sm">{t('noCustomersFound')}</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-stone-100 dark:divide-stone-800">
+                      {filteredCustomers.map((customer) => {
+                        const customerIsSubscribed = subscriptions.some(s => s.customerId === customer.id && s.isActive)
+                        const isSelected = selectedCustomer === customer.id
+                        return (
+                          <button 
+                            key={customer.id} 
+                            type="button" 
+                            onClick={() => setSelectedCustomer(customer.id)} 
+                            className={`w-full flex items-center justify-between p-3.5 transition-all ${isSelected ? 'bg-amber-50 dark:bg-amber-900/20' : 'hover:bg-stone-50 dark:hover:bg-stone-800/50'}`}
+                          >
+                            <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
+                              <span className={`text-sm ${isSelected ? 'font-bold text-amber-700 dark:text-amber-400' : 'font-medium text-stone-700 dark:text-stone-300'}`}>{customer.name}</span>
+                              <span className="text-[10px] text-stone-400 font-mono uppercase font-normal">{customer.humanId}</span>
+                            </div>
+                            {customerIsSubscribed && (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800">
+                                {t('subscribed')}
+                              </span>
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
               </div>
-              {errors.customer && <p className={`text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-end' : 'text-start'}`}>{errors.customer}</p>}
+
+              {/* Resource Selection */}
+              <div className="flex flex-col gap-3">
+                <label className="flex items-center gap-2 text-[13px] font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">
+                  <Monitor className="h-3.5 w-3.5" />
+                  <span>{t('selectResource')}</span>
+                </label>
+                
+                <div className="h-11" /> {/* Align with search box */}
+
+                <div className="h-64 overflow-y-auto scrollbar-thin">
+                  <div className="grid grid-cols-2 gap-3">
+                    {availableResources.map((resource) => {
+                      const isSelected = selectedResource === resource.id
+                      return (
+                        <button 
+                          key={resource.id} 
+                          type="button" 
+                          onClick={() => setSelectedResource(resource.id)} 
+                          className={`flex flex-col items-center justify-center gap-1.5 rounded-lg border transition-all h-20 ${isSelected ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20 ring-1 ring-amber-500' : 'border-stone-200 bg-white hover:border-amber-200 dark:border-stone-800 dark:bg-stone-800 dark:hover:border-stone-700'}`}
+                        >
+                          <span className={`text-[13px] ${isSelected ? 'font-bold text-amber-700 dark:text-amber-400' : 'font-medium text-stone-700 dark:text-stone-200'} text-center line-clamp-1`}>{resource.name}</span>
+                          <span className="text-[10px] font-medium text-stone-400 uppercase">
+                            {resource.ratePerHour} {t('egp')}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* Resource Selection */}
-            <div className="space-y-2">
-              <label className={`flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300 ${isRTL ? 'justify-start' : 'justify-start'}`}>
-                {isRTL ? (
-                  <>
-                    <Monitor className="h-4 w-4" />
-                    <span>{t('selectResource')}</span>
-                    <span className="text-red-500">*</span>
-                  </>
-                ) : (
-                  <>
-                    <Monitor className="h-4 w-4" />
-                    <span>{t('selectResource')}</span>
-                    <span className="text-red-500">*</span>
-                  </>
-                )}
-              </label>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                {availableResources.map((resource) => (
-                  <button key={resource.id} type="button" onClick={() => setSelectedResource(resource.id)} className={`rounded-lg border-2 p-3 transition-colors ${isRTL ? 'text-end' : 'text-start'} ${selectedResource === resource.id ? 'border-amber-500 bg-amber-50 dark:border-amber-400 dark:bg-amber-900/20' : 'border-stone-200 hover:border-stone-300 dark:border-stone-700 dark:hover:border-stone-600'}`}>
-                    <p className="text-sm font-medium text-stone-900 dark:text-stone-100">{resource.name}</p>
-                    <p className="text-xs text-stone-500 dark:text-stone-400">{resource.ratePerHour} {t('egpHr')}</p>
-                  </button>
-                ))}
+            {/* Summary */}
+            {selectedCustomerData && selectedResourceData && (
+              <div className="rounded-xl bg-stone-50 border border-stone-100 p-4 dark:bg-stone-800/50 dark:border-stone-800 flex items-center justify-between px-6">
+                <div className="flex items-center gap-8">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase text-stone-400 font-medium tracking-tight">{t('customer')}</span>
+                    <span className="text-xs font-semibold text-stone-800 dark:text-stone-100">{selectedCustomerData.name}</span>
+                  </div>
+                  <div className="w-px h-8 bg-stone-200 dark:bg-stone-700"></div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] uppercase text-stone-400 font-medium tracking-tight">{t('resource')}</span>
+                    <span className="text-xs font-semibold text-stone-800 dark:text-stone-100">{selectedResourceData.name}</span>
+                  </div>
+                </div>
+                <div className="text-end">
+                  <span className="text-[10px] uppercase text-stone-400 font-medium tracking-tight block">{t('rate')}</span>
+                  <span className={`text-sm font-bold ${isSubscribed ? 'text-emerald-600' : 'text-amber-600'}`}>
+                    {isSubscribed ? t('freeSubscription') : `${selectedResourceData.ratePerHour} ${t('egpHr')}`}
+                  </span>
+                </div>
               </div>
-              {errors.resource && <p className={`text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-end' : 'text-start'}`}>{errors.resource}</p>}
-            </div>
-          </div>
-          {selectedCustomerData && selectedResourceData && (
-            <div className="rounded-lg bg-stone-50 p-4 dark:bg-stone-800">
-              <h4 className={`mb-2 text-sm font-medium text-stone-700 dark:text-stone-300 ${isRTL ? 'text-end' : 'text-start'}`}>{t('sessionSummary')}</h4>
-              <div className="space-y-1 text-sm">
-                <p className={`text-stone-600 dark:text-stone-400 ${isRTL ? 'text-end' : 'text-start'}`}>{t('customer')}: <span className="font-medium text-stone-900 dark:text-stone-100">{selectedCustomerData.name}</span></p>
-                <p className={`text-stone-600 dark:text-stone-400 ${isRTL ? 'text-end' : 'text-start'}`}>{t('resource')}: <span className="font-medium text-stone-900 dark:text-stone-100">{selectedResourceData.name}</span></p>
-                <p className={`text-stone-600 dark:text-stone-400 ${isRTL ? 'text-end' : 'text-start'}`}>{t('rate')}: <span className="font-medium text-stone-900 dark:text-stone-100">{isSubscribed ? t('freeSubscription') : `${selectedResourceData.ratePerHour} ${t('egpHr')}`}</span></p>
-              </div>
-            </div>
-          )}
-          <div className={`flex gap-3 pt-2 ${isRTL ? '' : 'flex-row-reverse'}`}>
-            <button type="button" onClick={handleClose} disabled={isLoading} className="flex-1 rounded-md border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700">{t('cancel')}</button>
-            <button type="submit" disabled={isLoading} className="flex flex-1 items-center justify-center gap-2 rounded-md bg-amber-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-50 dark:bg-amber-600 dark:hover:bg-amber-500">{isLoading && <Loader2 className="h-4 w-4 animate-spin" />}{t('startSession')}</button>
-          </div>
-        </form>
+            )}
+          </form>
+        </div>
+
+        {/* Footer */}
+        <div className="flex-shrink-0 p-5 border-t border-stone-200 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 rounded-b-xl flex gap-4">
+          <button type="button" onClick={handleClose} disabled={isLoading} className="flex-1 rounded-lg border border-stone-300 bg-white px-4 py-3 text-[13px] font-semibold text-stone-600 hover:bg-stone-50 disabled:opacity-50 transition-colors dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 uppercase tracking-wide">
+            {t('cancel')}
+          </button>
+          <button 
+            type="button" 
+            onClick={handleSubmit} 
+            disabled={isLoading || !selectedCustomer || !selectedResource} 
+            className="flex-1 items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-3 text-[13px] font-semibold text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm dark:bg-amber-600 dark:hover:bg-amber-500 flex uppercase tracking-wide"
+          >
+            {isLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            {t('startSession')}
+          </button>
+        </div>
       </div>
     </div>
   )

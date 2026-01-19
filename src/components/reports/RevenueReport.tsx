@@ -1,5 +1,5 @@
 import type { RevenueData, RevenueDataPoint, TopCustomer } from '@/types'
-import { TrendingUp, TrendingDown, Download, Users } from 'lucide-react'
+import { TrendingUp, TrendingDown, Users } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 
 interface RevenueReportProps {
@@ -7,10 +7,9 @@ interface RevenueReportProps {
   revenueChart: RevenueDataPoint[]
   topCustomers: TopCustomer[]
   onCustomerClick?: (id: string) => void
-  onExport?: () => void
 }
 
-export function RevenueReport({ revenueData, revenueChart, topCustomers, onCustomerClick, onExport }: RevenueReportProps) {
+export function RevenueReport({ revenueData, revenueChart, topCustomers, onCustomerClick }: RevenueReportProps) {
   const t = useAppStore((state) => state.t)
   const formatCurrency = (amount: number) => `${amount.toLocaleString()} ${t('egpCurrency')}`
   const percentChange = revenueData.comparison.percentChange

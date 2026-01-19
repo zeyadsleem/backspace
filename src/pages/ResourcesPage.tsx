@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppStore } from '@/stores/useAppStore'
-import { ResourcesList, ResourceDialog } from '@/components/resources'
+import { ResourcesList, ResourceDialog, ResourceDetailsDialog } from '@/components/resources'
 import { DeleteConfirmDialog } from '@/components/shared'
 import type { ResourceType } from '@/types'
 
@@ -14,22 +14,38 @@ export function ResourcesPage() {
   const updateResource = useAppStore((state) => state.updateResource)
   const deleteResource = useAppStore((state) => state.deleteResource)
   const t = useAppStore((state) => state.t)
+  
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [selectedResourceId, setSelectedResourceId] = useState<string | null>(null)
 
   const editResource = editId ? resources.find(r => r.id === editId) : null
+  const selectedResource = selectedResourceId ? resources.find(r => r.id === selectedResourceId) : null
 
   return (
     <>
       <ResourcesList
         resources={resources}
         resourceTypes={resourceTypes}
+        onView={(id) => setSelectedResourceId(id)}
         onEdit={(id) => setEditId(id)}
         onDelete={(id) => setDeleteId(id)}
         onCreate={() => setShowCreateDialog(true)}
         onSelectForSession={(id) => navigate(`/sessions?resource=${id}`)}
       />
+      
+      {selectedResource && (
+        <ResourceDetailsDialog
+          isOpen={!!selectedResourceId}
+          resource={selectedResource}
+          onClose={() => setSelectedResourceId(null)}
+          onEdit={() => { setSelectedResourceId(null); setEditId(selectedResource.id); }}
+          onDelete={() => { setSelectedResourceId(null); setDeleteId(selectedResource.id); }}
+          onStartSession={() => navigate(`/sessions?resource=${selectedResource.id}`)}
+        />
+      )}
+
       <ResourceDialog
         isOpen={showCreateDialog}
         title={t('newResource')}

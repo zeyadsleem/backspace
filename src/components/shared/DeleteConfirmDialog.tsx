@@ -28,7 +28,7 @@ export function DeleteConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50 dark:bg-black/70" onClick={onCancel} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
       <div className="relative z-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-stone-900">
         <button
           type="button"

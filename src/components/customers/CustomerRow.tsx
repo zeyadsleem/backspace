@@ -31,7 +31,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors">
       <div className="hidden md:flex col-span-1 items-center">
-        <span className="text-xs font-mono text-stone-500 dark:text-stone-400">{customer.humanId}</span>
+        <span className="text-sm font-mono text-stone-500 dark:text-stone-400 uppercase tracking-tight">{customer.humanId}</span>
       </div>
       <div className="col-span-1 md:col-span-3 flex items-center gap-3">
         <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center flex-shrink-0">
@@ -51,7 +51,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
       <div className="col-span-1 md:col-span-2 flex items-center">
         <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${config.bg} ${config.color}`}>{t(config.labelKey as any)}</span>
       </div>
-      <div className="col-span-1 md:col-span-2 flex items-center md:justify-end">
+      <div className="col-span-1 md:col-span-2 flex items-center md:justify-center">
         <span className={`text-sm font-medium ${customer.balance < 0 ? 'text-red-600 dark:text-red-400' : customer.balance > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-500 dark:text-stone-400'}`}>{formatBalance(customer.balance)}</span>
       </div>
       <div className="col-span-1 md:col-span-2 flex items-center justify-end gap-1">

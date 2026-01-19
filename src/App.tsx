@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { AppShell } from './components/shell'
 import { useAppStore } from './stores/useAppStore'
 import { RTLProvider } from './components/ui/RTLProvider'
-import { LayoutDashboard, Users, Monitor, Clock, CreditCard, Package, FileText, BarChart3, Settings } from 'lucide-react'
+import { LayoutDashboard, Users, Monitor, Clock, CreditCard, Package, FileText, Settings } from 'lucide-react'
 
 function App() {
   const navigate = useNavigate()

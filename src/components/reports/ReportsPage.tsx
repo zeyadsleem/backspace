@@ -16,12 +16,9 @@ interface ReportsPageProps {
   operationHistory: OperationRecord[]
   onCustomerClick?: (id: string) => void
   onResourceClick?: (id: string) => void
-  onExportRevenue?: () => void
-  onExportUtilization?: () => void
-  onExportHistory?: () => void
 }
 
-export function ReportsPage({ revenueData, revenueChart, topCustomers, utilizationData, operationHistory, onCustomerClick, onResourceClick, onExportRevenue, onExportUtilization, onExportHistory }: ReportsPageProps) {
+export function ReportsPage({ revenueData, revenueChart, topCustomers, utilizationData, operationHistory, onCustomerClick, onResourceClick }: ReportsPageProps) {
   const t = useAppStore((state) => state.t)
   const [activeTab, setActiveTab] = useState<Tab>('revenue')
   const tabs = [
@@ -31,7 +28,7 @@ export function ReportsPage({ revenueData, revenueChart, topCustomers, utilizati
   ]
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="flex flex-col p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('reports')}</h1>
         <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{t('analyticsAndInsights')}</p>
@@ -48,9 +45,9 @@ export function ReportsPage({ revenueData, revenueChart, topCustomers, utilizati
         })}
       </div>
 
-      {activeTab === 'revenue' && <RevenueReport revenueData={revenueData} revenueChart={revenueChart} topCustomers={topCustomers} onCustomerClick={onCustomerClick} onExport={onExportRevenue} />}
-      {activeTab === 'utilization' && <UtilizationReport utilizationData={utilizationData} onResourceClick={onResourceClick} onExport={onExportUtilization} />}
-      {activeTab === 'history' && <OperationHistory operations={operationHistory} onExport={onExportHistory} />}
+      {activeTab === 'revenue' && <RevenueReport revenueData={revenueData} revenueChart={revenueChart} topCustomers={topCustomers} onCustomerClick={onCustomerClick} />}
+      {activeTab === 'utilization' && <UtilizationReport utilizationData={utilizationData} onResourceClick={onResourceClick} />}
+      {activeTab === 'history' && <OperationHistory operations={operationHistory} />}
     </div>
   )
 }

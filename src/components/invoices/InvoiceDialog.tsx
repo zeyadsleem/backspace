@@ -22,13 +22,13 @@ export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: Inv
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
-      <div className="absolute inset-0 bg-black/50 dark:bg-black/70" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 my-8 w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl dark:bg-stone-900">
         <div className={`mb-6 flex items-center justify-between`}>
           <div className={`flex items-center gap-3 ${isRTL ? '' : 'flex-row-reverse'}`}>
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30"><RTLIcon><FileText className="h-5 w-5 text-amber-600 dark:text-amber-400" /></RTLIcon></div>
             <div className={isRTL ? 'text-end' : 'text-start'}>
-              <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{invoice.invoiceNumber}</h2>
+              <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100 uppercase tracking-tight">{invoice.invoiceNumber}</h2>
               <p className="text-sm text-stone-500 dark:text-stone-400">{t('createdOn')} {formatDate(invoice.createdAt)}</p>
             </div>
           </div>

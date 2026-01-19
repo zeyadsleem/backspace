@@ -18,7 +18,6 @@ export function DashboardPage() {
     customers,
     resources,
     subscriptions,
-    planTypes,
     startSession,
     addCustomer,
     t

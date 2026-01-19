@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { OperationRecord, OperationType } from '@/types'
-import { Download, Search, Play, Square, Coffee, UserPlus, Receipt, CreditCard, History } from 'lucide-react'
+import { Search, Play, Square, Coffee, UserPlus, Receipt, CreditCard, History } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 
 const operationConfig: Record<OperationType, { icon: typeof Play; label: string; color: string; bg: string }> = {
@@ -16,10 +16,9 @@ const operationConfig: Record<OperationType, { icon: typeof Play; label: string;
 interface OperationHistoryProps {
   operations: OperationRecord[]
   onOperationClick?: (id: string) => void
-  onExport?: () => void
 }
 
-export function OperationHistory({ operations, onOperationClick, onExport }: OperationHistoryProps) {
+export function OperationHistory({ operations, onOperationClick }: OperationHistoryProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<OperationType | 'all'>('all')
   const isRTL = useAppStore((state) => state.isRTL)

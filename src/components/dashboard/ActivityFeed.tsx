@@ -1,5 +1,5 @@
 import type { RecentActivity } from '@/types'
-import { Play, Square, Coffee, UserPlus, Receipt, CreditCard, Activity } from 'lucide-react'
+import { Play, Square, Coffee, UserPlus, Receipt, CreditCard, Activity, FileText } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 
 interface ActivityFeedProps {
@@ -13,6 +13,7 @@ const activityConfig: Record<RecentActivity['type'], { icon: typeof Play; color:
   customer_new: { icon: UserPlus, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-100 dark:bg-blue-900/50' },
   invoice_paid: { icon: Receipt, color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/50' },
   subscription_new: { icon: CreditCard, color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-100 dark:bg-purple-900/50' },
+  invoice_created: { icon: FileText, color: 'text-teal-600 dark:text-teal-400', bg: 'bg-teal-100 dark:bg-teal-900/50' },
 }
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {

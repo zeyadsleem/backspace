@@ -89,8 +89,8 @@ export const sampleData = {
     { id: 'res-001', name: 'Seat A1', resourceType: 'seat' as const, ratePerHour: 25.00, isAvailable: true, createdAt: '2025-08-01T00:00:00Z', utilizationRate: 72 },
     { id: 'res-002', name: 'Seat A2', resourceType: 'seat' as const, ratePerHour: 25.00, isAvailable: false, createdAt: '2025-08-01T00:00:00Z', utilizationRate: 68 },
     { id: 'res-003', name: 'Seat A3', resourceType: 'seat' as const, ratePerHour: 25.00, isAvailable: true, createdAt: '2025-08-01T00:00:00Z', utilizationRate: 55 },
-    { id: 'res-004', name: 'Seat B1', resourceType: 'seat' as const, ratePerHour: 30.00, isAvailable: true, createdAt: '2025-08-01T00:00:00Z', utilizationRate: 80 },
-    { id: 'res-005', name: 'Seat B2', resourceType: 'seat' as const, ratePerHour: 30.00, isAvailable: false, createdAt: '2025-08-01T00:00:00Z', utilizationRate: 75 },
+    { id: 'res-004', name: 'Seat B1', resourceType: 'seat' as const, ratePerHour: 25.00, isAvailable: true, createdAt: '2025-08-01T00:00:00Z', utilizationRate: 80 },
+    { id: 'res-005', name: 'Seat B2', resourceType: 'seat' as const, ratePerHour: 25.00, isAvailable: false, createdAt: '2025-08-01T00:00:00Z', utilizationRate: 75 },
     { id: 'res-006', name: 'Meeting Room 1', resourceType: 'room' as const, ratePerHour: 100.00, isAvailable: true, createdAt: '2025-08-01T00:00:00Z', utilizationRate: 45 },
     { id: 'res-007', name: 'Meeting Room 2', resourceType: 'room' as const, ratePerHour: 150.00, isAvailable: true, createdAt: '2025-08-01T00:00:00Z', utilizationRate: 60 },
     { id: 'res-008', name: 'Private Desk 1', resourceType: 'desk' as const, ratePerHour: 50.00, isAvailable: true, createdAt: '2025-08-01T00:00:00Z', utilizationRate: 85 },
@@ -136,15 +136,11 @@ export const sampleData = {
   inventory: [
     { id: 'inv-001', name: 'Tea', category: 'beverage' as const, price: 10.00, quantity: 25, minStock: 10, createdAt: '2025-08-01T00:00:00Z' },
     { id: 'inv-002', name: 'Coffee', category: 'beverage' as const, price: 15.00, quantity: 18, minStock: 10, createdAt: '2025-08-01T00:00:00Z' },
-    { id: 'inv-003', name: 'Nescafé', category: 'beverage' as const, price: 12.00, quantity: 2, minStock: 5, createdAt: '2025-08-01T00:00:00Z' },
     { id: 'inv-004', name: 'Pepsi', category: 'beverage' as const, price: 15.00, quantity: 30, minStock: 15, createdAt: '2025-08-01T00:00:00Z' },
     { id: 'inv-005', name: '7Up', category: 'beverage' as const, price: 15.00, quantity: 28, minStock: 15, createdAt: '2025-08-01T00:00:00Z' },
     { id: 'inv-006', name: 'Water Bottle', category: 'beverage' as const, price: 5.00, quantity: 50, minStock: 20, createdAt: '2025-08-01T00:00:00Z' },
-    { id: 'inv-007', name: 'Chips (Cheese)', category: 'snack' as const, price: 10.00, quantity: 3, minStock: 10, createdAt: '2025-08-01T00:00:00Z' },
     { id: 'inv-008', name: 'Chips (Salt)', category: 'snack' as const, price: 10.00, quantity: 15, minStock: 10, createdAt: '2025-08-01T00:00:00Z' },
     { id: 'inv-009', name: 'Chocolate Bar', category: 'snack' as const, price: 8.00, quantity: 20, minStock: 10, createdAt: '2025-08-01T00:00:00Z' },
-    { id: 'inv-010', name: 'Sandwich', category: 'meal' as const, price: 25.00, quantity: 8, minStock: 5, createdAt: '2025-08-01T00:00:00Z' },
-    { id: 'inv-011', name: 'Toast', category: 'meal' as const, price: 20.00, quantity: 0, minStock: 5, createdAt: '2025-08-01T00:00:00Z' },
   ] as InventoryItem[],
 
   invoices: [
@@ -233,6 +229,11 @@ export const sampleData = {
       theme: 'system' as const,
       language: 'en' as const,
     },
+    discounts: {
+      enabled: false,
+      value: 0,
+      label: 'Seasonal Offer',
+    },
   } as Settings,
 
   dashboardMetrics: {
@@ -310,14 +311,14 @@ export const sampleData = {
   ] as OperationRecord[],
 
   planTypes: [
-    { id: 'weekly' as const, labelEn: 'Weekly', labelAr: 'أسبوعي', days: 7 },
-    { id: 'half-monthly' as const, labelEn: 'Half-Monthly', labelAr: 'نصف شهري', days: 15 },
-    { id: 'monthly' as const, labelEn: 'Monthly', labelAr: 'شهري', days: 30 },
+    { id: 'weekly' as const, labelEn: 'Weekly', labelAr: 'أسبوعي', days: 7, price: 300 },
+    { id: 'half-monthly' as const, labelEn: 'Half-Monthly', labelAr: 'نصف شهري', days: 15, price: 500 },
+    { id: 'monthly' as const, labelEn: 'Monthly', labelAr: 'شهري', days: 30, price: 700 },
   ] as PlanTypeOption[],
 
   categories: [
-    { id: 'beverage' as const, labelEn: 'Beverages', labelAr: 'مشروبات' },
-    { id: 'snack' as const, labelEn: 'Snacks', labelAr: 'وجبات خفيفة' },
-    { id: 'meal' as const, labelEn: 'Meals', labelAr: 'وجبات' },
-  ] as CategoryOption[],
+    { id: 'beverage', labelEn: 'Beverages', labelAr: 'مشروبات' },
+    { id: 'snack', labelEn: 'Snacks', labelAr: 'وجبات خفيفة' },
+    { id: 'other', labelEn: 'Other', labelAr: 'أخرى' },
+  ],
 }

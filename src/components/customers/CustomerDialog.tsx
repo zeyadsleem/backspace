@@ -20,7 +20,7 @@ export function CustomerDialog({ isOpen, title, onClose, ...formProps }: Custome
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 dark:bg-black/70" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className={`relative z-10 w-full max-w-lg max-h-[90vh] flex flex-col rounded-lg bg-white shadow-xl dark:bg-stone-900 ${isRTL ? 'rtl-dialog' : 'ltr-dialog'}`}>
         {/* Header - Fixed */}
         <div className={`flex-shrink-0 flex items-center justify-between p-6 border-b border-stone-200 dark:border-stone-800 ${isRTL ? '' : 'flex-row-reverse'}`}>

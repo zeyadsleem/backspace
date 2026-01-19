@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { MainNav } from './MainNav'
-import { Menu, X } from 'lucide-react'
+import { Menu, X, ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface NavigationItem {
   label: string
@@ -43,7 +43,7 @@ export function AppShell({
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-40 bg-black/50"
+          className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
@@ -101,9 +101,11 @@ export function AppShell({
             ${isRTL ? '-left-3' : '-right-3'}
           `}
         >
-          <span className={`text-xs transition-transform ${sidebarCollapsed ? (isRTL ? 'rotate-180' : '') : (isRTL ? '' : 'rotate-180')}`}>
-            ›
-          </span>
+          {sidebarCollapsed ? (
+            isRTL ? <ChevronLeft className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />
+          ) : (
+            isRTL ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />
+          )}
         </button>
       </aside>
 
@@ -114,7 +116,7 @@ export function AppShell({
           ${isRTL ? (sidebarCollapsed ? 'lg:mr-16' : 'lg:mr-60') : (sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-60')}
         `}
       >
-        <div className="flex-1 overflow-y-auto scrollbar-thin">
+        <div className="flex-1 overflow-y-auto scrollbar-thin flex flex-col pb-8">
           {children}
         </div>
       </main>

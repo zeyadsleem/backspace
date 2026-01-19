@@ -14,6 +14,8 @@ export function CustomerProfilePage() {
   const navigate = useNavigate()
   const t = useTranslation()
   const customers = useAppStore((state) => state.customers)
+  const invoices = useAppStore((state) => state.invoices)
+  const operationHistory = useAppStore((state) => state.operationHistory)
   const updateCustomer = useAppStore((state) => state.updateCustomer)
   const deleteCustomer = useAppStore((state) => state.deleteCustomer)
   
@@ -22,6 +24,14 @@ export function CustomerProfilePage() {
 
   const customer = customers.find(c => c.id === id)
   if (!customer) return <div className="p-6">{t('customerNotFound')}</div>
+
+  const customerInvoices = invoices
+    .filter(inv => inv.customerId === id)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
+  const customerHistory = operationHistory
+    .filter(op => op.customerId === id)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
 
   const handleEdit = () => {
     setShowEditDialog(true)
@@ -48,9 +58,11 @@ export function CustomerProfilePage() {
 
   return (
     <>
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="flex flex-col p-6">
         <CustomerProfile
           customer={customer}
+          invoices={customerInvoices}
+          history={customerHistory}
           onEdit={handleEdit}
           onDelete={handleDelete}
           onBack={() => navigate('/customers')}

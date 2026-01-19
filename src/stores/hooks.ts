@@ -7,6 +7,9 @@ import type {
   TopCustomer
 } from '@/types'
 
+// Re-export useAppStore so it can be used directly
+export { useAppStore } from './useAppStore'
+
 // Optimized hooks to prevent infinite loops
 export const useCustomers = () => useAppStore(state => state.customers)
 export const useResources = () => useAppStore(state => state.resources)

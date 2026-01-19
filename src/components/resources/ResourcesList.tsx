@@ -31,13 +31,13 @@ export function ResourcesList({ resources, resourceTypes, onView, onEdit, onDele
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="flex flex-col p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className={isRTL ? 'text-end' : 'text-start'}>
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('resources')}</h1>
           <p className="text-sm text-stone-500 dark:text-stone-400 mt-1"><span className="text-emerald-600 dark:text-emerald-400">{availableCount} {t('available')}</span>{' · '}<span className="text-red-600 dark:text-red-400">{occupiedCount} {t('occupied')}</span></p>
         </div>
-        <button onClick={onCreate} className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors ${isRTL ? '' : 'flex-row-reverse'}`}><Plus className="h-4 w-4" />{t('addResource')}</button>
+        <button onClick={onCreate} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"><Plus className="h-4 w-4" />{t('addResource')}</button>
       </div>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex bg-stone-100 dark:bg-stone-800 rounded-lg p-1">
@@ -57,7 +57,7 @@ export function ResourcesList({ resources, resourceTypes, onView, onEdit, onDele
           <div className="p-4 bg-stone-100 dark:bg-stone-800 rounded-full mb-4"><Building2 className="h-8 w-8 text-stone-400" /></div>
           <h3 className="text-lg font-medium text-stone-900 dark:text-stone-100">{t('noResourcesFound')}</h3>
           <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{typeFilter !== 'all' ? t('trySelectingDifferent') : t('addFirstResource')}</p>
-          {typeFilter === 'all' && <button onClick={onCreate} className={`mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors ${isRTL ? '' : 'flex-row-reverse'}`}><Plus className="h-4 w-4" />{t('addResource')}</button>}
+          {typeFilter === 'all' && <button onClick={onCreate} className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"><Plus className="h-4 w-4" />{t('addResource')}</button>}
         </div>
       ) : (
         <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch' : 'space-y-3'}>

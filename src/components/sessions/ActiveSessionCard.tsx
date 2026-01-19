@@ -1,20 +1,18 @@
 import { useState, useEffect } from 'react'
 import type { ActiveSession } from '@/types'
-import { Clock, Coffee, Square, ChevronRight, CreditCard } from 'lucide-react'
+import { Clock, Square, CreditCard, PlusCircle, Monitor } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 
 interface ActiveSessionCardProps {
   session: ActiveSession
   onAddInventory?: () => void
   onEndSession?: () => void
-  onViewDetails?: () => void
 }
 
 export function ActiveSessionCard({
   session,
   onAddInventory,
   onEndSession,
-  onViewDetails,
 }: ActiveSessionCardProps) {
   const t = useAppStore((state) => state.t)
   const [elapsedTime, setElapsedTime] = useState('')
@@ -28,10 +26,12 @@ export function ActiveSessionCard({
       const diffMins = Math.floor(diffMs / 60000)
       const hours = Math.floor(diffMins / 60)
       const mins = diffMins % 60
+      
       setElapsedTime(hours > 0 ? `${hours}${t('hour').charAt(0)} ${mins}${t('minute').charAt(0)}` : `${mins}${t('minute').charAt(0)}`)
+      
       if (!session.isSubscribed) {
         const cost = (diffMins / 60) * session.resourceRate
-        setSessionCost(Math.round(cost * 100) / 100)
+        setSessionCost(Math.round(cost))
       }
     }
     calculateTime()
@@ -41,72 +41,82 @@ export function ActiveSessionCard({
 
   const totalCost = sessionCost + session.inventoryTotal
   const initials = session.customerName.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
-  const formatCurrency = (amount: number) => `${amount.toFixed(0)} ${t('egp')}`
 
   return (
-    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden flex flex-col h-full">
-      <div className="p-4 border-b border-stone-100 dark:border-stone-800">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-              <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">{initials}</span>
-            </div>
-            <div>
-              <h3 className="font-semibold text-stone-900 dark:text-stone-100">{session.customerName}</h3>
-              <p className="text-sm text-stone-500 dark:text-stone-400">{session.resourceName}</p>
+    <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl flex flex-col h-full w-full shadow-sm overflow-hidden border-b-4 border-b-amber-500/10">
+      
+      {/* 1. Header: Customer & Live Time */}
+      <div className="p-4 flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center justify-center text-stone-500 dark:text-stone-400 font-medium text-xs flex-shrink-0 shadow-sm">
+            {initials}
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-[15px] font-medium text-stone-900 dark:text-stone-100 leading-tight truncate">{session.customerName}</h3>
+            <div className="flex items-center gap-1.5 mt-1 text-stone-400">
+              <Monitor className="w-3 h-3" />
+              <span className="text-[10px] font-medium uppercase tracking-wider truncate">{session.resourceName}</span>
             </div>
           </div>
-          {session.isSubscribed && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-full">
-              <CreditCard className="h-3 w-3" />{t('subscribed')}
-            </span>
-          )}
+        </div>
+        <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-100 dark:border-amber-800/30 shadow-sm">
+                <Clock className="w-3.5 h-3.5 animate-pulse" />
+                <span className="text-xs font-medium font-mono">{elapsedTime}</span>
+            </div>
+            {session.isSubscribed && (
+                <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.1em]">{t('subscribed')}</span>
+            )}
         </div>
       </div>
 
-      <div className="p-4 space-y-3 flex-grow">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-stone-500 dark:text-stone-400"><Clock className="h-4 w-4" /><span className="text-sm">{t('elapsed')}</span></div>
-          <span className="text-lg font-bold text-stone-900 dark:text-stone-100 font-mono">{elapsedTime}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-stone-500 dark:text-stone-400">{t('session')}</span>
-          <span className={`text-sm font-medium ${session.isSubscribed ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-700 dark:text-stone-300'}`}>
-            {session.isSubscribed ? t('covered') : formatCurrency(sessionCost)}
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-stone-500 dark:text-stone-400">{t('inventoryLabel')}</span>
-            {session.inventoryConsumptions.length > 0 && <span className="text-xs text-stone-400">({t('items', { count: session.inventoryConsumptions.length })})</span>}
+      {/* 2. Billing Breakdown: Centered & Clear */}
+      <div className="px-4 pb-4 space-y-5 flex-grow">
+        <div className="grid grid-cols-2 gap-4 border-t border-stone-50 dark:border-stone-800 pt-4">
+          <div className="text-center space-y-1">
+            <p className="text-[11px] text-stone-400 font-medium uppercase tracking-widest">{t('session')}</p>
+            <p className={`text-base font-semibold ${session.isSubscribed ? 'text-emerald-600' : 'text-stone-900 dark:text-stone-100'}`}>
+              {session.isSubscribed ? t('covered') : `${sessionCost} ${t('egp')}`}
+            </p>
           </div>
-          <span className="text-sm font-medium text-stone-700 dark:text-stone-300">{formatCurrency(session.inventoryTotal)}</span>
-        </div>
-        <div className="flex items-center justify-between pt-3 border-t border-stone-100 dark:border-stone-800">
-          <span className="text-sm font-semibold text-stone-700 dark:text-stone-300">{t('total')}</span>
-          <span className="text-lg font-bold text-amber-600 dark:text-amber-400">{formatCurrency(totalCost)}</span>
-        </div>
-        {session.inventoryConsumptions.length > 0 && (
-          <div className="pt-2">
-            <p className="text-xs text-stone-500 dark:text-stone-400 mb-2">{t('recentItems')}</p>
-            <div className="flex flex-wrap gap-1">
-              {session.inventoryConsumptions.slice(-3).map((item) => (
-                <span key={item.id} className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 rounded">{item.itemName} ×{item.quantity}</span>
-              ))}
+          <div className="text-center space-y-1 border-s border-stone-100 dark:border-stone-800">
+            <p className="text-[11px] text-stone-400 font-medium uppercase tracking-widest">{t('inventoryLabel')}</p>
+            <div className="flex flex-col items-center gap-0.5">
+                <p className="text-base font-semibold text-stone-900 dark:text-stone-100">{session.inventoryTotal} {t('egp')}</p>
+                {session.inventoryConsumptions.length > 0 && (
+                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">
+                        {t('items', { count: session.inventoryConsumptions.length })}
+                    </span>
+                )}
             </div>
           </div>
-        )}
+        </div>
+
+        {/* 3. The Total: Integrated Premium Box (#FFFBEB) */}
+        <div className="bg-[#FFFBEB] dark:bg-amber-900/10 px-4 py-3 rounded-xl border border-amber-100 dark:border-amber-900/20 flex items-center justify-between shadow-sm">
+          <span className="text-[11px] font-medium text-amber-800/70 dark:text-amber-400 uppercase tracking-widest">{t('totalToPay')}</span>
+          <div className="flex items-baseline gap-1">
+            <span className="text-xl font-semibold text-amber-700 dark:text-amber-400">{totalCost}</span>
+            <span className="text-[10px] font-medium text-amber-600/70 uppercase">{t('egpCurrency')}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="p-3 bg-stone-50 dark:bg-stone-800/50 border-t border-stone-100 dark:border-stone-800 flex gap-2 mt-auto">
-        <button onClick={onAddInventory} className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-stone-700 dark:text-stone-300 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors">
-          <Coffee className="h-4 w-4" />{t('addItem')}
+      {/* 4. Actions: Slim & Practical */}
+      <div className="mt-auto grid grid-cols-2 gap-px bg-stone-100 dark:bg-stone-800 border-t border-stone-100 dark:border-stone-800">
+        <button 
+          onClick={onAddInventory} 
+          className="bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 py-3 flex items-center justify-center gap-2 text-xs font-medium text-stone-600 dark:text-stone-300 transition-colors"
+        >
+          <PlusCircle className="w-4 h-4 text-amber-500" />
+          {t('addItem')}
         </button>
-        <button onClick={onEndSession} className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors">
-          <Square className="h-4 w-4" />{t('end')}
-        </button>
-        <button onClick={onViewDetails} className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-white dark:hover:bg-stone-900 rounded-lg transition-colors">
-          <ChevronRight className="h-4 w-4" />
+        <button 
+          onClick={onEndSession} 
+          className="bg-white dark:bg-stone-900 hover:bg-red-50 dark:hover:bg-red-900/10 py-3 flex items-center justify-center gap-2 text-xs font-medium text-stone-600 dark:text-stone-300 hover:text-red-600 transition-colors"
+        >
+          <Square className="w-3.5 h-3.5 fill-current" />
+          {t('end')}
         </button>
       </div>
     </div>
