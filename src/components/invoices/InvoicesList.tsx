@@ -1,17 +1,16 @@
 import { useState } from 'react'
 import type { Invoice, InvoiceStatus } from '@/types'
 import { InvoiceRow } from './InvoiceRow'
-import { Plus, Search, FileText } from 'lucide-react'
+import { Search, FileText } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 
 interface InvoicesListProps {
   invoices: Invoice[]
   onView?: (id: string) => void
   onRecordPayment?: (id: string) => void
-  onCreate?: () => void
 }
 
-export function InvoicesList({ invoices, onView, onRecordPayment, onCreate }: InvoicesListProps) {
+export function InvoicesList({ invoices, onView, onRecordPayment }: InvoicesListProps) {
   const t = useAppStore((state) => state.t)
   const isRTL = useAppStore((state) => state.isRTL)
   const [searchQuery, setSearchQuery] = useState('')
@@ -21,7 +20,7 @@ export function InvoicesList({ invoices, onView, onRecordPayment, onCreate }: In
     const matchesSearch = invoice.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) || invoice.customerName.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter
     return matchesSearch && matchesStatus
-  })
+  }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   const statusCounts = { all: invoices.length, paid: invoices.filter((i) => i.status === 'paid').length, unpaid: invoices.filter((i) => i.status === 'unpaid').length, pending: invoices.filter((i) => i.status === 'pending').length }
   const totalAmount = filteredInvoices.reduce((sum, i) => sum + i.total, 0)
@@ -33,9 +32,6 @@ export function InvoicesList({ invoices, onView, onRecordPayment, onCreate }: In
         <div className={isRTL ? 'text-end' : 'text-start'}>
           <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('invoices')}</h1>
           <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{t('totalAmount')}: {totalAmount.toLocaleString()} {t('egpCurrency')} · {t('collectedAmount')}: {paidAmount.toLocaleString()} {t('egpCurrency')}</p>
-        </div>
-        <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <button onClick={onCreate} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"><Plus className="h-4 w-4" />{t('newInvoice')}</button>
         </div>
       </div>
 
@@ -56,7 +52,6 @@ export function InvoicesList({ invoices, onView, onRecordPayment, onCreate }: In
           <div className="p-4 bg-stone-100 dark:bg-stone-800 rounded-full mb-4"><FileText className="h-8 w-8 text-stone-400" /></div>
           <h3 className="text-lg font-medium text-stone-900 dark:text-stone-100">{searchQuery || statusFilter !== 'all' ? t('noInvoicesFound') : t('noInvoicesYet')}</h3>
           <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{searchQuery || statusFilter !== 'all' ? t('tryAdjustingFilters') : t('createFirstInvoice')}</p>
-          {!searchQuery && statusFilter === 'all' && <button onClick={onCreate} className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"><Plus className="h-4 w-4" />{t('createInvoice')}</button>}
         </div>
       ) : (
         <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden flex flex-col flex-1 min-h-0">

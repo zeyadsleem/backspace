@@ -139,22 +139,22 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
                           key={item.id} 
                           onClick={() => handleItemAdd(item)}
                           disabled={availableQuantity <= 0}
-                          className={`group text-start flex items-center gap-3 p-2.5 rounded-lg border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                          className={`group text-start flex items-center gap-2.5 p-1.5 rounded-lg border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                             isInCart 
                               ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-900/10' 
                               : 'border-stone-100 bg-stone-50 hover:bg-white hover:border-amber-200 dark:border-stone-800 dark:bg-stone-800/50 dark:hover:bg-stone-800 dark:hover:border-stone-700'
                           }`}
                         >
-                          <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${
+                          <div className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
                             isInCart ? 'bg-amber-500 text-white' : 'bg-white dark:bg-stone-800 text-stone-400 border border-stone-100 dark:border-stone-700'
                           }`}>
-                            {isInCart ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                            {isInCart ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[15px] font-medium text-stone-900 dark:text-stone-100 truncate">{item.name}</p>
+                            <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">{item.name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-sm font-bold text-amber-600 dark:text-amber-400">{item.price} {t('egpCurrency')}</span>
-                              <span className="text-[11px] text-stone-400 font-medium tracking-tight">• {availableQuantity} {t('inStock')}</span>
+                              <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{item.price} {t('egpCurrency')}</span>
+                              <span className="text-[10px] text-stone-400 font-medium tracking-tight">• {availableQuantity} {t('inStock')}</span>
                             </div>
                           </div>
                         </button>
