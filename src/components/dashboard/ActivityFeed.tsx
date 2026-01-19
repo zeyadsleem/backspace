@@ -43,8 +43,8 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       </div>
       
       {/* Content - Scrollable */}
-      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-4 hover:scrollbar-thumb-stone-400 transition-colors">
-        <div className="space-y-3">
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-2">
+        <div className="divide-y divide-stone-100 dark:divide-stone-800/50">
           {activities.length === 0 ? (
             <p className="text-sm text-stone-500 dark:text-stone-400 text-center py-8">{t('noRecentActivity')}</p>
           ) : (
@@ -52,13 +52,13 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
               const config = activityConfig[activity.type]
               const Icon = config.icon
               return (
-                <div key={activity.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors">
-                  <div className={`p-1.5 rounded-lg flex-shrink-0 ${config.bg}`}>
-                    <Icon className={`h-3 w-3 ${config.color}`} />
+                <div key={activity.id} className="flex items-start gap-3 p-3 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors">
+                  <div className={`p-2 rounded-lg flex-shrink-0 ${config.bg}`}>
+                    <Icon className={`h-3.5 w-3.5 ${config.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-stone-700 dark:text-stone-300 leading-relaxed font-medium">{activity.description}</p>
-                    <p className="text-xs text-stone-500 dark:text-stone-500 mt-1">{formatTime(activity.timestamp)}</p>
+                    <p className="text-sm text-stone-700 dark:text-stone-300 leading-snug font-medium">{activity.description}</p>
+                    <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">{formatTime(activity.timestamp)}</p>
                   </div>
                 </div>
               )

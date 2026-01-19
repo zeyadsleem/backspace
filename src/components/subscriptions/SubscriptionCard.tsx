@@ -37,12 +37,12 @@ export function SubscriptionCard({ subscription, planType, onView }: Subscriptio
       <div className="p-4 sm:p-5 space-y-4 flex flex-col flex-1">
         <div className="flex justify-between items-start gap-4">
           <div className="min-w-0">
-            <h3 className="text-base font-bold text-stone-900 dark:text-stone-100 truncate">{subscription.customerName}</h3>
-            <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">{isRTL ? planType.labelAr : planType.labelEn}</p>
+            <h3 className="text-lg font-medium text-stone-900 dark:text-stone-100 truncate">{subscription.customerName}</h3>
+            <p className="text-sm text-stone-500 dark:text-stone-400 font-normal">{isRTL ? planType.labelAr : planType.labelEn}</p>
           </div>
           {subscription.status === 'active' && (
             <div className="text-end shrink-0">
-              <span className={`text-xs font-black ${getTextColor()}`}>
+              <span className={`text-sm font-semibold ${getTextColor()}`}>
                 {subscription.daysRemaining} {t('days')}
               </span>
             </div>
@@ -50,7 +50,7 @@ export function SubscriptionCard({ subscription, planType, onView }: Subscriptio
         </div>
 
         <div className="flex-1 flex flex-col justify-end gap-3">
-          <div className="flex items-center justify-between text-[10px] font-bold text-stone-400 uppercase tracking-tight">
+          <div className="flex items-center justify-between text-xs font-medium text-stone-400 uppercase tracking-tight">
             <span>{formatDate(subscription.startDate)}</span>
             <span>{formatDate(subscription.endDate)}</span>
           </div>
@@ -63,7 +63,7 @@ export function SubscriptionCard({ subscription, planType, onView }: Subscriptio
               />
             </div>
           ) : (
-            <div className={`text-[10px] uppercase tracking-widest font-black text-center py-1 rounded ${subscription.status === 'expired' ? 'bg-red-50 dark:bg-red-900/10 text-red-500' : 'bg-stone-100 dark:bg-stone-800/50 text-stone-400'}`}>
+            <div className={`text-xs uppercase tracking-widest font-bold text-center py-1 rounded ${subscription.status === 'expired' ? 'bg-red-50 dark:bg-red-900/10 text-red-500' : 'bg-stone-100 dark:bg-stone-800/50 text-stone-400'}`}>
               {t(subscription.status)}
             </div>
           )}

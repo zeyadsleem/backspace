@@ -21,83 +21,85 @@ export function InventoryItemCard({ item, category, onEdit, onDelete, onAdjustQu
   }
 
   const status = getStockStatus()
-  const statusConfig = {
-    'in-stock': { color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100', icon: null },
-    'low-stock': { color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100', icon: <AlertCircle className="w-3.5 h-3.5" /> },
-    'out-of-stock': { color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100', icon: <AlertCircle className="w-3.5 h-3.5" /> },
+  const statusColors = {
+    'in-stock': 'text-stone-900 dark:text-stone-100',
+    'low-stock': 'text-amber-600 dark:text-amber-400',
+    'out-of-stock': 'text-red-600 dark:text-red-400',
   }
-  const config = statusConfig[status]
-
+  
   const categoryIcons = {
-    beverage: <Coffee className="w-4 h-4" />,
-    snack: <Cookie className="w-4 h-4" />,
-    other: <Box className="w-4 h-4" />,
+    beverage: <Coffee className="w-3.5 h-3.5" />,
+    snack: <Cookie className="w-3.5 h-3.5" />,
+    other: <Box className="w-3.5 h-3.5" />,
   }
 
   return (
-    <div className={`group bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl flex flex-col h-full w-full shadow-sm overflow-hidden transition-all hover:border-stone-300 dark:hover:border-stone-700 ${status === 'out-of-stock' ? 'opacity-90' : ''}`}>
+    <div className={`group relative bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl flex flex-col h-full shadow-sm hover:shadow-md transition-all duration-200 ${status === 'out-of-stock' ? 'border-l-4 border-l-red-500' : 'hover:border-amber-400/50'}`}>
       
-      {/* 1. Header with Category Tint */}
-      <div className="p-3 flex items-center justify-between border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-800/30">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 flex items-center justify-center text-stone-400 shadow-sm">
-            {categoryIcons[item.category as keyof typeof categoryIcons] || <Package className="w-4 h-4" />}
-          </div>
-          <span className="text-[10px] font-semibold text-stone-500 uppercase tracking-widest">
+      {/* 1. Top Row: Category & Actions */}
+      <div className="p-4 pb-0 flex items-start justify-between">
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400">
+          {categoryIcons[item.category as keyof typeof categoryIcons] || <Package className="w-3.5 h-3.5" />}
+          <span className="text-[10px] font-bold uppercase tracking-wider">
             {isRTL ? category.labelAr : category.labelEn}
           </span>
         </div>
-        <div className="flex items-center gap-1">
-          <button onClick={onEdit} className="p-1.5 text-stone-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-all">
-            <Pencil className="w-4 h-4" />
+        
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button onClick={onEdit} className="p-1.5 text-stone-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors">
+            <Pencil className="w-3.5 h-3.5" />
           </button>
-          <button onClick={onDelete} className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
-            <Trash2 className="w-4 h-4" />
+          <button onClick={onDelete} className="p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+            <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* 2. Main Body */}
-      <div className="p-4 flex-grow flex flex-col gap-4">
-        <div className="flex justify-between items-start gap-3">
-          <h3 className="text-base font-medium text-stone-800 dark:text-stone-100 leading-tight truncate">{item.name}</h3>
-          <div className="px-2.5 py-1 bg-[#FFFBEB] dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded-lg flex-shrink-0">
-            <span className="text-lg font-bold text-amber-700 dark:text-amber-400">{item.price}</span>
-            <span className="text-[11px] font-medium text-amber-600/70 ms-1 uppercase">{t('egp')}</span>
-          </div>
+      {/* 2. Hero Info: Name & Price */}
+      <div className="px-4 py-3 flex-1 flex flex-col items-center text-center">
+        <h3 className="text-base font-bold text-stone-800 dark:text-stone-100 leading-tight mb-1 line-clamp-2" title={item.name}>
+          {item.name}
+        </h3>
+        <div className="flex items-baseline justify-center gap-1">
+          <span className="text-lg font-bold text-amber-600 dark:text-amber-500">{item.price}</span>
+          <span className="text-xs font-medium text-stone-400 uppercase">{t('egp')}</span>
         </div>
+      </div>
 
-        {/* 3. Stock Status Row */}
-        <div className={`px-3 py-2.5 rounded-xl border ${config.bg} ${config.border} flex items-center justify-between`}>
+      {/* 3. Footer: Unified Stock Control */}
+      <div className="p-3 mt-auto border-t border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 rounded-b-2xl flex items-center justify-between">
+        
+        {/* Stock Indicator */}
+        <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-stone-800 dark:text-stone-100">
-                {item.quantity} / {item.minStock}
+            <span className={`text-xl font-bold font-mono ${statusColors[status]}`}>
+              {item.quantity}
             </span>
+            {status !== 'in-stock' && (
+              <AlertCircle className={`w-4 h-4 ${status === 'out-of-stock' ? 'text-red-500' : 'text-amber-500'}`} />
+            )}
           </div>
-          <div className={`flex items-center gap-1.5 ${config.color}`}>
-            {config.icon}
-          </div>
+          <span className="text-[10px] font-medium text-stone-400 uppercase tracking-tight">
+            {t('minStock')}: {item.minStock}
+          </span>
         </div>
-      </div>
 
-      {/* 4. Refined Footer Adjuster */}
-      <div className="p-2 border-t border-stone-100 dark:border-stone-800 flex items-center gap-2 bg-stone-50/30 dark:bg-stone-900/50">
-        <button 
-          onClick={() => onAdjustQuantity?.(-1)} 
-          disabled={item.quantity <= 0}
-          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-400 hover:text-red-600 hover:border-red-100 shadow-sm transition-all disabled:opacity-30"
-        >
-          <Minus className="w-4 h-4" />
-        </button>
-        <div className="flex-1 text-center font-medium text-stone-600 dark:text-stone-300 text-sm">
-            {item.quantity}
+        {/* Quick Actions */}
+        <div className="flex items-center gap-1 bg-white dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-1 shadow-sm">
+          <button 
+            onClick={() => onAdjustQuantity?.(-1)}
+            disabled={item.quantity <= 0}
+            className="w-7 h-7 flex items-center justify-center rounded bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-red-100 hover:text-red-600 disabled:opacity-30 transition-colors"
+          >
+            <Minus className="w-3.5 h-3.5" />
+          </button>
+          <button 
+            onClick={() => onAdjustQuantity?.(1)}
+            className="w-7 h-7 flex items-center justify-center rounded bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-emerald-100 hover:text-emerald-600 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
         </div>
-        <button 
-          onClick={() => onAdjustQuantity?.(1)}
-          className="w-9 h-9 flex items-center justify-center rounded-xl bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-400 hover:text-emerald-600 hover:border-emerald-100 shadow-sm transition-all"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
       </div>
     </div>
   )

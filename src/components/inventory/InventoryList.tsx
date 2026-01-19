@@ -36,7 +36,7 @@ export function InventoryList({ inventory, categories, onView, onEdit, onDelete,
     return acc
   }, [] as Array<{ category: CategoryOption; items: InventoryItem[] }>)
 
-  const gridClass = "grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-4 items-stretch"
+  const gridClass = "grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4 items-stretch"
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -87,11 +87,10 @@ export function InventoryList({ inventory, categories, onView, onEdit, onDelete,
             {groupedInventory.map(({ category, items }) => (
               <div key={category.id}>
                 <div className="flex items-center gap-3 mb-5 px-1">
-                  <h2 className="text-sm font-bold text-stone-400 uppercase tracking-[0.2em]">{isRTL ? category.labelAr : category.labelEn}</h2>
-                  <div className="h-px bg-stone-100 dark:bg-stone-800 flex-1" />
-                  <span className="text-[10px] font-bold text-stone-300 uppercase tracking-widest">{items.length} {t('itemsLabel') || 'Items'}</span>
-                </div>
-                <div className={gridClass}>
+                                  <h2 className="text-sm font-bold text-stone-400 uppercase tracking-[0.2em]">{isRTL ? category.labelAr : category.labelEn}</h2>
+                                  <div className="h-px bg-stone-100 dark:bg-stone-800 flex-1" />
+                                  <span className="text-[10px] font-bold text-stone-300 uppercase tracking-widest">{t('items', { count: items.length })}</span>
+                                </div>                <div className={gridClass}>
                   {items.map((item) => (
                     <InventoryItemCard key={item.id} item={item} category={category} onEdit={() => onEdit?.(item.id)} onDelete={() => onDelete?.(item.id)} onAdjustQuantity={(delta) => onAdjustQuantity?.(item.id, delta)} />
                   ))}

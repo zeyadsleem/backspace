@@ -30,6 +30,13 @@ export function ResourcesList({ resources, resourceTypes, onView, onEdit, onDele
     desk: t('desk') 
   }
 
+  // Group resources by type for 'all' view
+  const groupedResources = resourceTypes.map(type => ({
+    type,
+    label: typeLabels[type],
+    items: filteredResources.filter(r => r.resourceType === type)
+  })).filter(group => group.items.length > 0)
+
   return (
     <div className="flex flex-col p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -58,6 +65,21 @@ export function ResourcesList({ resources, resourceTypes, onView, onEdit, onDele
           <h3 className="text-lg font-medium text-stone-900 dark:text-stone-100">{t('noResourcesFound')}</h3>
           <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{typeFilter !== 'all' ? t('trySelectingDifferent') : t('addFirstResource')}</p>
           {typeFilter === 'all' && <button onClick={onCreate} className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"><Plus className="h-4 w-4" />{t('addResource')}</button>}
+        </div>
+      ) : typeFilter === 'all' ? (
+        <div className="space-y-8">
+          {groupedResources.map((group) => (
+            <div key={group.type}>
+              <div className="flex items-center gap-3 mb-4 px-1">
+                <h2 className="text-sm font-bold text-stone-400 uppercase tracking-[0.2em]">{group.label}</h2>
+                <div className="h-px bg-stone-100 dark:bg-stone-800 flex-1" />
+                <span className="text-[10px] font-bold text-stone-300 uppercase tracking-widest">{t('items', { count: group.items.length })}</span>
+              </div>
+              <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch' : 'space-y-3'}>
+                {group.items.map((resource) => <ResourceCard key={resource.id} resource={resource} viewMode={viewMode} onClick={() => onView?.(resource.id)} onEdit={() => onEdit?.(resource.id)} onDelete={() => onDelete?.(resource.id)} onSelectForSession={resource.isAvailable ? () => onSelectForSession?.(resource.id) : undefined} />)}
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch' : 'space-y-3'}>

@@ -56,18 +56,17 @@ export function Dashboard({ onNewCustomer, onStartSession, onNavigateToSection, 
       </div>
       
       {/* Bottom Section - Split Activity and Unpaid Invoices */}
-      <div className="flex-1 min-h-0 px-6 pb-6 lg:overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 h-auto lg:h-full">
-          {/* Recent Activity - Taking full width since Unpaid is hidden */}
-          <div className="h-[320px] lg:h-full">
+      <div className="flex-1 min-h-0 px-6 pb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Activity */}
+          <div className="h-[550px]">
             <ActivityFeed activities={recentActivity} />
           </div>
           
-          {/* Unpaid Invoices - Hidden for now
-          <div className="h-[320px] lg:h-full">
+          {/* Unpaid Invoices */}
+          <div className="h-[550px]">
             <PendingInvoices invoices={invoices} onViewInvoice={onViewInvoice} />
           </div>
-          */}
         </div>
       </div>
     </div>
