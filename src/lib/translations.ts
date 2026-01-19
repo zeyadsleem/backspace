@@ -121,6 +121,22 @@ export const translations = {
     noActiveSessions: 'No active sessions',
     startNewSessionPrompt: 'Start a new session to see it here',
     
+    // Checkout Dialog
+    checkout: 'Checkout',
+    orders: 'Orders',
+    noOrders: 'No orders added',
+    totalDue: 'Total Due',
+    payNow: 'Pay Now',
+    addToDebt: 'Add to Debt',
+    amountReceived: 'Amount Received',
+    cashPaymentDescription: 'Standard cash payment. The invoice will be marked as Paid.',
+    unpaidInvoice: 'Unpaid Invoice',
+    addToDebtWarning: 'This amount ({amount} EGP) will be added to {name}\'s debt balance. The invoice will be marked as Unpaid.',
+    confirmPayment: 'Complete Payment',
+    confirmDebt: 'Confirm Debt',
+    unpaidInvoices: 'Unpaid Invoices',
+    viewCustomerProfile: 'View Customer Profile',
+
     // Start Session Dialog
     selectCustomer: 'Select Customer',
     selectResource: 'Select Resource',
@@ -519,6 +535,22 @@ export const translations = {
     noActiveSessions: 'لا توجد جلسات نشطة',
     startNewSessionPrompt: 'ابدأ جلسة جديدة لتظهر هنا',
     
+    // Checkout Dialog
+    checkout: 'الدفع والخروج',
+    orders: 'الطلبات',
+    noOrders: 'لا توجد طلبات',
+    totalDue: 'المبلغ المستحق',
+    payNow: 'دفع الآن',
+    addToDebt: 'تسجيل كدين',
+    amountReceived: 'المبلغ المستلم',
+    cashPaymentDescription: 'دفع نقدي قياسي. سيتم تسجيل الفاتورة كمدفوعة.',
+    unpaidInvoice: 'فاتورة غير مدفوعة',
+    addToDebtWarning: 'سيتم إضافة هذا المبلغ ({amount} ج.م) إلى رصيد ديون {name}. ستسجل الفاتورة كغير مدفوعة.',
+    confirmPayment: 'إتمام الدفع',
+    confirmDebt: 'تأكيد الدين',
+    unpaidInvoices: 'الفواتير غير المدفوعة',
+    viewCustomerProfile: 'عرض ملف العميل',
+
     // Start Session Dialog
     selectCustomer: 'اختر العميل',
     selectResource: 'اختر المورد',

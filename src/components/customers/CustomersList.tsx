@@ -73,12 +73,12 @@ export function CustomersList({ customers, customerTypes, onView, onEdit, onDele
         <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl overflow-hidden flex flex-col flex-1 min-h-0">
           {/* Table Header - Fixed */}
           <div className="flex-shrink-0 hidden md:grid grid-cols-12 gap-4 px-4 py-3 bg-stone-50 dark:bg-stone-800/50 border-b border-stone-200 dark:border-stone-800 text-start">
-            <div className="col-span-1 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase">{t('id')}</div>
-            <div className="col-span-3 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase">{t('customer')}</div>
-            <div className="col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase">{t('phone')}</div>
-            <div className="col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase">{t('type')}</div>
-            <div className="col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase text-center">{t('balance')}</div>
-            <div className="col-span-2 text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase text-end">{t('actions')}</div>
+            <div className="col-span-1 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase">{t('id')}</div>
+            <div className="col-span-3 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase">{t('customer')}</div>
+            <div className="col-span-2 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase">{t('phone')}</div>
+            <div className="col-span-2 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase">{t('type')}</div>
+            <div className="col-span-2 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase text-center">{t('balance')}</div>
+            <div className="col-span-2 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase text-end">{t('actions')}</div>
           </div>
           
           {/* Table Body - Scrollable */}

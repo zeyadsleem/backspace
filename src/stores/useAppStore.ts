@@ -872,7 +872,7 @@ export const useAppStore = create<AppStore>()(
           
           const invoice = state.invoices[index]
           const newPaidAmount = invoice.paidAmount + amount
-          const newStatus = newPaidAmount >= invoice.total ? 'paid' : 'pending'
+          const newStatus = newPaidAmount >= invoice.total ? 'paid' : 'unpaid'
           
           invoice.payments.push(newPayment)
           invoice.paidAmount = newPaidAmount

@@ -10,16 +10,15 @@ interface InvoiceRowProps {
   onRecordPayment?: () => void
 }
 
-const statusConfig: Record<InvoiceStatus, { color: string; bg: string }> = {
+const statusConfig: Record<Exclude<InvoiceStatus, 'pending'>, { color: string; bg: string }> = {
   paid: { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
   unpaid: { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/30' },
-  pending: { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-100 dark:bg-amber-900/30' },
 }
 
 export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps) {
   const t = useTranslation()
   const isRTL = useAppStore((state) => state.isRTL)
-  const config = statusConfig[invoice.status]
+  const config = statusConfig[invoice.status as keyof typeof statusConfig] || statusConfig.unpaid
   
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString(isRTL ? 'ar-EG' : 'en-US', { 
     month: 'short', 
@@ -27,12 +26,11 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
   })
   
   const formatCurrency = (amount: number) => `${amount.toLocaleString()} ${t('egpCurrency')}`
-  const remainingAmount = invoice.total - invoice.paidAmount
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors text-start">
       <div className="col-span-1 md:col-span-2 flex items-center">
-        <span className="font-mono text-[11px] font-medium text-stone-500 dark:text-stone-400 uppercase tracking-tight">
+        <span className="font-mono text-xs font-medium text-stone-600 dark:text-stone-400 uppercase tracking-tight">
           {invoice.invoiceNumber}
         </span>
       </div>
@@ -40,16 +38,16 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
       <div className="col-span-1 md:col-span-3 flex items-center">
         <div className="text-start">
           <p className="text-sm font-normal text-stone-900 dark:text-stone-100">{invoice.customerName}</p>
-          <p className="text-xs text-stone-500 dark:text-stone-400">{invoice.customerPhone}</p>
+          <p className="text-[11px] text-stone-500 dark:text-stone-400">{invoice.customerPhone}</p>
         </div>
       </div>
       
       <div className="col-span-1 md:col-span-2 flex items-center md:justify-center">
         <div className="md:text-center text-start">
           <p className="text-sm font-normal text-stone-900 dark:text-stone-100 font-mono">{formatCurrency(invoice.total)}</p>
-          {invoice.status === 'pending' && remainingAmount > 0 && (
+          {invoice.status === 'unpaid' && invoice.paidAmount > 0 && (
             <p className="text-[10px] text-amber-600 dark:text-amber-400 font-normal font-mono uppercase">
-              {formatCurrency(remainingAmount)} {t('remaining')}
+              {formatCurrency(invoice.total - invoice.paidAmount)} {t('remaining')}
             </p>
           )}
         </div>
@@ -57,7 +55,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
       
       <div className="col-span-1 md:col-span-2 flex items-center">
         <span className={cn(
-          "px-2.5 py-0.5 text-[10px] font-black rounded-full uppercase tracking-wider",
+          "px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider",
           config.bg,
           config.color
         )}>

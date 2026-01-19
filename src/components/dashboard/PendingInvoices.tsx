@@ -4,10 +4,10 @@ import { useAppStore } from '@/stores/useAppStore'
 
 interface PendingInvoicesProps {
   invoices: Invoice[]
-  onViewInvoice?: (id: string) => void
+  onViewCustomerDebt?: (customerId: string) => void
 }
 
-export function PendingInvoices({ invoices, onViewInvoice }: PendingInvoicesProps) {
+export function PendingInvoices({ invoices, onViewCustomerDebt }: PendingInvoicesProps) {
   const t = useAppStore((state) => state.t)
   const isRTL = useAppStore((state) => state.isRTL)
 
@@ -20,23 +20,16 @@ export function PendingInvoices({ invoices, onViewInvoice }: PendingInvoicesProp
       if (existing) {
         existing.totalDue += balanceDue
         existing.count += 1
-        // Keep the ID of the most recent invoice for navigation
-        if (new Date(invoice.createdAt) > new Date(existing.lastInvoiceDate)) {
-            existing.actionInvoiceId = invoice.id
-            existing.lastInvoiceDate = invoice.createdAt
-        }
       } else {
         acc.push({
           customerId: invoice.customerId,
           customerName: invoice.customerName,
           totalDue: balanceDue,
           count: 1,
-          actionInvoiceId: invoice.id,
-          lastInvoiceDate: invoice.createdAt
         })
       }
       return acc
-    }, [] as { customerId: string, customerName: string, totalDue: number, count: number, actionInvoiceId: string, lastInvoiceDate: string }[])
+    }, [] as { customerId: string, customerName: string, totalDue: number, count: number }[])
     .sort((a, b) => b.totalDue - a.totalDue)
 
   return (
@@ -47,7 +40,7 @@ export function PendingInvoices({ invoices, onViewInvoice }: PendingInvoicesProp
           <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
             <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
           </div>
-          <h3 className="font-bold text-stone-900 dark:text-stone-100">{t('unpaid')}</h3>
+          <h3 className="font-bold text-stone-900 dark:text-stone-100">{t('unpaidInvoices')}</h3>
         </div>
         <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-[10px] font-black border border-red-100 dark:border-red-900/30">
           {pendingByCustomer.length} {t('customer')}
@@ -65,7 +58,7 @@ export function PendingInvoices({ invoices, onViewInvoice }: PendingInvoicesProp
             {pendingByCustomer.map((item) => (
               <button
                 key={item.customerId}
-                onClick={() => onViewInvoice?.(item.actionInvoiceId)}
+                onClick={() => onViewCustomerDebt?.(item.customerId)}
                 className="w-full flex items-center justify-between p-3 rounded-xl border border-stone-100 dark:border-stone-800/50 hover:bg-red-50/30 dark:hover:bg-red-900/10 hover:border-red-100 transition-all group"
               >
                 <div className="text-start">

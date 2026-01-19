@@ -3,7 +3,6 @@ import { LowStockBanner } from './LowStockBanner'
 import { QuickActions } from './QuickActions'
 import { ActivityFeed } from './ActivityFeed'
 import { PendingInvoices } from './PendingInvoices'
-import { RevenueChart } from './RevenueChart'
 import { DollarSign, Clock, Users, CreditCard, Activity } from 'lucide-react'
 import { useDashboardData, useTranslation } from '@/stores/hooks'
 import { useAppStore } from '@/stores/useAppStore'
@@ -13,14 +12,14 @@ interface DashboardProps {
   onStartSession?: () => void
   onNavigateToSection?: (section: string) => void
   onViewInventoryItem?: (id: string) => void
-  onViewInvoice?: (id: string) => void
+  onViewCustomerDebt?: (customerId: string) => void
 }
 
-export function Dashboard({ onNewCustomer, onStartSession, onNavigateToSection, onViewInventoryItem, onViewInvoice }: DashboardProps) {
+export function Dashboard({ onNewCustomer, onStartSession, onNavigateToSection, onViewInventoryItem, onViewCustomerDebt }: DashboardProps) {
   const t = useTranslation()
   const isRTL = useAppStore((state) => state.isRTL)
   const invoices = useAppStore((state) => state.invoices)
-  const { dashboardMetrics: metrics, lowStockAlerts, recentActivity, revenueChart } = useDashboardData()
+  const { dashboardMetrics: metrics, lowStockAlerts, recentActivity } = useDashboardData()
   
   const formatCurrency = (amount: number) => {
     const formattedNumber = new Intl.NumberFormat('en-EG', { 
@@ -65,7 +64,7 @@ export function Dashboard({ onNewCustomer, onStartSession, onNavigateToSection, 
           
           {/* Unpaid Invoices */}
           <div className="h-[550px]">
-            <PendingInvoices invoices={invoices} onViewInvoice={onViewInvoice} />
+            <PendingInvoices invoices={invoices} onViewCustomerDebt={onViewCustomerDebt} />
           </div>
         </div>
       </div>

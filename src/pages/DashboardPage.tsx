@@ -5,6 +5,7 @@ import { StartSessionDialog } from '@/components/sessions/StartSessionDialog'
 import { CustomerDialog } from '@/components/customers/CustomerDialog'
 import { InvoiceDialog } from '@/components/invoices/InvoiceDialog'
 import { PaymentDialog } from '@/components/invoices/PaymentDialog'
+import { CustomerDebtDialog } from '@/components/dashboard/CustomerDebtDialog'
 import { useAppStore } from '@/stores/useAppStore'
 import type { CustomerType } from '@/types'
 
@@ -16,6 +17,7 @@ export function DashboardPage() {
   const [showNewCustomerDialog, setShowNewCustomerDialog] = useState(false)
   const [viewInvoiceId, setViewInvoiceId] = useState<string | null>(null)
   const [paymentInvoiceId, setPaymentInvoiceId] = useState<string | null>(null)
+  const [customerDebtId, setCustomerDebtId] = useState<string | null>(null)
   
   // Get data from store
   const {
@@ -46,6 +48,11 @@ export function DashboardPage() {
 
   const viewInvoice = viewInvoiceId ? invoices.find(i => i.id === viewInvoiceId) ?? null : null
   const paymentInvoice = paymentInvoiceId ? invoices.find(i => i.id === paymentInvoiceId) ?? null : null
+  
+  const customerDebtInvoices = customerDebtId 
+    ? invoices.filter(i => i.customerId === customerDebtId && i.status !== 'paid') 
+    : []
+  const debtCustomer = customerDebtId ? customers.find(c => c.id === customerDebtId) : null
 
   return (
     <>
@@ -54,7 +61,7 @@ export function DashboardPage() {
         onNewCustomer={() => setShowNewCustomerDialog(true)}
         onNavigateToSection={(section) => navigate(`/${section}`)}
         onViewInventoryItem={(id) => navigate(`/inventory?highlight=${id}`)}
-        onViewInvoice={(id) => setViewInvoiceId(id)}
+        onViewCustomerDebt={(customerId) => setCustomerDebtId(customerId)}
       />
       
       <StartSessionDialog
@@ -65,7 +72,7 @@ export function DashboardPage() {
         onSubmit={handleStartSession}
         onClose={() => setShowStartSessionDialog(false)}
       />
-      
+
       <CustomerDialog
         isOpen={showNewCustomerDialog}
         title={t('newCustomer')}
@@ -86,6 +93,16 @@ export function DashboardPage() {
         invoice={paymentInvoice}
         onSubmit={(data) => { if (paymentInvoiceId) recordPayment(paymentInvoiceId, data.amount, data.method, data.date, data.notes); setPaymentInvoiceId(null) }}
         onClose={() => setPaymentInvoiceId(null)}
+      />
+
+      <CustomerDebtDialog
+        isOpen={!!customerDebtId}
+        customerName={debtCustomer?.name || ''}
+        invoices={customerDebtInvoices}
+        onClose={() => setCustomerDebtId(null)}
+        onViewInvoice={(id) => { setViewInvoiceId(id); }}
+        onRecordPayment={(id) => { setPaymentInvoiceId(id); }}
+        onGoToProfile={() => { if (customerDebtId) navigate(`/customers/${customerDebtId}`); setCustomerDebtId(null); }}
       />
     </>
   )

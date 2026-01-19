@@ -10,10 +10,9 @@ interface InvoiceDialogProps {
   onRecordPayment?: () => void
 }
 
-const statusConfig: Record<InvoiceStatus, { color: string; bg: string }> = {
-  paid: { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
-  unpaid: { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-900/20' },
-  pending: { color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+const statusConfig: Record<Exclude<InvoiceStatus, 'pending'>, { color: string; bg: string }> = {
+  paid: { color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-100 dark:bg-emerald-900/20' },
+  unpaid: { color: 'text-red-600 dark:text-red-400', bg: 'bg-red-100 dark:bg-red-900/20' },
 }
 
 export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: InvoiceDialogProps) {
@@ -30,7 +29,7 @@ export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: Inv
   
   const formatCurrency = (amount: number) => `${amount.toLocaleString()} ${t('egpCurrency')}`
   const remainingAmount = invoice.total - invoice.paidAmount
-  const status = statusConfig[invoice.status]
+  const status = statusConfig[invoice.status as keyof typeof statusConfig] || statusConfig.unpaid
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -97,14 +96,14 @@ export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: Inv
           <div className="space-y-1.5 border-t border-stone-100 dark:border-stone-800 pt-3">
             <div className="flex justify-between text-xs">
               <span className="text-stone-500 font-medium">{t('total')}</span>
-              <span className="font-bold text-stone-900 dark:text-stone-100 font-mono">{formatCurrency(invoice.total)}</span>
+              <span className="font-semibold text-stone-900 dark:text-stone-100 font-mono">{formatCurrency(invoice.total)}</span>
             </div>
             <div className="flex justify-between text-xs text-emerald-600 font-medium">
               <span>{t('paid')}</span>
               <span className="font-mono">{formatCurrency(invoice.paidAmount)}</span>
             </div>
             {remainingAmount > 0 && (
-              <div className="flex justify-between text-sm font-bold text-red-600 border-t border-dashed border-stone-200 dark:border-stone-700 pt-2 mt-1">
+              <div className="flex justify-between text-sm font-semibold text-red-600 border-t border-dashed border-stone-200 dark:border-stone-700 pt-2 mt-1">
                 <span>{t('balanceDue')}</span>
                 <span className="font-mono">{formatCurrency(remainingAmount)}</span>
               </div>

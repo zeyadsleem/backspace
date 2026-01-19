@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import type { ActiveSession, PaymentMethod, InvoiceStatus } from '@/types'
-import { X, Clock, Coffee, DollarSign, Wallet, Calendar, Calculator, CheckCircle2, Trash2 } from 'lucide-react'
+import { X, Clock, Coffee, DollarSign, Wallet, CheckCircle2, User, AlertCircle, Receipt } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
+import { cn } from '@/lib/utils'
 
 interface EndSessionDialogProps {
   isOpen: boolean
@@ -24,8 +25,8 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
   
   const [duration, setDuration] = useState(0)
   const [sessionCost, setSessionCost] = useState(0)
-  const [paymentAmount, setPaymentAmount] = useState(0)
-  const [paymentStatus, setPaymentStatus] = useState<InvoiceStatus>('paid')
+  const [amountToPay, setAmountToPay] = useState(0)
+  const [paymentMode, setPaymentMode] = useState<'pay-now' | 'pay-later'>('pay-now')
   const [notes, setNotes] = useState('')
 
   useEffect(() => {
@@ -40,8 +41,8 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
       setSessionCost(roundedCost)
       
       const total = roundedCost + session.inventoryTotal
-      setPaymentAmount(total)
-      setPaymentStatus('paid')
+      setAmountToPay(total)
+      setPaymentMode('pay-now')
     }
   }, [session, isOpen, session?.inventoryTotal])
 
@@ -49,40 +50,40 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
 
   const totalAmount = sessionCost + session.inventoryTotal
 
-  const handleStatusChange = (status: InvoiceStatus) => {
-    setPaymentStatus(status)
-    if (status === 'unpaid') {
-      setPaymentAmount(0)
-    } else if (status === 'paid') {
-      setPaymentAmount(totalAmount)
-    }
-  }
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // logic: 
+    // Pay Now -> Status: Paid, Amount: Input Amount (usually Total)
+    // Pay Later -> Status: Unpaid, Amount: 0
+    
+    const isPayNow = paymentMode === 'pay-now'
+    const finalStatus: InvoiceStatus = isPayNow ? 'paid' : 'unpaid'
+    const finalPaidAmount = isPayNow ? amountToPay : 0
+
     onConfirm({
-      amount: paymentAmount,
-      method: 'cash',
+      amount: finalPaidAmount,
+      method: 'cash', // Default to cash for now
       date: new Date().toISOString(),
       notes,
-      status: paymentStatus
+      status: finalStatus
     })
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative z-10 w-full max-w-4xl bg-white dark:bg-stone-900 rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className={`relative z-10 w-full max-w-4xl bg-white dark:bg-stone-900 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
         
         {/* Header */}
         <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between bg-stone-50/50 dark:bg-stone-900/50">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 className="h-5 w-5" />
+            <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400">
+              <Receipt className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{t('endSession')}</h2>
-              <p className="text-[11px] text-stone-500">{session.customerName} • {session.resourceName}</p>
+              <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{t('checkout')}</h2>
+              <p className="text-xs text-stone-500 font-mono">{session.customerName}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors">
@@ -90,186 +91,184 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
           </button>
         </div>
 
-        <div className="flex-1 overflow-hidden">
-          <form onSubmit={handleSubmit} className="h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
+            
+            {/* LEFT COLUMN: THE BILL */}
+            <div className="flex-1 flex flex-col border-e border-stone-100 dark:border-stone-800 bg-stone-50/30 dark:bg-stone-900/30">
+                <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
+                    <div className="space-y-6">
+                        
+                        {/* Session Cost */}
+                        <div className="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+                            <div className="p-3 border-b border-stone-100 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 flex justify-between items-center">
+                                <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300">
+                                    <Clock className="h-4 w-4" />
+                                    <span className="text-xs font-semibold uppercase tracking-wider">{t('session')}</span>
+                                </div>
+                                <span className="font-mono font-bold text-stone-900 dark:text-stone-100">{sessionCost} {t('egp')}</span>
+                            </div>
+                            <div className="p-3 flex justify-between items-center text-sm">
+                                <div className="text-stone-600 dark:text-stone-400">
+                                    <span className="font-medium text-stone-900 dark:text-stone-100">{session.resourceName}</span>
+                                    <span className="mx-2 text-stone-300">|</span>
+                                    <span>{duration} {t('minutes')}</span>
+                                </div>
+                                <span className="text-xs text-stone-400">{session.resourceRate} {t('egpHr')}</span>
+                            </div>
+                        </div>
+
+                        {/* Inventory Items */}
+                        <div className="bg-white dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 overflow-hidden">
+                            <div className="p-3 border-b border-stone-100 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 flex justify-between items-center">
+                                <div className="flex items-center gap-2 text-stone-600 dark:text-stone-300">
+                                    <Coffee className="h-4 w-4" />
+                                    <span className="text-xs font-semibold uppercase tracking-wider">{t('orders')}</span>
+                                </div>
+                                <span className="font-mono font-bold text-stone-900 dark:text-stone-100">{session.inventoryTotal} {t('egp')}</span>
+                            </div>
+                            <div className="divide-y divide-stone-100 dark:divide-stone-700">
+                                {session.inventoryConsumptions.length === 0 ? (
+                                    <p className="p-4 text-center text-xs text-stone-400 italic">{t('noOrders')}</p>
+                                ) : (
+                                    session.inventoryConsumptions.map((item) => (
+                                        <div key={item.id} className="p-3 flex justify-between items-center text-sm group">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-medium text-stone-800 dark:text-stone-200">{item.itemName}</span>
+                                                <span className="text-xs text-stone-400">x{item.quantity}</span>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-mono text-stone-600 dark:text-stone-400">{item.quantity * item.price}</span>
+                                                {onRemoveItem && (
+                                                    <button onClick={() => onRemoveItem(item.id)} className="text-stone-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <X className="h-3.5 w-3.5" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
                 
-                {/* Right Side: Account Details */}
-                <div className="flex flex-col space-y-5">
-                  <h3 className="text-[11px] font-bold text-stone-400 uppercase tracking-widest px-1 border-s-4 border-amber-500 ps-2">
-                    {t('details')}
-                  </h3>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3.5 bg-stone-50 dark:bg-stone-800/50 rounded-xl border border-stone-100 dark:border-stone-800">
-                      <div className="flex items-center gap-1.5 mb-1 text-stone-400">
-                        <Clock className="h-3.5 w-3.5" />
-                        <span className="text-[10px] font-medium uppercase">{t('sessionTime')}</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-xl font-semibold text-stone-800 dark:text-stone-100">{duration}</span>
-                        <span className="text-xs text-stone-500">{t('minutes')}</span>
-                      </div>
-                    </div>
-                    <div className="p-3.5 bg-amber-50/50 dark:bg-amber-900/10 rounded-xl border border-amber-100/50 dark:border-amber-900/20">
-                      <div className="flex items-center gap-1.5 mb-1 text-amber-600">
-                        <Calculator className="h-3.5 w-3.5" />
-                        <span className="text-[10px] font-medium uppercase">{t('totalAmount')}</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-xl font-semibold text-amber-700 dark:text-amber-400">{totalAmount}</span>
-                        <span className="text-xs text-amber-600/80">{t('egpCurrency')}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Scrollable Items List */}
-                  <div className="flex-1 min-h-[200px] bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 flex flex-col overflow-hidden">
-                    <div className="p-3 border-b border-stone-100 dark:border-stone-800 bg-stone-50/30 flex justify-between items-center">
-                        <span className="text-[10px] font-bold text-stone-500 uppercase tracking-tight">{t('billingItems')}</span>
-                    </div>
-                    <div className="flex-1 overflow-y-auto scrollbar-thin divide-y divide-stone-100 dark:divide-stone-800">
-                        <div className="p-3 flex justify-between items-center hover:bg-stone-50/50 transition-colors text-sm">
-                          <div className="flex items-center gap-3 text-stone-600 dark:text-stone-300">
-                            <Clock className="h-4 w-4 opacity-40" />
-                            <div>
-                              <p className="font-medium text-stone-800 dark:text-stone-100">{t('sessionUsage')}</p>
-                              <p className="text-[10px] text-stone-400">{duration} {t('minutes')} @ {session.resourceRate} {t('egpHr')}</p>
-                            </div>
-                          </div>
-                          <span className="font-semibold text-stone-800 dark:text-stone-100">{sessionCost}</span>
+                {/* Total Bar */}
+                <div className="p-5 border-t border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
+                    <div className="flex justify-between items-end">
+                        <span className="text-sm font-semibold text-stone-500 uppercase tracking-widest mb-1">{t('totalDue')}</span>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-semibold text-stone-900 dark:text-stone-100">{totalAmount}</span>
+                            <span className="text-sm font-semibold text-stone-400">{t('egp')}</span>
                         </div>
-
-                        {session.inventoryConsumptions.map((item) => (
-                          <div key={item.id} className="p-3 flex justify-between items-center hover:bg-stone-50/50 transition-colors text-sm group">
-                            <div className="flex items-center gap-3 text-stone-600 dark:text-stone-300">
-                              <Coffee className="h-4 w-4 opacity-40" />
-                              <div>
-                                <p className="font-medium text-stone-800 dark:text-stone-100">{item.itemName}</p>
-                                <p className="text-[10px] text-stone-400">{item.quantity} × {item.price} {t('egpCurrency')}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <span className="font-semibold text-stone-800 dark:text-stone-100">{item.quantity * item.price}</span>
-                                <button 
-                                    type="button"
-                                    onClick={() => onRemoveItem?.(item.id)}
-                                    className="p-1 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all opacity-0 group-hover:opacity-100"
-                                >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                            </div>
-                          </div>
-                        ))}
                     </div>
-                  </div>
                 </div>
-
-                {/* Left Side: Payment Options */}
-                <div className="flex flex-col space-y-5">
-                  <h3 className="text-[11px] font-bold text-stone-400 uppercase tracking-widest px-1 border-s-4 border-amber-500 ps-2">
-                    {t('paymentStatus')}
-                  </h3>
-
-                  <div className="flex p-1 bg-stone-100 dark:bg-stone-800 rounded-xl">
-                    <button
-                      type="button"
-                      onClick={() => handleStatusChange('paid')}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-medium transition-all ${paymentStatus === 'paid' ? 'bg-white dark:bg-stone-700 text-emerald-600 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-                    >
-                      <DollarSign className="h-4 w-4" /> {t('paid')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleStatusChange('pending')}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-medium transition-all ${paymentStatus === 'pending' ? 'bg-white dark:bg-stone-700 text-amber-600 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-                    >
-                      <Wallet className="h-4 w-4" /> {t('pending')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleStatusChange('unpaid')}
-                      className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-medium transition-all ${paymentStatus === 'unpaid' ? 'bg-white dark:bg-stone-700 text-red-600 shadow-sm' : 'text-stone-500 hover:text-stone-700'}`}
-                    >
-                      <Calendar className="h-4 w-4" /> {t('debt')}
-                    </button>
-                  </div>
-
-                  <div className={`p-5 rounded-xl border-2 transition-all flex-1 flex flex-col ${
-                    paymentStatus === 'paid' ? 'border-emerald-100 bg-emerald-50/10 dark:border-emerald-900/20' : 
-                    paymentStatus === 'pending' ? 'border-amber-100 bg-amber-50/10 dark:border-amber-900/20' : 
-                    'border-red-100 bg-red-50/10 dark:border-red-900/20'
-                  }`}>
-                    <div className="space-y-5 flex-1">
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">{t('amountPaid')}</label>
-                        <div className="relative">
-                          <input
-                            type="number"
-                            value={paymentAmount}
-                            onChange={(e) => setPaymentAmount(Number(e.target.value))}
-                            disabled={paymentStatus === 'unpaid'}
-                            className="w-full h-10 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg px-3 text-lg font-semibold focus:ring-1 focus:ring-amber-500 outline-none disabled:opacity-50"
-                          />
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-stone-400 uppercase">{t('egpCurrency')}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">{t('paymentMethod')}</label>
-                        <div className="flex items-center gap-3 p-3 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl">
-                            <div className="p-1.5 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600">
-                                <DollarSign className="h-4 w-4" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-stone-800 dark:text-stone-100">{t('cash')}</p>
-                                <p className="text-[10px] text-stone-500">{t('onlyCashAccepted')}</p>
-                            </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5 flex-1 flex flex-col">
-                        <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">{t('notes')}</label>
-                        <textarea
-                          value={notes}
-                          onChange={(e) => setNotes(e.target.value)}
-                          placeholder={t('addPaymentNotes')}
-                          className="w-full flex-1 p-3 bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs focus:ring-1 focus:ring-amber-500 min-h-[80px] outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* Footer Buttons */}
-            <div className="p-4 border-t border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 h-10 rounded-lg border border-stone-200 bg-white dark:bg-stone-800 dark:border-stone-700 text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-50 transition-all uppercase tracking-wider"
-              >
-                {t('cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isLoading}
-                className="flex-[1.5] h-10 rounded-lg bg-amber-500 text-xs font-medium text-white hover:bg-amber-600 shadow-sm transition-all uppercase tracking-wider flex items-center justify-center gap-2"
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" />
-                    {t('confirmAndEnd')}
-                  </>
-                )}
-              </button>
+            {/* RIGHT COLUMN: PAYMENT ACTIONS */}
+            <div className="flex-1 flex flex-col bg-white dark:bg-stone-900 p-6">
+                <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-6">
+                    
+                    <div>
+                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3 block">{t('paymentMethod')}</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setPaymentMode('pay-now')}
+                                className={cn(
+                                    "flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 transition-all",
+                                    paymentMode === 'pay-now' 
+                                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400" 
+                                        : "border-stone-200 dark:border-stone-700 hover:border-emerald-200 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400"
+                                )}
+                            >
+                                <Wallet className="h-5 w-5" />
+                                <span className="font-bold text-sm">{t('payNow')}</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setPaymentMode('pay-later')}
+                                className={cn(
+                                    "flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 transition-all",
+                                    paymentMode === 'pay-later' 
+                                        ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400" 
+                                        : "border-stone-200 dark:border-stone-700 hover:border-red-200 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400"
+                                )}
+                            >
+                                <User className="h-5 w-5" />
+                                <span className="font-bold text-sm">{t('addToDebt')}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex-1">
+                        {paymentMode === 'pay-now' ? (
+                            <div className="animate-fade-in space-y-4">
+                                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
+                                    <label className="text-xs font-bold text-emerald-600/70 uppercase tracking-widest mb-1.5 block">{t('amountReceived')}</label>
+                                    <div className="relative">
+                                        <input 
+                                            type="number" 
+                                            value={amountToPay} 
+                                            onChange={(e) => setAmountToPay(Number(e.target.value))}
+                                            className={`w-full bg-transparent text-xl font-bold text-emerald-700 dark:text-emerald-400 outline-none border-b-2 border-emerald-200 dark:border-emerald-800 focus:border-emerald-500 pb-1 ${isRTL ? 'pl-8' : 'pr-8'}`}
+                                        />
+                                        <span className={`absolute bottom-2 text-xs font-bold text-emerald-600/50 ${isRTL ? 'left-0' : 'right-0'}`}>{t('egp')}</span>
+                                    </div>
+                                </div>
+                                <div className="p-3 flex items-start gap-3 bg-stone-50 dark:bg-stone-800 rounded-lg text-xs text-stone-600 dark:text-stone-400">
+                                    <DollarSign className="h-4 w-4 text-stone-400 shrink-0 mt-0.5" />
+                                    <p>{t('cashPaymentDescription')}</p>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="animate-fade-in space-y-4">
+                                <div className="p-4 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-900/20 flex items-start gap-3">
+                                    <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+                                    <div>
+                                        <p className="font-bold text-red-700 dark:text-red-400 mb-1 text-sm">{t('unpaidInvoice')}</p>
+                                        <p className="text-xs text-red-600/80 dark:text-red-400/80 leading-relaxed">
+                                            {t('addToDebtWarning', { name: session.customerName, amount: totalAmount })}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <div className="mt-4">
+                            <label className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">{t('notes')}</label>
+                            <textarea
+                                value={notes}
+                                onChange={(e) => setNotes(e.target.value)}
+                                placeholder={t('addPaymentNotes')}
+                                className="w-full p-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-xs focus:ring-2 focus:ring-stone-400 outline-none transition-all resize-none h-20"
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className={cn(
+                            "w-full h-11 rounded-xl font-bold text-base text-white shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2",
+                            paymentMode === 'pay-now' 
+                                ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200 dark:shadow-none" 
+                                : "bg-red-600 hover:bg-red-700 shadow-red-200 dark:shadow-none"
+                        )}
+                    >
+                        {isLoading ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                <CheckCircle2 className="h-5 w-5" />
+                                {paymentMode === 'pay-now' ? t('confirmPayment') : t('confirmDebt')}
+                            </>
+                        )}
+                    </button>
+
+                </form>
             </div>
-          </form>
         </div>
       </div>
     </div>
