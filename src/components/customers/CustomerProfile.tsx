@@ -32,6 +32,11 @@ export function CustomerProfile({ customer, invoices = [], history = [], onEdit,
   const formatDate = (dateStr: string) => new Date(dateStr).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' })
   const formatCurrency = (amount: number) => `${amount.toLocaleString('en-EG')} ${t('egp')}`
 
+  // Calculate real-time statistics from props
+  const realTotalSpent = invoices.reduce((sum, inv) => sum + inv.paidAmount, 0)
+  const realTotalSessions = history.filter(op => op.type === 'session_end').length
+  const avgPerSession = realTotalSessions > 0 ? Math.round(realTotalSpent / realTotalSessions) : 0
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -67,45 +72,45 @@ export function CustomerProfile({ customer, invoices = [], history = [], onEdit,
 
       {activeTab === 'overview' && (
         <div className="space-y-6">
-          <div className="rounded-lg border border-stone-200 bg-white p-6 dark:border-stone-700 dark:bg-stone-900">
-            <div className="flex items-start gap-6">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 text-2xl font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{initials}</div>
-              <div className="flex-1">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{customer.name}</h2>
-                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${typeInfo.color}`}>{typeInfo.label}</span>
+          <div className="rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900 shadow-sm">
+            <div className="flex items-start gap-5">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-xl font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 flex-shrink-0 shadow-sm">{initials}</div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 truncate">{customer.name}</h2>
+                  <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${typeInfo.color}`}>{typeInfo.label}</span>
                 </div>
-                <p className="mt-1 text-sm font-mono text-stone-400 dark:text-stone-500 uppercase tracking-wider">{customer.humanId}</p>
-                <div className="mt-4 flex flex-wrap gap-4">
-                  <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400"><Phone className="h-4 w-4" /><span dir="ltr">{customer.phone}</span></div>
-                  {customer.email && <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400"><Mail className="h-4 w-4" /><span>{customer.email}</span></div>}
-                  <div className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400"><Calendar className="h-4 w-4" /><span>{t('memberSince')} {formatDate(customer.createdAt)}</span></div>
+                <p className="mt-0.5 text-xs font-mono text-stone-400 dark:text-stone-500 uppercase tracking-widest">{customer.humanId}</p>
+                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+                  <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400"><Phone className="h-3.5 w-3.5" /><span dir="ltr">{customer.phone}</span></div>
+                  {customer.email && <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400"><Mail className="h-3.5 w-3.5" /><span>{customer.email}</span></div>}
+                  <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400"><Calendar className="h-3.5 w-3.5" /><span>{t('memberSince')} {formatDate(customer.createdAt)}</span></div>
                 </div>
               </div>
-              <div className="text-end">
-                <p className="text-sm text-stone-500 dark:text-stone-400">{t('balance')}</p>
-                <p className={`text-2xl font-bold ${customer.balance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>{formatCurrency(customer.balance)}</p>
+              <div className="text-end hidden sm:block">
+                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{t('balance')}</p>
+                <p className={`text-lg font-black ${customer.balance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>{formatCurrency(customer.balance)}</p>
               </div>
             </div>
-            {customer.notes && <div className="mt-6 rounded-md bg-stone-50 p-4 dark:bg-stone-800"><p className="text-sm text-stone-600 dark:text-stone-400">{customer.notes}</p></div>}
+            {customer.notes && <div className="mt-4 rounded-lg bg-stone-50 p-3 dark:bg-stone-800/50 border border-stone-100 dark:border-stone-800"><p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">{customer.notes}</p></div>}
           </div>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+            <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30"><Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" /></div>
-                <div><p className="text-sm text-stone-500 dark:text-stone-400">{t('totalSessions')}</p><p className="text-xl font-bold text-stone-900 dark:text-stone-100">{customer.totalSessions}</p></div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30 flex-shrink-0"><Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" /></div>
+                <div><p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{t('totalSessions')}</p><p className="text-lg font-black text-stone-900 dark:text-stone-100">{realTotalSessions}</p></div>
               </div>
             </div>
-            <div className="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
+            <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30"><Receipt className="h-5 w-5 text-emerald-600 dark:text-emerald-400" /></div>
-                <div><p className="text-sm text-stone-500 dark:text-stone-400">{t('totalSpent')}</p><p className="text-xl font-bold text-stone-900 dark:text-stone-100">{formatCurrency(customer.totalSpent)}</p></div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex-shrink-0"><Receipt className="h-4 w-4 text-emerald-600 dark:text-emerald-400" /></div>
+                <div><p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{t('totalSpent')}</p><p className="text-lg font-black text-stone-900 dark:text-stone-100">{formatCurrency(realTotalSpent)}</p></div>
               </div>
             </div>
-            <div className="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
+            <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30"><CreditCard className="h-5 w-5 text-amber-600 dark:text-amber-400" /></div>
-                <div><p className="text-sm text-stone-500 dark:text-stone-400">{t('avgPerSession')}</p><p className="text-xl font-bold text-stone-900 dark:text-stone-100">{customer.totalSessions > 0 ? formatCurrency(Math.round(customer.totalSpent / customer.totalSessions)) : formatCurrency(0)}</p></div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30 flex-shrink-0"><CreditCard className="h-4 w-4 text-amber-600 dark:text-amber-400" /></div>
+                <div><p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{t('avgPerSession')}</p><p className="text-lg font-black text-stone-900 dark:text-stone-100">{formatCurrency(avgPerSession)}</p></div>
               </div>
             </div>
           </div>
