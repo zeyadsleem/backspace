@@ -28,6 +28,7 @@ export function DashboardPage() {
     startSession,
     addCustomer,
     recordPayment,
+    recordBulkPayment,
     t
   } = useAppStore()
 
@@ -100,7 +101,7 @@ export function DashboardPage() {
         customerName={debtCustomer?.name || ''}
         invoices={customerDebtInvoices}
         onClose={() => setCustomerDebtId(null)}
-        onRecordPayment={(id) => { setPaymentInvoiceId(id); }}
+        onRecordBulkPayment={(ids, amount, notes) => recordBulkPayment(ids, amount, notes)}
         onGoToProfile={() => { if (customerDebtId) navigate(`/customers/${customerDebtId}`); setCustomerDebtId(null); }}
       />
     </>

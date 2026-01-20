@@ -102,6 +102,7 @@ interface AppActions {
   
   // Invoice actions
   recordPayment: (invoiceId: string, amount: number, method: string, date: string, notes?: string) => void
+  recordBulkPayment: (invoiceIds: string[], totalAmount: number, notes: string) => void
   
   // Settings actions
   updateSettings: (settings: Partial<Settings>) => void
@@ -973,6 +974,29 @@ export const useAppStore = create<AppStore>()(
         }))
         
         get().addActivity('invoice_paid', `Payment of ${amount} EGP recorded`)
+      },
+
+      recordBulkPayment: (invoiceIds: string[], totalAmount: number, notes: string) => {
+        const date = new Date().toISOString()
+        set(produce((state: AppState) => {
+          invoiceIds.forEach(id => {
+            const invoice = state.invoices.find(inv => inv.id === id)
+            if (invoice) {
+              const remaining = invoice.total - invoice.paidAmount
+              invoice.payments.push({
+                id: get().generateId(),
+                amount: remaining,
+                method: 'cash',
+                date,
+                notes: notes || 'Bulk payment'
+              })
+              invoice.paidAmount = invoice.total
+              invoice.status = 'paid'
+              invoice.paidDate = date
+            }
+          })
+        }))
+        get().addActivity('invoice_paid', `Bulk payment of ${totalAmount} EGP recorded`)
       },
       
       // Settings actions

@@ -341,6 +341,11 @@ export const translations = {
     confirmCancelAndRefund: 'Cancel & Refund',
     changePlanNote: 'Changing the plan will start a new billing cycle and generate a new invoice.',
     reactivateSubscription: 'Reactivate Subscription',
+    invoiceList: 'Invoice List',
+    paymentSummary: 'Payment Summary',
+    totalAmountToPay: 'Total Amount to Pay',
+    payAllInvoices: 'Pay All Invoices',
+    partial: 'Partial',
     
     // Inventory specific
     itemName: 'Item Name',
@@ -766,6 +771,11 @@ export const translations = {
     confirmCancelAndRefund: 'إلغاء واسترداد المبلغ',
     changePlanNote: 'تغيير الخطة سيبدأ دورة فوترة جديدة ويولد فاتورة جديدة.',
     reactivateSubscription: 'إعادة تفعيل الاشتراك',
+    invoiceList: 'قائمة الفواتير',
+    paymentSummary: 'ملخص الدفع',
+    totalAmountToPay: 'إجمالي المبلغ المطلوب',
+    payAllInvoices: 'دفع كل الفواتير',
+    partial: 'جزئي',
     
     // Inventory specific
     itemName: 'اسم المنتج',
