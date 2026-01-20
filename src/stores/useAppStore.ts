@@ -91,6 +91,8 @@ interface AppActions {
   updateSubscription: (id: string, data: Partial<Subscription>) => void
   deactivateSubscription: (id: string) => void
   reactivateSubscription: (id: string) => void
+  changeSubscription: (id: string, newPlanType: string) => void
+  cancelSubscription: (id: string, refundAmount: number) => void
   
   // Inventory actions
   addInventoryItem: (item: Omit<InventoryItem, 'id' | 'createdAt'>) => void
@@ -307,7 +309,7 @@ export const useAppStore = create<AppStore>()(
                 createdAt: new Date().toISOString(),
                 lineItems: [
                   {
-                    description: `Subscription - ${plan.labelEn} (${plan.days} days)`,
+                    description: `${get().language === 'ar' ? 'اشتراك' : 'Subscription'} - ${get().language === 'ar' ? plan.labelAr : plan.labelEn} (${plan.days} ${get().language === 'ar' ? 'يوم' : 'days'})`,
                     quantity: 1,
                     rate: plan.price,
                     amount: plan.price,
@@ -391,11 +393,18 @@ export const useAppStore = create<AppStore>()(
       
       // Session actions
       startSession: (customerId: string, resourceId: string) => {
-        const { customers, resources, subscriptions } = get()
+        const { customers, resources, subscriptions, activeSessions } = get()
         const customer = customers.find(c => c.id === customerId)
         const resource = resources.find(r => r.id === resourceId)
         
         if (!customer || !resource) return
+
+        // Check if customer already has an active session
+        const hasActiveSession = activeSessions.some(s => s.customerId === customerId)
+        if (hasActiveSession) {
+          // Prevent duplicate sessions for the same customer
+          return
+        }
         
         const isSubscribed = subscriptions.some(s => s.customerId === customerId && s.isActive)
         
@@ -659,10 +668,18 @@ export const useAppStore = create<AppStore>()(
       
       // Subscription actions
       addSubscription: (customerId: string, planType: string, startDate: string) => {
-        const customer = get().customers.find(c => c.id === customerId)
-        const plan = get().planTypes.find(p => p.id === planType)
+        const { customers, subscriptions, planTypes } = get()
+        const customer = customers.find(c => c.id === customerId)
+        const plan = planTypes.find(p => p.id === planType)
         
         if (!customer || !plan) return
+
+        // Check if customer already has an active subscription
+        const hasActive = subscriptions.some(s => s.customerId === customerId && s.status === 'active')
+        if (hasActive) {
+          // You could throw an error or handle it in UI
+          return
+        }
         
         const start = new Date(startDate)
         const end = new Date(start)
@@ -698,7 +715,7 @@ export const useAppStore = create<AppStore>()(
           createdAt: new Date().toISOString(),
           lineItems: [
             {
-              description: `Subscription - ${plan.labelEn} (${plan.days} days)`,
+              description: `${get().language === 'ar' ? 'اشتراك' : 'Subscription'} - ${get().language === 'ar' ? plan.labelAr : plan.labelEn} (${plan.days} ${get().language === 'ar' ? 'يوم' : 'days'})`,
               quantity: 1,
               rate: plan.price,
               amount: plan.price,
@@ -720,6 +737,81 @@ export const useAppStore = create<AppStore>()(
         
         get().addActivity('subscription_new', `${customer.name} subscribed to ${plan.labelEn} plan`)
         get().addActivity('invoice_created', `Invoice generated for subscription: ${plan.price} EGP`)
+        get().updateDashboardMetrics()
+      },
+
+      changeSubscription: (id: string, newPlanType: string) => {
+        set(produce((state: AppState) => {
+          const subIndex = state.subscriptions.findIndex(s => s.id === id)
+          if (subIndex === -1) return
+          
+          const sub = state.subscriptions[subIndex]
+          const oldPlan = state.planTypes.find(p => p.id === sub.planType)
+          const newPlan = state.planTypes.find(p => p.id === newPlanType)
+          
+          if (!oldPlan || !newPlan) return
+
+          // Update subscription info
+          sub.planType = newPlanType as any
+          const now = new Date()
+          const end = new Date(now)
+          end.setDate(end.getDate() + newPlan.days)
+          
+          sub.startDate = now.toISOString().split('T')[0]
+          sub.endDate = end.toISOString().split('T')[0]
+          sub.daysRemaining = newPlan.days
+          sub.status = 'active'
+          sub.isActive = true
+
+          // Generate adjustment invoice
+          const invoice: Invoice = {
+            id: get().generateId(),
+            invoiceNumber: `INV-${String(state.invoices.length + 1).padStart(4, '0')}`,
+            customerId: sub.customerId,
+            customerName: sub.customerName,
+            customerPhone: state.customers.find(c => c.id === sub.customerId)?.phone || '',
+            sessionId: null,
+            amount: newPlan.price,
+            discount: 0,
+            total: newPlan.price,
+            paidAmount: 0,
+            status: 'unpaid',
+            dueDate: sub.startDate,
+            paidDate: null,
+            createdAt: new Date().toISOString(),
+            lineItems: [
+              {
+                description: `${state.language === 'ar' ? 'تعديل اشتراك' : 'Subscription Change'} - ${state.language === 'ar' ? newPlan.labelAr : newPlan.labelEn}`,
+                quantity: 1,
+                rate: newPlan.price,
+                amount: newPlan.price,
+              }
+            ],
+            payments: [],
+          }
+          state.invoices.push(invoice)
+        }))
+        get().addActivity('subscription_new', `Subscription plan changed for ${get().subscriptions.find(s => s.id === id)?.customerName}`)
+      },
+
+      cancelSubscription: (id: string, refundAmount: number) => {
+        set(produce((state: AppState) => {
+          const subIndex = state.subscriptions.findIndex(s => s.id === id)
+          if (subIndex === -1) return
+          
+          const sub = state.subscriptions[subIndex]
+          sub.status = 'inactive'
+          sub.isActive = false
+          sub.daysRemaining = 0
+
+          if (refundAmount > 0) {
+            const customerIndex = state.customers.findIndex(c => c.id === sub.customerId)
+            if (customerIndex !== -1) {
+              state.customers[customerIndex].balance += refundAmount
+            }
+          }
+        }))
+        get().addActivity('subscription_new', `Subscription cancelled for ${get().subscriptions.find(s => s.id === id)?.customerName}`)
         get().updateDashboardMetrics()
       },
       
@@ -799,7 +891,7 @@ export const useAppStore = create<AppStore>()(
             createdAt: new Date().toISOString(),
             lineItems: [
               {
-                description: `Subscription Renewal - ${plan.labelEn} (${plan.days} days)`,
+                description: `${get().language === 'ar' ? 'تجديد اشتراك' : 'Subscription Renewal'} - ${get().language === 'ar' ? plan.labelAr : plan.labelEn} (${plan.days} ${get().language === 'ar' ? 'يوم' : 'days'})`,
                 quantity: 1,
                 rate: plan.price,
                 amount: plan.price,

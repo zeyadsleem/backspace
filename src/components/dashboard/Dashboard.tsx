@@ -56,14 +56,14 @@ export function Dashboard({ onNewCustomer, onStartSession, onNavigateToSection, 
       
       {/* Bottom Section - Split Activity and Unpaid Invoices */}
       <div className="flex-1 min-h-0 px-6 pb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Recent Activity */}
-          <div className="h-[550px]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Recent Activity - Taking 7 columns */}
+          <div className="h-[550px] lg:col-span-7">
             <ActivityFeed activities={recentActivity} />
           </div>
           
           {/* Unpaid Invoices */}
-          <div className="h-[550px]">
+          <div className="h-[550px] lg:col-span-5">
             <PendingInvoices invoices={invoices} onViewCustomerDebt={onViewCustomerDebt} />
           </div>
         </div>

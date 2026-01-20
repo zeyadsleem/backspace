@@ -94,23 +94,33 @@ export function StartSessionDialog({ isOpen, customers, resources, subscriptions
                     <div className="divide-y divide-stone-100 dark:divide-stone-800">
                       {filteredCustomers.map((customer) => {
                         const customerIsSubscribed = subscriptions.some(s => s.customerId === customer.id && s.isActive)
+                        const customerHasActiveSession = activeSessions.some(s => s.customerId === customer.id)
                         const isSelected = selectedCustomer === customer.id
+                        
                         return (
                           <button 
                             key={customer.id} 
                             type="button" 
-                            onClick={() => setSelectedCustomer(customer.id)} 
-                            className={`w-full flex items-center justify-between p-3.5 transition-all ${isSelected ? 'bg-amber-50 dark:bg-amber-900/20' : 'hover:bg-stone-50 dark:hover:bg-stone-800/50'}`}
+                            onClick={() => !customerHasActiveSession && setSelectedCustomer(customer.id)} 
+                            disabled={customerHasActiveSession}
+                            className={`w-full flex items-center justify-between p-3.5 transition-all ${isSelected ? 'bg-amber-50 dark:bg-amber-900/20' : customerHasActiveSession ? 'opacity-50 cursor-not-allowed bg-stone-50 dark:bg-stone-800/20' : 'hover:bg-stone-50 dark:hover:bg-stone-800/50'}`}
                           >
                             <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
                               <span className={`text-[15px] ${isSelected ? 'font-bold text-amber-700 dark:text-amber-400' : 'font-semibold text-stone-700 dark:text-stone-300'}`}>{customer.name}</span>
                               <span className="text-xs text-stone-400 font-mono uppercase font-normal">{customer.humanId}</span>
                             </div>
-                            {customerIsSubscribed && (
-                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800">
-                                {t('subscribed')}
-                              </span>
-                            )}
+                            <div className="flex flex-col items-end gap-1">
+                                {customerIsSubscribed && (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800">
+                                        {t('subscribed')}
+                                    </span>
+                                )}
+                                {customerHasActiveSession && (
+                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-400 border border-stone-200 dark:border-stone-700">
+                                        {isRTL ? 'مشغول حالياً' : 'Busy Now'}
+                                    </span>
+                                )}
+                            </div>
                           </button>
                         )
                       })}

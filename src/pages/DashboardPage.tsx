@@ -100,7 +100,6 @@ export function DashboardPage() {
         customerName={debtCustomer?.name || ''}
         invoices={customerDebtInvoices}
         onClose={() => setCustomerDebtId(null)}
-        onViewInvoice={(id) => { setViewInvoiceId(id); }}
         onRecordPayment={(id) => { setPaymentInvoiceId(id); }}
         onGoToProfile={() => { if (customerDebtId) navigate(`/customers/${customerDebtId}`); setCustomerDebtId(null); }}
       />

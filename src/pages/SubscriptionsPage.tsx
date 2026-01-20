@@ -7,8 +7,9 @@ export function SubscriptionsPage() {
   const customers = useAppStore((state) => state.customers)
   const planTypes = useAppStore((state) => state.planTypes)
   const addSubscription = useAppStore((state) => state.addSubscription)
-  const updateSubscription = useAppStore((state) => state.updateSubscription)
   const deactivateSubscription = useAppStore((state) => state.deactivateSubscription)
+  const changeSubscription = useAppStore((state) => state.changeSubscription)
+  const cancelSubscription = useAppStore((state) => state.cancelSubscription)
   const t = useAppStore((state) => state.t)
   
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -50,8 +51,9 @@ export function SubscriptionsPage() {
           isOpen={!!selectedSubscriptionId}
           subscription={selectedSubscription}
           plan={selectedPlan}
-          onUpdate={updateSubscription}
-          onDeactivate={deactivateSubscription}
+          planTypes={planTypes}
+          onChangePlan={changeSubscription}
+          onCancelSubscription={cancelSubscription}
           onClose={() => setSelectedSubscriptionId(null)}
         />
       )}

@@ -330,7 +330,17 @@ export const translations = {
     // Subscription specific
     allPlans: 'All Plans',
     expiringSoon: 'expiring soon',
-    createFirstSubscription: 'Create your first subscription to get started',
+    createFirstSubscription: 'Add your first subscription to get started',
+    subscriptionDetails: 'Subscription Details',
+    changePlan: 'Change Plan',
+    cancelSubscription: 'Cancel Subscription',
+    chooseNewPlan: 'Choose New Plan',
+    confirmCancellation: 'Confirm Cancellation',
+    cancelWarning: 'This will immediately end the subscription and stop all benefits.',
+    refundAmount: 'Refund Amount',
+    confirmCancelAndRefund: 'Cancel & Refund',
+    changePlanNote: 'Changing the plan will start a new billing cycle and generate a new invoice.',
+    reactivateSubscription: 'Reactivate Subscription',
     
     // Inventory specific
     itemName: 'Item Name',
@@ -746,6 +756,16 @@ export const translations = {
     allPlans: 'كل الخطط',
     expiringSoon: 'تنتهي قريباً',
     createFirstSubscription: 'أضف أول اشتراك للبدء',
+    subscriptionDetails: 'تفاصيل الاشتراك',
+    changePlan: 'تغيير الخطة',
+    cancelSubscription: 'إلغاء الاشتراك',
+    chooseNewPlan: 'اختر الخطة الجديدة',
+    confirmCancellation: 'تأكيد الإلغاء',
+    cancelWarning: 'سيؤدي هذا إلى إنهاء الاشتراك فوراً وإيقاف جميع المزايا.',
+    refundAmount: 'المبلغ المسترد',
+    confirmCancelAndRefund: 'إلغاء واسترداد المبلغ',
+    changePlanNote: 'تغيير الخطة سيبدأ دورة فوترة جديدة ويولد فاتورة جديدة.',
+    reactivateSubscription: 'إعادة تفعيل الاشتراك',
     
     // Inventory specific
     itemName: 'اسم المنتج',
