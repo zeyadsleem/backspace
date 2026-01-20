@@ -28,7 +28,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
   const formatCurrency = (amount: number) => `${amount.toLocaleString()} ${t('egpCurrency')}`
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors text-start">
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 px-4 py-2.5 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors text-start">
       <div className="col-span-1 md:col-span-2 flex items-center">
         <span className="font-mono text-xs font-medium text-stone-600 dark:text-stone-400 uppercase tracking-tight">
           {invoice.invoiceNumber}
@@ -37,16 +37,16 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
       
       <div className="col-span-1 md:col-span-3 flex items-center">
         <div className="text-start">
-          <p className="text-sm font-normal text-stone-900 dark:text-stone-100">{invoice.customerName}</p>
-          <p className="text-[11px] text-stone-500 dark:text-stone-400">{invoice.customerPhone}</p>
+          <p className="text-xs font-normal text-stone-900 dark:text-stone-100">{invoice.customerName}</p>
+          <p className="text-[10px] text-stone-500 dark:text-stone-400">{invoice.customerPhone}</p>
         </div>
       </div>
       
       <div className="col-span-1 md:col-span-2 flex items-center md:justify-center">
         <div className="md:text-center text-start">
-          <p className="text-sm font-normal text-stone-900 dark:text-stone-100 font-mono">{formatCurrency(invoice.total)}</p>
+          <p className="text-xs font-normal text-stone-900 dark:text-stone-100 font-mono">{formatCurrency(invoice.total)}</p>
           {invoice.status === 'unpaid' && invoice.paidAmount > 0 && (
-            <p className="text-[10px] text-amber-600 dark:text-amber-400 font-normal font-mono uppercase">
+            <p className="text-[9px] text-amber-600 dark:text-amber-400 font-normal font-mono uppercase">
               {formatCurrency(invoice.total - invoice.paidAmount)} {t('remaining')}
             </p>
           )}
@@ -64,7 +64,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
       </div>
       
       <div className="col-span-1 md:col-span-1 flex items-center">
-        <span className="text-sm text-stone-600 dark:text-stone-400 font-medium">
+        <span className="text-xs text-stone-600 dark:text-stone-400 font-medium">
           {formatDate(invoice.dueDate)}
         </span>
       </div>

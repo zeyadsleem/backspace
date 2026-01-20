@@ -18,6 +18,7 @@ interface StartSessionDialogProps {
 export function StartSessionDialog({ isOpen, customers, resources, subscriptions, onSubmit, onCancel, onClose, isLoading = false }: StartSessionDialogProps) {
   const t = useTranslation()
   const isRTL = useAppStore((state) => state.isRTL)
+  const activeSessions = useAppStore((state) => state.activeSessions)
   const [selectedCustomer, setSelectedCustomer] = useState<string>('')
   const [selectedResource, setSelectedResource] = useState<string>('')
   const [searchCustomer, setSearchCustomer] = useState('')
