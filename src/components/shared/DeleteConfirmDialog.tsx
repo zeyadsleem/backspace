@@ -1,5 +1,6 @@
 import { AlertTriangle, X, Loader2 } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
+import { Modal } from '@/components/shared'
 
 interface DeleteConfirmDialogProps {
   isOpen: boolean
@@ -23,17 +24,22 @@ export function DeleteConfirmDialog({
   isLoading = false,
 }: DeleteConfirmDialogProps) {
   const t = useAppStore((state) => state.t)
-  
+  const isRTL = useAppStore((state) => state.isRTL)
+
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-stone-900">
+    <Modal
+      isOpen={isOpen}
+      onClose={onCancel!}
+      showCloseButton={false}
+      maxWidth="max-w-md"
+    >
+      <div className="p-6 relative">
         <button
           type="button"
           onClick={onCancel}
-          className="absolute right-4 top-4 rounded-lg p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+          className={`absolute top-4 rounded-lg p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300 ${t.dir === 'rtl' || isRTL ? 'left-4' : 'right-4'}`}
         >
           <X className="h-5 w-5" />
         </button>
@@ -64,6 +70,6 @@ export function DeleteConfirmDialog({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
