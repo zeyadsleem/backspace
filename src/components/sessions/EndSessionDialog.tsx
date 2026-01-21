@@ -73,10 +73,10 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative z-10 w-full max-w-4xl bg-white dark:bg-stone-900 rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className={`relative z-10 w-full max-w-4xl bg-white dark:bg-stone-900 rounded-xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
         
         {/* Header */}
-        <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between bg-stone-50/50 dark:bg-stone-900/50">
+        <div className="p-6 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between bg-stone-50/50 dark:bg-stone-900/50">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400">
               <Receipt className="h-5 w-5" />
@@ -92,9 +92,9 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
         </div>
 
         <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
-            
+
             {/* LEFT COLUMN: THE BILL */}
-            <div className="flex-1 flex flex-col border-e border-stone-100 dark:border-stone-800 bg-stone-50/30 dark:bg-stone-900/30">
+            <div className="flex-[2] flex flex-col border-e border-stone-100 dark:border-stone-800 bg-stone-50/30 dark:bg-stone-900/30">
                 <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
                     <div className="space-y-6">
                         
@@ -140,7 +140,7 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                                                 <span className="font-mono text-stone-600 dark:text-stone-400">{item.quantity * item.price}</span>
                                                 {onRemoveItem && (
                                                     <button onClick={() => onRemoveItem(item.id)} className="text-stone-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        <X className="h-3.5 w-3.5" />
+                                                        <X className="h-4 w-4" />
                                                     </button>
                                                 )}
                                             </div>
@@ -166,7 +166,7 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
             </div>
 
             {/* RIGHT COLUMN: PAYMENT ACTIONS */}
-            <div className="flex-1 flex flex-col bg-white dark:bg-stone-900 p-6">
+            <div className="w-full lg:flex-1 flex flex-col bg-white dark:bg-stone-900 p-5">
                 <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-6">
                     
                     <div>
@@ -176,13 +176,13 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                                 type="button"
                                 onClick={() => setPaymentMode('pay-now')}
                                 className={cn(
-                                    "flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 transition-all",
-                                    paymentMode === 'pay-now' 
-                                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400" 
+                                    "flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all",
+                                    paymentMode === 'pay-now'
+                                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400"
                                         : "border-stone-200 dark:border-stone-700 hover:border-emerald-200 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400"
                                 )}
                             >
-                                <Wallet className="h-5 w-5" />
+                                <Wallet className="h-4 w-4" />
                                 <span className="font-bold text-sm">{t('payNow')}</span>
                             </button>
 
@@ -190,13 +190,13 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                                 type="button"
                                 onClick={() => setPaymentMode('pay-later')}
                                 className={cn(
-                                    "flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border-2 transition-all",
-                                    paymentMode === 'pay-later' 
-                                        ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400" 
+                                    "flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all",
+                                    paymentMode === 'pay-later'
+                                        ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
                                         : "border-stone-200 dark:border-stone-700 hover:border-red-200 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400"
                                 )}
                             >
-                                <User className="h-5 w-5" />
+                                <User className="h-4 w-4" />
                                 <span className="font-bold text-sm">{t('addToDebt')}</span>
                             </button>
                         </div>

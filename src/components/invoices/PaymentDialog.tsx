@@ -56,27 +56,27 @@ export function PaymentDialog({ isOpen, invoice, onSubmit, onClose, isLoading }:
       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={onClose} />
       
       <div className="relative z-10 w-full max-w-md rounded-xl bg-white shadow-xl dark:bg-stone-900 overflow-hidden">
-        <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800 px-5 py-3">
+        <div className="flex items-center justify-between border-b border-stone-100 dark:border-stone-800 px-6 py-4">
           <h2 className="font-bold text-stone-900 dark:text-stone-100">{t('recordPayment')}</h2>
-          <button onClick={onClose} className="p-1 text-stone-400 hover:text-stone-600">
+          <button onClick={onClose} className="p-2 rounded-lg text-stone-400 hover:text-stone-600">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="bg-emerald-50 dark:bg-emerald-900/10 p-3 rounded-lg flex justify-between items-center text-sm border border-emerald-100 dark:border-emerald-900/20">
             <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold">
               <Wallet className="h-4 w-4" />
               <span>{t('cash')}</span>
             </div>
             <div className="text-end">
-              <p className="text-[10px] text-emerald-600/70 uppercase font-bold">{t('remainingBalance')}</p>
+              <p className="text-xs text-emerald-600/70 uppercase font-bold">{t('remainingBalance')}</p>
               <p className="font-bold text-emerald-700 dark:text-emerald-400 font-mono">{remainingBalance.toLocaleString()} {t('egpCurrency')}</p>
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-bold text-stone-400 uppercase">{t('paymentAmount')}</label>
+            <label className="text-xs font-bold text-stone-400 uppercase">{t('paymentAmount')}</label>
             <div className="relative">
               <input
                 type="number"
@@ -91,16 +91,16 @@ export function PaymentDialog({ isOpen, invoice, onSubmit, onClose, isLoading }:
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, amount: remainingBalance })}
-                className="absolute end-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 uppercase"
+                className="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-600 hover:text-emerald-700 uppercase"
               >
                 {t('payFullBalance')}
               </button>
             </div>
-            {errors.amount && <p className="text-[10px] text-red-600 font-bold">{errors.amount}</p>}
+            {errors.amount && <p className="text-xs text-red-600 font-bold">{errors.amount}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[11px] font-bold text-stone-400 uppercase">{t('paymentDate')}</label>
+            <label className="text-xs font-bold text-stone-400 uppercase">{t('paymentDate')}</label>
             <input
               type="date"
               value={formData.date}

@@ -89,7 +89,7 @@ export function InventoryList({ inventory, categories, onView, onEdit, onDelete,
                 <div className="flex items-center gap-3 mb-5 px-1">
                                   <h2 className="text-sm font-bold text-stone-400 uppercase tracking-[0.2em]">{isRTL ? category.labelAr : category.labelEn}</h2>
                                   <div className="h-px bg-stone-100 dark:bg-stone-800 flex-1" />
-                                  <span className="text-[10px] font-bold text-stone-300 uppercase tracking-widest">{t('items', { count: items.length })}</span>
+                                  <span className="text-xs font-bold text-stone-300 uppercase tracking-widest">{t('items', { count: items.length })}</span>
                                 </div>                <div className={gridClass}>
                   {items.map((item) => (
                     <InventoryItemCard key={item.id} item={item} category={category} onEdit={() => onEdit?.(item.id)} onDelete={() => onDelete?.(item.id)} onAdjustQuantity={(delta) => onAdjustQuantity?.(item.id, delta)} />

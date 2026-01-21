@@ -60,9 +60,9 @@ export function SubscriptionDetailsDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-lg rounded-xl bg-white dark:bg-stone-900 shadow-xl overflow-hidden flex flex-col max-h-[90vh]" dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className="p-5 border-b border-stone-200 dark:border-stone-800 flex justify-between items-center bg-stone-50/50 dark:bg-stone-900/50">
+        <div className="p-6 border-b border-stone-200 dark:border-stone-800 flex justify-between items-center bg-stone-50/50 dark:bg-stone-900/50">
           <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100">{t('subscriptionDetails')}</h2>
-          <button onClick={onClose} className="p-1 rounded-full text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800">
+          <button onClick={onClose} className="p-2 rounded-lg text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -86,11 +86,11 @@ export function SubscriptionDetailsDialog({
           {/* Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div className="p-3 rounded-lg border border-stone-100 dark:border-stone-800">
-              <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">{t('startDate')}</label>
+              <label className="text-xs font-bold text-stone-400 uppercase tracking-widest block mb-1">{t('startDate')}</label>
               <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">{formatDate(subscription.startDate)}</p>
             </div>
             <div className="p-3 rounded-lg border border-stone-100 dark:border-stone-800">
-              <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block mb-1">{t('endDate')}</label>
+              <label className="text-xs font-bold text-stone-400 uppercase tracking-widest block mb-1">{t('endDate')}</label>
               <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">{formatDate(subscription.endDate)}</p>
             </div>
           </div>
@@ -99,9 +99,9 @@ export function SubscriptionDetailsDialog({
           <div className="p-4 rounded-xl bg-stone-50 dark:bg-stone-800/30 border border-stone-100 dark:border-stone-800">
             <div className="flex justify-between items-center">
                 <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">{t('status')}</label>
+                    <label className="text-xs font-bold text-stone-400 uppercase tracking-widest block">{t('status')}</label>
                     <div className="flex items-center gap-2">
-                        <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider ${getStatusColor()}`}>
+                        <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full uppercase tracking-wider ${getStatusColor()}`}>
                             {t(subscription.status)}
                         </span>
                     </div>
@@ -109,7 +109,7 @@ export function SubscriptionDetailsDialog({
                 {subscription.status === 'active' && (
                     <div className="text-end">
                         <p className="text-2xl font-black text-stone-900 dark:text-stone-100">{subscription.daysRemaining}</p>
-                        <p className="text-[10px] font-bold text-stone-400 uppercase">{t('daysRemaining')}</p>
+                        <p className="text-xs font-bold text-stone-400 uppercase">{t('daysRemaining')}</p>
                     </div>
                 )}
             </div>
@@ -154,7 +154,7 @@ export function SubscriptionDetailsDialog({
                         </button>
                     ))}
                 </div>
-                <p className="text-[10px] text-stone-500 italic text-center">{t('changePlanNote')}</p>
+                <p className="text-xs text-stone-500 italic text-center">{t('changePlanNote')}</p>
             </div>
           )}
 
@@ -167,7 +167,7 @@ export function SubscriptionDetailsDialog({
                 </div>
                 <p className="text-xs text-red-600/80 leading-relaxed">{t('cancelWarning')}</p>
                 <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-stone-500 uppercase">{t('refundAmount')} ({t('optional')})</label>
+                    <label className="text-xs font-bold text-stone-500 uppercase">{t('refundAmount')} ({t('optional')})</label>
                     <div className="relative">
                         <input 
                             type="number" 
@@ -175,7 +175,7 @@ export function SubscriptionDetailsDialog({
                             onChange={(e) => setRefundAmount(Number(e.target.value))}
                             className="w-full h-10 rounded-lg border border-red-200 dark:border-red-900/30 bg-white dark:bg-stone-800 px-3 text-sm font-bold outline-none focus:ring-2 focus:ring-red-500/20"
                         />
-                        <span className="absolute end-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-stone-400">{t('egp')}</span>
+                        <span className="absolute end-3 top-1/2 -translate-y-1/2 text-xs font-bold text-stone-400">{t('egp')}</span>
                     </div>
                 </div>
                 <button 
@@ -189,7 +189,7 @@ export function SubscriptionDetailsDialog({
         </div>
 
         {/* Actions */}
-        <div className="p-5 bg-stone-50 dark:bg-stone-800/50 border-t border-stone-200 dark:border-stone-800 flex gap-3">
+        <div className="p-6 bg-stone-50 dark:bg-stone-800/50 border-t border-stone-200 dark:border-stone-800 flex gap-3">
           {subscription.status !== 'active' ? (
             <button onClick={handleReactivate} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-white rounded-lg bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-600/10">
               <RefreshCw className="h-4 w-4" /> {t('reactivateSubscription')}

@@ -38,7 +38,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
       <div className="col-span-1 md:col-span-3 flex items-center">
         <div className="text-start">
           <p className="text-sm font-medium text-stone-900 dark:text-stone-100">{invoice.customerName}</p>
-          <p className="text-[11px] text-stone-500 dark:text-stone-400">{invoice.customerPhone}</p>
+          <p className="text-xs text-stone-500 dark:text-stone-400">{invoice.customerPhone}</p>
         </div>
       </div>
       
@@ -46,7 +46,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
         <div className="md:text-center text-start">
           <p className="text-sm font-medium text-stone-900 dark:text-stone-100 font-mono">{formatCurrency(invoice.total)}</p>
           {invoice.status === 'unpaid' && invoice.paidAmount > 0 && (
-            <p className="text-[10px] text-amber-600 dark:text-amber-400 font-medium font-mono uppercase">
+            <p className="text-xs text-amber-600 dark:text-amber-400 font-medium font-mono uppercase">
               {formatCurrency(invoice.total - invoice.paidAmount)} {t('remaining')}
             </p>
           )}

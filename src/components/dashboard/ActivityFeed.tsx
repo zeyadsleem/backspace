@@ -54,11 +54,11 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
               return (
                 <div key={activity.id} className="flex items-start gap-3 p-3 hover:bg-stone-50 dark:hover:bg-stone-800/50 transition-colors">
                   <div className={`p-2 rounded-lg flex-shrink-0 ${config.bg}`}>
-                    <Icon className={`h-3.5 w-3.5 ${config.color}`} />
+                    <Icon className={`h-4 w-4 ${config.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-stone-700 dark:text-stone-300 leading-snug font-medium">{activity.description}</p>
-                    <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">{formatTime(activity.timestamp)}</p>
+                    <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">{formatTime(activity.timestamp)}</p>
                   </div>
                 </div>
               )

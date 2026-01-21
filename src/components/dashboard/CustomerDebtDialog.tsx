@@ -46,20 +46,20 @@ export function CustomerDebtDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       
-      <div className={`relative z-10 w-full max-w-5xl bg-white dark:bg-stone-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[75vh] ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className={`relative z-10 w-full max-w-4xl bg-white dark:bg-stone-900 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
         
         {/* Header */}
-        <div className="p-3.5 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between bg-stone-50/50 dark:bg-stone-900/50">
+        <div className="p-6 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between bg-stone-50/50 dark:bg-stone-900/50">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg text-red-600 dark:text-red-400">
               <User className="h-4 w-4" />
             </div>
             <div>
               <h2 className="text-base font-bold text-stone-900 dark:text-stone-100">{customerName}</h2>
-              <p className="text-[10px] text-stone-500 font-bold uppercase tracking-wider">{t('unpaidInvoices')}</p>
+              <p className="text-xs text-stone-500 font-bold uppercase tracking-wider">{t('unpaidInvoices')}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors">
+          <button onClick={onClose} className="p-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 transition-colors rounded-lg">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -69,8 +69,8 @@ export function CustomerDebtDialog({
             {/* RIGHT PANEL: INVOICES LIST */}
             <div className="flex-[1.6] flex flex-col border-e border-stone-100 dark:border-stone-800 bg-stone-50/30 dark:bg-stone-900/30 overflow-hidden">
                 <div className="p-3 px-4 border-b border-stone-100 dark:border-stone-800 flex justify-between items-center bg-white/50 dark:bg-stone-800/50">
-                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">{t('invoiceList')}</span>
-                    <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-[10px] font-bold border border-red-100">
+                    <span className="text-xs font-bold text-stone-400 uppercase tracking-widest">{t('invoiceList')}</span>
+                    <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-xs font-bold border border-red-100">
                         {invoices.length} {t('invoices')}
                     </span>
                 </div>
@@ -93,26 +93,26 @@ export function CustomerDebtDialog({
                                             "h-8 w-8 rounded-lg flex items-center justify-center border transition-colors",
                                             isExpanded ? "bg-red-50 border-red-100 text-red-600" : "bg-stone-50 dark:bg-stone-800 border-stone-100 dark:border-stone-700 text-stone-400"
                                         )}>
-                                            <Receipt className="h-3.5 w-3.5" />
+                                            <Receipt className="h-4 w-4" />
                                         </div>
                                         <div>
                                             <p className="text-xs font-bold text-stone-900 dark:text-stone-100">{invoice.invoiceNumber}</p>
-                                            <p className="text-[9px] text-stone-500 font-medium">{formatDate(invoice.dueDate)}</p>
+                                            <p className="text-xs text-stone-500 font-medium">{formatDate(invoice.dueDate)}</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <div className="text-end">
-                                            <p className="text-xs font-bold text-stone-900 dark:text-stone-100">{balance.toLocaleString()} <span className="text-[9px] text-stone-400 font-medium">{t('egp')}</span></p>
-                                            {invoice.paidAmount > 0 && <p className="text-[8px] text-emerald-600 font-bold uppercase">{t('partial')}</p>}
+                                            <p className="text-xs font-bold text-stone-900 dark:text-stone-100">{balance.toLocaleString()} <span className="text-xs text-stone-400 font-medium">{t('egp')}</span></p>
+                                            {invoice.paidAmount > 0 && <p className="text-xs text-emerald-600 font-bold uppercase">{t('partial')}</p>}
                                         </div>
-                                        {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-stone-400" /> : <ChevronDown className="h-3.5 w-3.5 text-stone-400" />}
+                                        {isExpanded ? <ChevronUp className="h-4 w-4 text-stone-400" /> : <ChevronDown className="h-4 w-4 text-stone-400" />}
                                     </div>
                                 </div>
 
                                 {isExpanded && (
                                     <div className="px-3 pb-3 pt-1 border-t border-stone-50 dark:border-stone-700/50 animate-fade-in">
                                         <div className="bg-stone-50/50 dark:bg-stone-900/50 rounded-lg p-2">
-                                            <table className="w-full text-[11px]">
+                                            <table className="w-full text-xs">
                                                 <thead>
                                                     <tr className="text-stone-400 font-bold uppercase tracking-wider border-b border-stone-100 dark:border-stone-700/50">
                                                         <th className="py-1 text-start px-1">{t('description')}</th>
@@ -142,9 +142,9 @@ export function CustomerDebtDialog({
                 <div className="flex-1 flex flex-col gap-6">
                     
                     <div className="space-y-3">
-                        <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">{t('paymentSummary')}</label>
+                        <label className="text-xs font-bold text-stone-400 uppercase tracking-widest block">{t('paymentSummary')}</label>
                         <div className="p-4 rounded-2xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 flex flex-col items-center text-center gap-1">
-                            <span className="text-[10px] font-bold text-red-600/70 uppercase tracking-widest">{t('totalAmountToPay')}</span>
+                            <span className="text-xs font-bold text-red-600/70 uppercase tracking-widest">{t('totalAmountToPay')}</span>
                             <div className="flex items-baseline gap-1.5">
                                 <span className="text-3xl font-medium text-red-700 dark:text-red-400">{totalDebt.toLocaleString()}</span>
                                 <span className="text-xs font-medium text-red-600/70">{t('egp')}</span>
@@ -154,21 +154,21 @@ export function CustomerDebtDialog({
 
                     <div className="space-y-4">
                         <div>
-                            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2 block">{t('paymentMethod')}</label>
+                            <label className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">{t('paymentMethod')}</label>
                             <div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/30 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400 flex items-center gap-3">
                                 <div className="p-1.5 bg-emerald-100 dark:bg-emerald-800 rounded-lg">
                                     <Wallet className="h-4 w-4" />
                                 </div>
                                 <div>
                                     <p className="font-bold text-xs">{t('cash')}</p>
-                                    <p className="text-[9px] opacity-70 uppercase font-bold">{t('onlyCashAccepted')}</p>
+                                    <p className="text-xs opacity-70 uppercase font-bold">{t('onlyCashAccepted')}</p>
                                 </div>
                                 <CheckCircle2 className="h-4 w-4 ms-auto text-emerald-500" />
                             </div>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest block">{t('notes')}</label>
+                            <label className="text-xs font-bold text-stone-400 uppercase tracking-widest block">{t('notes')}</label>
                             <textarea
                                 value={paymentNotes}
                                 onChange={(e) => setPaymentNotes(e.target.value)}
@@ -197,7 +197,7 @@ export function CustomerDebtDialog({
                 <div className="mt-6 pt-4 border-t border-stone-100 dark:border-stone-800">
                     <button 
                         onClick={onGoToProfile}
-                        className="w-full py-1 text-[10px] font-bold text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors uppercase tracking-widest"
+                        className="w-full py-1 text-xs font-bold text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 transition-colors uppercase tracking-widest"
                     >
                         {t('viewCustomerProfile')}
                     </button>

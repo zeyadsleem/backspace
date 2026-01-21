@@ -68,26 +68,26 @@ export function EditInventoryModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-4xl bg-white dark:bg-stone-900 rounded-xl shadow-xl max-h-[75vh] flex flex-col" dir="rtl">
+      <div className="relative w-full max-w-3xl bg-white dark:bg-stone-900 rounded-xl shadow-xl max-h-[85vh] flex flex-col" dir="rtl">
         
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b border-stone-200 dark:border-stone-800 flex-shrink-0">
+        <div className="flex items-center justify-between p-6 border-b border-stone-200 dark:border-stone-800 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-              <Edit3 className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+            <div className="h-8 w-8 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+              <Edit3 className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">تعديل المنتجات</h2>
+              <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">تعديل المنتجات</h2>
               <p className="text-xs text-stone-500 dark:text-stone-400">{session.customerName}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors">
-            <X className="h-4 w-4" />
+          <button onClick={onClose} className="p-2 text-stone-500 hover:text-stone-700 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors">
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="flex-1 overflow-y-auto p-6">
           {session.inventoryConsumptions.length === 0 ? (
             <div className="text-center py-8">
               <Coffee className="h-8 w-8 text-stone-300 dark:text-stone-600 mx-auto mb-3" />
@@ -140,7 +140,7 @@ export function EditInventoryModal({
                             disabled={displayQuantity <= 0}
                             className="p-1 rounded bg-stone-100 dark:bg-stone-700 border border-stone-200 dark:border-stone-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors"
                           >
-                            <Minus className="h-3 w-3 text-stone-600 dark:text-stone-300" />
+                            <Minus className="h-4 w-4 text-stone-600 dark:text-stone-300" />
                           </button>
                           
                           <div className="px-2 py-1 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded min-w-[40px] text-center">
@@ -159,7 +159,7 @@ export function EditInventoryModal({
                             onClick={() => handleQuantityChange(item.id, displayQuantity + 1)}
                             className="p-1 rounded bg-stone-100 dark:bg-stone-700 border border-stone-200 dark:border-stone-600 hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors"
                           >
-                            <Plus className="h-3 w-3 text-stone-600 dark:text-stone-300" />
+                            <Plus className="h-4 w-4 text-stone-600 dark:text-stone-300" />
                           </button>
                         </div>
 
@@ -185,7 +185,7 @@ export function EditInventoryModal({
                           className="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                           title="حذف المنتج"
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
@@ -209,7 +209,7 @@ export function EditInventoryModal({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-stone-200 dark:border-stone-800 p-3 flex-shrink-0">
+        <div className="border-t border-stone-200 dark:border-stone-800 p-6 flex-shrink-0">
           {/* New Total */}
           {hasChanges && (
             <div className="mb-3 p-3 bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border border-amber-200 dark:border-amber-800 rounded-lg">

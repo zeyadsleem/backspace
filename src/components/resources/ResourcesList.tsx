@@ -73,7 +73,7 @@ export function ResourcesList({ resources, resourceTypes, onView, onEdit, onDele
               <div className="flex items-center gap-3 mb-4 px-1">
                 <h2 className="text-sm font-bold text-stone-400 uppercase tracking-[0.2em]">{group.label}</h2>
                 <div className="h-px bg-stone-100 dark:bg-stone-800 flex-1" />
-                <span className="text-[10px] font-bold text-stone-300 uppercase tracking-widest">{t('items', { count: group.items.length })}</span>
+                <span className="text-xs font-bold text-stone-300 uppercase tracking-widest">{t('items', { count: group.items.length })}</span>
               </div>
               <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch' : 'space-y-3'}>
                 {group.items.map((resource) => <ResourceCard key={resource.id} resource={resource} viewMode={viewMode} onClick={() => onView?.(resource.id)} onEdit={() => onEdit?.(resource.id)} onDelete={() => onDelete?.(resource.id)} onSelectForSession={resource.isAvailable ? () => onSelectForSession?.(resource.id) : undefined} />)}

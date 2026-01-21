@@ -78,17 +78,17 @@ export function CustomerProfile({ customer, invoices = [], history = [], onEdit,
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 truncate">{customer.name}</h2>
-                  <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${typeInfo.color}`}>{typeInfo.label}</span>
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${typeInfo.color}`}>{typeInfo.label}</span>
                 </div>
                 <p className="mt-0.5 text-xs font-mono text-stone-400 dark:text-stone-500 uppercase tracking-widest">{customer.humanId}</p>
                 <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-                  <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400"><Phone className="h-3.5 w-3.5" /><span dir="ltr">{customer.phone}</span></div>
-                  {customer.email && <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400"><Mail className="h-3.5 w-3.5" /><span>{customer.email}</span></div>}
-                  <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400"><Calendar className="h-3.5 w-3.5" /><span>{t('memberSince')} {formatDate(customer.createdAt)}</span></div>
+                  <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400"><Phone className="h-4 w-4" /><span dir="ltr">{customer.phone}</span></div>
+                  {customer.email && <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400"><Mail className="h-4 w-4" /><span>{customer.email}</span></div>}
+                  <div className="flex items-center gap-1.5 text-xs text-stone-600 dark:text-stone-400"><Calendar className="h-4 w-4" /><span>{t('memberSince')} {formatDate(customer.createdAt)}</span></div>
                 </div>
               </div>
               <div className="text-end hidden sm:block">
-                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">{t('balance')}</p>
+                <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">{t('balance')}</p>
                 <p className={`text-lg font-black ${customer.balance >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>{formatCurrency(customer.balance)}</p>
               </div>
             </div>

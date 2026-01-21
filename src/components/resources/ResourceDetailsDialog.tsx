@@ -31,15 +31,15 @@ export function ResourceDetailsDialog({ isOpen, resource, onClose, onEdit, onDel
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md rounded-xl bg-white dark:bg-stone-900 shadow-xl" dir={isRTL ? 'rtl' : 'ltr'}>
         {/* Header */}
-        <div className="p-5 border-b border-stone-200 dark:border-stone-800 flex justify-between items-center">
+        <div className="p-6 border-b border-stone-200 dark:border-stone-800 flex justify-between items-center">
           <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100">{t('resourceDetails') || 'Resource Details'}</h2>
-          <button onClick={onClose} className="p-1 rounded-full text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800">
+          <button onClick={onClose} className="p-2 rounded-lg text-stone-500 hover:bg-stone-100 dark:text-stone-400 dark:hover:bg-stone-800">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-5">
+        <div className="p-6 space-y-6">
           <div className="flex items-center gap-4">
             <div className={`p-3.5 rounded-2xl ${config.bg}`}>
               <Icon className={`h-7 w-7 ${config.color}`} />
@@ -74,7 +74,7 @@ export function ResourceDetailsDialog({ isOpen, resource, onClose, onEdit, onDel
         </div>
 
         {/* Footer Actions */}
-        <div className="p-5 bg-stone-50 dark:bg-stone-800/50 border-t border-stone-200 dark:border-stone-800 flex flex-col gap-3">
+        <div className="p-6 bg-stone-50 dark:bg-stone-800/50 border-t border-stone-200 dark:border-stone-800 flex flex-col gap-3">
           {resource.isAvailable && (
             <button 
               onClick={() => { onStartSession(); onClose(); }}

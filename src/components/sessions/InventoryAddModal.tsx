@@ -76,12 +76,12 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className={`relative w-full max-w-5xl bg-white dark:bg-stone-900 rounded-xl shadow-2xl flex flex-col h-[70vh] overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className={`relative w-full max-w-3xl bg-white dark:bg-stone-900 rounded-xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden ${isRTL ? 'rtl' : 'ltr'}`} dir={isRTL ? 'rtl' : 'ltr'}>
         
         {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between p-4 border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900">
+        <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900">
           <div className="flex items-center gap-3">
-            <div className="p-1.5 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+            <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
               <ShoppingCart className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
@@ -103,7 +103,7 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
               <div className="p-3 border-b border-stone-100 dark:border-stone-800">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-xs font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">{t('availableItems')}</h3>
-                  <span className="px-2 py-0.5 text-[10px] font-bold bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 rounded-full">{filteredItems.length} {t('item')}</span>
+                  <span className="px-2 py-0.5 text-xs font-bold bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400 rounded-full">{filteredItems.length} {t('item')}</span>
                 </div>
                 
                 <div className="relative">
@@ -148,13 +148,13 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
                           <div className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
                             isInCart ? 'bg-amber-500 text-white' : 'bg-white dark:bg-stone-800 text-stone-400 border border-stone-100 dark:border-stone-700'
                           }`}>
-                            {isInCart ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
+                            {isInCart ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-stone-900 dark:text-stone-100 truncate">{item.name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
                               <span className="text-xs font-bold text-amber-600 dark:text-amber-400">{item.price} {t('egpCurrency')}</span>
-                              <span className="text-[10px] text-stone-400 font-medium tracking-tight">• {availableQuantity} {t('inStock')}</span>
+                              <span className="text-xs text-stone-400 font-medium tracking-tight">• {availableQuantity} {t('inStock')}</span>
                             </div>
                           </div>
                         </button>
@@ -172,7 +172,7 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
                   <ShoppingCart className="h-4 w-4 text-stone-400" />
                   <h3 className="text-xs font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">{t('selectedItems')}</h3>
                 </div>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-500 text-white rounded-full">
+                <span className="px-2 py-0.5 text-xs font-bold bg-amber-500 text-white rounded-full">
                   {cart.filter(ci => ci.quantity > 0).length}
                 </span>
               </div>
@@ -189,8 +189,8 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
                     <div key={cartItem.item.id} className="p-2.5 bg-stone-50 dark:bg-stone-800/50 rounded-lg border border-stone-100 dark:border-stone-700/50 group">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[15px] font-medium text-stone-800 dark:text-stone-200 truncate">{cartItem.item.name}</p>
-                          <p className="text-[11px] text-stone-400 font-medium">{cartItem.item.price} {t('egpCurrency')} / {t('item')}</p>
+                          <p className="text-base font-medium text-stone-800 dark:text-stone-200 truncate">{cartItem.item.name}</p>
+                          <p className="text-xs text-stone-400 font-medium">{cartItem.item.price} {t('egpCurrency')} / {t('item')}</p>
                         </div>
                         <button 
                           onClick={() => handleItemRemove(cartItem.item.id)}
@@ -207,7 +207,7 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
                             disabled={cartItem.quantity <= 0}
                             className="w-8 h-8 flex items-center justify-center rounded hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors disabled:opacity-30"
                           >
-                            <Minus className="h-3.5 w-3.5" />
+                            <Minus className="h-4 w-4" />
                           </button>
                           <span className="w-10 text-center text-sm font-bold text-stone-700 dark:text-stone-200">
                             {cartItem.quantity}
@@ -217,11 +217,11 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
                             disabled={cartItem.quantity >= cartItem.item.quantity}
                             className="w-8 h-8 flex items-center justify-center rounded hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-500 transition-colors disabled:opacity-30"
                           >
-                            <Plus className="h-3.5 w-3.5" />
+                            <Plus className="h-4 w-4" />
                           </button>
                         </div>
                         <span className="text-sm font-bold text-stone-900 dark:text-stone-100 px-1.5">
-                          {cartItem.item.price * cartItem.quantity} <span className="text-[11px] text-stone-400 font-medium">{t('egpCurrency')}</span>
+                          {cartItem.item.price * cartItem.quantity} <span className="text-xs text-stone-400 font-medium">{t('egpCurrency')}</span>
                         </span>
                       </div>
                     </div>
@@ -243,7 +243,7 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 border-t border-stone-200 dark:border-stone-800 p-3 bg-white dark:bg-stone-900 flex gap-3">
+        <div className="flex-shrink-0 border-t border-stone-200 dark:border-stone-800 p-6 bg-white dark:bg-stone-900 flex gap-3">
           <button 
             onClick={onClose}
             className="flex-1 py-2.5 text-sm font-semibold text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 rounded-lg hover:bg-stone-200 dark:hover:bg-stone-700 transition-all uppercase tracking-wider"

@@ -35,7 +35,7 @@ export function EmptyState({ icon = 'default', title, description, actionText, o
         <button
           type="button"
           onClick={onAction}
-          className="mt-6 rounded-md bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
+          className="mt-6 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
         >
           {actionText}
         </button>

@@ -39,9 +39,9 @@ export function PendingInvoices({ invoices, onViewCustomerDebt }: PendingInvoice
           <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg text-red-600 dark:text-red-400">
             <AlertCircle className="h-4 w-4" />
           </div>
-          <h3 className="font-bold text-stone-900 dark:text-stone-100">{t('unpaidInvoices')}</h3>
+          <h3 className="font-semibold text-stone-900 dark:text-stone-100">{t('unpaidInvoices')}</h3>
         </div>
-        <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-[10px] font-black border border-red-100 dark:border-red-900/30">
+        <span className="px-2 py-0.5 rounded-full bg-red-50 text-red-600 text-xs font-semibold border border-red-100 dark:border-red-900/30">
           {sortedCustomerIds.length} {t('customer')}
         </span>
       </div>
@@ -64,19 +64,19 @@ export function PendingInvoices({ invoices, onViewCustomerDebt }: PendingInvoice
                   className="w-full flex items-center justify-between p-4 rounded-xl border border-stone-100 dark:border-stone-800/50 hover:bg-red-50/30 dark:hover:bg-red-900/10 hover:border-red-100 transition-all group shadow-sm"
                 >
                   <div className="text-start">
-                    <p className="text-sm font-bold text-stone-900 dark:text-stone-100">{group.name}</p>
+                    <p className="text-sm font-medium text-stone-900 dark:text-stone-100">{group.name}</p>
                     <div className="flex items-center gap-2 mt-1">
-                        <span className="px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-[9px] font-bold text-stone-500 uppercase tracking-tight border border-stone-200 dark:border-stone-700">
+                        <span className="px-1.5 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-xs font-medium text-stone-500 uppercase tracking-tight border border-stone-200 dark:border-stone-700">
                             {group.invoices.length} {t('invoices')}
                         </span>
                     </div>
                   </div>
                   <div className="text-end flex items-center gap-4">
                     <div>
-                      <p className="text-base font-black text-red-600 font-mono">
+                      <p className="text-base font-semibold text-red-600 font-mono">
                         {totalDue.toLocaleString()}
                       </p>
-                      <p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider">{t('totalDue')}</p>
+                      <p className="text-xs text-stone-400 font-medium uppercase tracking-wider">{t('totalDue')}</p>
                     </div>
                     {isRTL ? <ChevronLeft className="h-4 w-4 text-stone-300 group-hover:text-red-400 transition-colors" /> : <ChevronRight className="h-4 w-4 text-stone-300 group-hover:text-red-400 transition-colors" />}
                   </div>

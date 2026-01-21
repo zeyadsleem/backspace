@@ -32,7 +32,7 @@ export function ActiveSessions({
   const [inventoryModalSession, setInventoryModalSession] = useState<string | null>(null)
   const [editInventorySessionId, setEditInventorySessionId] = useState<string | null>(null)
   const [endSessionModalId, setEndSessionModalId] = useState<string | null>(null)
-  
+
   const selectedSession = activeSessions.find((s) => s.id === inventoryModalSession)
   const sessionToEditInventory = activeSessions.find((s) => s.id === editInventorySessionId)
   const sessionToEnd = activeSessions.find((s) => s.id === endSessionModalId)
@@ -59,25 +59,25 @@ export function ActiveSessions({
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-stretch pb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 items-stretch pb-6">
           {activeSessions.map((session) => (
-            <ActiveSessionCard 
-              key={session.id} 
-              session={session} 
-              onAddInventory={() => setInventoryModalSession(session.id)} 
-              onEndSession={() => setEndSessionModalId(session.id)} 
-              onViewDetails={() => setEditInventorySessionId(session.id)} 
+            <ActiveSessionCard
+              key={session.id}
+              session={session}
+              onAddInventory={() => setInventoryModalSession(session.id)}
+              onEndSession={() => setEndSessionModalId(session.id)}
+              onViewDetails={() => setEditInventorySessionId(session.id)}
             />
           ))}
         </div>
       )}
 
       {selectedSession && (
-        <InventoryAddModal 
-          session={selectedSession} 
-          availableInventory={availableInventory} 
-          onAdd={(data) => { onAddInventory?.(selectedSession.id, data); setInventoryModalSession(null) }} 
-          onClose={() => setInventoryModalSession(null)} 
+        <InventoryAddModal
+          session={selectedSession}
+          availableInventory={availableInventory}
+          onAdd={(data) => { onAddInventory?.(selectedSession.id, data); setInventoryModalSession(null) }}
+          onClose={() => setInventoryModalSession(null)}
         />
       )}
 
