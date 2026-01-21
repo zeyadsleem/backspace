@@ -75,7 +75,7 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            maxWidth="max-w-4xl"
+            maxWidth="max-w-3xl"
             showCloseButton={false}
             className="overflow-hidden"
         >
@@ -98,7 +98,7 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
             <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
 
                 {/* LEFT COLUMN: THE BILL */}
-                <div className="flex-[2] flex flex-col border-e border-stone-100 dark:border-stone-800 bg-stone-50/30 dark:bg-stone-900/30">
+                <div className="lg:flex-[3] flex flex-col border-e border-stone-100 dark:border-stone-800 bg-stone-50/30 dark:bg-stone-900/30">
                     <div className="flex-1 overflow-y-auto p-5 scrollbar-thin">
                         <div className="space-y-6">
 
@@ -109,7 +109,7 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                                         <Clock className="h-4 w-4" />
                                         <span className="text-xs font-semibold uppercase tracking-wider">{t('session')}</span>
                                     </div>
-                                    <span className="font-mono font-bold text-stone-900 dark:text-stone-100">{sessionCost} {t('egp')}</span>
+                                    <span className="font-mono font-semibold text-stone-900 dark:text-stone-100">{sessionCost} {t('egp')}</span>
                                 </div>
                                 <div className="p-3 flex justify-between items-center text-sm">
                                     <div className="text-stone-600 dark:text-stone-400">
@@ -128,7 +128,7 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                                         <Coffee className="h-4 w-4" />
                                         <span className="text-xs font-semibold uppercase tracking-wider">{t('orders')}</span>
                                     </div>
-                                    <span className="font-mono font-bold text-stone-900 dark:text-stone-100">{session.inventoryTotal} {t('egp')}</span>
+                                    <span className="font-mono font-semibold text-stone-900 dark:text-stone-100">{session.inventoryTotal} {t('egp')}</span>
                                 </div>
                                 <div className="divide-y divide-stone-100 dark:divide-stone-700">
                                     {session.inventoryConsumptions.length === 0 ? (
@@ -160,48 +160,48 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                     {/* Total Bar */}
                     <div className="p-5 border-t border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900">
                         <div className="flex justify-between items-end">
-                            <span className="text-sm font-semibold text-stone-500 uppercase tracking-widest mb-1">{t('totalDue')}</span>
+                            <span className="text-xs font-medium text-stone-500 uppercase tracking-widest mb-0.5">{t('totalDue')}</span>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-semibold text-stone-900 dark:text-stone-100">{totalAmount}</span>
-                                <span className="text-sm font-semibold text-stone-400">{t('egp')}</span>
+                                <span className="text-xl font-medium text-stone-900 dark:text-stone-100">{totalAmount}</span>
+                                <span className="text-xs font-normal text-stone-400">{t('egp')}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* RIGHT COLUMN: PAYMENT ACTIONS */}
-                <div className="w-full lg:flex-1 flex flex-col bg-white dark:bg-stone-900 p-5">
+                <div className="w-full lg:flex-[2] flex flex-col bg-white dark:bg-stone-900 p-5">
                     <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-6">
 
                         <div>
-                            <label className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3 block">{t('paymentMethod')}</label>
+                            <label className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-3 block">{t('paymentMethod')}</label>
                             <div className="grid grid-cols-2 gap-3">
                                 <button
                                     type="button"
                                     onClick={() => setPaymentMode('pay-now')}
                                     className={cn(
-                                        "flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all",
+                                        "flex items-center justify-center gap-2 h-11 rounded-xl border transition-all",
                                         paymentMode === 'pay-now'
-                                            ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400"
-                                            : "border-stone-200 dark:border-stone-700 hover:border-emerald-200 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400"
+                                            ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 font-semibold ring-2 ring-emerald-500/20"
+                                            : "border-stone-200 dark:border-stone-700 hover:border-emerald-200 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 font-medium"
                                     )}
                                 >
                                     <Wallet className="h-4 w-4" />
-                                    <span className="font-bold text-sm">{t('payNow')}</span>
+                                    <span className="text-sm">{t('payNow')}</span>
                                 </button>
 
                                 <button
                                     type="button"
                                     onClick={() => setPaymentMode('pay-later')}
                                     className={cn(
-                                        "flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 transition-all",
+                                        "flex items-center justify-center gap-2 h-11 rounded-xl border transition-all",
                                         paymentMode === 'pay-later'
-                                            ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400"
-                                            : "border-stone-200 dark:border-stone-700 hover:border-red-200 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400"
+                                            ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 font-semibold ring-2 ring-red-500/20"
+                                            : "border-stone-200 dark:border-stone-700 hover:border-red-200 hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 font-medium"
                                     )}
                                 >
                                     <User className="h-4 w-4" />
-                                    <span className="font-bold text-sm">{t('addToDebt')}</span>
+                                    <span className="text-sm">{t('addToDebt')}</span>
                                 </button>
                             </div>
                         </div>
@@ -209,21 +209,21 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                         <div className="flex-1">
                             {paymentMode === 'pay-now' ? (
                                 <div className="animate-fade-in space-y-4">
-                                    <div className="p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-900/20">
-                                        <label className="text-xs font-bold text-emerald-600/70 uppercase tracking-widest mb-1.5 block">{t('amountReceived')}</label>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-medium text-stone-400 uppercase tracking-widest block">{t('amountReceived')}</label>
                                         <div className="relative">
                                             <input
                                                 type="number"
                                                 value={amountToPay}
                                                 onChange={(e) => setAmountToPay(Number(e.target.value))}
-                                                className={`w-full bg-transparent text-xl font-bold text-emerald-700 dark:text-emerald-400 outline-none border-b-2 border-emerald-200 dark:border-emerald-800 focus:border-emerald-500 pb-1 ${isRTL ? 'pl-8' : 'pr-8'}`}
+                                                className={`w-full h-14 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 text-3xl font-medium font-mono outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all ${isRTL ? 'pl-10' : 'pr-10'}`}
                                             />
-                                            <span className={`absolute bottom-2 text-xs font-bold text-emerald-600/50 ${isRTL ? 'left-0' : 'right-0'}`}>{t('egp')}</span>
+                                            <span className={`absolute top-1/2 -translate-y-1/2 text-sm font-medium text-stone-400 uppercase pointer-events-none ${isRTL ? 'left-4' : 'right-4'}`}>{t('egp')}</span>
                                         </div>
                                     </div>
-                                    <div className="p-3 flex items-start gap-3 bg-stone-50 dark:bg-stone-800 rounded-lg text-xs text-stone-600 dark:text-stone-400">
+                                    <div className="p-3 flex items-start gap-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-100 dark:border-stone-700 text-xs text-stone-600 dark:text-stone-400">
                                         <DollarSign className="h-4 w-4 text-stone-400 shrink-0 mt-0.5" />
-                                        <p>{t('cashPaymentDescription')}</p>
+                                        <p className="leading-relaxed">{t('cashPaymentDescription')}</p>
                                     </div>
                                 </div>
                             ) : (
@@ -241,12 +241,12 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                             )}
 
                             <div className="mt-4">
-                                <label className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-2 block">{t('notes')}</label>
+                                <label className="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-2 block">{t('notes')}</label>
                                 <textarea
                                     value={notes}
                                     onChange={(e) => setNotes(e.target.value)}
                                     placeholder={t('addPaymentNotes')}
-                                    className="w-full p-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-xs focus:ring-2 focus:ring-stone-400 outline-none transition-all resize-none h-20"
+                                    className="w-full p-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:ring-2 focus:ring-stone-400 outline-none transition-all resize-none h-20"
                                 />
                             </div>
                         </div>
@@ -255,7 +255,7 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                             type="submit"
                             disabled={isLoading}
                             className={cn(
-                                "w-full h-11 rounded-xl font-bold text-base text-white shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2",
+                                "w-full h-11 rounded-xl font-medium text-base text-white shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2",
                                 paymentMode === 'pay-now'
                                     ? "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200 dark:shadow-none"
                                     : "bg-red-600 hover:bg-red-700 shadow-red-200 dark:shadow-none"

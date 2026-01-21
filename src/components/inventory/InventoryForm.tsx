@@ -6,7 +6,7 @@ import { inventorySchema, type InventoryFormData } from '@/lib/validations'
 import type { InventoryCategory } from '@/types'
 
 interface InventoryFormProps {
-  initialData?: { 
+  initialData?: {
     name: string
     category: InventoryCategory
     price: number
@@ -23,7 +23,7 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
   const t = useAppStore((state) => state.t)
   const language = useAppStore((state) => state.language)
   const isRTL = useAppStore((state) => state.isRTL)
-  
+
   const {
     register,
     handleSubmit,
@@ -57,32 +57,30 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Name Field */}
         <div className="space-y-1.5">
-          <label htmlFor="name" className="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+          <label htmlFor="name" className="flex items-center gap-2 text-xs font-bold text-stone-400 uppercase tracking-widest">
             <Package className="h-4 w-4" />
             <span>{t('itemName') || 'Item Name'}</span>
             <span className="text-red-500">*</span>
           </label>
-          <div className={isRTL ? 'rtl-input-wrapper' : 'ltr-input-wrapper'}>
+          <div className="relative">
             <input
               id="name"
               type="text"
               {...register('name')}
               placeholder={t('inventoryExample') || 'Enter item name'}
-              dir={isRTL ? 'rtl' : 'ltr'}
-              className={`h-10 w-full rounded-md border px-3 text-sm focus:outline-none focus:ring-1 dark:bg-stone-800 dark:text-stone-100 ${
-                errors.name 
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                  : 'border-stone-300 focus:border-amber-500 focus:ring-amber-500 dark:border-stone-600'
-              } ${isRTL ? 'rtl-text-input' : 'ltr-text-input'}`}
+              className={`h-11 w-full rounded-xl border px-3 text-sm font-medium focus:outline-none focus:ring-2 transition-all dark:bg-stone-800 dark:text-stone-100 ${errors.name
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                : 'border-stone-200 focus:border-amber-500 focus:ring-amber-500/20 dark:border-stone-700'
+                }`}
               disabled={isLoading}
             />
           </div>
-          {errors.name && <p className={`text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-end' : 'text-start'}`}>{errors.name.message}</p>}
+          {errors.name && <p className="text-xs text-red-600 dark:text-red-400 font-bold">{errors.name.message}</p>}
         </div>
 
         {/* Price Field */}
         <div className="space-y-1.5">
-          <label htmlFor="price" className="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+          <label htmlFor="price" className="flex items-center gap-2 text-xs font-bold text-stone-400 uppercase tracking-widest">
             <DollarSign className="h-4 w-4" />
             <span>{t('price') || `Price (${t('egp')})`}</span>
             <span className="text-red-500">*</span>
@@ -94,20 +92,18 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
             min="0"
             {...register('price', { valueAsNumber: true })}
             placeholder="0.00"
-            dir="ltr"
-            className={`h-10 w-full rounded-md border px-3 text-sm focus:outline-none focus:ring-1 dark:bg-stone-800 dark:text-stone-100 ${
-              errors.price 
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                : 'border-stone-300 focus:border-amber-500 focus:ring-amber-500 dark:border-stone-600'
-            }`}
+            className={`h-11 w-full rounded-xl border px-3 text-sm font-medium focus:outline-none focus:ring-2 transition-all dark:bg-stone-800 dark:text-stone-100 ${errors.price
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+              : 'border-stone-200 focus:border-amber-500 focus:ring-amber-500/20 dark:border-stone-700'
+              }`}
             disabled={isLoading}
           />
-          {errors.price && <p className={`text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-end' : 'text-start'}`}>{errors.price.message}</p>}
+          {errors.price && <p className="text-xs text-red-600 dark:text-red-400 font-bold">{errors.price.message}</p>}
         </div>
 
         {/* Quantity Field */}
         <div className="space-y-1.5">
-          <label htmlFor="quantity" className="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+          <label htmlFor="quantity" className="flex items-center gap-2 text-xs font-bold text-stone-400 uppercase tracking-widest">
             <Hash className="h-4 w-4" />
             <span>{t('quantity') || 'Quantity'}</span>
             <span className="text-red-500">*</span>
@@ -118,20 +114,18 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
             min="0"
             {...register('quantity', { valueAsNumber: true })}
             placeholder="0"
-            dir="ltr"
-            className={`h-10 w-full rounded-md border px-3 text-sm focus:outline-none focus:ring-1 dark:bg-stone-800 dark:text-stone-100 ${
-              errors.quantity 
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                : 'border-stone-300 focus:border-amber-500 focus:ring-amber-500 dark:border-stone-600'
-            }`}
+            className={`h-11 w-full rounded-xl border px-3 text-sm font-medium focus:outline-none focus:ring-2 transition-all dark:bg-stone-800 dark:text-stone-100 ${errors.quantity
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+              : 'border-stone-200 focus:border-amber-500 focus:ring-amber-500/20 dark:border-stone-700'
+              }`}
             disabled={isLoading}
           />
-          {errors.quantity && <p className={`text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-end' : 'text-start'}`}>{errors.quantity.message}</p>}
+          {errors.quantity && <p className="text-xs text-red-600 dark:text-red-400 font-bold">{errors.quantity.message}</p>}
         </div>
 
         {/* Min Stock Field */}
         <div className="space-y-1.5">
-          <label htmlFor="minStock" className="flex items-center gap-2 text-sm font-medium text-stone-700 dark:text-stone-300">
+          <label htmlFor="minStock" className="flex items-center gap-2 text-xs font-bold text-stone-400 uppercase tracking-widest">
             <Hash className="h-4 w-4" />
             <span>{t('minStock') || 'Minimum Stock'}</span>
             <span className="text-red-500">*</span>
@@ -142,33 +136,27 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
             min="0"
             {...register('minStock', { valueAsNumber: true })}
             placeholder="5"
-            dir="ltr"
-            className={`h-10 w-full rounded-md border px-3 text-sm focus:outline-none focus:ring-1 dark:bg-stone-800 dark:text-stone-100 ${
-              errors.minStock 
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                : 'border-stone-300 focus:border-amber-500 focus:ring-amber-500 dark:border-stone-600'
-            }`}
+            className={`h-11 w-full rounded-xl border px-3 text-sm font-medium focus:outline-none focus:ring-2 transition-all dark:bg-stone-800 dark:text-stone-100 ${errors.minStock
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+              : 'border-stone-200 focus:border-amber-500 focus:ring-amber-500/20 dark:border-stone-700'
+              }`}
             disabled={isLoading}
           />
-          {errors.minStock && <p className={`text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-end' : 'text-start'}`}>{errors.minStock.message}</p>}
-          <p className={`text-sm text-stone-500 dark:text-stone-400 ${isRTL ? 'text-end' : 'text-start'}`}>
-            {t('stockAlertMessage') || 'Alert when stock falls below this level'}
-          </p>
+          {errors.minStock && <p className="text-xs text-red-600 dark:text-red-400 font-bold">{errors.minStock.message}</p>}
         </div>
       </div>
 
       {/* Category Field - Full Width */}
       <div className="space-y-1.5">
-        <label htmlFor="category" className={`block text-sm font-medium text-stone-700 dark:text-stone-300 ${isRTL ? 'text-end' : 'text-start'}`}>
+        <label htmlFor="category" className="block text-xs font-bold text-stone-400 uppercase tracking-widest">
           {t('category') || 'Category'}
           <span className="text-red-500 ml-1">*</span>
         </label>
-        <div className={isRTL ? 'rtl-input-wrapper' : 'ltr-input-wrapper'}>
+        <div>
           <select
             id="category"
             {...register('category')}
-            dir={isRTL ? 'rtl' : 'ltr'}
-            className={`h-10 w-full rounded-md border border-stone-300 bg-white px-3 text-sm focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100 ${isRTL ? 'rtl-text-input' : 'ltr-text-input'}`}
+            className={`h-11 w-full rounded-xl border border-stone-200 bg-white px-3 text-sm font-medium focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100 transition-all`}
             disabled={isLoading}
           >
             {categories.map((category) => (
@@ -178,25 +166,25 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
             ))}
           </select>
         </div>
-        {errors.category && <p className={`text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-end' : 'text-start'}`}>{errors.category.message}</p>}
+        {errors.category && <p className="text-xs text-red-600 dark:text-red-400 font-bold">{errors.category.message}</p>}
       </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 pt-4">
+      <div className="flex gap-3 pt-4 border-t border-stone-100 dark:border-stone-800">
         <button
           type="button"
           onClick={handleReset}
           disabled={isLoading}
-          className="flex-1 rounded-md border border-stone-300 bg-white px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 transition-colors"
+          className="px-6 h-11 rounded-xl border border-stone-200 bg-white text-sm font-bold text-stone-600 hover:bg-stone-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700 transition-colors"
         >
           {t('cancel')}
         </button>
         <button
           type="submit"
           disabled={isLoading || !isValid || (!isDirty && !isEditing)}
-          className="flex flex-1 items-center justify-center gap-2 rounded-md bg-amber-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-amber-600 dark:hover:bg-amber-500 transition-colors"
+          className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-amber-500 text-sm font-bold text-white hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-amber-600 dark:hover:bg-amber-500 shadow-lg shadow-amber-500/10 transition-all active:scale-[0.98]"
         >
-          {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+          {isLoading && <Loader2 className="h-5 w-5 animate-spin" />}
           {isEditing ? t('updateItem') : t('newItem')}
         </button>
       </div>
