@@ -1,6 +1,7 @@
-import { AlertTriangle, X, Loader2 } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 import { Modal } from '@/components/shared'
+import { Button } from '@/components/ui/button'
 
 interface DeleteConfirmDialogProps {
   isOpen: boolean
@@ -24,50 +25,43 @@ export function DeleteConfirmDialog({
   isLoading = false,
 }: DeleteConfirmDialogProps) {
   const t = useAppStore((state) => state.t)
-  const isRTL = useAppStore((state) => state.isRTL)
 
   if (!isOpen) return null
 
   return (
+
     <Modal
       isOpen={isOpen}
       onClose={onCancel!}
       showCloseButton={false}
-      maxWidth="max-w-md"
+      maxWidth="max-w-sm"
     >
-      <div className="p-6 relative">
-        <button
-          type="button"
-          onClick={onCancel}
-          className={`absolute top-4 rounded-lg p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300 ${t.dir === 'rtl' || isRTL ? 'left-4' : 'right-4'}`}
-        >
-          <X className="h-5 w-5" />
-        </button>
+      <div className="p-6 text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
           <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
         </div>
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{title}</h3>
-          <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">{description}</p>
-        </div>
-        <div className="mt-6 flex gap-3">
-          <button
+        <h3 className="text-lg font-bold text-stone-900 dark:text-stone-100">{title}</h3>
+        <p className="mt-2 text-sm text-stone-500 dark:text-stone-400 leading-relaxed">{description}</p>
+
+        <div className="mt-6 grid grid-cols-2 gap-3">
+          <Button
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="flex-1 rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50 disabled:opacity-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
+            variant="ghost"
+            className="font-semibold"
           >
             {cancelText || t('cancel')}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50 dark:bg-red-700 dark:hover:bg-red-600"
+            variant="danger"
+            isLoading={isLoading}
           >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             {confirmText || t('delete')}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

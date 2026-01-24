@@ -214,6 +214,7 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                                         <div className="relative">
                                             <input
                                                 type="number"
+                                                step="any"
                                                 value={amountToPay}
                                                 onChange={(e) => setAmountToPay(Number(e.target.value))}
                                                 className={`w-full h-14 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 text-3xl font-medium font-mono outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all ${isRTL ? 'pl-10' : 'pr-10'}`}

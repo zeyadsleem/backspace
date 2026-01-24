@@ -111,7 +111,7 @@ export interface PlanTypeOption {
 // Inventory
 // -----------------------------------------------------------------------------
 
-export type InventoryCategory = 'beverage' | 'snack' | 'other'
+export type InventoryCategory = 'beverage' | 'snack' | 'meal' | 'other'
 
 export interface InventoryItem {
   id: string
@@ -133,7 +133,7 @@ export interface CategoryOption {
 // Invoice
 // -----------------------------------------------------------------------------
 
-export type InvoiceStatus = 'paid' | 'unpaid' | 'pending'
+export type InvoiceStatus = 'paid' | 'unpaid' | 'pending' | 'cancelled'
 export type PaymentMethod = 'cash' | 'card' | 'transfer'
 
 export interface LineItem {
@@ -265,13 +265,13 @@ export interface UtilizationData {
   averageSessionDuration: number
 }
 
-export type OperationType = 
-  | 'session_start' 
-  | 'session_end' 
-  | 'inventory_add' 
-  | 'invoice_created' 
-  | 'payment_received' 
-  | 'customer_new' 
+export type OperationType =
+  | 'session_start'
+  | 'session_end'
+  | 'inventory_add'
+  | 'invoice_created'
+  | 'payment_received'
+  | 'customer_new'
   | 'subscription_new'
 
 export interface OperationRecord {

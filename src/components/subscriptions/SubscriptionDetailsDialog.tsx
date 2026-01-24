@@ -176,6 +176,7 @@ export function SubscriptionDetailsDialog({
               <div className="relative">
                 <input
                   type="number"
+                  step="any"
                   value={refundAmount}
                   onChange={(e) => setRefundAmount(Number(e.target.value))}
                   className="w-full h-10 rounded-lg border border-red-200 dark:border-red-900/30 bg-white dark:bg-stone-800 px-3 text-sm font-bold outline-none focus:ring-2 focus:ring-red-500/20"

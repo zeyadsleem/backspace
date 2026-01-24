@@ -35,23 +35,23 @@ interface AppState {
   inventory: InventoryItem[]
   invoices: Invoice[]
   settings: Settings
-  
+
   // Dashboard data
   dashboardMetrics: DashboardMetrics
   lowStockAlerts: LowStockAlert[]
   recentActivity: RecentActivity[]
   revenueChart: RevenueDataPoint[]
-  
+
   // Reports data
   revenueData: RevenueData
   utilizationData: UtilizationData
   operationHistory: OperationRecord[]
   topCustomers: TopCustomer[]
-  
+
   // Options
   planTypes: PlanTypeOption[]
   categories: CategoryOption[]
-  
+
   // Theme & Language
   theme: ThemeOption
   language: LanguageOption
@@ -62,22 +62,22 @@ interface AppState {
 interface AppActions {
   // Computed values
   t: (key: TranslationKey, params?: Record<string, string | number>) => string
-  
+
   // Theme & Language actions
   setTheme: (theme: ThemeOption) => void
   setLanguage: (language: LanguageOption) => void
   setSidebarCollapsed: (collapsed: boolean) => void
-  
+
   // Customer actions
   addCustomer: (customer: Omit<Customer, 'id' | 'humanId' | 'createdAt' | 'totalSessions' | 'totalSpent'>) => void
   updateCustomer: (id: string, data: Partial<Customer>) => void
   deleteCustomer: (id: string) => void
-  
+
   // Resource actions
   addResource: (resource: Omit<Resource, 'id' | 'createdAt' | 'utilizationRate' | 'isAvailable'>) => void
   updateResource: (id: string, data: Partial<Resource>) => void
   deleteResource: (id: string) => void
-  
+
   // Session actions
   startSession: (customerId: string, resourceId: string) => void
   endSession: (sessionId: string) => void
@@ -85,7 +85,7 @@ interface AppActions {
   addInventoryToSession: (sessionId: string, inventoryId: string, quantity: number) => void
   updateInventoryInSession: (sessionId: string, consumptionId: string, newQuantity: number) => void
   removeInventoryFromSession: (sessionId: string, consumptionId: string) => void
-  
+
   // Subscription actions
   addSubscription: (customerId: string, planType: string, startDate: string) => void
   updateSubscription: (id: string, data: Partial<Subscription>) => void
@@ -93,22 +93,22 @@ interface AppActions {
   reactivateSubscription: (id: string) => void
   changeSubscription: (id: string, newPlanType: string) => void
   cancelSubscription: (id: string, refundAmount: number) => void
-  
+
   // Inventory actions
   addInventoryItem: (item: Omit<InventoryItem, 'id' | 'createdAt'>) => void
   updateInventoryItem: (id: string, data: Partial<InventoryItem>) => void
   deleteInventoryItem: (id: string) => void
   adjustInventoryQuantity: (id: string, delta: number) => void
-  
+
   // Invoice actions
   recordPayment: (invoiceId: string, amount: number, method: string, date: string, notes?: string) => void
   recordBulkPayment: (invoiceIds: string[], totalAmount: number, notes: string) => void
-  
+
   // Settings actions
   updateSettings: (settings: Partial<Settings>) => void
   updatePlanPrice: (planId: string, price: number) => void
   updateResourceTypePrice: (type: ResourceType, price: number) => void
-  
+
   // Internal actions
   addActivity: (type: RecentActivity['type'], description: string) => void
   generateId: () => string
@@ -157,15 +157,15 @@ export const useAppStore = create<AppStore>()(
   persist(
     (set, get) => ({
       ...initialState,
-      
+
       // Computed values
       t: (key: TranslationKey, params?: Record<string, string | number>) => {
         return translate(key, get().language, params)
       },
-      
+
       // Helper functions
       generateId: () => Math.random().toString(36).substring(2, 11),
-      
+
       addActivity: (type: RecentActivity['type'], description: string) => {
         set(produce((state: AppState) => {
           const activity: RecentActivity = {
@@ -178,7 +178,7 @@ export const useAppStore = create<AppStore>()(
           state.recentActivity = state.recentActivity.slice(0, 50)
         }))
       },
-      
+
       updateDashboardMetrics: () => {
         set(produce((state: AppState) => {
           const { activeSessions, subscriptions, resources } = state
@@ -190,7 +190,7 @@ export const useAppStore = create<AppStore>()(
           }
         }))
       },
-      
+
       updateLowStockAlerts: () => {
         set(produce((state: AppState) => {
           state.lowStockAlerts = state.inventory
@@ -203,7 +203,7 @@ export const useAppStore = create<AppStore>()(
             }))
         }))
       },
-      
+
       updateTopCustomers: () => {
         set(produce((state: AppState) => {
           state.topCustomers = [...state.customers]
@@ -212,18 +212,18 @@ export const useAppStore = create<AppStore>()(
             .map(c => ({ id: c.id, name: c.name, revenue: c.totalSpent }))
         }))
       },
-      
+
       // Theme & Language actions
       setTheme: (theme: ThemeOption) => {
         set(produce((state: AppState) => {
           state.theme = theme
           state.settings.appearance.theme = theme
         }))
-        
+
         // Apply theme to DOM
         const root = document.documentElement
         root.classList.remove('light', 'dark')
-        
+
         if (theme === 'system') {
           const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
           root.classList.add(systemTheme)
@@ -231,18 +231,18 @@ export const useAppStore = create<AppStore>()(
           root.classList.add(theme)
         }
       },
-      
+
       setLanguage: (language: LanguageOption) => {
         set(produce((state: AppState) => {
           state.language = language
           state.isRTL = language === 'ar'
           state.settings.appearance.language = language
         }))
-        
+
         // Apply RTL to DOM
         const isRTL = language === 'ar'
         document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
-        
+
         // Add RTL class to body
         if (isRTL) {
           document.body.classList.add('rtl')
@@ -254,7 +254,7 @@ export const useAppStore = create<AppStore>()(
       setSidebarCollapsed: (collapsed: boolean) => {
         set({ sidebarCollapsed: collapsed })
       },
-      
+
       // Customer actions
       addCustomer: (data) => {
         const customerId = get().generateId()
@@ -266,7 +266,7 @@ export const useAppStore = create<AppStore>()(
           totalSessions: 0,
           totalSpent: 0,
         }
-        
+
         set(produce((state: AppState) => {
           state.customers.push(newCustomer)
 
@@ -282,7 +282,7 @@ export const useAppStore = create<AppStore>()(
                 id: get().generateId(),
                 customerId: customerId,
                 customerName: data.name,
-                planType: data.customerType as any,
+                planType: data.customerType as unknown as string,
                 startDate,
                 endDate: endDate.toISOString().split('T')[0],
                 isActive: true,
@@ -322,12 +322,12 @@ export const useAppStore = create<AppStore>()(
             }
           }
         }))
-        
+
         get().addActivity('customer_new', `New customer: ${data.name} registered`)
         get().updateTopCustomers()
         get().updateDashboardMetrics()
       },
-      
+
       updateCustomer: (id: string, data: Partial<Customer>) => {
         set(produce((state: AppState) => {
           const index = state.customers.findIndex(c => c.id === id)
@@ -337,14 +337,14 @@ export const useAppStore = create<AppStore>()(
         }))
         get().updateTopCustomers()
       },
-      
+
       deleteCustomer: (id: string) => {
         set(produce((state: AppState) => {
           state.customers = state.customers.filter(c => c.id !== id)
         }))
         get().updateTopCustomers()
       },
-      
+
       // Resource actions
       addResource: (data) => {
         let rate = data.ratePerHour;
@@ -368,14 +368,14 @@ export const useAppStore = create<AppStore>()(
           utilizationRate: 0,
           isAvailable: true,
         }
-        
+
         set(produce((state: AppState) => {
           state.resources.push(newResource)
         }))
-        
+
         get().updateDashboardMetrics()
       },
-      
+
       updateResource: (id: string, data: Partial<Resource>) => {
         set(produce((state: AppState) => {
           const index = state.resources.findIndex(r => r.id === id)
@@ -384,20 +384,20 @@ export const useAppStore = create<AppStore>()(
           }
         }))
       },
-      
+
       deleteResource: (id: string) => {
         set(produce((state: AppState) => {
           state.resources = state.resources.filter(r => r.id !== id)
         }))
         get().updateDashboardMetrics()
       },
-      
+
       // Session actions
       startSession: (customerId: string, resourceId: string) => {
         const { customers, resources, subscriptions, activeSessions } = get()
         const customer = customers.find(c => c.id === customerId)
         const resource = resources.find(r => r.id === resourceId)
-        
+
         if (!customer || !resource) return
 
         // Check if customer already has an active session
@@ -406,9 +406,9 @@ export const useAppStore = create<AppStore>()(
           // Prevent duplicate sessions for the same customer
           return
         }
-        
+
         const isSubscribed = subscriptions.some(s => s.customerId === customerId && s.isActive)
-        
+
         const newSession: ActiveSession = {
           id: get().generateId(),
           customerId,
@@ -421,33 +421,33 @@ export const useAppStore = create<AppStore>()(
           inventoryConsumptions: [],
           inventoryTotal: 0,
         }
-        
+
         set(produce((state: AppState) => {
           state.activeSessions.push(newSession)
-          
+
           const resourceIndex = state.resources.findIndex(r => r.id === resourceId)
           if (resourceIndex !== -1) {
             state.resources[resourceIndex].isAvailable = false
           }
         }))
-        
+
         get().addActivity('session_start', `${customer.name} started session on ${resource.name}`)
         get().updateDashboardMetrics()
       },
-      
+
       endSession: (sessionId: string) => {
         const session = get().activeSessions.find(s => s.id === sessionId)
         if (!session) return
-        
+
         // Calculate session cost and create invoice
         const startTime = new Date(session.startedAt)
         const endTime = new Date()
         const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / 60000)
         const sessionCost = session.isSubscribed ? 0 : (durationMinutes / 60) * session.resourceRate
         const totalAmount = sessionCost + session.inventoryTotal
-        
+
         const customer = get().customers.find(c => c.id === session.customerId)
-        
+
         const invoice: Invoice = {
           id: get().generateId(),
           invoiceNumber: `INV-${String(get().invoices.length + 1).padStart(4, '0')}`,
@@ -479,21 +479,21 @@ export const useAppStore = create<AppStore>()(
           ],
           payments: [],
         }
-        
+
         set(produce((state: AppState) => {
           // Mark resource as available
           const resourceIndex = state.resources.findIndex(r => r.id === session.resourceId)
           if (resourceIndex !== -1) {
             state.resources[resourceIndex].isAvailable = true
           }
-          
+
           // Remove from active sessions
           state.activeSessions = state.activeSessions.filter(s => s.id !== sessionId)
-          
+
           // Add invoice
           state.invoices.push(invoice)
         }))
-        
+
         get().addActivity('session_end', `${session.customerName} ended session - ${Math.round(totalAmount)} EGP`)
         get().updateDashboardMetrics()
       },
@@ -501,15 +501,15 @@ export const useAppStore = create<AppStore>()(
       endSessionWithPayment: (sessionId: string, paymentData) => {
         const session = get().activeSessions.find(s => s.id === sessionId)
         if (!session) return
-        
+
         const startTime = new Date(session.startedAt)
         const endTime = new Date()
         const durationMinutes = Math.round((endTime.getTime() - startTime.getTime()) / 60000)
         const sessionCost = session.isSubscribed ? 0 : (durationMinutes / 60) * session.resourceRate
         const totalAmount = sessionCost + session.inventoryTotal
-        
+
         const customer = get().customers.find(c => c.id === session.customerId)
-        
+
         const invoiceId = get().generateId()
         const invoice: Invoice = {
           id: invoiceId,
@@ -543,22 +543,22 @@ export const useAppStore = create<AppStore>()(
           payments: paymentData.amount > 0 ? [{
             id: get().generateId(),
             amount: paymentData.amount,
-            method: paymentData.method as any,
+            method: paymentData.method,
             date: paymentData.date,
             notes: paymentData.notes || '',
           }] : [],
         }
-        
+
         set(produce((state: AppState) => {
           // Mark resource as available
           const resourceIndex = state.resources.findIndex(r => r.id === session.resourceId)
           if (resourceIndex !== -1) {
             state.resources[resourceIndex].isAvailable = true
           }
-          
+
           // Remove from active sessions
           state.activeSessions = state.activeSessions.filter(s => s.id !== sessionId)
-          
+
           // Add invoice
           state.invoices.push(invoice)
 
@@ -577,18 +577,18 @@ export const useAppStore = create<AppStore>()(
             state.customers[customerIndex].totalSpent += paymentData.amount
           }
         }))
-        
+
         get().addActivity('session_end', `${session.customerName} ended session - ${Math.round(totalAmount)} EGP`)
         if (paymentData.amount > 0) {
           get().addActivity('invoice_paid', `Payment of ${paymentData.amount} EGP recorded`)
         }
         get().updateDashboardMetrics()
       },
-      
+
       addInventoryToSession: (sessionId: string, inventoryId: string, quantity: number) => {
         const item = get().inventory.find(i => i.id === inventoryId)
         if (!item || item.quantity < quantity) return
-        
+
         const consumption = {
           id: get().generateId(),
           itemName: item.name,
@@ -596,14 +596,14 @@ export const useAppStore = create<AppStore>()(
           price: item.price,
           addedAt: new Date().toISOString(),
         }
-        
+
         set(produce((state: AppState) => {
           // Deduct from inventory
           const inventoryIndex = state.inventory.findIndex(i => i.id === inventoryId)
           if (inventoryIndex !== -1) {
             state.inventory[inventoryIndex].quantity -= quantity
           }
-          
+
           // Add to session
           const sessionIndex = state.activeSessions.findIndex(s => s.id === sessionId)
           if (sessionIndex !== -1) {
@@ -611,12 +611,12 @@ export const useAppStore = create<AppStore>()(
             state.activeSessions[sessionIndex].inventoryTotal += item.price * quantity
           }
         }))
-        
+
         const session = get().activeSessions.find(s => s.id === sessionId)
         if (session) {
           get().addActivity('inventory_add', `${item.name} added to ${session.customerName}'s session`)
         }
-        
+
         get().updateLowStockAlerts()
       },
 
@@ -653,7 +653,7 @@ export const useAppStore = create<AppStore>()(
           if (consumptionIndex === -1) return
 
           const consumption = session.inventoryConsumptions[consumptionIndex]
-          
+
           // Restore inventory stock
           const inventoryItem = state.inventory.find(i => i.name === consumption.itemName)
           if (inventoryItem) {
@@ -666,13 +666,13 @@ export const useAppStore = create<AppStore>()(
         }))
         get().updateLowStockAlerts()
       },
-      
+
       // Subscription actions
       addSubscription: (customerId: string, planType: string, startDate: string) => {
         const { customers, subscriptions, planTypes } = get()
         const customer = customers.find(c => c.id === customerId)
         const plan = planTypes.find(p => p.id === planType)
-        
+
         if (!customer || !plan) return
 
         // Check if customer already has an active subscription
@@ -681,16 +681,16 @@ export const useAppStore = create<AppStore>()(
           // You could throw an error or handle it in UI
           return
         }
-        
+
         const start = new Date(startDate)
         const end = new Date(start)
         end.setDate(end.getDate() + plan.days)
-        
+
         const newSubscription: Subscription = {
           id: get().generateId(),
           customerId,
           customerName: customer.name,
-          planType: planType as any,
+          planType: planType as unknown as string,
           startDate,
           endDate: end.toISOString().split('T')[0],
           isActive: true,
@@ -724,18 +724,18 @@ export const useAppStore = create<AppStore>()(
           ],
           payments: [],
         }
-        
+
         set(produce((state: AppState) => {
           state.subscriptions.push(newSubscription)
-          
+
           const customerIndex = state.customers.findIndex(c => c.id === customerId)
           if (customerIndex !== -1) {
-            state.customers[customerIndex].customerType = planType as any
+            state.customers[customerIndex].customerType = planType as unknown as string
           }
 
           state.invoices.push(invoice)
         }))
-        
+
         get().addActivity('subscription_new', `${customer.name} subscribed to ${plan.labelEn} plan`)
         get().addActivity('invoice_created', `Invoice generated for subscription: ${plan.price} EGP`)
         get().updateDashboardMetrics()
@@ -745,24 +745,35 @@ export const useAppStore = create<AppStore>()(
         set(produce((state: AppState) => {
           const subIndex = state.subscriptions.findIndex(s => s.id === id)
           if (subIndex === -1) return
-          
+
           const sub = state.subscriptions[subIndex]
           const oldPlan = state.planTypes.find(p => p.id === sub.planType)
           const newPlan = state.planTypes.find(p => p.id === newPlanType)
-          
+
           if (!oldPlan || !newPlan) return
 
           // Update subscription info
-          sub.planType = newPlanType as any
+          sub.planType = newPlanType as unknown as string
           const now = new Date()
           const end = new Date(now)
           end.setDate(end.getDate() + newPlan.days)
-          
+
           sub.startDate = now.toISOString().split('T')[0]
           sub.endDate = end.toISOString().split('T')[0]
           sub.daysRemaining = newPlan.days
           sub.status = 'active'
           sub.isActive = true
+
+          // Cancel any existing unpaid/pending invoice for this subscription
+          const pendingInvoiceIndex = state.invoices.findIndex(inv =>
+            inv.customerId === sub.customerId &&
+            (inv.status === 'unpaid' || inv.status === 'pending') &&
+            inv.lineItems.some(item => item.description.includes('Subscription') || item.description.includes('اشتراك'))
+          )
+
+          if (pendingInvoiceIndex !== -1) {
+            state.invoices[pendingInvoiceIndex].status = 'cancelled'
+          }
 
           // Generate adjustment invoice
           const invoice: Invoice = {
@@ -799,7 +810,7 @@ export const useAppStore = create<AppStore>()(
         set(produce((state: AppState) => {
           const subIndex = state.subscriptions.findIndex(s => s.id === id)
           if (subIndex === -1) return
-          
+
           const sub = state.subscriptions[subIndex]
           sub.status = 'inactive'
           sub.isActive = false
@@ -815,22 +826,22 @@ export const useAppStore = create<AppStore>()(
         get().addActivity('subscription_new', `Subscription cancelled for ${get().subscriptions.find(s => s.id === id)?.customerName}`)
         get().updateDashboardMetrics()
       },
-      
+
       updateSubscription: (id: string, data: Partial<Subscription>) => {
         set(produce((state: AppState) => {
           const index = state.subscriptions.findIndex(s => s.id === id)
           if (index !== -1) {
             Object.assign(state.subscriptions[index], data)
-            
+
             // Recalculate status and days remaining
             const sub = state.subscriptions[index]
             const end = new Date(sub.endDate)
             const now = new Date()
             now.setHours(0, 0, 0, 0)
-            
+
             const diffTime = end.getTime() - now.getTime()
             sub.daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-            
+
             if (sub.isActive) {
               sub.status = sub.daysRemaining < 0 ? 'expired' : 'active'
             } else {
@@ -863,11 +874,11 @@ export const useAppStore = create<AppStore>()(
 
           const now = new Date()
           now.setHours(0, 0, 0, 0)
-          
+
           const newStart = now.toISOString().split('T')[0]
           const newEnd = new Date(now)
           newEnd.setDate(newEnd.getDate() + plan.days)
-          
+
           sub.startDate = newStart
           sub.endDate = newEnd.toISOString().split('T')[0]
           sub.daysRemaining = plan.days
@@ -902,11 +913,11 @@ export const useAppStore = create<AppStore>()(
           }
           state.invoices.push(invoice)
         }))
-        
+
         get().addActivity('subscription_new', `Subscription renewed for ${get().subscriptions.find(s => s.id === id)?.customerName}`)
         get().updateDashboardMetrics()
       },
-      
+
       // Inventory actions
       addInventoryItem: (data) => {
         const newItem: InventoryItem = {
@@ -914,14 +925,14 @@ export const useAppStore = create<AppStore>()(
           id: get().generateId(),
           createdAt: new Date().toISOString(),
         }
-        
+
         set(produce((state: AppState) => {
           state.inventory.push(newItem)
         }))
-        
+
         get().updateLowStockAlerts()
       },
-      
+
       updateInventoryItem: (id: string, data: Partial<InventoryItem>) => {
         set(produce((state: AppState) => {
           const index = state.inventory.findIndex(i => i.id === id)
@@ -931,14 +942,14 @@ export const useAppStore = create<AppStore>()(
         }))
         get().updateLowStockAlerts()
       },
-      
+
       deleteInventoryItem: (id: string) => {
         set(produce((state: AppState) => {
           state.inventory = state.inventory.filter(i => i.id !== id)
         }))
         get().updateLowStockAlerts()
       },
-      
+
       adjustInventoryQuantity: (id: string, delta: number) => {
         set(produce((state: AppState) => {
           const index = state.inventory.findIndex(i => i.id === id)
@@ -948,31 +959,31 @@ export const useAppStore = create<AppStore>()(
         }))
         get().updateLowStockAlerts()
       },
-      
+
       // Invoice actions
       recordPayment: (invoiceId: string, amount: number, method: string, date: string, notes?: string) => {
         const newPayment = {
           id: get().generateId(),
           amount,
-          method: method as any,
+          method: method,
           date,
           notes: notes || '',
         }
-        
+
         set(produce((state: AppState) => {
           const index = state.invoices.findIndex(inv => inv.id === invoiceId)
           if (index === -1) return
-          
+
           const invoice = state.invoices[index]
           const newPaidAmount = invoice.paidAmount + amount
           const newStatus = newPaidAmount >= invoice.total ? 'paid' : 'unpaid'
-          
+
           invoice.payments.push(newPayment)
           invoice.paidAmount = newPaidAmount
-          invoice.status = newStatus as any
+          invoice.status = newStatus as unknown as string
           invoice.paidDate = newStatus === 'paid' ? date : null
         }))
-        
+
         get().addActivity('invoice_paid', `Payment of ${amount} EGP recorded`)
       },
 
@@ -998,7 +1009,7 @@ export const useAppStore = create<AppStore>()(
         }))
         get().addActivity('invoice_paid', `Bulk payment of ${totalAmount} EGP recorded`)
       },
-      
+
       // Settings actions
       updateSettings: (newSettings: Partial<Settings>) => {
         set(produce((state: AppState) => {
@@ -1049,7 +1060,7 @@ export const useAppStore = create<AppStore>()(
 // Apply theme and language on initialization
 setTimeout(() => {
   const { theme, isRTL } = useAppStore.getState()
-  
+
   // Apply theme
   const root = document.documentElement
   root.classList.remove('light', 'dark')
@@ -1059,10 +1070,10 @@ setTimeout(() => {
   } else {
     root.classList.add(theme)
   }
-  
+
   // Apply RTL
   document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
-  
+
   // Add RTL class to body
   if (isRTL) {
     document.body.classList.add('rtl')

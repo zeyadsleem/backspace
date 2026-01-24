@@ -18,21 +18,24 @@ export function InvoicesList({ invoices, onView, onRecordPayment }: InvoicesList
 
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch = invoice.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) || invoice.customerName.toLowerCase().includes(searchQuery.toLowerCase())
-    
+
     let matchesStatus = true
     if (statusFilter === 'paid') {
       matchesStatus = invoice.status === 'paid'
     } else if (statusFilter === 'unpaid') {
-      matchesStatus = invoice.status !== 'paid'
+      matchesStatus = invoice.status === 'unpaid' || invoice.status === 'pending'
+    } else if (statusFilter === 'cancelled') {
+      matchesStatus = invoice.status === 'cancelled'
     }
-    
+
     return matchesSearch && matchesStatus
   }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
-  const statusCounts = { 
-    all: invoices.length, 
-    paid: invoices.filter((i) => i.status === 'paid').length, 
-    unpaid: invoices.filter((i) => i.status !== 'paid').length 
+  const statusCounts = {
+    all: invoices.length,
+    paid: invoices.filter((i) => i.status === 'paid').length,
+    unpaid: invoices.filter((i) => i.status === 'unpaid' || i.status === 'pending').length,
+    cancelled: invoices.filter((i) => i.status === 'cancelled').length
   }
   const totalAmount = filteredInvoices.reduce((sum, i) => sum + i.total, 0)
   const paidAmount = filteredInvoices.reduce((sum, i) => sum + i.paidAmount, 0)
@@ -52,8 +55,8 @@ export function InvoicesList({ invoices, onView, onRecordPayment }: InvoicesList
           <input type="text" placeholder={t('searchInvoices')} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full py-2 text-sm bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 ps-10 pe-4 text-start" />
         </div>
         <div className="flex bg-stone-100 dark:bg-stone-800 rounded-lg p-1">
-          {(['all', 'paid', 'unpaid'] as const).map((status) => (
-            <button key={status} onClick={() => setStatusFilter(status)} className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${statusFilter === status ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' : 'text-stone-600 dark:text-stone-400'}`}>{status === 'all' ? t('all') : status === 'paid' ? t('paid') : t('unpaid')} ({statusCounts[status]})</button>
+          {(['all', 'paid', 'unpaid', 'cancelled'] as const).map((status) => (
+            <button key={status} onClick={() => setStatusFilter(status)} className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${statusFilter === status ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' : 'text-stone-600 dark:text-stone-400'}`}>{status === 'all' ? t('all') : t(status)} ({statusCounts[status]})</button>
           ))}
         </div>
       </div>
@@ -75,7 +78,7 @@ export function InvoicesList({ invoices, onView, onRecordPayment }: InvoicesList
             <div className="col-span-1 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase">{t('dueDate')}</div>
             <div className="col-span-2 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase text-end">{t('actions')}</div>
           </div>
-          
+
           {/* Table Body - Scrollable */}
           <div className="flex-1 overflow-y-auto scrollbar-thin">
             <div className="divide-y divide-stone-100 dark:divide-stone-800">

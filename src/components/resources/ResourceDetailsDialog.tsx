@@ -16,7 +16,7 @@ export function ResourceDetailsDialog({ isOpen, resource, onClose, onEdit, onDel
   const t = useAppStore((state) => state.t)
   const isRTL = useAppStore((state) => state.isRTL)
 
-  if (!isOpen) return null
+  if (isOpen === false) return null
 
   const typeConfig: Record<ResourceType, { icon: typeof Armchair; label: string; bg: string; color: string }> = {
     seat: { icon: Armchair, label: t('seatType'), bg: 'bg-blue-100 dark:bg-blue-900/30', color: 'text-blue-600 dark:text-blue-400' },
@@ -33,6 +33,7 @@ export function ResourceDetailsDialog({ isOpen, resource, onClose, onEdit, onDel
       onClose={onClose}
       title={t('resourceDetails') || 'Resource Details'}
       maxWidth="max-w-md"
+      className="overflow-hidden"
     >
       {/* Content */}
       <div className="p-6 space-y-6 flex-1 overflow-y-auto">

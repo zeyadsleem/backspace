@@ -1,19 +1,19 @@
 import { useState } from 'react'
-import { 
-  useSettings, 
-  useSettingsActions, 
-  useTheme, 
-  useLanguage, 
-  useThemeActions, 
-  useTranslation 
+import {
+  useSettings,
+  useSettingsActions,
+  useTheme,
+  useLanguage,
+  useThemeActions,
+  useTranslation
 } from '@/stores/hooks'
-import { 
-  Building2, 
-  Globe, 
-  Palette, 
-  Database, 
-  Download, 
-  Upload, 
+import {
+  Building2,
+  Globe,
+  Palette,
+  Database,
+  Download,
+  Upload,
   RotateCcw,
   Save
 } from 'lucide-react'
@@ -25,7 +25,7 @@ export function SettingsPageOptimized() {
   const language = useLanguage()
   const { updateSettings } = useSettingsActions()
   const { setTheme, setLanguage } = useThemeActions()
-  
+
   const [localSettings, setLocalSettings] = useState(settings)
   const [hasChanges, setHasChanges] = useState(false)
 
@@ -142,7 +142,7 @@ export function SettingsPageOptimized() {
               type="number"
               min="0"
               max="100"
-              step="0.1"
+              step="any"
               value={localSettings.tax.rate}
               onChange={(e) => handleSettingsChange({
                 tax: { ...localSettings.tax, rate: parseFloat(e.target.value) || 0 }

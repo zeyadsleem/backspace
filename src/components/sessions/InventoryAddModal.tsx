@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import type { InventoryItem, ActiveSession } from '@/types'
-import { X, Search, Minus, Plus, Coffee, Check, ShoppingCart } from 'lucide-react'
+import { Search, Minus, Plus, Coffee, Check, ShoppingCart, Package } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 import { Modal } from '@/components/shared'
+import { Button } from '@/components/ui/button'
+import { FormInput } from '@/components/ui/form'
 
 interface CartItem {
   item: InventoryItem
@@ -78,32 +80,26 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
     <Modal
       isOpen={true}
       onClose={onClose!}
-      maxWidth="max-w-5xl"
-      showCloseButton={false}
-      className="h-[85vh] flex flex-col p-0 overflow-hidden"
-    >
-      {/* Header */}
-      <div className="flex-shrink-0 flex items-center justify-between p-6 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50">
+      maxWidth="max-w-4xl"
+      showCloseButton={true}
+      className="h-[70vh] flex flex-col p-0 overflow-hidden"
+      title={
         <div className="flex items-center gap-3">
           <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-xl text-amber-600 dark:text-amber-400">
             <ShoppingCart className="h-5 w-5" />
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100">{t('addInventoryItem')}</h2>
-            <p className="text-xs text-stone-500 dark:text-stone-400 font-medium font-mono">{session.customerName}</p>
+          <div className="flex flex-col">
+            <h2 className="text-lg font-bold text-stone-900 dark:text-stone-100 leading-none">{t('addInventoryItem')}</h2>
+            <p className="text-xs text-stone-500 dark:text-stone-400 font-medium font-mono mt-1">{session.customerName}</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all">
-          <X className="h-5 w-5" />
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto lg:overflow-hidden bg-stone-50/30 dark:bg-stone-900/30">
+      }
+    >
+      <div className="flex-1 min-h-0 overflow-y-auto lg:overflow-hidden bg-stone-50/30 dark:bg-stone-900/30">
         <div className="flex flex-col lg:grid lg:grid-cols-12 lg:h-full">
 
           {/* Left Side: Available Items */}
-          <div className="lg:col-span-8 flex flex-col lg:h-full border-e border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50">
+          <div className="lg:col-span-8 flex flex-col lg:h-full min-h-0 border-e border-stone-200 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50">
             <div className="p-4 border-b border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-900 sticky top-0 z-10 lg:static">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xs font-bold text-stone-400 dark:text-stone-500 uppercase tracking-widest">{t('availableItems')}</h3>
@@ -111,13 +107,16 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
               </div>
 
               <div className="relative">
-                <Search className={`absolute top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 ${isRTL ? 'right-3' : 'left-3'}`} />
-                <input
+                <div className={`absolute top-0 flex items-center h-10 text-stone-400 ${isRTL ? 'right-3' : 'left-3'}`}>
+                  <Search className="h-4 w-4" />
+                </div>
+                <FormInput
                   type="text"
                   placeholder={t('searchInventory')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-full h-11 bg-stone-50 dark:bg-stone-800 border-none ring-1 ring-stone-200 dark:ring-stone-700 rounded-xl focus:ring-2 focus:ring-amber-500 placeholder:text-stone-400 transition-all ${isRTL ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4 text-left'}`}
+                  className={`h-10 text-sm border-stone-200 bg-stone-50 dark:bg-stone-800 dark:border-stone-700 ${isRTL ? 'pr-10' : 'pl-10'}`}
+                  isRTL={isRTL}
                 />
               </div>
             </div>
@@ -135,7 +134,7 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {filteredItems.map((item) => {
                     const cartItem = cart.find(ci => ci.item.id === item.id)
-                    const isInCart = !!cartItem && cartItem.quantity > 0
+                    const isInCart = cartItem !== undefined && cartItem.quantity > 0
                     const availableQuantity = item.quantity - (cartItem?.quantity || 0)
 
                     return (
@@ -151,7 +150,7 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
                         <div className="flex items-start justify-between w-full mb-3">
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${isInCart ? 'bg-amber-500 text-white shadow-sm' : 'bg-stone-100 dark:bg-stone-700 text-stone-400 group-hover:bg-amber-100 group-hover:text-amber-600 dark:group-hover:bg-amber-900/30'
                             }`}>
-                            {isInCart ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                            {isInCart ? <Check className="h-4 w-4" /> : <Package className="h-4 w-4" />}
                           </div>
                           <span className="text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded-lg">
                             {item.price} <span className="text-[10px] uppercase opacity-70">{t('egp')}</span>
@@ -174,7 +173,7 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
           </div>
 
           {/* Right Side: Cart */}
-          <div className="lg:col-span-4 flex flex-col lg:h-full bg-white dark:bg-stone-900 border-t lg:border-t-0 lg:border-l border-stone-200 dark:border-stone-800 shadow-xl lg:shadow-none z-10 w-full">
+          <div className="lg:col-span-4 flex flex-col lg:h-full min-h-0 bg-white dark:bg-stone-900 border-t lg:border-t-0 lg:border-l border-stone-200 dark:border-stone-800 shadow-xl lg:shadow-none z-10 w-full">
             <div className="p-4 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between bg-stone-50 dark:bg-stone-800/50 lg:sticky lg:top-0">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="h-4 w-4 text-stone-400" />
@@ -204,7 +203,7 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
                         onClick={() => handleItemRemove(cartItem.item.id)}
                         className="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                       >
-                        <X className="h-4 w-4" />
+                        <Minus className="h-4 w-4" />
                       </button>
                     </div>
 
@@ -253,28 +252,25 @@ export function InventoryAddModal({ session, availableInventory, onAdd, onClose,
         </div>
       </div>
 
-      {/* Footer (Always Visible, Outside Scrolls) */}
+      {/* Footer */}
       <div className="flex-shrink-0 border-t border-stone-200 dark:border-stone-800 p-4 lg:p-6 bg-white dark:bg-stone-900 flex gap-3 z-20 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.05)]">
-        <button
+        <Button
           onClick={onClose}
-          className="flex-1 py-3 text-sm font-bold text-stone-500 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 rounded-xl hover:bg-stone-200 dark:hover:bg-stone-700 transition-all uppercase tracking-wider"
+          variant="outline"
+          className="flex-1"
         >
           {t('cancel')}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={handleSubmit}
           disabled={isLoading || cart.filter(ci => ci.quantity > 0).length === 0}
-          className="flex-[2] py-3 text-sm font-bold text-white bg-amber-500 rounded-xl hover:bg-amber-600 transition-all disabled:opacity-50 shadow-lg shadow-amber-500/20 flex items-center justify-center gap-2 active:scale-[0.98] uppercase tracking-wider"
+          className="flex-[2]"
+          isLoading={isLoading}
+          variant="primary"
         >
-          {isLoading ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            <>
-              <Check className="h-5 w-5" />
-              {t('addToSession')}
-            </>
-          )}
-        </button>
+          <Check className="h-4 w-4" />
+          {t('addToSession')}
+        </Button>
       </div>
     </Modal>
   )
