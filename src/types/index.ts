@@ -16,8 +16,9 @@ export interface Customer {
   email: string | null
   customerType: CustomerType
   balance: number
-  notes: string
+  notes: string | null
   createdAt: string
+  updatedAt: string
   totalSessions: number
   totalSpent: number
 }
@@ -35,6 +36,7 @@ export interface Resource {
   ratePerHour: number
   isAvailable: boolean
   createdAt: string
+  updatedAt: string
   utilizationRate: number
 }
 
@@ -97,6 +99,7 @@ export interface Subscription {
   status: SubscriptionStatus
   daysRemaining: number
   createdAt: string
+  updatedAt: string
 }
 
 export interface PlanTypeOption {
