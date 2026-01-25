@@ -115,7 +115,7 @@ export type SettingsFormData = z.infer<typeof settingsSchema>
 
 // Helper functions for validation
 export const validatePhoneNumber = (phone: string): boolean => {
-  const normalized = phone.replace(/[\s\-\+]/g, '')
+  const normalized = phone.replace(/[\s\-+]/g, '')
   return /^(0|20)?1[0125]\d{8}$/.test(normalized)
 }
 
@@ -125,10 +125,12 @@ export const validateEmail = (email: string): boolean => {
 }
 
 // Form validation helpers
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getFieldError = (errors: any, fieldName: string): string | undefined => {
   return errors[fieldName]?.message
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const hasFieldError = (errors: any, fieldName: string): boolean => {
   return !!errors[fieldName]
 }

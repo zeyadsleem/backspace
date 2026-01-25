@@ -16,7 +16,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
   const updatePlanPrice = useAppStore((state) => state.updatePlanPrice)
   const updateResourceTypePrice = useAppStore((state) => state.updateResourceTypePrice)
   const isRTL = useAppStore((state) => state.isRTL)
-  
+
   const resourceCategories: Array<{ id: ResourceType; label: string }> = [
     { id: 'seat', label: t('seatType') },
     { id: 'room', label: t('roomType') },
@@ -28,21 +28,22 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
     { id: 'dark' as ThemeOption, label: t('dark') },
     { id: 'system' as ThemeOption, label: t('system') },
   ]
-  
+
   const availableLanguages = [
     { id: 'en' as LanguageOption, nativeLabel: 'English' },
     { id: 'ar' as LanguageOption, nativeLabel: 'العربية' },
   ]
 
   return (
-    <div className="flex flex-col p-6 space-y-8">
-      <div>
+    <div className="flex flex-col h-full p-6 gap-6 overflow-hidden">
+      <div className="shrink-0">
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('settings')}</h1>
         <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{t('manageSettings')}</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 space-y-6">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
+        {/* Scrollable Main Content */}
+        <section className="lg:col-span-2 overflow-y-auto pr-2 space-y-6">
           {/* Company Info */}
           <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -63,7 +64,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
               <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg"><CreditCard className="h-5 w-5 text-emerald-600 dark:text-emerald-400" /></div>
               <div><h2 className="font-semibold text-stone-900 dark:text-stone-100">{t('pricingControl') || 'Pricing Control Center'}</h2><p className="text-xs text-stone-500 dark:text-stone-400">{t('manageAllPrices') || 'Centralized pricing for all services'}</p></div>
             </div>
-            
+
             <div className="space-y-8">
               {/* Subscription Plans */}
               <div>
@@ -113,6 +114,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
           </div>
         </section>
 
+        {/* Fixed Sidebar */}
         <section className="lg:col-span-1 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl p-6 h-fit">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg"><Palette className="h-5 w-5 text-purple-600 dark:text-purple-400" /></div>

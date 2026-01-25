@@ -370,7 +370,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       get().fetchResources()
       get().fetchInvoices() // Invoice created
     } catch (err) {
-      toast.error(String(err))
+      toast.error(err instanceof Error ? err.message : String(err))
     }
   },
 
@@ -381,7 +381,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       get().fetchActiveSessions()
       get().fetchInventory()
     } catch (err) {
-      toast.error(String(err))
+      toast.error(err instanceof Error ? err.message : String(err))
     }
   },
 
@@ -391,7 +391,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       const invoices = await invoke<Invoice[]>('get_invoices')
       set({ invoices })
     } catch (err) {
-      toast.error(String(err))
+      toast.error(err instanceof Error ? err.message : String(err))
     }
   },
 
@@ -402,7 +402,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       get().fetchInvoices()
       get().fetchCustomers()
     } catch (err) {
-      toast.error(String(err))
+      toast.error(err instanceof Error ? err.message : String(err))
     }
   },
 
@@ -436,7 +436,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       get().fetchCustomers() // Refresh customers (some views depend on it)
       // fetchSubscriptions if implemented
     } catch (err) {
-      toast.error(String(err))
+      toast.error(err instanceof Error ? err.message : String(err))
     }
   },
 
@@ -445,7 +445,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
       await invoke('deactivate_subscription', { id })
       toast.success('Subscription deactivated')
     } catch (err) {
-      toast.error(String(err))
+      toast.error(err instanceof Error ? err.message : String(err))
     }
   },
 

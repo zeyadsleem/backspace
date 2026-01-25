@@ -9,7 +9,7 @@ export function SettingsPageWrapper() {
   return (
     <SettingsPage
       settings={settings}
-      onUpdateAppearance={(appearance) => {
+      onUpdateAppearance={(appearance: { theme: 'light' | 'dark' | 'system', language: 'en' | 'ar' }) => {
         setTheme(appearance.theme)
         setLanguage(appearance.language)
       }}

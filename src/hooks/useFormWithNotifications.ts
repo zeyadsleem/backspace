@@ -23,19 +23,19 @@ export function useFormWithNotifications<T extends FieldValues>({
   const handleSubmit = form.handleSubmit(async (data: T) => {
     try {
       const loadingToast = notifications.loading('Processing...')
-      
+
       await onSubmitSuccess?.(data)
-      
+
       notifications.dismiss(loadingToast)
-      
+
       if (successMessage) {
         notifications.success(successMessage)
       }
     } catch (error) {
       notifications.dismiss()
-      
+
       const errorMsg = error instanceof Error ? error.message : 'An error occurred'
-      
+
       if (onSubmitError) {
         onSubmitError(error as Error)
       } else {
@@ -44,7 +44,9 @@ export function useFormWithNotifications<T extends FieldValues>({
     }
   })
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleError = (errors: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const firstError = Object.values(errors)[0] as any
     if (firstError?.message) {
       notifications.validationError(firstError.message)
@@ -53,7 +55,7 @@ export function useFormWithNotifications<T extends FieldValues>({
 
   return {
     ...form,
-    handleSubmit: (onValid?: (data: T) => void) => 
+    handleSubmit: (onValid?: (data: T) => void) =>
       onValid ? form.handleSubmit(onValid, handleError) : handleSubmit,
     submitWithNotifications: handleSubmit,
   }

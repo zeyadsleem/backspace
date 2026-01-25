@@ -24,28 +24,38 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
     const t = useAppStore((state) => state.t)
     const isRTL = useAppStore((state) => state.isRTL)
 
-    const [duration, setDuration] = useState(0)
-    const [sessionCost, setSessionCost] = useState(0)
-    const [amountToPay, setAmountToPay] = useState(0)
+    // Calculate derived values directly
+    let duration = 0
+    let sessionCost = 0
+    let amountToPay = 0
+
+    if (session && isOpen) {
+        const start = new Date(session.startedAt)
+        const now = new Date()
+        const diffMins = Math.floor((now.getTime() - start.getTime()) / 60000)
+        duration = diffMins
+
+        const cost = session.isSubscribed ? 0 : (diffMins / 60) * session.resourceRate
+        const roundedCost = Math.round(cost)
+        sessionCost = roundedCost
+
+        amountToPay = roundedCost + session.inventoryTotal
+    }
+
+    const [userInputAmount, setUserInputAmount] = useState<number | null>(null)
     const [paymentMode, setPaymentMode] = useState<'pay-now' | 'pay-later'>('pay-now')
     const [notes, setNotes] = useState('')
 
+    // Reset local state when dialog opens/closes or session changes
     useEffect(() => {
-        if (session && isOpen) {
-            const start = new Date(session.startedAt)
-            const now = new Date()
-            const diffMins = Math.floor((now.getTime() - start.getTime()) / 60000)
-            setDuration(diffMins)
-
-            const cost = session.isSubscribed ? 0 : (diffMins / 60) * session.resourceRate
-            const roundedCost = Math.round(cost)
-            setSessionCost(roundedCost)
-
-            const total = roundedCost + session.inventoryTotal
-            setAmountToPay(total)
+        if (isOpen) {
             setPaymentMode('pay-now')
+            setUserInputAmount(null)
+            setNotes('')
         }
-    }, [session, isOpen, session?.inventoryTotal])
+    }, [isOpen, session?.id])
+
+    const displayAmount = userInputAmount !== null ? userInputAmount : amountToPay
 
     if (!isOpen || !session) return null
 
@@ -60,7 +70,7 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
 
         const isPayNow = paymentMode === 'pay-now'
         const finalStatus: InvoiceStatus = isPayNow ? 'paid' : 'unpaid'
-        const finalPaidAmount = isPayNow ? amountToPay : 0
+        const finalPaidAmount = isPayNow ? displayAmount : 0
 
         onConfirm({
             amount: finalPaidAmount,
@@ -215,8 +225,8 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
                                             <input
                                                 type="number"
                                                 step="any"
-                                                value={amountToPay}
-                                                onChange={(e) => setAmountToPay(Number(e.target.value))}
+                                                value={displayAmount}
+                                                onChange={(e) => setUserInputAmount(Number(e.target.value))}
                                                 className={`w-full h-14 rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-3 text-3xl font-medium font-mono outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all ${isRTL ? 'pl-10' : 'pr-10'}`}
                                             />
                                             <span className={`absolute top-1/2 -translate-y-1/2 text-sm font-medium text-stone-400 uppercase pointer-events-none ${isRTL ? 'left-4' : 'right-4'}`}>{t('egp')}</span>

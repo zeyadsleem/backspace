@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { AppShell } from './components/shell'
 import { useAppStore } from './stores/useAppStore'
 import { RTLProvider } from './components/ui/RTLProvider'
-import { LayoutDashboard, Users, Monitor, Clock, CreditCard, Package, FileText, Settings } from 'lucide-react'
+import { LayoutDashboard, Users, Monitor, Clock, CreditCard, Package, FileText, Settings, BarChart3 } from 'lucide-react'
 
 function App() {
   const navigate = useNavigate()
@@ -17,7 +17,7 @@ function App() {
     { label: t('subscriptions'), href: '/subscriptions', icon: <CreditCard className="h-5 w-5" /> },
     { label: t('inventory'), href: '/inventory', icon: <Package className="h-5 w-5" /> },
     { label: t('invoices'), href: '/invoices', icon: <FileText className="h-5 w-5" /> },
-    // { label: t('reports'), href: '/reports', icon: <BarChart3 className="h-5 w-5" /> }, // Temporarily hidden
+    { label: t('reports'), href: '/reports', icon: <BarChart3 className="h-5 w-5" /> },
   ].map(item => ({
     ...item,
     isActive: location.pathname === item.href || (item.href === '/dashboard' && location.pathname === '/'),
