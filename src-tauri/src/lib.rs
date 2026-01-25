@@ -1,6 +1,7 @@
 pub mod database;
 pub mod commands;
 pub mod background;
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -46,7 +47,17 @@ pub fn run() {
         commands::invoices::get_invoice_items,
         commands::invoices::process_payment,
         commands::settings::get_settings,
-        commands::settings::update_settings
+        commands::settings::update_settings,
+        commands::subscriptions::get_subscriptions,
+        commands::subscriptions::add_subscription,
+        commands::subscriptions::deactivate_subscription,
+        commands::subscriptions::change_subscription_plan,
+        commands::subscriptions::cancel_subscription,
+        commands::subscriptions::reactivate_subscription,
+        commands::reports::get_dashboard_metrics,
+        commands::reports::get_revenue_chart_data,
+        commands::reports::get_top_customers,
+        commands::reports::get_recent_activity
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

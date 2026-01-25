@@ -19,7 +19,7 @@ export function CustomerProfilePage() {
   const operationHistory = useAppStore((state) => state.operationHistory)
   const updateCustomer = useAppStore((state) => state.updateCustomer)
   const deleteCustomer = useAppStore((state) => state.deleteCustomer)
-  
+
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null)
@@ -34,7 +34,7 @@ export function CustomerProfilePage() {
   const customerHistory = operationHistory
     .filter(op => op.customerId === id)
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-    
+
   const selectedInvoice = selectedInvoiceId ? invoices.find(i => i.id === selectedInvoiceId) : null
 
   const handleEdit = () => {
@@ -45,7 +45,7 @@ export function CustomerProfilePage() {
     setShowDeleteDialog(true)
   }
 
-  const handleUpdateCustomer = (data: any) => {
+  const handleUpdateCustomer = (data: { name: string; phone: string; email?: string; notes?: string }) => {
     updateCustomer(customer.id, {
       ...data,
       email: data.email || null,
@@ -88,7 +88,7 @@ export function CustomerProfilePage() {
         onSubmit={handleUpdateCustomer}
         onClose={() => setShowEditDialog(false)}
       />
-      
+
       {selectedInvoice && (
         <InvoiceDialog
           isOpen={!!selectedInvoice}

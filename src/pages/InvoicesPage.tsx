@@ -27,7 +27,7 @@ export function InvoicesPage() {
       <PaymentDialog
         isOpen={!!paymentId}
         invoice={paymentInvoice}
-        onSubmit={(data) => { if (paymentId) recordPayment(paymentId, data.amount, data.method, data.date, data.notes); setPaymentId(null) }}
+        onSubmit={(data) => { if (paymentId) recordPayment(paymentId, data.amount, data.method, data.notes); setPaymentId(null) }}
         onClose={() => setPaymentId(null)}
       />
     </>

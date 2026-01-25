@@ -14,7 +14,6 @@ interface ActiveSessionsProps {
   onUpdateInventory?: (sessionId: string, consumptionId: string, newQuantity: number) => void
   onRemoveInventory?: (sessionId: string, consumptionId: string) => void
   onEndSession?: (sessionId: string, paymentData: { amount: number; method: PaymentMethod; date: string; notes?: string; status: InvoiceStatus }) => void
-  onViewDetails?: (sessionId: string) => void
   onStartSession?: () => void
 }
 
@@ -25,7 +24,6 @@ export function ActiveSessions({
   onUpdateInventory,
   onRemoveInventory,
   onEndSession,
-  onViewDetails,
   onStartSession,
 }: ActiveSessionsProps) {
   const t = useAppStore((state) => state.t)
@@ -66,7 +64,6 @@ export function ActiveSessions({
               session={session}
               onAddInventory={() => setInventoryModalSession(session.id)}
               onEndSession={() => setEndSessionModalId(session.id)}
-              onViewDetails={() => setEditInventorySessionId(session.id)}
             />
           ))}
         </div>

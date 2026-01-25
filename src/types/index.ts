@@ -313,3 +313,10 @@ export interface RecentActivity {
   description: string
   timestamp: string
 }
+
+export interface RecentActivityView {
+  id: string
+  description: string
+  operation_type: string
+  timestamp: string
+}

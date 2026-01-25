@@ -12,8 +12,8 @@ pub struct Customer {
     pub phone: String,
     pub email: Option<String>,
     pub customer_type: Option<String>,
-    pub balance: Decimal,
-    pub total_spent: Decimal,
+    pub balance: f64,
+    pub total_spent: f64,
     pub total_sessions: i64,
     pub notes: Option<String>,
     pub created_at: chrono::NaiveDateTime,
@@ -64,8 +64,8 @@ pub async fn add_customer(pool: State<'_, DbPool>, data: CreateCustomerDto) -> R
         phone: data.phone,
         email: data.email,
         customer_type: data.customer_type,
-        balance: Decimal::ZERO,
-        total_spent: Decimal::ZERO,
+        balance: 0.0,
+        total_spent: 0.0,
         total_sessions: 0,
         notes: data.notes,
         created_at: chrono::Local::now().naive_local(),
@@ -102,16 +102,7 @@ pub async fn add_customer(pool: State<'_, DbPool>, data: CreateCustomerDto) -> R
 
 #[tauri::command]
 pub async fn update_customer(pool: State<'_, DbPool>, id: String, data: UpdateCustomerDto) -> Result<(), String> {
-     sqlx::query("UPDATE customers SET 
-        name = COALESCE(?, name), 
-        phone = COALESCE(?, phone), 
-        email = COALESCE(?, email), 
-        customer_type = COALESCE(?, customer_type) 
-        WHERE id = ?")
-        .bind(data.name)
-        .bind(data.phone)
-        .bind(data.email)
-    sqlx::query("UPDATE customers SET 
+    sqlx::query::<sqlx::Sqlite>("UPDATE customers SET 
         name = COALESCE(?, name), 
         phone = COALESCE(?, phone), 
         email = COALESCE(?, email), 
@@ -135,7 +126,7 @@ pub async fn update_customer(pool: State<'_, DbPool>, id: String, data: UpdateCu
 
 #[tauri::command]
 pub async fn delete_customer(pool: State<'_, DbPool>, id: String) -> Result<(), String> {
-    sqlx::query("DELETE FROM customers WHERE id = ?")
+    sqlx::query::<sqlx::Sqlite>("DELETE FROM customers WHERE id = ?")
         .bind(id)
         .execute(&*pool)
         .await

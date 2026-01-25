@@ -33,7 +33,7 @@ export function SessionsPage() {
           removeInventoryFromSession(sessionId, consumptionId)
         }}
         onEndSession={(sessionId, paymentData) => {
-          endSessionWithPayment(sessionId, paymentData)
+          endSessionWithPayment(sessionId, paymentData.method, paymentData.amount)
         }}
         onStartSession={() => setShowStartDialog(true)}
       />

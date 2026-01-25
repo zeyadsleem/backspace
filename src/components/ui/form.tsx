@@ -1,4 +1,4 @@
-import { forwardRef, InputHTMLAttributes, TextareaHTMLAttributes, SelectHTMLAttributes, LabelHTMLAttributes } from 'react'
+import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes, type SelectHTMLAttributes, type LabelHTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 
 // FormLabel Component
@@ -124,7 +124,7 @@ export interface FormErrorProps {
 
 export const FormError = ({ children }: FormErrorProps) => {
   if (!children) return null
-  
+
   return (
     <p className="text-xs text-red-600 dark:text-red-400 font-bold">
       {children}

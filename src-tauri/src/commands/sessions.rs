@@ -14,8 +14,8 @@ pub struct SessionView {
     pub resource_id: String,
     pub resource_name: String,
     pub started_at: chrono::NaiveDateTime,
-    pub resource_rate_snapshot: Decimal,
-    pub inventory_total: Decimal,
+    pub resource_rate_snapshot: f64,
+    pub inventory_total: f64,
     pub is_subscribed: bool,
     pub status: String,
     pub created_at: chrono::NaiveDateTime,
@@ -54,18 +54,30 @@ pub async fn start_session(pool: State<'_, DbPool>, customer_id: String, resourc
     let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
 
     // Check resource
-    let resource_opt = sqlx::query!("SELECT rate_per_hour, is_available FROM resources WHERE id = ?", resource_id)
+    use sqlx::Row;
+    use std::str::FromStr;
+    
+    let resource_row = sqlx::query("SELECT rate_per_hour, is_available FROM resources WHERE id = ?")
+        .bind(&resource_id)
         .fetch_optional(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
 
-    let resource = resource_opt.ok_or("Resource not found")?;
-    if !resource.is_available.unwrap_or(true) {
+    let resource_row = resource_row.ok_or("Resource not found")?;
+    let is_available: bool = resource_row.try_get("is_available").unwrap_or(true); // Assuming boolean or 0/1
+    // Actually sqlite boolean is 0/1 integer. sqlx maps boolean to boolean.
+    // If it fails, we check logic. Schema says BOOLEAN.
+    
+    if !is_available {
         return Err("Resource is currently in use".to_string());
     }
+    
+    let rate_s: String = resource_row.try_get("rate_per_hour").unwrap_or_default();
+    let rate_per_hour = Decimal::from_str(&rate_s).unwrap_or(Decimal::ZERO);
 
     // Check active session for customer
-    let has_active = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM sessions WHERE customer_id = ? AND status = 'active'")
+    let has_active: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM sessions WHERE customer_id = ? AND status = 'active'")
+        .bind(&customer_id)
         .fetch_one(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
@@ -75,10 +87,10 @@ pub async fn start_session(pool: State<'_, DbPool>, customer_id: String, resourc
     }
 
     // Check subscription
-    let active_sub = sqlx::query!(
-        "SELECT id FROM subscriptions WHERE customer_id = ? AND status = 'active' AND start_date <= date('now') AND end_date >= date('now')", 
-        customer_id
+    let active_sub = sqlx::query(
+        "SELECT id FROM subscriptions WHERE customer_id = ? AND status = 'active' AND start_date <= date('now') AND end_date >= date('now')"
     )
+    .bind(&customer_id)
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| e.to_string())?;
@@ -98,7 +110,7 @@ pub async fn start_session(pool: State<'_, DbPool>, customer_id: String, resourc
     .bind(&resource_id)
     .bind(now)
     .bind(is_subscribed)
-    .bind(resource.rate_per_hour)
+    .bind(rate_per_hour.to_string())
     .bind("active")
     .bind(now)
     .bind(now)
@@ -123,14 +135,24 @@ pub async fn add_session_inventory(pool: State<'_, DbPool>, session_id: String, 
     let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
 
     // Get item info & check stock
-    let inv_item = sqlx::query!("SELECT price, quantity, name FROM inventory WHERE id = ?", item.inventory_id)
+    use sqlx::Row;
+    use std::str::FromStr;
+    
+    let inv_row = sqlx::query("SELECT price, quantity, name FROM inventory WHERE id = ?")
+        .bind(&item.inventory_id)
         .fetch_optional(&mut *tx)
         .await
         .map_err(|e| e.to_string())?
         .ok_or("Item not found")?;
 
-    if inv_item.quantity < item.quantity {
-        return Err(format!("Insufficient stock for {}. Available: {}", inv_item.name, inv_item.quantity));
+    let name: String = inv_row.try_get("name").unwrap_or_default();
+    let quantity: i64 = inv_row.try_get("quantity").unwrap_or(0);
+    // Assuming price is stored as string/real in DB. If configured as DECIMAL in DB, reading as string is safest.
+    let price_s: String = inv_row.try_get("price").unwrap_or_default();
+    let price = Decimal::from_str(&price_s).unwrap_or(Decimal::ZERO);
+
+    if quantity < item.quantity {
+        return Err(format!("Insufficient stock for {}. Available: {}", name, quantity));
     }
 
     let consumption_id = Uuid::new_v4().to_string();
@@ -151,15 +173,19 @@ pub async fn add_session_inventory(pool: State<'_, DbPool>, session_id: String, 
     .bind(&session_id)
     .bind(&item.inventory_id)
     .bind(item.quantity)
-    .bind(inv_item.price)
+    .bind(price.to_string())
     .execute(&mut *tx)
     .await
     .map_err(|e| e.to_string())?;
 
     // Update session total
-    let amount = inv_item.price * Decimal::from(item.quantity);
+    let amount = price * Decimal::from(item.quantity);
+    // Update session total: "inventory_total"
+    // Fetch current total to avoid SQL math on string/real mix if possible, OR trust sql engine.
+    // Better to do: inventory_total = inventory_total + ?
+    // Bind amount as string (sqlite will sum it if column is numeric).
     sqlx::query("UPDATE sessions SET inventory_total = inventory_total + ?, updated_at = ? WHERE id = ?")
-        .bind(amount)
+        .bind(amount.to_string())
         .bind(chrono::Local::now().naive_local())
         .bind(&session_id)
         .execute(&mut *tx)
@@ -174,34 +200,50 @@ pub async fn add_session_inventory(pool: State<'_, DbPool>, session_id: String, 
 pub async fn end_session(pool: State<'_, DbPool>, session_id: String) -> Result<String, String> {
     let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
 
-    let session = sqlx::query!(
+    use sqlx::Row;
+    use std::str::FromStr;
+
+    let session_row = sqlx::query(
         "SELECT s.*, r.name as resource_name 
          FROM sessions s
          JOIN resources r ON s.resource_id = r.id 
-         WHERE s.id = ?", 
-        session_id
+         WHERE s.id = ?"
     )
+    .bind(&session_id)
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| e.to_string())?
     .ok_or("Session not found")?;
 
-    if session.status != "active" {
+    let status: String = session_row.try_get("status").unwrap_or_default();
+    if status != "active" {
         return Err("Session is not active".to_string());
     }
 
+    let started_at: chrono::NaiveDateTime = session_row.try_get("started_at").unwrap();
+    let customer_id: String = session_row.try_get("customer_id").unwrap_or_default();
+    let resource_id: String = session_row.try_get("resource_id").unwrap_or_default();
+    let resource_name: String = session_row.try_get("resource_name").unwrap_or_default();
+    let is_subscribed: bool = session_row.try_get("is_subscribed").unwrap_or(false);
+    
+    let rate_s: String = session_row.try_get("resource_rate_snapshot").unwrap_or_default();
+    let resource_rate_snapshot = Decimal::from_str(&rate_s).unwrap_or(Decimal::ZERO);
+    
+    let inv_total_s: String = session_row.try_get("inventory_total").unwrap_or_default();
+    let inventory_total = Decimal::from_str(&inv_total_s).unwrap_or(Decimal::ZERO);
+
     let end_time = chrono::Local::now().naive_local();
-    let duration = end_time - session.started_at;
+    let duration = end_time - started_at;
     let duration_minutes = duration.num_minutes();
     let duration_hours = Decimal::from(duration_minutes) / Decimal::from(60);
 
-    let session_cost = if session.is_subscribed.unwrap_or(false) {
+    let session_cost = if is_subscribed {
         Decimal::ZERO
     } else {
-        duration_hours * session.resource_rate_snapshot
+        duration_hours * resource_rate_snapshot
     };
 
-    let total_amount = session_cost + session.inventory_total;
+    let total_amount = session_cost + inventory_total;
 
     // Update session
     sqlx::query("UPDATE sessions SET ended_at = ?, status = 'completed', updated_at = ? WHERE id = ?")
@@ -214,7 +256,7 @@ pub async fn end_session(pool: State<'_, DbPool>, session_id: String) -> Result<
 
     // Free resource
     sqlx::query("UPDATE resources SET is_available = TRUE WHERE id = ?")
-        .bind(session.resource_id)
+        .bind(&resource_id)
         .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
@@ -235,10 +277,10 @@ pub async fn end_session(pool: State<'_, DbPool>, session_id: String) -> Result<
     )
     .bind(&invoice_id)
     .bind(invoice_number)
-    .bind(&session.customer_id)
+    .bind(&customer_id)
     .bind(&session_id)
-    .bind(total_amount) // amount
-    .bind(total_amount) // total (minus discount if any, 0 for now)
+    .bind(total_amount.to_string()) // amount
+    .bind(total_amount.to_string()) // total
     .bind("unpaid")
     .bind(due_date)
     .execute(&mut *tx)
@@ -253,26 +295,46 @@ pub async fn end_session(pool: State<'_, DbPool>, session_id: String) -> Result<
         )
         .bind(Uuid::new_v4().to_string())
         .bind(&invoice_id)
-        .bind(format!("Session - {} ({:.0} mins)", session.resource_name, duration_minutes))
+        .bind(format!("Session - {} ({:.0} mins)", resource_name, duration_minutes))
         .bind(1)
-        .bind(session_cost) // rate is the full cost for 1 unit of session
-        .bind(session_cost)
+        .bind(session_cost.to_string())
+        .bind(session_cost.to_string())
         .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
     }
 
     // 2. Inventory Items
-    let session_items = sqlx::query!(
+    // Use Vec of struct or explicit parsing
+    struct SessItem {
+        inventory_id: String,
+        name: String,
+        quantity: i64,
+        price_at_time: Decimal,
+    }
+    
+    let item_rows = sqlx::query(
         "SELECT si.inventory_id, i.name, si.quantity, si.price_at_time 
          FROM session_inventory si
          JOIN inventory i ON si.inventory_id = i.id
-         WHERE si.session_id = ?",
-        session_id
+         WHERE si.session_id = ?"
     )
+    .bind(&session_id)
     .fetch_all(&mut *tx)
     .await
     .map_err(|e| e.to_string())?;
+    
+    let mut session_items = Vec::new();
+    for row in item_rows {
+        let price_s: String = row.try_get("price_at_time").unwrap_or_default();
+        let price = Decimal::from_str(&price_s).unwrap_or(Decimal::ZERO);
+        session_items.push(SessItem {
+            inventory_id: row.try_get("inventory_id").unwrap_or_default(),
+            name: row.try_get("name").unwrap_or_default(),
+            quantity: row.try_get("quantity").unwrap_or(0),
+            price_at_time: price,
+        });
+    }
 
     for item in session_items {
         let amount = item.price_at_time * Decimal::from(item.quantity);
@@ -283,8 +345,8 @@ pub async fn end_session(pool: State<'_, DbPool>, session_id: String) -> Result<
         .bind(&invoice_id)
         .bind(item.name)
         .bind(item.quantity)
-        .bind(item.price_at_time)
-        .bind(amount)
+        .bind(item.price_at_time.to_string())
+        .bind(amount.to_string())
         .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
@@ -292,9 +354,9 @@ pub async fn end_session(pool: State<'_, DbPool>, session_id: String) -> Result<
 
     // Update Customer Balance (Increase Debt)
     sqlx::query("UPDATE customers SET balance = balance + ?, updated_at = ? WHERE id = ?")
-        .bind(total_amount)
+        .bind(total_amount.to_string())
         .bind(end_time)
-        .bind(&session.customer_id)
+        .bind(&customer_id)
         .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;

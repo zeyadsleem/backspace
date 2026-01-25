@@ -11,11 +11,11 @@ export const translations = {
     reports: 'Reports',
     settings: 'Settings',
     logout: 'Logout',
-    
+
     // User Menu
     admin: 'Admin',
     manager: 'Manager',
-    
+
     // Dashboard
     lowStockAlert: 'Low Stock Alert',
     itemsBelowMinStock: '{count} item(s) below minimum stock level',
@@ -44,7 +44,7 @@ export const translations = {
     mAgo: '{m}m ago',
     hAgo: '{h}h ago',
     more: '+{count} more',
-    
+
     // Customers
     totalCustomers: '{count} total customers',
     export: 'Export',
@@ -67,7 +67,7 @@ export const translations = {
     delete: 'Delete',
     noCustomersFound: 'No customers found',
     tryAdjustingFilters: 'Try adjusting your search or filters',
-    
+
     // Customer Profile
     backToCustomers: 'Back to Customers',
     memberSince: 'Member since',
@@ -75,7 +75,7 @@ export const translations = {
     totalSpent: 'Total Spent',
     avgPerSession: 'Avg. per Session',
     customerNotFound: 'Customer not found',
-    
+
     // Customer Form
     name: 'Name',
     email: 'Email',
@@ -83,7 +83,7 @@ export const translations = {
     notes: 'Notes',
     save: 'Save',
     cancel: 'Cancel',
-    
+
     // Resources
     totalResources: '{count} total resources',
     newResource: 'New Resource',
@@ -97,7 +97,7 @@ export const translations = {
     utilizationRate: 'Utilization',
     selectForSession: 'Select for Session',
     noResourcesFound: 'No resources found',
-    
+
     // Sessions
     sessionsInProgress: '{count} sessions in progress',
     elapsed: 'Elapsed',
@@ -120,7 +120,7 @@ export const translations = {
     subscribed: 'Subscribed',
     noActiveSessions: 'No active sessions',
     startNewSessionPrompt: 'Start a new session to see it here',
-    
+
     // Checkout Dialog
     checkout: 'Checkout',
     orders: 'Orders',
@@ -148,23 +148,23 @@ export const translations = {
     pleaseSelectCustomer: 'Please select a customer',
     pleaseSelectResource: 'Please select a resource',
     egp: 'EGP',
-    
+
     // Add Inventory Modal
     addInventoryItem: 'Add Inventory Item',
     availableItems: 'Available Items',
     selectedItems: 'Selected Items',
     selectItem: 'Select Item',
     quantity: 'Quantity',
-        add: 'Add',
-        each: 'each',
-        noInventoryAvailable: 'No inventory available',
-        noItemsSelected: 'No items selected',
-        selectItemsFromRight: 'Select items from the right',
-        removeItem: 'Remove item',
-        addToSession: 'Add to Session',
-        updateSession: 'Update Session',
-        maxQuantityReached: 'Maximum quantity reached',
-        totalQuantity: 'Total Quantity',    
+    add: 'Add',
+    each: 'each',
+    noInventoryAvailable: 'No inventory available',
+    noItemsSelected: 'No items selected',
+    selectItemsFromRight: 'Select items from the right',
+    removeItem: 'Remove item',
+    addToSession: 'Add to Session',
+    updateSession: 'Update Session',
+    maxQuantityReached: 'Maximum quantity reached',
+    totalQuantity: 'Total Quantity',
     // Subscriptions
     totalSubscriptions: '{count} total subscriptions',
     newSubscription: 'New Subscription',
@@ -179,7 +179,7 @@ export const translations = {
     status: 'Status',
     deactivate: 'Deactivate',
     noSubscriptionsFound: 'No subscriptions found',
-    
+
     // Inventory
     totalItems: '{count} total items',
     newItem: 'New Item',
@@ -198,7 +198,7 @@ export const translations = {
     inStock: 'In Stock',
     quickAdjust: 'Quick Adjust',
     noInventoryFound: 'No inventory items found',
-    
+
     // Invoices
     totalInvoices: '{count} total invoices',
     searchInvoices: 'Search invoices...',
@@ -206,6 +206,7 @@ export const translations = {
     paid: 'Paid',
     pending: 'Pending',
     unpaid: 'Unpaid',
+    cancelled: 'Cancelled',
     overdue: 'Overdue',
     invoiceNumber: 'Invoice #',
     date: 'Date',
@@ -214,7 +215,7 @@ export const translations = {
     recordPayment: 'Record Payment',
     print: 'Print',
     noInvoicesFound: 'No invoices found',
-    
+
     // Payment Dialog
     paymentAmount: 'Payment Amount',
     paymentMethod: 'Payment Method',
@@ -223,7 +224,7 @@ export const translations = {
     cash: 'Cash',
     card: 'Card',
     transfer: 'Transfer',
-    
+
     // Reports
     analyticsAndInsights: 'Analytics and insights for your coworking space',
     revenue: 'Revenue',
@@ -233,7 +234,7 @@ export const translations = {
     topCustomers: 'Top Customers',
     operationHistory: 'Operation History',
     noOperations: 'No operations recorded',
-    
+
     // Settings
     manageSettings: 'Manage your application settings',
     companyInfo: 'Company Information',
@@ -255,7 +256,7 @@ export const translations = {
     exportCSV: 'Export to CSV',
     resetDatabase: 'Reset Database',
     resetWarning: 'Warning: Reset will permanently delete all data',
-    
+
     // Common
     close: 'Close',
     confirm: 'Confirm',
@@ -264,7 +265,7 @@ export const translations = {
     success: 'Success',
     required: 'Required',
     optional: 'optional',
-    
+
     // Form labels and actions
     customerName: 'Customer Name',
     phoneNumber: 'Phone Number',
@@ -278,7 +279,7 @@ export const translations = {
     createResource: 'Create Resource',
     updateResource: 'Update Resource',
     createSubscription: 'Create Subscription',
-    
+
     // Validation messages
     nameRequired: 'Name is required',
     phoneRequired: 'Phone is required',
@@ -287,7 +288,7 @@ export const translations = {
     resourceNameRequired: 'Resource name is required',
     rateMustBeGreater: 'Rate must be greater than 0',
     startDateRequired: 'Start date is required',
-    
+
     // Placeholders
     enterCustomerName: 'Enter customer name',
     phoneExample: '01012345678',
@@ -297,18 +298,18 @@ export const translations = {
     searchByNamePhone: 'Search by name, phone, or ID...',
     searchByNameId: 'Search by name or ID...',
     inventoryExample: 'e.g., Tea, Coffee',
-    
+
     // Customer types
     visitorType: 'Visitor',
     weeklyMember: 'Weekly Member',
     halfMonthlyMember: 'Half-Monthly Member',
     monthlyMember: 'Monthly Member',
-    
+
     // Resource types
     seatType: 'Seat',
     roomType: 'Room',
     deskType: 'Desk',
-    
+
     // Status labels
     recentItems: 'Recent items:',
     resourceDetails: 'Resource Details',
@@ -319,14 +320,14 @@ export const translations = {
     autoCalculated: 'Auto-calculated',
     planType: 'Plan Type',
     days: 'days',
-    
+
     // Numbers and time
     item: 'item',
     minute: 'minute',
     minutes: 'minutes',
     hour: 'hour',
     hours: 'hours',
-    
+
     // Subscription specific
     allPlans: 'All Plans',
     expiringSoon: 'expiring soon',
@@ -346,7 +347,7 @@ export const translations = {
     totalAmountToPay: 'Total Amount to Pay',
     payAllInvoices: 'Pay All Invoices',
     partial: 'Partial',
-    
+
     // Inventory specific
     itemName: 'Item Name',
     itemNameRequired: 'Item name is required',
@@ -355,7 +356,7 @@ export const translations = {
     minStockCannotBeNegative: 'Minimum stock cannot be negative',
     stockAlertMessage: 'You will be alerted when stock falls below this level',
     updateItem: 'Update Item',
-    
+
     // Payment specific
     invoiceSummary: 'Invoice Summary',
     totalAmount: 'Total Amount',
@@ -366,21 +367,21 @@ export const translations = {
     paymentDateRequired: 'Payment date is required',
     payFullBalance: 'Pay full remaining balance',
     addPaymentNotes: 'Add any notes about this payment...',
-    
+
     // Status labels
     inactive: 'Inactive',
     period: 'Period',
     remaining: 'Remaining',
     details: 'Details',
     used: 'used',
-    
+
     // Low stock alerts
     outOfStockTitle: 'Out of Stock',
     outOfStockMessage: 'item(s) need restocking',
     lowStockWarning: 'Low Stock Warning',
     lowStockMessage: 'item(s) below minimum level',
     moreItems: 'more',
-    
+
     // Additional Invoice translations
     newInvoice: 'New Invoice',
     createInvoice: 'Create Invoice',
@@ -395,7 +396,7 @@ export const translations = {
     discount: 'Discount',
     balanceDue: 'Balance Due',
     dueDate: 'Due Date',
-    
+
     // Additional Reports translations
     overallUtilization: 'Overall Utilization',
     avgSessionDuration: 'Avg Session Duration',
@@ -407,11 +408,11 @@ export const translations = {
     medium: 'Medium',
     high: 'High',
     peak: 'Peak',
-    
+
     // Subscription Form translations
     subscriptionSummary: 'Subscription Summary',
     duration: 'Duration',
-    
+
     // Delete Dialog translations
     deleteCustomer: 'Delete Customer',
     deleteResource: 'Delete Resource',
@@ -439,11 +440,11 @@ export const translations = {
     reports: 'التقارير',
     settings: 'الإعدادات',
     logout: 'تسجيل الخروج',
-    
+
     // User Menu
     admin: 'مدير',
     manager: 'مشرف',
-    
+
     // Dashboard
     lowStockAlert: 'تنبيه نقص المخزون',
     itemsBelowMinStock: '{count} منتج(ات) أقل من الحد الأدنى',
@@ -472,7 +473,7 @@ export const translations = {
     mAgo: 'منذ {m} دقيقة',
     hAgo: 'منذ {h} ساعة',
     more: '+{count} المزيد',
-    
+
     // Customers
     totalCustomers: '{count} عميل',
     export: 'تصدير',
@@ -495,7 +496,7 @@ export const translations = {
     delete: 'حذف',
     noCustomersFound: 'لم يتم العثور على عملاء',
     tryAdjustingFilters: 'حاول تعديل البحث أو الفلاتر',
-    
+
     // Customer Profile
     backToCustomers: 'العودة للعملاء',
     memberSince: 'عضو منذ',
@@ -503,7 +504,7 @@ export const translations = {
     totalSpent: 'إجمالي المصروف',
     avgPerSession: 'متوسط الجلسة',
     customerNotFound: 'لم يتم العثور على العميل',
-    
+
     // Customer Form
     name: 'الاسم',
     email: 'البريد الإلكتروني',
@@ -511,7 +512,7 @@ export const translations = {
     notes: 'ملاحظات',
     save: 'حفظ',
     cancel: 'إلغاء',
-    
+
     // Resources
     totalResources: '{count} مورد',
     newResource: 'مورد جديد',
@@ -525,7 +526,7 @@ export const translations = {
     utilizationRate: 'نسبة الاستخدام',
     selectForSession: 'اختيار للجلسة',
     noResourcesFound: 'لم يتم العثور على موارد',
-    
+
     // Sessions
     sessionsInProgress: '{count} جلسة قيد التنفيذ',
     elapsed: 'المدة',
@@ -549,7 +550,7 @@ export const translations = {
     subscribed: 'مشترك',
     noActiveSessions: 'لا توجد جلسات نشطة',
     startNewSessionPrompt: 'ابدأ جلسة جديدة لتظهر هنا',
-    
+
     // Checkout Dialog
     checkout: 'الدفع والخروج',
     orders: 'الطلبات',
@@ -577,7 +578,7 @@ export const translations = {
     pleaseSelectCustomer: 'يرجى اختيار عميل',
     pleaseSelectResource: 'يرجى اختيار مورد',
     egp: 'EGP',
-    
+
     // Add Inventory Modal
     addInventoryItem: 'إضافة منتج من المخزون',
     availableItems: 'المنتجات المتاحة',
@@ -594,7 +595,7 @@ export const translations = {
     updateSession: 'تحديث الجلسة',
     maxQuantityReached: 'تم الوصول للحد الأقصى',
     totalQuantity: 'إجمالي الكمية',
-    
+
     // Subscriptions
     totalSubscriptions: '{count} اشتراك',
     newSubscription: 'اشتراك جديد',
@@ -609,7 +610,7 @@ export const translations = {
     status: 'الحالة',
     deactivate: 'إلغاء التفعيل',
     noSubscriptionsFound: 'لم يتم العثور على اشتراكات',
-    
+
     // Inventory
     totalItems: '{count} منتج',
     newItem: 'منتج جديد',
@@ -628,7 +629,7 @@ export const translations = {
     inStock: 'متوفر',
     quickAdjust: 'تعديل سريع',
     noInventoryFound: 'لم يتم العثور على منتجات',
-    
+
     // Invoices
     totalInvoices: '{count} فاتورة',
     searchInvoices: 'البحث في الفواتير...',
@@ -636,6 +637,7 @@ export const translations = {
     paid: 'مدفوعة',
     pending: 'معلقة',
     unpaid: 'غير مدفوعة',
+    cancelled: 'ملغاة',
     overdue: 'متأخرة',
     invoiceNumber: 'رقم الفاتورة',
     date: 'التاريخ',
@@ -644,7 +646,7 @@ export const translations = {
     recordPayment: 'تسجيل دفعة',
     print: 'طباعة',
     noInvoicesFound: 'لم يتم العثور على فواتير',
-    
+
     // Payment Dialog
     paymentAmount: 'مبلغ الدفع',
     paymentMethod: 'طريقة الدفع',
@@ -653,7 +655,7 @@ export const translations = {
     cash: 'نقدي',
     card: 'بطاقة',
     transfer: 'تحويل',
-    
+
     // Reports
     analyticsAndInsights: 'تحليلات ورؤى لمساحة العمل المشتركة',
     revenue: 'الإيرادات',
@@ -663,7 +665,7 @@ export const translations = {
     topCustomers: 'أفضل العملاء',
     operationHistory: 'سجل العمليات',
     noOperations: 'لا توجد عمليات مسجلة',
-    
+
     // Settings
     manageSettings: 'إدارة إعدادات التطبيق',
     companyInfo: 'معلومات الشركة',
@@ -685,7 +687,7 @@ export const translations = {
     exportCSV: 'تصدير CSV',
     resetDatabase: 'إعادة تعيين',
     resetWarning: 'تحذير: إعادة التعيين ستحذف جميع البيانات بشكل دائم',
-    
+
     // Common
     close: 'إغلاق',
     confirm: 'تأكيد',
@@ -694,7 +696,7 @@ export const translations = {
     success: 'نجاح',
     required: 'مطلوب',
     optional: 'اختياري',
-    
+
     // Form labels and actions
     customerName: 'اسم العميل',
     phoneNumber: 'رقم الهاتف',
@@ -708,7 +710,7 @@ export const translations = {
     createResource: 'إنشاء مورد',
     updateResource: 'تحديث المورد',
     createSubscription: 'إنشاء اشتراك',
-    
+
     // Validation messages
     nameRequired: 'الاسم مطلوب',
     phoneRequired: 'رقم الهاتف مطلوب',
@@ -717,7 +719,7 @@ export const translations = {
     resourceNameRequired: 'اسم المورد مطلوب',
     rateMustBeGreater: 'السعر يجب أن يكون أكبر من 0',
     startDateRequired: 'تاريخ البدء مطلوب',
-    
+
     // Placeholders
     enterCustomerName: 'أدخل اسم العميل',
     phoneExample: '01012345678',
@@ -727,18 +729,18 @@ export const translations = {
     searchByNamePhone: 'البحث بالاسم أو الهاتف أو الرقم...',
     searchByNameId: 'البحث بالاسم أو الرقم...',
     inventoryExample: 'مثال: شاي، قهوة',
-    
+
     // Customer types
     visitorType: 'زائر',
     weeklyMember: 'عضو أسبوعي',
     halfMonthlyMember: 'عضو نصف شهري',
     monthlyMember: 'عضو شهري',
-    
+
     // Resource types
     seatType: 'مقعد',
     roomType: 'غرفة',
     deskType: 'مكتب',
-    
+
     // Status labels
     recentItems: 'المنتجات الأخيرة:',
     resourceDetails: 'تفاصيل المورد',
@@ -749,14 +751,14 @@ export const translations = {
     autoCalculated: 'يتم حسابه تلقائياً',
     planType: 'نوع الخطة',
     days: 'أيام',
-    
+
     // Numbers and time
     item: 'منتج',
     minute: 'دقيقة',
     minutes: 'دقائق',
     hour: 'ساعة',
     hours: 'ساعات',
-    
+
     // Subscription specific
     allPlans: 'كل الخطط',
     expiringSoon: 'تنتهي قريباً',
@@ -776,7 +778,7 @@ export const translations = {
     totalAmountToPay: 'إجمالي المبلغ المطلوب',
     payAllInvoices: 'دفع كل الفواتير',
     partial: 'جزئي',
-    
+
     // Inventory specific
     itemName: 'اسم المنتج',
     itemNameRequired: 'اسم المنتج مطلوب',
@@ -785,7 +787,7 @@ export const translations = {
     minStockCannotBeNegative: 'الحد الأدنى لا يمكن أن يكون سالب',
     stockAlertMessage: 'سيتم تنبيهك عندما ينخفض المخزون عن هذا الحد',
     updateItem: 'تحديث المنتج',
-    
+
     // Payment specific
     invoiceSummary: 'ملخص الفاتورة',
     totalAmount: 'المبلغ الإجمالي',
@@ -796,21 +798,21 @@ export const translations = {
     paymentDateRequired: 'تاريخ الدفع مطلوب',
     payFullBalance: 'دفع كامل الرصيد المتبقي',
     addPaymentNotes: 'أضف أي ملاحظات عن هذه الدفعة...',
-    
+
     // Status labels
     inactive: 'غير نشط',
     period: 'الفترة',
     remaining: 'المتبقي',
     details: 'التفاصيل',
     used: 'مستخدم',
-    
+
     // Low stock alerts
     outOfStockTitle: 'نفد من المخزون',
     outOfStockMessage: 'منتج نفذ',
     lowStockWarning: 'مخزون منخفض',
     lowStockMessage: 'منتج أقل من الحد الأدنى',
     moreItems: 'أخرى',
-    
+
     // Additional Invoice translations
     newInvoice: 'فاتورة جديدة',
     createInvoice: 'إنشاء فاتورة',
@@ -825,7 +827,7 @@ export const translations = {
     discount: 'الخصم',
     balanceDue: 'الرصيد المستحق',
     dueDate: 'تاريخ الاستحقاق',
-    
+
     // Additional Reports translations
     overallUtilization: 'الاستخدام الإجمالي',
     avgSessionDuration: 'متوسط مدة الجلسة',
@@ -837,11 +839,11 @@ export const translations = {
     medium: 'متوسط',
     high: 'عالي',
     peak: 'ذروة',
-    
+
     // Subscription Form translations
     subscriptionSummary: 'ملخص الاشتراك',
     duration: 'المدة',
-    
+
     // Delete Dialog translations
     deleteCustomer: 'حذف العميل',
     deleteResource: 'حذف المورد',

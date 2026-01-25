@@ -1,5 +1,5 @@
 import type { Resource, ResourceType } from '@/types'
-import { X, Pencil, Trash2, Monitor, DoorOpen, Armchair, DollarSign, Activity, Play } from 'lucide-react'
+import { Pencil, Trash2, Monitor, DoorOpen, Armchair, DollarSign, Activity, Play } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 import { Modal } from '@/components/shared'
 
@@ -14,7 +14,6 @@ interface ResourceDetailsDialogProps {
 
 export function ResourceDetailsDialog({ isOpen, resource, onClose, onEdit, onDelete, onStartSession }: ResourceDetailsDialogProps) {
   const t = useAppStore((state) => state.t)
-  const isRTL = useAppStore((state) => state.isRTL)
 
   if (isOpen === false) return null
 

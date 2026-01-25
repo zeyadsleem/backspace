@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { Invoice, PaymentMethod } from '@/types'
-import { CreditCard, Wallet, Banknote, Calendar, Receipt } from 'lucide-react'
+import { CreditCard, Wallet, Receipt } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 import { Modal } from '@/components/shared'
 import { Button } from '@/components/ui/button'

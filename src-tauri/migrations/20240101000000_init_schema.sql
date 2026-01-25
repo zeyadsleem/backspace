@@ -1,4 +1,17 @@
--- Enable Foreign Keys
+PRAGMA foreign_keys = OFF;
+
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS settings;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS invoice_items;
+DROP TABLE IF EXISTS invoices;
+DROP TABLE IF EXISTS session_inventory;
+DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS subscriptions;
+DROP TABLE IF EXISTS inventory;
+DROP TABLE IF EXISTS resources;
+DROP TABLE IF EXISTS customers;
+
 PRAGMA foreign_keys = ON;
 
 -- 1. Customers

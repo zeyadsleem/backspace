@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { ActiveSession } from '@/types'
-import { Clock, Square, CreditCard, PlusCircle, Monitor } from 'lucide-react'
+import { Clock, Square, PlusCircle, Monitor } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
 
 interface ActiveSessionCardProps {
@@ -26,9 +26,9 @@ export function ActiveSessionCard({
       const diffMins = Math.floor(diffMs / 60000)
       const hours = Math.floor(diffMins / 60)
       const mins = diffMins % 60
-      
+
       setElapsedTime(hours > 0 ? `${hours}${t('hour').charAt(0)} ${mins}${t('minute').charAt(0)}` : `${mins}${t('minute').charAt(0)}`)
-      
+
       if (!session.isSubscribed) {
         const cost = (diffMins / 60) * session.resourceRate
         setSessionCost(Math.round(cost))
@@ -44,7 +44,7 @@ export function ActiveSessionCard({
 
   return (
     <div className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-xl flex flex-col h-full w-full shadow-sm overflow-hidden border-b-4 border-b-amber-500/10">
-      
+
       {/* 1. Header: Customer & Live Time */}
       <div className="p-4 flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -60,13 +60,13 @@ export function ActiveSessionCard({
           </div>
         </div>
         <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-100 dark:border-amber-800/30 shadow-sm">
-                <Clock className="w-4 h-4 animate-pulse" />
-                <span className="text-xs font-medium font-mono">{elapsedTime}</span>
-            </div>
-            {session.isSubscribed && (
-                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.1em]">{t('subscribed')}</span>
-            )}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-lg border border-amber-100 dark:border-amber-800/30 shadow-sm">
+            <Clock className="w-4 h-4 animate-pulse" />
+            <span className="text-xs font-medium font-mono">{elapsedTime}</span>
+          </div>
+          {session.isSubscribed && (
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.1em]">{t('subscribed')}</span>
+          )}
         </div>
       </div>
 
@@ -82,12 +82,12 @@ export function ActiveSessionCard({
           <div className="text-center space-y-1 border-s border-stone-100 dark:border-stone-800">
             <p className="text-xs text-stone-400 font-medium uppercase tracking-widest">{t('inventoryLabel')}</p>
             <div className="flex flex-col items-center gap-0.5">
-                <p className="text-base font-semibold text-stone-900 dark:text-stone-100">{session.inventoryTotal} {t('egp')}</p>
-                {session.inventoryConsumptions.length > 0 && (
-                    <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                        {t('items', { count: session.inventoryConsumptions.length })}
-                    </span>
-                )}
+              <p className="text-base font-semibold text-stone-900 dark:text-stone-100">{session.inventoryTotal} {t('egp')}</p>
+              {session.inventoryConsumptions.length > 0 && (
+                <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                  {t('items', { count: session.inventoryConsumptions.length })}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -104,15 +104,15 @@ export function ActiveSessionCard({
 
       {/* 4. Actions: Slim & Practical */}
       <div className="mt-auto grid grid-cols-2 gap-px bg-stone-100 dark:bg-stone-800 border-t border-stone-100 dark:border-stone-800">
-        <button 
-          onClick={onAddInventory} 
+        <button
+          onClick={onAddInventory}
           className="bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 py-3 flex items-center justify-center gap-2 text-xs font-medium text-stone-600 dark:text-stone-300 transition-colors"
         >
           <PlusCircle className="w-4 h-4 text-amber-500" />
           {t('addItem')}
         </button>
-        <button 
-          onClick={onEndSession} 
+        <button
+          onClick={onEndSession}
           className="bg-white dark:bg-stone-900 hover:bg-red-50 dark:hover:bg-red-900/10 py-3 flex items-center justify-center gap-2 text-xs font-medium text-stone-600 dark:text-stone-300 hover:text-red-600 transition-colors"
         >
           <Square className="w-4 h-4 fill-current" />

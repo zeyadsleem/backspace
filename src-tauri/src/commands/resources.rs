@@ -9,7 +9,7 @@ pub struct Resource {
     pub id: String,
     pub name: String,
     pub resource_type: String, // 'seat', 'room', etc.
-    pub rate_per_hour: Decimal,
+    pub rate_per_hour: f64,
     pub is_available: bool,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
@@ -19,14 +19,14 @@ pub struct Resource {
 pub struct CreateResourceDto {
     pub name: String,
     pub resource_type: String,
-    pub rate_per_hour: Decimal,
+    pub rate_per_hour: f64,
 }
 
 #[derive(Deserialize)]
 pub struct UpdateResourceDto {
     pub name: Option<String>,
     pub resource_type: Option<String>,
-    pub rate_per_hour: Option<Decimal>,
+    pub rate_per_hour: Option<f64>,
     pub is_available: Option<bool>,
 }
 

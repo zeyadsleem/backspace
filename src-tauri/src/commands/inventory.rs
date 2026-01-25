@@ -10,7 +10,7 @@ pub struct InventoryItem {
     pub name: String,
     pub category: Option<String>,
     pub quantity: i64,
-    pub price: Decimal,
+    pub price: f64,
     pub min_stock: Option<i64>,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
@@ -21,7 +21,7 @@ pub struct CreateInventoryDto {
     pub name: String,
     pub category: Option<String>,
     pub quantity: i64,
-    pub price: Decimal,
+    pub price: f64,
     pub min_stock: Option<i64>,
 }
 
@@ -30,7 +30,7 @@ pub struct UpdateInventoryDto {
     pub name: Option<String>,
     pub category: Option<String>,
     pub quantity: Option<i64>,
-    pub price: Option<Decimal>,
+    pub price: Option<f64>,
     pub min_stock: Option<i64>,
 }
 

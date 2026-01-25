@@ -18,7 +18,7 @@ export function DashboardPage() {
   const [viewInvoiceId, setViewInvoiceId] = useState<string | null>(null)
   const [paymentInvoiceId, setPaymentInvoiceId] = useState<string | null>(null)
   const [customerDebtId, setCustomerDebtId] = useState<string | null>(null)
-  
+
   // Get data from store
   const {
     customers,
@@ -37,7 +37,7 @@ export function DashboardPage() {
     setShowStartSessionDialog(false)
   }
 
-  const handleCreateCustomer = (data: { name: string; phone: string; email?: string; customerType: any; notes?: string }) => {
+  const handleCreateCustomer = (data: { name: string; phone: string; email?: string; customerType?: CustomerType; notes?: string }) => {
     addCustomer({
       ...data,
       balance: 0,
@@ -49,9 +49,9 @@ export function DashboardPage() {
 
   const viewInvoice = viewInvoiceId ? invoices.find(i => i.id === viewInvoiceId) ?? null : null
   const paymentInvoice = paymentInvoiceId ? invoices.find(i => i.id === paymentInvoiceId) ?? null : null
-  
-  const customerDebtInvoices = customerDebtId 
-    ? invoices.filter(i => i.customerId === customerDebtId && i.status !== 'paid') 
+
+  const customerDebtInvoices = customerDebtId
+    ? invoices.filter(i => i.customerId === customerDebtId && i.status !== 'paid')
     : []
   const debtCustomer = customerDebtId ? customers.find(c => c.id === customerDebtId) : null
 
@@ -64,7 +64,7 @@ export function DashboardPage() {
         onViewInventoryItem={(id) => navigate(`/inventory?highlight=${id}`)}
         onViewCustomerDebt={(customerId) => setCustomerDebtId(customerId)}
       />
-      
+
       <StartSessionDialog
         isOpen={showStartSessionDialog}
         customers={customers}
@@ -92,7 +92,7 @@ export function DashboardPage() {
       <PaymentDialog
         isOpen={!!paymentInvoiceId}
         invoice={paymentInvoice}
-        onSubmit={(data) => { if (paymentInvoiceId) recordPayment(paymentInvoiceId, data.amount, data.method, data.date, data.notes); setPaymentInvoiceId(null) }}
+        onSubmit={(data) => { if (paymentInvoiceId) recordPayment(paymentInvoiceId, data.amount, data.method, data.notes); setPaymentInvoiceId(null) }}
         onClose={() => setPaymentInvoiceId(null)}
       />
 

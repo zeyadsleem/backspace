@@ -127,10 +127,10 @@ export const sampleData = {
   ] as ActiveSession[],
 
   subscriptions: [
-    { id: 'sub-001', customerId: 'cust-001', customerName: 'Ahmed Hassan', planType: 'monthly' as const, startDate: '2026-01-01', endDate: '2026-01-31', isActive: true, daysRemaining: 24, createdAt: '2025-12-28T10:00:00Z' },
-    { id: 'sub-002', customerId: 'cust-002', customerName: 'Sara Mohamed', planType: 'weekly' as const, startDate: '2026-01-03', endDate: '2026-01-10', isActive: true, daysRemaining: 3, createdAt: '2026-01-02T14:00:00Z' },
-    { id: 'sub-003', customerId: 'cust-004', customerName: 'Fatma Ibrahim', planType: 'half-monthly' as const, startDate: '2025-12-25', endDate: '2026-01-09', isActive: true, daysRemaining: 2, createdAt: '2025-12-24T11:00:00Z' },
-    { id: 'sub-004', customerId: 'cust-005', customerName: 'Youssef Kamal', planType: 'monthly' as const, startDate: '2025-12-15', endDate: '2026-01-14', isActive: true, daysRemaining: 7, createdAt: '2025-12-14T09:00:00Z' },
+    { id: 'sub-001', customerId: 'cust-001', customerName: 'Ahmed Hassan', planType: 'monthly' as const, startDate: '2026-01-01', endDate: '2026-01-31', isActive: true, status: 'active' as const, daysRemaining: 24, createdAt: '2025-12-28T10:00:00Z', updatedAt: '2025-12-28T10:00:00Z' },
+    { id: 'sub-002', customerId: 'cust-002', customerName: 'Sara Mohamed', planType: 'weekly' as const, startDate: '2026-01-03', endDate: '2026-01-10', isActive: true, status: 'active' as const, daysRemaining: 3, createdAt: '2026-01-02T14:00:00Z', updatedAt: '2026-01-02T14:00:00Z' },
+    { id: 'sub-003', customerId: 'cust-004', customerName: 'Fatma Ibrahim', planType: 'half-monthly' as const, startDate: '2025-12-25', endDate: '2026-01-09', isActive: true, status: 'active' as const, daysRemaining: 2, createdAt: '2025-12-24T11:00:00Z', updatedAt: '2025-12-24T11:00:00Z' },
+    { id: 'sub-004', customerId: 'cust-005', customerName: 'Youssef Kamal', planType: 'monthly' as const, startDate: '2025-12-15', endDate: '2026-01-14', isActive: true, status: 'active' as const, daysRemaining: 7, createdAt: '2025-12-14T09:00:00Z', updatedAt: '2025-12-14T09:00:00Z' },
   ] as Subscription[],
 
   inventory: [
@@ -317,8 +317,9 @@ export const sampleData = {
   ] as PlanTypeOption[],
 
   categories: [
-    { id: 'beverage', labelEn: 'Beverages', labelAr: 'مشروبات' },
-    { id: 'snack', labelEn: 'Snacks', labelAr: 'وجبات خفيفة' },
-    { id: 'other', labelEn: 'Other', labelAr: 'أخرى' },
-  ],
+    { id: 'beverage' as const, labelEn: 'Beverages', labelAr: 'مشروبات' },
+    { id: 'snack' as const, labelEn: 'Snacks', labelAr: 'وجبات خفيفة' },
+    { id: 'meal' as const, labelEn: 'Meals', labelAr: 'وجبات' },
+    { id: 'other' as const, labelEn: 'Other', labelAr: 'أخرى' },
+  ] as CategoryOption[],
 }

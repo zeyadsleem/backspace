@@ -41,7 +41,7 @@ export function CustomersPage() {
           customerType: editingCustomer.customerType,
           notes: editingCustomer.notes || ''
         } : undefined}
-        onSubmit={(data: any) => {
+        onSubmit={(data: { name: string; phone: string; email?: string; customerType?: CustomerType; notes?: string }) => {
           if (editId) {
             updateCustomer(editId, { ...data, email: data.email || null, notes: data.notes || '' })
             setEditId(null)

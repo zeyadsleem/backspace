@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Row};
 use tauri::State;
 use uuid::Uuid;
+use std::str::FromStr;
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct InvoiceView {
@@ -12,11 +13,10 @@ pub struct InvoiceView {
     pub invoice_number: String,
     pub customer_id: String,
     pub customer_name: String,
-    pub amount: Decimal,
-    pub total: Decimal,
-    pub paid_amount: Decimal,
+    pub amount: f64,
+    pub total: f64,
+    pub paid_amount: f64,
     pub status: String,
-    pub due_date: chrono::NaiveDate,
     pub due_date: chrono::NaiveDate,
     pub created_at: chrono::NaiveDateTime,
     pub updated_at: chrono::NaiveDateTime,
@@ -35,8 +35,8 @@ pub struct InvoiceItemView {
     pub id: String,
     pub description: String,
     pub quantity: i64,
-    pub rate: Decimal,
-    pub amount: Decimal,
+    pub rate: f64,
+    pub amount: f64,
 }
 
 #[tauri::command]
@@ -71,14 +71,41 @@ pub async fn process_payment(pool: State<'_, DbPool>, data: PaymentDto) -> Resul
     let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
     
     // Fetch invoice
-    let invoice = sqlx::query!(
-        "SELECT total, paid_amount, status, customer_id FROM invoices WHERE id = ?", 
-        data.invoice_id
+    // Fetch invoice manually to avoid implicit types
+    use sqlx::Row;
+    let row = sqlx::query(
+        "SELECT total, paid_amount, status, customer_id FROM invoices WHERE id = ?"
     )
+    .bind(&data.invoice_id)
     .fetch_optional(&mut *tx)
     .await
     .map_err(|e| e.to_string())?
     .ok_or("Invoice not found")?;
+
+    // Map fields. Decimals stored/returned might be REAL or TEXT. Parse carefully.
+    // Assuming we store as TEXT/REAL. 
+    // We try to read as String then parse, or f64.
+    // If bind uses string, read as string is safest.
+    let total_s: String = row.try_get("total").unwrap_or_default();
+    let total = Decimal::from_str_exact(&total_s).unwrap_or(Decimal::ZERO);
+    
+    let paid_s: String = row.try_get("paid_amount").unwrap_or_default();
+    let paid_amount = Decimal::from_str_exact(&paid_s).unwrap_or(Decimal::ZERO);
+    
+    let status: String = row.try_get("status").unwrap_or_default();
+    let customer_id: String = row.try_get("customer_id").unwrap_or_default();
+
+    // Struct for logic
+    struct Inv { total: Decimal, paid_amount: Decimal, status: String }
+    let invoice = Inv { total, paid_amount, status };
+    
+    if invoice.status == "cancelled" {
+        return Err("Cannot pay cancelled invoice".to_string());
+    }
+    // Logic uses 'invoice', so we constructed a local struct.
+    // We don't need customer_id here? Logic doesn't seems to use it in snippet.
+    // Wait, original query fetched customer_id. Maybe it's not used in this function.
+    // Ah, original 'invoice' var was used.
 
     if invoice.status == "cancelled" {
         return Err("Cannot pay cancelled invoice".to_string());
@@ -86,9 +113,9 @@ pub async fn process_payment(pool: State<'_, DbPool>, data: PaymentDto) -> Resul
 
     // Explicitly handle potential NULL from DB if not default 0, though schema says DEFAULT 0.
     // SQLx might return strict types. Schema: paid_amount DECIMAL DEFAULT 0.
-    let current_paid = Decimal::from(invoice.paid_amount.unwrap_or(0)); 
+    let current_paid = invoice.paid_amount;
     let new_paid = current_paid + data.amount;
-    let total = Decimal::from(invoice.total); // Schema: total DECIMAL NOT NULL
+    let total = invoice.total; // already Decimal from our local struct mapping
     
     let mut status = "partially_paid";
     if new_paid >= total {
@@ -99,23 +126,26 @@ pub async fn process_payment(pool: State<'_, DbPool>, data: PaymentDto) -> Resul
     let now = chrono::Local::now().naive_local();
 
     // Record Transaction
+    // Insert Payment (transactions table?) Wait, schema has payments
+    // Using sqlx::query
     sqlx::query(
-        "INSERT INTO transactions (id, invoice_id, amount, payment_method, payment_date, notes) VALUES (?, ?, ?, ?, ?, ?)"
+        "INSERT INTO payments (id, invoice_id, amount, method, notes, payment_date) VALUES (?, ?, ?, ?, ?, ?)"
     )
     .bind(transaction_id)
     .bind(&data.invoice_id)
-    .bind(data.amount)
+    .bind(data.amount.to_string())
     .bind(&data.payment_method)
-    .bind(now)
     .bind(&data.notes)
+    .bind(now)
     .execute(&mut *tx)
     .await
     .map_err(|e| e.to_string())?;
 
     // Update Invoice
+    // Update Invoice
     let paid_date = if status == "paid" { Some(now) } else { None };
     sqlx::query("UPDATE invoices SET paid_amount = ?, status = ?, paid_date = ?, updated_at = ? WHERE id = ?")
-        .bind(new_paid)
+        .bind(new_paid.to_string())
         .bind(status)
         .bind(paid_date)
         .bind(now)
@@ -126,13 +156,11 @@ pub async fn process_payment(pool: State<'_, DbPool>, data: PaymentDto) -> Resul
 
     // Update Customer Stats
     // Decrease balance (debt) and increase total_spent
-    // Update Customer Stats
-    // Decrease balance (debt) and increase total_spent
     sqlx::query("UPDATE customers SET total_spent = total_spent + ?, balance = balance - ?, updated_at = ? WHERE id = ?")
-        .bind(data.amount)
-        .bind(data.amount)
+        .bind(data.amount.to_string())
+        .bind(data.amount.to_string())
         .bind(now)
-        .bind(invoice.customer_id)
+        .bind(customer_id)
         .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;

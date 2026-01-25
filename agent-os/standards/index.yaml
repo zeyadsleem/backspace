@@ -1,0 +1,30 @@
+# Standards Index
+
+# هذا الملف هو نقطة الدخول لمعايير الكود
+# اقرأ الملفات المذكورة هنا قبل بدء أي مهمة برمجية
+
+standards:
+  - file: rtl.md
+    description: قواعد RTL والتصميم العربي
+    required: true
+
+  - file: components.md
+    description: معايير إنشاء المكونات
+    required: true
+
+  - file: state.md
+    description: إدارة الحالة مع Zustand
+    required: true
+
+  - file: tauri.md
+    description: التكامل مع Tauri/Rust
+    required: true
+
+conventions:
+  language: ar
+  direction: rtl
+  naming:
+    files: kebab-case
+    components: PascalCase
+    functions: camelCase
+    constants: SCREAMING_SNAKE_CASE

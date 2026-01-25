@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { Customer, Resource, Subscription } from '@/types'
-import { X, Loader2, User, Monitor, Clock } from 'lucide-react'
+import { Loader2, User, Clock, Monitor } from 'lucide-react'
 import { useTranslation } from '@/stores/hooks'
 import { useAppStore } from '@/stores/useAppStore'
 import { Modal } from '@/components/shared'
