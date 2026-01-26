@@ -31,54 +31,54 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
   }, [utilizationData.peakHours]);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900">
-          <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
+    <div className="space-y-6 3xl:space-y-8">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 3xl:gap-6">
+        <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900 3xl:p-6">
+          <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400 3xl:text-sm">
             {t("overallUtilization")}
           </p>
-          <p className="mt-1 font-bold text-3xl text-amber-600 dark:text-amber-400">
+          <p className="mt-1 font-bold text-3xl text-amber-600 dark:text-amber-400 3xl:text-4xl">
             {Math.round(utilizationData.overallRate)}%
           </p>
-          <div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800 3xl:h-3">
             <div
               className="h-full rounded-full bg-amber-500 transition-all duration-500"
               style={{ width: `${utilizationData.overallRate}%` }}
             />
           </div>
         </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900">
-          <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
+        <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900 3xl:p-6">
+          <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400 3xl:text-sm">
             {t("avgSessionDuration")}
           </p>
           <div className="mt-1 flex items-center gap-2">
-            <Clock className="h-5 w-5 text-stone-400" />
-            <p className="font-bold text-2xl text-stone-900 dark:text-stone-100">
+            <Clock className="h-5 w-5 text-stone-400 3xl:h-6 3xl:w-6" />
+            <p className="font-bold text-2xl text-stone-900 dark:text-stone-100 3xl:text-3xl">
               {formatDuration(utilizationData.averageSessionDuration)}
             </p>
           </div>
         </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900">
-          <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
+        <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900 3xl:p-6">
+          <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400 3xl:text-sm">
             {t("peakHour")}
           </p>
-          <p className="mt-1 font-bold text-2xl text-stone-900 dark:text-stone-100">
+          <p className="mt-1 font-bold text-2xl text-stone-900 dark:text-stone-100 3xl:text-3xl">
             {peakHourData.hour.toString().padStart(2, "0")}:00
           </p>
-          <p className="mt-1 text-stone-500 text-xs dark:text-stone-400">
+          <p className="mt-1 text-stone-500 text-xs dark:text-stone-400 3xl:text-sm">
             {Math.round(peakHourData.occupancy)}% {t("occupancy")}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 3xl:gap-8">
+        <div className="rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900 3xl:p-8">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-semibold text-stone-900 dark:text-stone-100">
+            <h3 className="font-semibold text-stone-900 3xl:text-xl dark:text-stone-100">
               {t("resourceUtilization")}
             </h3>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {utilizationData.byResource.map((resource) => {
               let barColor = "bg-red-500";
               if (resource.rate >= 80) {
@@ -89,22 +89,22 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
 
               return (
                 <button
-                  className="w-full text-left"
+                  className="group w-full text-left"
                   key={resource.id}
                   onClick={() => onResourceClick?.(resource.id)}
                   type="button"
                 >
-                  <div className="mb-1 flex items-center justify-between">
-                    <span className="font-medium text-sm text-stone-700 dark:text-stone-300">
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <span className="font-medium text-sm text-stone-700 transition-colors group-hover:text-amber-600 dark:text-stone-300 dark:group-hover:text-amber-400 3xl:text-base">
                       {resource.name}
                     </span>
-                    <span className="font-bold font-mono text-sm text-stone-900 dark:text-stone-100">
+                    <span className="font-bold font-mono text-sm text-stone-900 dark:text-stone-100 3xl:text-base">
                       {Math.round(resource.rate)}%
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
+                  <div className="h-2.5 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800 3xl:h-3.5">
                     <div
-                      className={`h-full rounded-full transition-all ${barColor}`}
+                      className={`h-full rounded-full transition-all duration-500 ${barColor}`}
                       style={{ width: `${resource.rate}%` }}
                     />
                   </div>
@@ -114,11 +114,11 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
           </div>
         </div>
 
-        <div className="rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900">
-          <h3 className="mb-4 font-semibold text-stone-900 dark:text-stone-100">
+        <div className="rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900 3xl:p-8">
+          <h3 className="mb-4 font-semibold text-stone-900 3xl:text-xl dark:text-stone-100">
             {t("peakHours")}
           </h3>
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {utilizationData.peakHours.map((hour) => {
               let barColor = "bg-emerald-300";
               if (hour.occupancy >= 80) {
@@ -131,38 +131,38 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
 
               return (
                 <div className="flex items-center gap-3" key={hour.hour}>
-                  <span className="w-12 text-right text-stone-500 text-xs dark:text-stone-400">
-                    {hour.hour}:00
+                  <span className="w-14 text-right font-mono text-stone-500 text-xs 3xl:w-16 3xl:text-sm dark:text-stone-400">
+                    {hour.hour.toString().padStart(2, "0")}:00
                   </span>
-                  <div className="h-6 flex-1 overflow-hidden rounded bg-stone-100 dark:bg-stone-800">
+                  <div className="h-6 flex-1 overflow-hidden rounded bg-stone-100 dark:bg-stone-800 3xl:h-8">
                     <div
-                      className={`h-full rounded transition-all ${barColor}`}
+                      className={`h-full rounded transition-all duration-500 ${barColor}`}
                       style={{ width: `${hour.occupancy}%` }}
                     />
                   </div>
-                  <span className="w-10 font-medium text-stone-600 text-xs dark:text-stone-400">
-                    {hour.occupancy}%
+                  <span className="w-10 font-bold font-mono text-stone-600 text-xs 3xl:w-12 3xl:text-sm dark:text-stone-400">
+                    {Math.round(hour.occupancy)}%
                   </span>
                 </div>
               );
             })}
           </div>
-          <div className="mt-4 flex gap-4 border-stone-100 border-t pt-4 dark:border-stone-800">
+          <div className="mt-6 flex flex-wrap gap-4 border-stone-100 border-t pt-4 dark:border-stone-800">
             <div className="flex items-center gap-1.5">
-              <div className="h-3 w-3 rounded bg-emerald-300" />
-              <span className="text-stone-500 text-xs">{t("low")}</span>
+              <div className="h-3 w-3 rounded bg-emerald-300 3xl:h-4 3xl:w-4" />
+              <span className="text-stone-500 text-xs 3xl:text-sm">{t("low")}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="h-3 w-3 rounded bg-emerald-500" />
-              <span className="text-stone-500 text-xs">{t("medium")}</span>
+              <div className="h-3 w-3 rounded bg-emerald-500 3xl:h-4 3xl:w-4" />
+              <span className="text-stone-500 text-xs 3xl:text-sm">{t("medium")}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="h-3 w-3 rounded bg-amber-500" />
-              <span className="text-stone-500 text-xs">{t("high")}</span>
+              <div className="h-3 w-3 rounded bg-amber-500 3xl:h-4 3xl:w-4" />
+              <span className="text-stone-500 text-xs 3xl:text-sm">{t("high")}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="h-3 w-3 rounded bg-red-500" />
-              <span className="text-stone-500 text-xs">{t("peak")}</span>
+              <div className="h-3 w-3 rounded bg-red-500 3xl:h-4 3xl:w-4" />
+              <span className="text-stone-500 text-xs 3xl:text-sm">{t("peak")}</span>
             </div>
           </div>
         </div>

@@ -42,21 +42,29 @@ export function MetricCard({
 
   return (
     <button
-      className={`w-full rounded-xl border p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] ${styles.container} ${onClick ? "cursor-pointer" : "cursor-default"} ${isRTL ? "text-right" : "text-left"}`}
+      className={`w-full rounded-xl border p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] 3xl:p-6 ${styles.container} ${onClick ? "cursor-pointer" : "cursor-default"} ${isRTL ? "text-right" : "text-left"}`}
       onClick={onClick}
       type="button"
     >
       <div className="flex items-start justify-between gap-3">
         <div className={`min-w-0 flex-1 ${isRTL ? "text-right" : "text-left"}`}>
-          <p className="font-medium text-stone-500 text-xs uppercase tracking-wide dark:text-stone-400">
+          <p className="font-bold text-[10px] text-stone-500 uppercase tracking-[0.15em] dark:text-stone-400 3xl:text-xs">
             {title}
           </p>
-          <p className={`mt-1 font-bold text-2xl ${styles.value}`}>{value}</p>
+          <p className={`mt-1 font-black text-2xl lg:text-3xl ${styles.value} 3xl:text-4xl`}>
+            {value}
+          </p>
           {subtitle && (
-            <p className="mt-1 truncate text-stone-500 text-xs dark:text-stone-400">{subtitle}</p>
+            <p className="mt-1.5 truncate font-medium text-stone-500 text-xs dark:text-stone-400 3xl:text-sm">
+              {subtitle}
+            </p>
           )}
         </div>
-        {icon && <div className={`flex-shrink-0 rounded-lg p-2 ${styles.icon}`}>{icon}</div>}
+        {icon && (
+          <div className={`flex-shrink-0 rounded-xl p-2.5 3xl:p-3.5 ${styles.icon}`}>
+            {icon}
+          </div>
+        )}
       </div>
     </button>
   );

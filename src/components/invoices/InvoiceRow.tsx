@@ -39,39 +39,57 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
   const formatCurrency = (amount: number) => `${amount.toLocaleString()} ${t("egpCurrency")}`;
 
   return (
-    <div className="grid grid-cols-1 gap-2 px-4 py-3 text-start transition-colors hover:bg-stone-50 md:grid-cols-12 md:gap-4 dark:hover:bg-stone-800/50">
-      <div className="col-span-1 flex items-center md:col-span-2">
-        <span className="font-medium font-mono text-sm text-stone-500 uppercase tracking-tight dark:text-stone-400">
-          {invoice.invoiceNumber}
-        </span>
-      </div>
-
-      <div className="col-span-1 flex items-center md:col-span-3">
-        <div className="text-start">
-          <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
-            {invoice.customerName}
-          </p>
-          <p className="text-stone-500 text-xs dark:text-stone-400">{invoice.customerPhone}</p>
+    <div className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-stone-50 md:grid md:grid-cols-12 md:gap-4 dark:hover:bg-stone-800/50">
+      {/* Invoice info & Customer */}
+      <div className="flex items-start justify-between md:col-span-5 md:items-center">
+        <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-4">
+          <span className="font-bold font-mono text-stone-500 text-xs uppercase tracking-tight md:w-20 dark:text-stone-400">
+            {invoice.invoiceNumber}
+          </span>
+          <div className="text-start">
+            <p className="font-semibold text-sm text-stone-900 dark:text-stone-100">
+              {invoice.customerName}
+            </p>
+            <p className="font-mono text-stone-400 text-xs dark:text-stone-500">
+              {invoice.customerPhone}
+            </p>
+          </div>
+        </div>
+        <div className="md:hidden">
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-0.5 font-bold text-[10px] uppercase tracking-wide",
+              config.bg,
+              config.color
+            )}
+          >
+            {t(invoice.status)}
+          </span>
         </div>
       </div>
 
-      <div className="col-span-1 flex items-center md:col-span-2 md:justify-center">
-        <div className="text-start md:text-center">
-          <p className="font-medium font-mono text-sm text-stone-900 dark:text-stone-100">
+      {/* Amount info */}
+      <div className="flex items-center justify-between border-stone-100 border-t pt-3 md:col-span-2 md:justify-center md:border-0 md:pt-0">
+        <span className="text-stone-400 text-[10px] uppercase tracking-widest md:hidden">
+          {t("amount")}
+        </span>
+        <div className="text-end md:text-center">
+          <p className="font-black font-mono text-sm text-stone-900 dark:text-stone-100">
             {formatCurrency(invoice.total)}
           </p>
           {invoice.status === "unpaid" && invoice.paidAmount > 0 && (
-            <p className="font-medium font-mono text-amber-600 text-xs uppercase dark:text-amber-400">
+            <p className="font-bold font-mono text-amber-600 text-[10px] uppercase dark:text-amber-400">
               {formatCurrency(invoice.total - invoice.paidAmount)} {t("remaining")}
             </p>
           )}
         </div>
       </div>
 
-      <div className="col-span-1 flex items-center md:col-span-2">
+      {/* Status (Desktop only) */}
+      <div className="hidden items-center md:col-span-2 md:flex md:justify-center">
         <span
           className={cn(
-            "rounded-full px-2.5 py-1 font-medium text-xs uppercase tracking-wider",
+            "rounded-full px-2.5 py-1 font-bold text-[10px] uppercase tracking-wider",
             config.bg,
             config.color
           )}
@@ -80,29 +98,36 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
         </span>
       </div>
 
-      <div className="col-span-1 flex items-center md:col-span-1">
-        <span className="font-medium text-sm text-stone-600 dark:text-stone-400">
+      {/* Due Date */}
+      <div className="flex items-center justify-between md:col-span-1 md:justify-center">
+        <span className="text-stone-400 text-[10px] uppercase tracking-widest md:hidden">
+          {t("dueDate")}
+        </span>
+        <span className="font-medium text-stone-600 text-xs dark:text-stone-400">
           {formatDate(invoice.dueDate)}
         </span>
       </div>
 
-      <div className="col-span-1 flex items-center justify-end gap-1 md:col-span-2">
+      {/* Actions */}
+      <div className="flex items-center justify-end gap-2 md:col-span-2">
         <button
-          className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-stone-100 p-2 text-stone-600 transition-colors hover:bg-stone-200 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-stone-700 dark:bg-stone-800 dark:text-stone-400 md:dark:bg-transparent md:dark:hover:text-stone-300"
           onClick={onView}
           title={t("viewInvoice")}
           type="button"
         >
           <Eye className="h-4 w-4" />
+          <span className="font-medium text-[10px] uppercase md:hidden">{t("view")}</span>
         </button>
         {invoice.status !== "paid" && invoice.status !== "cancelled" && (
           <button
-            className="rounded-lg p-2 text-emerald-600 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
+            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-50 p-2 text-emerald-600 transition-colors hover:bg-emerald-100 md:flex-none md:bg-transparent md:text-emerald-500 md:hover:text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 md:dark:bg-transparent"
             onClick={onRecordPayment}
             title={t("recordPayment")}
             type="button"
           >
             <CreditCard className="h-4 w-4" />
+            <span className="font-medium text-[10px] uppercase md:hidden">{t("payNow")}</span>
           </button>
         )}
       </div>

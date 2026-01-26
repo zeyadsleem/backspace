@@ -57,46 +57,60 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
   };
 
   return (
-    <div className="grid grid-cols-1 gap-2 px-4 py-3 transition-colors hover:bg-stone-50 md:grid-cols-12 md:gap-4 dark:hover:bg-stone-800/50">
-      <div className="col-span-1 hidden items-center md:flex">
-        <span className="font-mono text-sm text-stone-500 uppercase tracking-tight dark:text-stone-400">
-          {customer.humanId}
-        </span>
-      </div>
-      <div className="col-span-1 flex items-center gap-3 md:col-span-3">
+    <div className="flex flex-col gap-4 p-4 transition-colors hover:bg-stone-50 md:grid md:grid-cols-12 md:gap-4 dark:hover:bg-stone-800/50">
+      {/* Name and ID section */}
+      <div className="flex items-center gap-3 md:col-span-4">
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
           <span className="font-semibold text-amber-700 text-sm dark:text-amber-300">
             {initials}
           </span>
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <p className="truncate font-medium text-sm text-stone-900 dark:text-stone-100">
+            <p className="truncate font-semibold text-sm text-stone-900 dark:text-stone-100">
               {customer.name}
             </p>
-            <span className="font-mono text-stone-400 text-xs md:hidden">{customer.humanId}</span>
+            <span className="font-mono text-stone-400 text-[10px] uppercase tracking-tight">
+              {customer.humanId}
+            </span>
           </div>
           {customer.email && (
             <p className="truncate text-stone-500 text-xs dark:text-stone-400">{customer.email}</p>
           )}
+          <div className="mt-1 md:hidden">
+            <span
+              className={`rounded-full px-2 py-0.5 font-bold text-[10px] uppercase tracking-wide ${config.bg} ${config.color}`}
+            >
+              {t(config.labelKey)}
+            </span>
+          </div>
         </div>
       </div>
-      <div className="col-span-1 flex items-center md:col-span-2">
-        <span className="font-mono text-sm text-stone-600 dark:text-stone-400">
+
+      {/* Phone section */}
+      <div className="flex items-center gap-2 md:col-span-2">
+        <span className="font-mono text-stone-600 text-sm md:text-stone-500 dark:text-stone-400">
           {customer.phone}
         </span>
       </div>
-      <div className="col-span-1 flex items-center md:col-span-2">
+
+      {/* Type section (desktop only) */}
+      <div className="hidden items-center md:col-span-2 md:flex">
         <span
           className={`rounded-full px-2.5 py-1 font-medium text-xs ${config.bg} ${config.color}`}
         >
           {t(config.labelKey)}
         </span>
       </div>
-      <div className="col-span-1 flex items-center md:col-span-2 md:justify-center">
+
+      {/* Balance section */}
+      <div className="flex items-center justify-between border-stone-100 border-t pt-3 md:col-span-2 md:justify-center md:border-0 md:pt-0">
+        <span className="text-stone-400 text-xs uppercase tracking-widest md:hidden">
+          {t("balance")}
+        </span>
         <span
           className={cn(
-            "font-medium text-sm",
+            "font-bold text-sm",
             customer.balance < 0 && "text-red-600 dark:text-red-400",
             customer.balance > 0 && "text-emerald-600 dark:text-emerald-400",
             customer.balance === 0 && "text-stone-500 dark:text-stone-400"
@@ -105,30 +119,35 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
           {formatBalance(customer.balance)}
         </span>
       </div>
-      <div className="col-span-1 flex items-center justify-end gap-1 md:col-span-2">
+
+      {/* Actions section */}
+      <div className="flex items-center justify-end gap-2 md:col-span-2">
         <button
-          className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+          className="flex flex-1 items-center justify-center rounded-lg bg-stone-100 p-2 text-stone-600 transition-colors hover:bg-stone-200 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-stone-700 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700 md:dark:bg-transparent md:dark:hover:text-stone-300"
           onClick={onView}
           title={t("view")}
           type="button"
         >
           <Eye className="h-4 w-4" />
+          <span className="ml-2 font-medium text-xs md:hidden">{t("view")}</span>
         </button>
         <button
-          className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+          className="flex flex-1 items-center justify-center rounded-lg bg-stone-100 p-2 text-stone-600 transition-colors hover:bg-amber-100 hover:text-amber-700 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-amber-600 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-amber-900/20 md:dark:bg-transparent"
           onClick={onEdit}
           title={t("edit")}
           type="button"
         >
           <Pencil className="h-4 w-4" />
+          <span className="ml-2 font-medium text-xs md:hidden">{t("edit")}</span>
         </button>
         <button
-          className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+          className="flex flex-1 items-center justify-center rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-red-600 dark:bg-red-900/10 dark:text-red-400 dark:hover:bg-red-900/20 md:dark:bg-transparent"
           onClick={onDelete}
           title={t("delete")}
           type="button"
         >
           <Trash2 className="h-4 w-4" />
+          <span className="ml-2 font-medium text-xs md:hidden">{t("delete")}</span>
         </button>
       </div>
     </div>

@@ -39,6 +39,7 @@ export function AppShell({
         <button
           className="rounded-md p-2 hover:bg-stone-100 dark:hover:bg-stone-800"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          type="button"
         >
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
@@ -50,6 +51,9 @@ export function AppShell({
         <div
           className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
           onClick={() => setMobileMenuOpen(false)}
+          onKeyDown={(e) => e.key === "Enter" && setMobileMenuOpen(false)}
+          role="button"
+          tabIndex={0}
         />
       )}
 
@@ -72,7 +76,7 @@ export function AppShell({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4">
+        <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-stone-200 dark:scrollbar-thumb-stone-800">
           <MainNav
             collapsed={sidebarCollapsed}
             items={navigationItems}
@@ -100,6 +104,7 @@ export function AppShell({
           className={`absolute top-1/2 hidden h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full border border-stone-200 bg-white transition-colors hover:bg-stone-100 lg:flex dark:border-stone-800 dark:bg-stone-900 dark:hover:bg-stone-800 ${isRTL ? "-left-3" : "-right-3"}
           `}
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          type="button"
         >
           {sidebarCollapsed ? (
             isRTL ? (
@@ -120,7 +125,9 @@ export function AppShell({
         className={`flex h-screen flex-col pt-14 transition-all duration-300 lg:pt-0 ${isRTL ? (sidebarCollapsed ? "lg:mr-16" : "lg:mr-60") : sidebarCollapsed ? "lg:ml-16" : "lg:ml-60"}
         `}
       >
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
+        <div className="mx-auto flex w-full max-w-[2560px] min-h-0 flex-1 flex-col overflow-hidden">
+          {children}
+        </div>
       </main>
     </div>
   );
