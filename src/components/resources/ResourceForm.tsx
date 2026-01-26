@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DollarSign, Monitor } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { FormError, FormField, FormInput, FormLabel, FormSelect } from "@/components/ui/form";
+import { FormActions, SelectField, TextField } from "@/components/ui/form";
 import { type ResourceFormData, resourceSchema } from "@/lib/validations";
 import { useAppStore } from "@/stores/useAppStore";
 import type { ResourceType } from "@/types";
@@ -25,7 +25,6 @@ export function ResourceForm({
   isLoading = false,
 }: ResourceFormProps) {
   const t = useAppStore((state) => state.t);
-  const isRTL = useAppStore((state) => state.isRTL);
 
   const {
     register,
@@ -59,67 +58,55 @@ export function ResourceForm({
 
   const isEditing = !!initialData;
 
+  const resourceTypeOptions = Object.entries(resourceTypeLabels).map(([type, label]) => ({
+    value: type,
+    label,
+  }));
+
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onFormSubmit)}>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Name Field */}
-        <FormField>
-          <FormLabel htmlFor="name" icon={<Monitor className="h-4 w-4" />} required>
-            {t("resourceName") || "Resource Name"}
-          </FormLabel>
-          <FormInput
-            id="name"
-            type="text"
-            {...register("name")}
-            disabled={isLoading}
-            error={!!errors.name}
-            isRTL={isRTL}
-            placeholder="Enter resource name"
-          />
-          <FormError>{errors.name?.message}</FormError>
-        </FormField>
+        <TextField
+          disabled={isLoading}
+          error={errors.name?.message}
+          icon={<Monitor className="h-4 w-4" />}
+          id="name"
+          label={t("resourceName") || "Resource Name"}
+          placeholder="Enter resource name"
+          required
+          {...register("name")}
+        />
 
         {/* Rate Per Hour Field */}
-        <FormField>
-          <FormLabel htmlFor="ratePerHour" icon={<DollarSign className="h-4 w-4" />} required>
-            {t("ratePerHour") || `Rate (${t("egp")}/hr)`}
-          </FormLabel>
-          <FormInput
-            id="ratePerHour"
-            min="0"
-            step="any"
-            type="number"
-            {...register("ratePerHour", { valueAsNumber: true })}
-            disabled={isLoading}
-            error={!!errors.ratePerHour}
-            placeholder="0.00"
-          />
-          <FormError>{errors.ratePerHour?.message}</FormError>
-        </FormField>
+        <TextField
+          disabled={isLoading}
+          error={errors.ratePerHour?.message}
+          icon={<DollarSign className="h-4 w-4" />}
+          id="ratePerHour"
+          label={t("ratePerHour") || `Rate (${t("egp")}/hr)`}
+          min="0"
+          placeholder="0.00"
+          required
+          step="any"
+          type="number"
+          {...register("ratePerHour", { valueAsNumber: true })}
+        />
       </div>
 
       {/* Resource Type Field - Full Width */}
-      <FormField>
-        <FormLabel htmlFor="resourceType" required>
-          {t("resourceType") || "Resource Type"}
-        </FormLabel>
-        <FormSelect
-          id="resourceType"
-          {...register("resourceType")}
-          disabled={isLoading}
-          error={!!errors.resourceType}
-        >
-          {Object.entries(resourceTypeLabels).map(([type, label]) => (
-            <option key={type} value={type}>
-              {label}
-            </option>
-          ))}
-        </FormSelect>
-        <FormError>{errors.resourceType?.message}</FormError>
-      </FormField>
+      <SelectField
+        disabled={isLoading}
+        error={errors.resourceType?.message}
+        id="resourceType"
+        label={t("resourceType") || "Resource Type"}
+        options={resourceTypeOptions}
+        required
+        {...register("resourceType")}
+      />
 
       {/* Action Buttons */}
-      <div className="flex gap-3 border-stone-100 border-t pt-4 dark:border-stone-800">
+      <FormActions>
         <Button disabled={isLoading} onClick={handleReset} type="button" variant="outline">
           {t("cancel")}
         </Button>
@@ -134,7 +121,7 @@ export function ResourceForm({
             ? t("updateResource") || "Update Resource"
             : t("createResource") || "Create Resource"}
         </Button>
-      </div>
+      </FormActions>
     </form>
   );
 }

@@ -141,7 +141,6 @@ export function InventoryAddModal({
                 </div>
                 <FormInput
                   className={`h-10 border-stone-200 bg-stone-50 text-sm dark:border-stone-700 dark:bg-stone-800 ${isRTL ? "pr-10" : "pl-10"}`}
-                  isRTL={isRTL}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t("searchInventory")}
                   type="text"

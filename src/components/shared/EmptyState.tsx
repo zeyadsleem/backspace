@@ -1,6 +1,18 @@
-import { Clock, CreditCard, FileText, Inbox, Monitor, Package, Search, Users } from "lucide-react";
+import {
+  Clock,
+  CreditCard,
+  FileText,
+  Inbox,
+  Monitor,
+  Package,
+  Plus,
+  Search,
+  Users,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-type EmptyStateIcon =
+export type EmptyStateIcon =
   | "users"
   | "resources"
   | "sessions"
@@ -10,12 +22,14 @@ type EmptyStateIcon =
   | "search"
   | "default";
 
-interface EmptyStateProps {
+export interface EmptyStateProps {
   icon?: EmptyStateIcon;
   title: string;
   description?: string;
   actionText?: string;
+  actionIcon?: React.ReactNode;
   onAction?: () => void;
+  className?: string;
 }
 
 const iconMap: Record<EmptyStateIcon, React.ComponentType<{ className?: string }>> = {
@@ -34,12 +48,14 @@ export function EmptyState({
   title,
   description,
   actionText,
+  actionIcon = <Plus className="h-4 w-4" />,
   onAction,
+  className,
 }: EmptyStateProps) {
   const IconComponent = iconMap[icon];
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
+    <div className={cn("flex flex-col items-center justify-center py-12 text-center", className)}>
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-stone-100 dark:bg-stone-800">
         <IconComponent className="h-8 w-8 text-stone-400 dark:text-stone-500" />
       </div>
@@ -48,13 +64,10 @@ export function EmptyState({
         <p className="mt-2 max-w-sm text-sm text-stone-600 dark:text-stone-400">{description}</p>
       )}
       {actionText && onAction && (
-        <button
-          className="mt-6 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
-          onClick={onAction}
-          type="button"
-        >
+        <Button className="mt-6" onClick={onAction} size="md" variant="primary">
+          {actionIcon}
           {actionText}
-        </button>
+        </Button>
       )}
     </div>
   );

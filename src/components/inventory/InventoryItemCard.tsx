@@ -9,6 +9,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { IconButton } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { CategoryOption, InventoryItem } from "@/types";
 
@@ -69,20 +70,20 @@ export function InventoryItemCard({
         </div>
 
         <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-          <button
-            className="rounded-lg p-1.5 text-stone-400 transition-colors hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/20"
+          <IconButton
+            className="text-stone-400 hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/20"
+            icon={<Pencil className="h-4 w-4" />}
+            label="Edit"
             onClick={onEdit}
-            type="button"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-          <button
-            className="rounded-lg p-1.5 text-stone-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+            variant="ghost"
+          />
+          <IconButton
+            className="text-stone-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+            icon={<Trash2 className="h-4 w-4" />}
+            label="Delete"
             onClick={onDelete}
-            type="button"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+            variant="ghost"
+          />
         </div>
       </div>
 
@@ -121,21 +122,21 @@ export function InventoryItemCard({
 
         {/* Quick Actions */}
         <div className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white p-1 shadow-sm dark:border-stone-700 dark:bg-stone-800">
-          <button
-            className="flex h-7 w-7 items-center justify-center rounded bg-stone-100 text-stone-600 transition-colors hover:bg-red-100 hover:text-red-600 disabled:opacity-30 dark:bg-stone-700 dark:text-stone-300"
+          <IconButton
+            className="h-7 w-7 bg-stone-100 text-stone-600 hover:bg-red-100 hover:text-red-600 dark:bg-stone-700 dark:text-stone-300"
             disabled={item.quantity <= 0}
+            icon={<Minus className="h-4 w-4" />}
+            label="Decrease quantity"
             onClick={() => onAdjustQuantity?.(-1)}
-            type="button"
-          >
-            <Minus className="h-4 w-4" />
-          </button>
-          <button
-            className="flex h-7 w-7 items-center justify-center rounded bg-stone-100 text-stone-600 transition-colors hover:bg-emerald-100 hover:text-emerald-600 dark:bg-stone-700 dark:text-stone-300"
+            variant="ghost"
+          />
+          <IconButton
+            className="h-7 w-7 bg-stone-100 text-stone-600 hover:bg-emerald-100 hover:text-emerald-600 dark:bg-stone-700 dark:text-stone-300"
+            icon={<Plus className="h-4 w-4" />}
+            label="Increase quantity"
             onClick={() => onAdjustQuantity?.(1)}
-            type="button"
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+            variant="ghost"
+          />
         </div>
       </div>
     </div>

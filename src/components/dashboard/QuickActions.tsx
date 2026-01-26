@@ -1,4 +1,5 @@
 import { Play, UserPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 
 interface QuickActionsProps {
@@ -12,22 +13,14 @@ export function QuickActions({ onNewCustomer, onStartSession }: QuickActionsProp
 
   return (
     <div className={`flex flex-wrap gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-      <button
-        className="inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-4 py-2.5 font-medium text-sm text-stone-700 shadow-sm transition-all hover:border-stone-300 hover:bg-stone-50 hover:shadow dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300 dark:hover:border-stone-600 dark:hover:bg-stone-800"
-        onClick={onNewCustomer}
-        type="button"
-      >
+      <Button onClick={onNewCustomer} size="md" variant="outline">
         <UserPlus className="h-4 w-4" />
         {t("newCustomer")}
-      </button>
-      <button
-        className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 font-medium text-sm text-white shadow-sm transition-all hover:bg-amber-600 hover:shadow-md"
-        onClick={onStartSession}
-        type="button"
-      >
+      </Button>
+      <Button onClick={onStartSession} size="md" variant="primary">
         <Play className="h-4 w-4" />
         {t("startSession")}
-      </button>
+      </Button>
     </div>
   );
 }

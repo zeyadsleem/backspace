@@ -1,4 +1,5 @@
 import { CheckCircle, X } from "lucide-react";
+import { Button, IconButton } from "@/components/ui/button";
 
 interface SuccessDialogProps {
   isOpen: boolean;
@@ -29,13 +30,13 @@ export function SuccessDialog({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-stone-900">
-        <button
-          className="absolute top-4 right-4 rounded-lg p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+        <IconButton
+          className="absolute end-4 top-4"
+          icon={<X className="h-5 w-5" />}
+          label="Close"
           onClick={onClose}
-          type="button"
-        >
-          <X className="h-5 w-5" />
-        </button>
+          variant="ghost"
+        />
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
           <CheckCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
         </div>
@@ -47,21 +48,13 @@ export function SuccessDialog({
         </div>
         <div className="mt-6 flex gap-3">
           {secondaryActionText && onSecondaryAction && (
-            <button
-              className="flex-1 rounded-lg border border-stone-300 bg-white px-4 py-2 font-medium text-sm text-stone-700 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
-              onClick={onSecondaryAction}
-              type="button"
-            >
+            <Button className="flex-1" onClick={onSecondaryAction} size="md" variant="outline">
               {secondaryActionText}
-            </button>
+            </Button>
           )}
-          <button
-            className="flex-1 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
-            onClick={onPrimaryAction}
-            type="button"
-          >
+          <Button className="flex-1" onClick={onPrimaryAction} size="md" variant="primary">
             {primaryActionText}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

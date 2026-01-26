@@ -437,6 +437,7 @@ export const translations = {
     currentRevenue: "Current Revenue",
     pricingControl: "Pricing Control Center",
     manageAllPrices: "Centralized pricing for all services",
+    busyNow: "Busy Now",
   },
   ar: {
     // Navigation
@@ -878,6 +879,7 @@ export const translations = {
     currentRevenue: "الإيرادات الحالية",
     pricingControl: "مركز التحكم في الأسعار",
     manageAllPrices: "تسعير مركزي لجميع الخدمات",
+    busyNow: "مشغول حالياً",
   },
 } as const;
 

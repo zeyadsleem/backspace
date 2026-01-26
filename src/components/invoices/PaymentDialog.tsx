@@ -2,7 +2,7 @@ import { CreditCard, Receipt, Wallet } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Modal } from "@/components/shared";
 import { Button } from "@/components/ui/button";
-import { FormError, FormField, FormInput, FormLabel } from "@/components/ui/form";
+import { FormError, FormField, FormLabel, TextField } from "@/components/ui/form";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Invoice, PaymentMethod } from "@/types";
 
@@ -150,14 +150,13 @@ export function PaymentDialog({
             <FormError>{errors.amount}</FormError>
           </FormField>
 
-          <FormField>
-            <FormLabel>{t("paymentDate")}</FormLabel>
-            <FormInput
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              type="date"
-              value={formData.date}
-            />
-          </FormField>
+          <TextField
+            id="paymentDate"
+            label={t("paymentDate")}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+            type="date"
+            value={formData.date}
+          />
         </div>
 
         <div className="flex gap-3 pt-2">

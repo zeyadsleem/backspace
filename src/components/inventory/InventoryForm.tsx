@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { DollarSign, Hash, Package } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { FormError, FormField, FormInput, FormLabel, FormSelect } from "@/components/ui/form";
+import { FormActions, SelectField, TextField } from "@/components/ui/form";
 import { type InventoryFormData, inventorySchema } from "@/lib/validations";
 import { useAppStore } from "@/stores/useAppStore";
 import type { InventoryCategory } from "@/types";
@@ -34,7 +34,6 @@ export function InventoryForm({
 }: InventoryFormProps) {
   const t = useAppStore((state) => state.t);
   const language = useAppStore((state) => state.language);
-  const isRTL = useAppStore((state) => state.isRTL);
 
   const {
     register,
@@ -64,101 +63,83 @@ export function InventoryForm({
 
   const isEditing = !!initialData;
 
+  const categoryOptions = categories.map((category) => ({
+    value: category.id,
+    label: language === "ar" ? category.labelAr : category.labelEn,
+  }));
+
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onFormSubmit)}>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Name Field */}
-        <FormField>
-          <FormLabel htmlFor="name" icon={<Package className="h-4 w-4" />} required>
-            {t("itemName") || "Item Name"}
-          </FormLabel>
-          <FormInput
-            id="name"
-            type="text"
-            {...register("name")}
-            disabled={isLoading}
-            error={!!errors.name}
-            isRTL={isRTL}
-            placeholder={t("inventoryExample") || "Enter item name"}
-          />
-          <FormError>{errors.name?.message}</FormError>
-        </FormField>
+        <TextField
+          disabled={isLoading}
+          error={errors.name?.message}
+          icon={<Package className="h-4 w-4" />}
+          id="name"
+          label={t("itemName") || "Item Name"}
+          placeholder={t("inventoryExample") || "Enter item name"}
+          required
+          {...register("name")}
+        />
 
         {/* Price Field */}
-        <FormField>
-          <FormLabel htmlFor="price" icon={<DollarSign className="h-4 w-4" />} required>
-            {t("price") || `Price (${t("egp")})`}
-          </FormLabel>
-          <FormInput
-            id="price"
-            min="0"
-            step="any"
-            type="number"
-            {...register("price", { valueAsNumber: true })}
-            disabled={isLoading}
-            error={!!errors.price}
-            placeholder="0.00"
-          />
-          <FormError>{errors.price?.message}</FormError>
-        </FormField>
+        <TextField
+          disabled={isLoading}
+          error={errors.price?.message}
+          icon={<DollarSign className="h-4 w-4" />}
+          id="price"
+          label={t("price") || `Price (${t("egp")})`}
+          min="0"
+          placeholder="0.00"
+          required
+          step="any"
+          type="number"
+          {...register("price", { valueAsNumber: true })}
+        />
 
         {/* Quantity Field */}
-        <FormField>
-          <FormLabel htmlFor="quantity" icon={<Hash className="h-4 w-4" />} required>
-            {t("quantity") || "Quantity"}
-          </FormLabel>
-          <FormInput
-            id="quantity"
-            min="0"
-            type="number"
-            {...register("quantity", { valueAsNumber: true })}
-            disabled={isLoading}
-            error={!!errors.quantity}
-            placeholder="0"
-          />
-          <FormError>{errors.quantity?.message}</FormError>
-        </FormField>
+        <TextField
+          disabled={isLoading}
+          error={errors.quantity?.message}
+          icon={<Hash className="h-4 w-4" />}
+          id="quantity"
+          label={t("quantity") || "Quantity"}
+          min="0"
+          placeholder="0"
+          required
+          type="number"
+          {...register("quantity", { valueAsNumber: true })}
+        />
 
         {/* Min Stock Field */}
-        <FormField>
-          <FormLabel htmlFor="minStock" icon={<Hash className="h-4 w-4" />} required>
-            {t("minStock") || "Minimum Stock"}
-          </FormLabel>
-          <FormInput
-            id="minStock"
-            min="0"
-            type="number"
-            {...register("minStock", { valueAsNumber: true })}
-            disabled={isLoading}
-            error={!!errors.minStock}
-            placeholder="5"
-          />
-          <FormError>{errors.minStock?.message}</FormError>
-        </FormField>
+        <TextField
+          disabled={isLoading}
+          error={errors.minStock?.message}
+          icon={<Hash className="h-4 w-4" />}
+          id="minStock"
+          label={t("minStock") || "Minimum Stock"}
+          min="0"
+          placeholder="5"
+          required
+          type="number"
+          {...register("minStock", { valueAsNumber: true })}
+        />
       </div>
 
       {/* Category Field - Full Width */}
-      <FormField>
-        <FormLabel htmlFor="category" required>
-          {t("category") || "Category"}
-        </FormLabel>
-        <FormSelect
-          id="category"
-          {...register("category")}
-          disabled={isLoading}
-          error={!!errors.category}
-        >
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {language === "ar" ? category.labelAr : category.labelEn}
-            </option>
-          ))}
-        </FormSelect>
-        <FormError>{errors.category?.message}</FormError>
-      </FormField>
+      <SelectField
+        disabled={isLoading}
+        error={errors.category?.message}
+        id="category"
+        label={t("category") || "Category"}
+        options={categoryOptions}
+        required
+        {...register("category")}
+      />
 
       {/* Action Buttons */}
-      <div className="flex gap-3 border-stone-100 border-t pt-4 dark:border-stone-800">
+      <FormActions>
         <Button disabled={isLoading} onClick={handleReset} type="button" variant="outline">
           {t("cancel")}
         </Button>
@@ -171,7 +152,7 @@ export function InventoryForm({
         >
           {isEditing ? t("updateItem") : t("newItem")}
         </Button>
-      </div>
+      </FormActions>
     </form>
   );
 }
