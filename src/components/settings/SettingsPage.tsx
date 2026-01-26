@@ -45,25 +45,25 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
   };
 
   return (
-    <div className="flex h-full flex-col gap-6 overflow-hidden p-4 sm:p-6 3xl:gap-8 3xl:p-8">
+    <div className="flex h-full flex-col 3xl:gap-8 gap-6 overflow-hidden 3xl:p-8 p-4 sm:p-6">
       <div className="shrink-0">
-        <h1 className="font-bold text-2xl tracking-tight text-stone-900 lg:text-3xl dark:text-stone-100">
+        <h1 className="font-bold text-2xl text-stone-900 tracking-tight lg:text-3xl dark:text-stone-100">
           {t("settings")}
         </h1>
         <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">{t("manageSettings")}</p>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-3 3xl:gap-8">
+      <div className="grid min-h-0 flex-1 grid-cols-1 3xl:gap-8 gap-6 lg:grid-cols-3">
         {/* Scrollable Main Content */}
-        <section className="space-y-6 overflow-y-auto scrollbar-thin lg:col-span-2 3xl:space-y-8">
+        <section className="scrollbar-thin 3xl:space-y-8 space-y-6 overflow-y-auto lg:col-span-2">
           {/* Company Info */}
-          <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-800 dark:bg-stone-900 3xl:p-10">
+          <div className="rounded-xl border border-stone-200 bg-white 3xl:p-10 p-6 shadow-sm dark:border-stone-800 dark:bg-stone-900">
             <div className="mb-6 flex items-center gap-3">
               <div className="rounded-lg bg-amber-100 p-2 dark:bg-amber-900/30">
                 <Building2 className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <h2 className="font-semibold text-stone-900 dark:text-stone-100 3xl:text-xl">
+                <h2 className="font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100">
                   {t("companyInfo")}
                 </h2>
                 <p className="text-stone-500 text-xs dark:text-stone-400">
@@ -71,46 +71,46 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 3xl:gap-6">
+            <div className="grid grid-cols-1 3xl:gap-6 gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block font-medium text-sm text-stone-700 dark:text-stone-300 3xl:text-base">
+                <label className="mb-1.5 block font-medium 3xl:text-base text-sm text-stone-700 dark:text-stone-300">
                   {t("companyName")}
                 </label>
                 <input
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 3xl:py-3 3xl:text-base"
+                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 3xl:py-3 py-2 3xl:text-base text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800"
                   defaultValue={settings.company.name}
                   onBlur={(e) => handleCompanyUpdate("name", e.target.value)}
                   type="text"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block font-medium text-sm text-stone-700 dark:text-stone-300 3xl:text-base">
+                <label className="mb-1.5 block font-medium 3xl:text-base text-sm text-stone-700 dark:text-stone-300">
                   {t("email")}
                 </label>
                 <input
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 3xl:py-3 3xl:text-base"
+                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 3xl:py-3 py-2 3xl:text-base text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800"
                   defaultValue={settings.company.email}
                   onBlur={(e) => handleCompanyUpdate("email", e.target.value)}
                   type="email"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block font-medium text-sm text-stone-700 dark:text-stone-300 3xl:text-base">
+                <label className="mb-1.5 block font-medium 3xl:text-base text-sm text-stone-700 dark:text-stone-300">
                   {t("phone")}
                 </label>
                 <input
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 3xl:py-3 3xl:text-base"
+                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 3xl:py-3 py-2 3xl:text-base text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800"
                   defaultValue={settings.company.phone}
                   onBlur={(e) => handleCompanyUpdate("phone", e.target.value)}
                   type="tel"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block font-medium text-sm text-stone-700 dark:text-stone-300 3xl:text-base">
+                <label className="mb-1.5 block font-medium 3xl:text-base text-sm text-stone-700 dark:text-stone-300">
                   {t("address")}
                 </label>
                 <input
-                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 3xl:py-3 3xl:text-base"
+                  className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 3xl:py-3 py-2 3xl:text-base text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800"
                   defaultValue={settings.company.address}
                   onBlur={(e) => handleCompanyUpdate("address", e.target.value)}
                   type="text"
@@ -120,36 +120,34 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
           </div>
 
           {/* Pricing Control Center */}
-          <div className="rounded-xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-800 dark:bg-stone-900 3xl:p-10">
+          <div className="rounded-xl border border-stone-200 bg-white 3xl:p-10 p-6 shadow-sm dark:border-stone-800 dark:bg-stone-900">
             <div className="mb-6 flex items-center gap-3">
               <div className="rounded-lg bg-emerald-100 p-2 dark:bg-emerald-900/30">
                 <CreditCard className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <h2 className="font-semibold text-stone-900 dark:text-stone-100 3xl:text-xl">
+                <h2 className="font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100">
                   {t("pricingControl")}
                 </h2>
-                <p className="text-stone-500 text-xs dark:text-stone-400">
-                  {t("manageAllPrices")}
-                </p>
+                <p className="text-stone-500 text-xs dark:text-stone-400">{t("manageAllPrices")}</p>
               </div>
             </div>
 
             <div className="space-y-10">
               {/* Subscription Plans */}
               <div>
-                <h3 className="mb-4 font-bold text-[10px] text-stone-400 uppercase tracking-[0.2em] 3xl:text-xs">
+                <h3 className="mb-4 font-bold 3xl:text-xs text-[10px] text-stone-400 uppercase tracking-[0.2em]">
                   {t("subscriptions")}
                 </h3>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 3xl:gap-8">
+                <div className="grid grid-cols-1 3xl:gap-8 gap-6 sm:grid-cols-3">
                   {planTypes.map((plan) => (
                     <div key={plan.id}>
-                      <label className="mb-1.5 block font-medium text-sm text-stone-700 dark:text-stone-300 3xl:text-base">
+                      <label className="mb-1.5 block font-medium 3xl:text-base text-sm text-stone-700 dark:text-stone-300">
                         {isRTL ? plan.labelAr : plan.labelEn}
                       </label>
                       <div className="relative">
                         <input
-                          className={`w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 3xl:py-3 3xl:text-base ${isRTL ? "pl-10" : "pr-10"}`}
+                          className={`w-full rounded-lg border border-stone-200 bg-stone-50 px-3 3xl:py-3 py-2 3xl:text-base text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 ${isRTL ? "pl-10" : "pr-10"}`}
                           defaultValue={plan.price}
                           onBlur={(e) =>
                             updatePlanPrice(plan.id, Number.parseFloat(e.target.value))
@@ -157,7 +155,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                           type="number"
                         />
                         <div
-                          className={`absolute top-1/2 -translate-y-1/2 text-stone-500 text-xs 3xl:text-sm ${isRTL ? "left-3" : "right-3"}`}
+                          className={`absolute top-1/2 -translate-y-1/2 3xl:text-sm text-stone-500 text-xs ${isRTL ? "left-3" : "right-3"}`}
                         >
                           {t("egp")}
                         </div>
@@ -169,20 +167,20 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
 
               {/* Resource Rates */}
               <div className="border-stone-100 border-t pt-8 dark:border-stone-800">
-                <h3 className="mb-4 font-bold text-[10px] text-stone-400 uppercase tracking-[0.2em] 3xl:text-xs">
+                <h3 className="mb-4 font-bold 3xl:text-xs text-[10px] text-stone-400 uppercase tracking-[0.2em]">
                   {t("resources")} ({t("ratePerHour")})
                 </h3>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 3xl:gap-8">
+                <div className="grid grid-cols-1 3xl:gap-8 gap-6 sm:grid-cols-3">
                   {resourceCategories.map((cat) => {
                     const firstOfKind = resources.find((r) => r.resourceType === cat.id);
                     return (
                       <div key={cat.id}>
-                        <label className="mb-1.5 block font-medium text-sm text-stone-700 dark:text-stone-300 3xl:text-base">
+                        <label className="mb-1.5 block font-medium 3xl:text-base text-sm text-stone-700 dark:text-stone-300">
                           {cat.label}
                         </label>
                         <div className="relative">
                           <input
-                            className={`w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 3xl:py-3 3xl:text-base ${isRTL ? "pl-10" : "pr-10"}`}
+                            className={`w-full rounded-lg border border-stone-200 bg-stone-50 px-3 3xl:py-3 py-2 3xl:text-base text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 ${isRTL ? "pl-10" : "pr-10"}`}
                             defaultValue={firstOfKind?.ratePerHour ?? 0}
                             onBlur={(e) =>
                               updateResourceTypePrice(cat.id, Number.parseFloat(e.target.value))
@@ -190,7 +188,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                             type="number"
                           />
                           <div
-                            className={`absolute top-1/2 -translate-y-1/2 text-stone-500 text-xs 3xl:text-sm ${isRTL ? "left-3" : "right-3"}`}
+                            className={`absolute top-1/2 -translate-y-1/2 3xl:text-sm text-stone-500 text-xs ${isRTL ? "left-3" : "right-3"}`}
                           >
                             {t("egp")}
                           </div>
@@ -205,17 +203,17 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
         </section>
 
         {/* Fixed Sidebar */}
-        <section className="h-fit rounded-xl border border-stone-200 bg-white p-6 shadow-sm lg:col-span-1 dark:border-stone-800 dark:bg-stone-900 3xl:p-10">
+        <section className="h-fit rounded-xl border border-stone-200 bg-white 3xl:p-10 p-6 shadow-sm lg:col-span-1 dark:border-stone-800 dark:bg-stone-900">
           <div className="mb-6 flex items-center gap-3">
             <div className="rounded-lg bg-purple-100 p-2 dark:bg-purple-900/30">
               <Palette className="h-5 w-5 text-purple-600 dark:text-purple-400" />
             </div>
-            <h2 className="font-semibold text-stone-900 dark:text-stone-100 3xl:text-xl">
+            <h2 className="font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100">
               {t("appearance")}
             </h2>
           </div>
           <div className="mb-8">
-            <label className="mb-3 block font-medium text-sm text-stone-700 dark:text-stone-300 3xl:text-base">
+            <label className="mb-3 block font-medium 3xl:text-base text-sm text-stone-700 dark:text-stone-300">
               {t("theme")}
             </label>
             <div className="space-y-2">
@@ -224,7 +222,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                 const isSelected = settings.appearance.theme === theme.id;
                 return (
                   <button
-                    className={`flex w-full items-center gap-3 rounded-lg border-2 p-3 transition-all 3xl:p-4 ${isSelected ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20" : "border-stone-200 hover:border-stone-300 dark:border-stone-700 dark:hover:border-stone-600"}`}
+                    className={`flex w-full items-center gap-3 rounded-lg border-2 3xl:p-4 p-3 transition-all ${isSelected ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20" : "border-stone-200 hover:border-stone-300 dark:border-stone-700 dark:hover:border-stone-600"}`}
                     key={theme.id}
                     onClick={() =>
                       onUpdateAppearance?.({
@@ -248,7 +246,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
             </div>
           </div>
           <div>
-            <label className="mb-3 block font-medium text-sm text-stone-700 dark:text-stone-300 3xl:text-base">
+            <label className="mb-3 block font-medium 3xl:text-base text-sm text-stone-700 dark:text-stone-300">
               {t("language")}
             </label>
             <div className="space-y-2">
@@ -256,7 +254,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                 const isSelected = settings.appearance.language === lang.id;
                 return (
                   <button
-                    className={`flex w-full items-center justify-center rounded-lg border-2 p-3 transition-all 3xl:p-4 ${isSelected ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20" : "border-stone-200 hover:border-stone-300 dark:border-stone-700 dark:hover:border-stone-600"}`}
+                    className={`flex w-full items-center justify-center rounded-lg border-2 3xl:p-4 p-3 transition-all ${isSelected ? "border-amber-500 bg-amber-50 dark:bg-amber-900/20" : "border-stone-200 hover:border-stone-300 dark:border-stone-700 dark:hover:border-stone-600"}`}
                     key={lang.id}
                     onClick={() =>
                       onUpdateAppearance?.({

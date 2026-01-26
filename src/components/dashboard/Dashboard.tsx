@@ -37,12 +37,12 @@ export function Dashboard({
   };
 
   return (
-    <div className="flex h-auto flex-col overflow-y-auto scrollbar-thin lg:h-full lg:overflow-hidden">
+    <div className="scrollbar-thin flex h-auto flex-col overflow-y-auto lg:h-full lg:overflow-hidden">
       {/* Top Section - Metric Cards */}
       <div className="flex-shrink-0 space-y-6 p-4 sm:p-6 lg:pb-4">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div className={isRTL ? "text-end" : "text-start"}>
-            <h1 className="font-bold text-2xl tracking-tight text-stone-900 lg:text-3xl dark:text-stone-100">
+            <h1 className="font-bold text-2xl text-stone-900 tracking-tight lg:text-3xl dark:text-stone-100">
               {t("dashboard")}
             </h1>
           </div>
@@ -57,7 +57,7 @@ export function Dashboard({
           />
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:gap-6 3xl:grid-cols-5">
+        <div className="grid 3xl:grid-cols-5 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:gap-6">
           <MetricCard
             icon={<DollarSign className="h-5 w-5" />}
             onClick={() => onNavigateToSection?.("sessions")}
@@ -103,7 +103,7 @@ export function Dashboard({
 
       {/* Bottom Section - Split Activity and Unpaid Invoices */}
       <div className="min-h-0 flex-1 px-4 pb-4 sm:px-6 sm:pb-6">
-        <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-12 3xl:gap-8">
+        <div className="grid h-full grid-cols-1 3xl:gap-8 gap-6 lg:grid-cols-12">
           {/* Recent Activity - Taking 7 columns */}
           <div className="min-h-[400px] lg:col-span-7 lg:h-full">
             <ActivityFeed activities={recentActivity} />

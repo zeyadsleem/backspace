@@ -192,7 +192,12 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   invoices: [],
   settings: {
     company: { name: "", address: "", phone: "", email: "" },
-    regional: { currency: "EGP", currencySymbol: "E£", timezone: "Africa/Cairo", dateFormat: "DD/MM/YYYY" },
+    regional: {
+      currency: "EGP",
+      currencySymbol: "E£",
+      timezone: "Africa/Cairo",
+      dateFormat: "DD/MM/YYYY",
+    },
     tax: { enabled: false, rate: 0 },
     appearance: { theme: "system", language: "ar" },
     discounts: { enabled: false, value: 0, label: "" },

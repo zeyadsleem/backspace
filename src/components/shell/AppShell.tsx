@@ -76,7 +76,7 @@ export function AppShell({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-stone-200 dark:scrollbar-thumb-stone-800">
+        <nav className="scrollbar-thin scrollbar-thumb-stone-200 dark:scrollbar-thumb-stone-800 flex-1 overflow-y-auto py-4">
           <MainNav
             collapsed={sidebarCollapsed}
             items={navigationItems}
@@ -125,7 +125,7 @@ export function AppShell({
         className={`flex h-screen flex-col pt-14 transition-all duration-300 lg:pt-0 ${isRTL ? (sidebarCollapsed ? "lg:mr-16" : "lg:mr-60") : sidebarCollapsed ? "lg:ml-16" : "lg:ml-60"}
         `}
       >
-        <div className="mx-auto flex w-full max-w-[2560px] min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="mx-auto flex min-h-0 w-full max-w-[2560px] flex-1 flex-col overflow-hidden">
           {children}
         </div>
       </main>

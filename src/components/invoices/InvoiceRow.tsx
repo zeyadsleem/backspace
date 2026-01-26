@@ -70,7 +70,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
 
       {/* Amount info */}
       <div className="flex items-center justify-between border-stone-100 border-t pt-3 md:col-span-2 md:justify-center md:border-0 md:pt-0">
-        <span className="text-stone-400 text-[10px] uppercase tracking-widest md:hidden">
+        <span className="text-[10px] text-stone-400 uppercase tracking-widest md:hidden">
           {t("amount")}
         </span>
         <div className="text-end md:text-center">
@@ -78,7 +78,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
             {formatCurrency(invoice.total)}
           </p>
           {invoice.status === "unpaid" && invoice.paidAmount > 0 && (
-            <p className="font-bold font-mono text-amber-600 text-[10px] uppercase dark:text-amber-400">
+            <p className="font-bold font-mono text-[10px] text-amber-600 uppercase dark:text-amber-400">
               {formatCurrency(invoice.total - invoice.paidAmount)} {t("remaining")}
             </p>
           )}
@@ -100,7 +100,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
 
       {/* Due Date */}
       <div className="flex items-center justify-between md:col-span-1 md:justify-center">
-        <span className="text-stone-400 text-[10px] uppercase tracking-widest md:hidden">
+        <span className="text-[10px] text-stone-400 uppercase tracking-widest md:hidden">
           {t("dueDate")}
         </span>
         <span className="font-medium text-stone-600 text-xs dark:text-stone-400">

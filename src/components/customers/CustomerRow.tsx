@@ -70,7 +70,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
             <p className="truncate font-semibold text-sm text-stone-900 dark:text-stone-100">
               {customer.name}
             </p>
-            <span className="font-mono text-stone-400 text-[10px] uppercase tracking-tight">
+            <span className="font-mono text-[10px] text-stone-400 uppercase tracking-tight">
               {customer.humanId}
             </span>
           </div>
@@ -89,7 +89,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
 
       {/* Phone section */}
       <div className="flex items-center gap-2 md:col-span-2">
-        <span className="font-mono text-stone-600 text-sm md:text-stone-500 dark:text-stone-400">
+        <span className="font-mono text-sm text-stone-600 md:text-stone-500 dark:text-stone-400">
           {customer.phone}
         </span>
       </div>
@@ -123,7 +123,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
       {/* Actions section */}
       <div className="flex items-center justify-end gap-2 md:col-span-2">
         <button
-          className="flex flex-1 items-center justify-center rounded-lg bg-stone-100 p-2 text-stone-600 transition-colors hover:bg-stone-200 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-stone-700 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700 md:dark:bg-transparent md:dark:hover:text-stone-300"
+          className="flex flex-1 items-center justify-center rounded-lg bg-stone-100 p-2 text-stone-600 transition-colors hover:bg-stone-200 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-stone-700 dark:bg-stone-800 dark:text-stone-400 md:dark:bg-transparent dark:hover:bg-stone-700 md:dark:hover:text-stone-300"
           onClick={onView}
           title={t("view")}
           type="button"
@@ -132,7 +132,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
           <span className="ml-2 font-medium text-xs md:hidden">{t("view")}</span>
         </button>
         <button
-          className="flex flex-1 items-center justify-center rounded-lg bg-stone-100 p-2 text-stone-600 transition-colors hover:bg-amber-100 hover:text-amber-700 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-amber-600 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-amber-900/20 md:dark:bg-transparent"
+          className="flex flex-1 items-center justify-center rounded-lg bg-stone-100 p-2 text-stone-600 transition-colors hover:bg-amber-100 hover:text-amber-700 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-amber-600 dark:bg-stone-800 dark:text-stone-400 md:dark:bg-transparent dark:hover:bg-amber-900/20"
           onClick={onEdit}
           title={t("edit")}
           type="button"
@@ -141,7 +141,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
           <span className="ml-2 font-medium text-xs md:hidden">{t("edit")}</span>
         </button>
         <button
-          className="flex flex-1 items-center justify-center rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-red-600 dark:bg-red-900/10 dark:text-red-400 dark:hover:bg-red-900/20 md:dark:bg-transparent"
+          className="flex flex-1 items-center justify-center rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-red-600 dark:bg-red-900/10 dark:text-red-400 md:dark:bg-transparent dark:hover:bg-red-900/20"
           onClick={onDelete}
           title={t("delete")}
           type="button"

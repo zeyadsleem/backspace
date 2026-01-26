@@ -45,10 +45,10 @@ export function ReportsPage({
   ];
 
   return (
-    <div className="flex h-full flex-col overflow-hidden p-4 sm:p-6 3xl:p-8">
+    <div className="flex h-full flex-col overflow-hidden 3xl:p-8 p-4 sm:p-6">
       <div className={`flex-shrink-0 space-y-6 pb-6 ${isRTL ? "text-right" : "text-left"}`}>
         <div>
-          <h1 className="font-bold text-2xl tracking-tight text-stone-900 lg:text-3xl dark:text-stone-100">
+          <h1 className="font-bold text-2xl text-stone-900 tracking-tight lg:text-3xl dark:text-stone-100">
             {t("reports")}
           </h1>
           <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
@@ -56,12 +56,12 @@ export function ReportsPage({
           </p>
         </div>
 
-        <div className={`flex w-fit rounded-lg bg-stone-100 p-1 dark:bg-stone-800 ${isRTL ? "flex-row-reverse" : ""}`}>
+        <div className="flex w-fit rounded-lg bg-stone-100 p-1 dark:bg-stone-800">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <button
-                className={`inline-flex items-center gap-2 rounded-md px-4 py-2 font-medium text-sm transition-all ${activeTab === tab.id ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
+                className={`inline-flex items-center gap-2 rounded-md px-4 py-2 font-medium text-sm transition-all ${activeTab === tab.id ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"} ${isRTL ? "flex-row-reverse" : ""}`}
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 type="button"
@@ -87,7 +87,10 @@ export function ReportsPage({
         )}
         {activeTab === "utilization" && (
           <div className="scrollbar-thin h-full overflow-y-auto pb-6">
-            <UtilizationReport onResourceClick={onResourceClick} utilizationData={utilizationData} />
+            <UtilizationReport
+              onResourceClick={onResourceClick}
+              utilizationData={utilizationData}
+            />
           </div>
         )}
         {activeTab === "history" && (

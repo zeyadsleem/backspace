@@ -1,7 +1,17 @@
-import { Coffee, CreditCard, Filter, History, Play, Receipt, Search, Square, UserPlus } from "lucide-react";
+import {
+  Coffee,
+  CreditCard,
+  Filter,
+  History,
+  Play,
+  Receipt,
+  Search,
+  Square,
+  UserPlus,
+} from "lucide-react";
 import { useState } from "react";
-import { useAppStore } from "@/stores/useAppStore";
 import type { TranslationKey } from "@/lib/translations";
+import { useAppStore } from "@/stores/useAppStore";
 import type { OperationRecord, OperationType } from "@/types";
 
 const operationConfig: Record<
@@ -80,23 +90,25 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
 
   return (
     <div className="flex h-full flex-col space-y-6">
-      <div className={`flex flex-shrink-0 flex-col gap-3 sm:flex-row ${isRTL ? "sm:flex-row-reverse" : ""}`}>
-        <div className="relative flex-1">
+      <div className={`flex flex-shrink-0 flex-col gap-3 sm:flex-row ${isRTL ? "" : ""}`}>
+        <div className={`relative flex-1 ${isRTL ? "order-2" : "order-1"}`}>
           <Search
             className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 ${isRTL ? "right-3" : "left-3"}`}
           />
           <input
-            className={`w-full rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "pr-10 pl-4 text-right" : "pl-10 pr-4 text-left"}`}
+            className={`w-full rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "pr-10 pl-4 text-right" : "pr-4 pl-10 text-left"}`}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("searchByNamePhone")}
             type="text"
             value={searchQuery}
           />
         </div>
-        <div className="relative">
-          <Filter className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 ${isRTL ? "right-3" : "left-3"}`} />
+        <div className={`relative ${isRTL ? "order-1" : "order-2"}`}>
+          <Filter
+            className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 ${isRTL ? "right-3" : "left-3"}`}
+          />
           <select
-            className={`cursor-pointer appearance-none rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "pr-10 pl-8 text-right" : "pl-10 pr-8 text-left"}`}
+            className={`cursor-pointer appearance-none rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "pr-10 pl-8 text-right" : "pr-8 pl-10 text-left"}`}
             onChange={(e) => setTypeFilter(e.target.value as OperationType | "all")}
             value={typeFilter}
           >
@@ -111,9 +123,11 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
       </div>
 
       <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
-        <div className="scrollbar-thin h-full overflow-y-auto divide-y divide-stone-100 dark:divide-stone-800">
+        <div className="scrollbar-thin h-full divide-y divide-stone-100 overflow-y-auto dark:divide-stone-800">
           {filteredOperations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div
+              className={`flex flex-col items-center justify-center py-16 text-center ${isRTL ? "text-right" : "text-left"}`}
+            >
               <div className="mb-4 rounded-full bg-stone-100 p-4 dark:bg-stone-800">
                 <History className="h-8 w-8 text-stone-400" />
               </div>
@@ -130,7 +144,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
               const Icon = config.icon;
               return (
                 <button
-                  className={`flex w-full items-center gap-4 p-4 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50 ${isRTL ? "text-right flex-row-reverse" : "text-left"}`}
+                  className={`flex w-full items-center gap-4 p-4 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
                   key={operation.id}
                   onClick={() => onOperationClick?.(operation.id)}
                   type="button"
@@ -138,7 +152,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
                   <div className={`flex-shrink-0 rounded-lg p-2 ${config.bg}`}>
                     <Icon className={`h-4 w-4 ${config.color}`} />
                   </div>
-                  <div className="min-w-0 flex-1">
+                  <div className={`min-w-0 flex-1 ${isRTL ? "text-right" : "text-left"}`}>
                     <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
                       {operation.description}
                     </p>
