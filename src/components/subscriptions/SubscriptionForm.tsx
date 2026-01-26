@@ -196,13 +196,14 @@ export function SubscriptionForm({
 
       {/* Buttons */}
       <FormActions>
-        <Button disabled={isLoading} onClick={onCancel} type="button" variant="outline">
+        <Button disabled={isLoading} onClick={onCancel} size="md" type="button" variant="ghost">
           {t("cancel")}
         </Button>
         <Button
           className="flex-1"
-          disabled={isLoading}
+          disabled={isLoading || !formData.customerId || !formData.startDate}
           isLoading={isLoading}
+          size="md"
           type="submit"
           variant="primary"
         >
