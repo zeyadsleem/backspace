@@ -114,7 +114,7 @@ export interface PlanTypeOption {
 // Inventory
 // -----------------------------------------------------------------------------
 
-export type InventoryCategory = "beverage" | "snack" | "meal" | "other";
+export type InventoryCategory = "beverage" | "snack" | "other";
 
 export interface InventoryItem {
   id: string;

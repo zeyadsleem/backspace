@@ -630,7 +630,7 @@ export const translations = {
     searchInventory: "البحث في المخزون...",
     allCategories: "جميع الفئات",
     beverages: "مشروبات",
-    snacks: "وجبات خفيفة",
+    snacks: "سناكس",
     supplies: "مستلزمات",
     other: "أخرى",
     price: "السعر",

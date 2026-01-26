@@ -1,6 +1,5 @@
 import type {
   ActiveSession,
-  CategoryOption,
   Customer,
   DashboardMetrics,
   InventoryItem,
@@ -606,8 +605,7 @@ export const sampleData = {
 
   categories: [
     { id: "beverage" as const, labelEn: "Beverages", labelAr: "مشروبات" },
-    { id: "snack" as const, labelEn: "Snacks", labelAr: "وجبات خفيفة" },
-    { id: "meal" as const, labelEn: "Meals", labelAr: "وجبات" },
+    { id: "snack" as const, labelEn: "Snacks", labelAr: "سناكس" },
     { id: "other" as const, labelEn: "Other", labelAr: "أخرى" },
-  ] as CategoryOption[],
+  ],
 };

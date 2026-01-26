@@ -42,7 +42,7 @@ export const inventorySchema = z.object({
     .min(2, "Item name must be at least 2 characters")
     .max(50, "Item name must be less than 50 characters")
     .trim(),
-  category: z.enum(["beverage", "snack", "meal", "other"] as const),
+  category: z.enum(["beverage", "snack", "other"] as const),
   price: z.number().min(0, "Price must be positive").max(1000, "Price seems too high"),
   quantity: z.number().int("Quantity must be a whole number").min(0, "Quantity cannot be negative"),
   minStock: z

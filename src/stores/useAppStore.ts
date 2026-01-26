@@ -233,8 +233,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   ],
   categories: [
     { id: "beverage", labelEn: "Beverages", labelAr: "مشروبات" },
-    { id: "snack", labelEn: "Snacks", labelAr: "وجبات خفيفة" },
-    { id: "meal", labelEn: "Meals", labelAr: "وجبات" },
+    { id: "snack", labelEn: "Snacks", labelAr: "سناكس" },
     { id: "other", labelEn: "Other", labelAr: "أخرى" },
   ],
 
