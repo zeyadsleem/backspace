@@ -52,8 +52,12 @@ export function RevenueChart({ data }: RevenueChartProps) {
         <div className="flex rounded-lg bg-stone-100 p-1 dark:bg-stone-800">
           {(["today", "week", "month"] as Period[]).map((p) => {
             let label = t("thisMonth");
-            if (p === "today") label = t("today");
-            if (p === "week") label = t("thisWeek");
+            if (p === "today") {
+              label = t("today");
+            }
+            if (p === "week") {
+              label = t("thisWeek");
+            }
 
             return (
               <button

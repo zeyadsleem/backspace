@@ -69,11 +69,11 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       return t("justNow");
     }
     if (diffMins < 60) {
-      return language === "ar" ? `منذ ${diffMins} دقيقة` : `${diffMins}m ago`;
+      return t("mAgo", { m: diffMins });
     }
     const diffHours = Math.floor(diffMins / 60);
     if (diffHours < 24) {
-      return language === "ar" ? `منذ ${diffHours} ساعة` : `${diffHours}h ago`;
+      return t("hAgo", { h: diffHours });
     }
     return date.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
       month: "short",

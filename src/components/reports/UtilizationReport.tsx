@@ -75,8 +75,11 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
           <div className="space-y-3">
             {utilizationData.byResource.map((resource) => {
               let barColor = "bg-red-500";
-              if (resource.rate >= 80) barColor = "bg-emerald-500";
-              else if (resource.rate >= 50) barColor = "bg-amber-500";
+              if (resource.rate >= 80) {
+                barColor = "bg-emerald-500";
+              } else if (resource.rate >= 50) {
+                barColor = "bg-amber-500";
+              }
 
               return (
                 <button
@@ -112,9 +115,13 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
           <div className="space-y-2">
             {utilizationData.peakHours.map((hour) => {
               let barColor = "bg-emerald-300";
-              if (hour.occupancy >= 80) barColor = "bg-red-500";
-              else if (hour.occupancy >= 60) barColor = "bg-amber-500";
-              else if (hour.occupancy >= 40) barColor = "bg-emerald-500";
+              if (hour.occupancy >= 80) {
+                barColor = "bg-red-500";
+              } else if (hour.occupancy >= 60) {
+                barColor = "bg-amber-500";
+              } else if (hour.occupancy >= 40) {
+                barColor = "bg-emerald-500";
+              }
 
               return (
                 <div className="flex items-center gap-3" key={hour.hour}>

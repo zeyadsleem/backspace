@@ -121,61 +121,55 @@ export function InventoryList({
         {filteredItems.length === 0 ? (
           <div className="flex h-64 flex-col items-center justify-center rounded-xl border-2 border-stone-100 border-dashed dark:border-stone-800">
             <Package className="mb-2 h-10 w-10 text-stone-300 dark:text-stone-700" />
-            <p className="font-medium text-stone-500 dark:text-stone-400">
-              {t("noItemsFound")}
-            </p>
+            <p className="font-medium text-stone-500 dark:text-stone-400">{t("noItemsFound")}</p>
+          </div>
+        ) : categoryFilter === "all" ? (
+          <div className="space-y-10 pb-6">
+            {categories.map((category) => {
+              const categoryItems = filteredItems.filter((item) => item.category === category.id);
+              if (categoryItems.length === 0) {
+                return null;
+              }
+
+              return (
+                <div className="space-y-4" key={category.id}>
+                  <div className="flex items-center gap-2 border-stone-100 border-b pb-2 dark:border-stone-800">
+                    <h2 className="font-bold text-sm text-stone-900 uppercase tracking-widest dark:text-stone-100">
+                      {isRTL ? category.labelAr : category.labelEn}
+                    </h2>
+                    <span className="rounded-full bg-stone-100 px-2 py-0.5 font-bold text-stone-500 text-xs dark:bg-stone-800">
+                      {categoryItems.length}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    {categoryItems.map((item) => (
+                      <InventoryItemCard
+                        category={category}
+                        item={item}
+                        key={item.id}
+                        onAdjustQuantity={(delta) => onAdjustQuantity?.(item.id, delta)}
+                        onDelete={() => onDelete?.(item.id)}
+                        onEdit={() => onEdit?.(item.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
-          <>
-            {categoryFilter === "all" ? (
-              <div className="space-y-10 pb-6">
-                {categories.map((category) => {
-                  const categoryItems = filteredItems.filter(
-                    (item) => item.category === category.id
-                  );
-                  if (categoryItems.length === 0) return null;
-
-                  return (
-                    <div className="space-y-4" key={category.id}>
-                      <div className="flex items-center gap-2 border-stone-100 border-b pb-2 dark:border-stone-800">
-                        <h2 className="font-bold text-sm text-stone-900 uppercase tracking-widest dark:text-stone-100">
-                          {isRTL ? category.labelAr : category.labelEn}
-                        </h2>
-                        <span className="rounded-full bg-stone-100 px-2 py-0.5 font-bold text-stone-500 text-xs dark:bg-stone-800">
-                          {categoryItems.length}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                        {categoryItems.map((item) => (
-                          <InventoryItemCard
-                            category={category}
-                            item={item}
-                            key={item.id}
-                            onAdjustQuantity={(delta) => onAdjustQuantity?.(item.id, delta)}
-                            onDelete={() => onDelete?.(item.id)}
-                            onEdit={() => onEdit?.(item.id)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-4 pb-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {filteredItems.map((item) => (
-                  <InventoryItemCard
-                    category={categories.find((c) => c.id === item.category)!}
-                    item={item}
-                    key={item.id}
-                    onAdjustQuantity={(delta) => onAdjustQuantity?.(item.id, delta)}
-                    onDelete={() => onDelete?.(item.id)}
-                    onEdit={() => onEdit?.(item.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </>
+          <div className="grid grid-cols-1 gap-4 pb-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {filteredItems.map((item) => (
+              <InventoryItemCard
+                category={categories.find((c) => c.id === item.category)!}
+                item={item}
+                key={item.id}
+                onAdjustQuantity={(delta) => onAdjustQuantity?.(item.id, delta)}
+                onDelete={() => onDelete?.(item.id)}
+                onEdit={() => onEdit?.(item.id)}
+              />
+            ))}
+          </div>
         )}
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ReportsPage } from "@/components/reports";
 import { useAppStore } from "@/stores/useAppStore";
@@ -9,6 +10,11 @@ export function ReportsPageWrapper() {
   const topCustomers = useAppStore((state) => state.topCustomers);
   const utilizationData = useAppStore((state) => state.utilizationData);
   const operationHistory = useAppStore((state) => state.operationHistory);
+  const fetchDashboardData = useAppStore((state) => state.fetchDashboardData);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   return (
     <ReportsPage

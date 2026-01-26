@@ -2,7 +2,6 @@ import { invoke } from "@tauri-apps/api/core";
 import { produce } from "immer";
 import toast from "react-hot-toast";
 import { create } from "zustand";
-import { sampleData } from "@/data/sample-data";
 import { type TranslationKey, t as translate } from "@/lib/translations";
 import type {
   ActiveSession,
@@ -184,31 +183,64 @@ interface AppActions {
 type AppStore = AppState & AppActions;
 
 export const useAppStore = create<AppStore>()((set, get) => ({
-  // Initialize all AppState fields explicitly
+  // Initialize all AppState fields empty
   customers: [],
   resources: [],
   activeSessions: [],
   subscriptions: [],
   inventory: [],
   invoices: [],
-  settings: sampleData.settings, // Fallback to sample settings initially
+  settings: {
+    company: { name: "", address: "", phone: "", email: "" },
+    regional: { currency: "EGP", currencySymbol: "E£", timezone: "Africa/Cairo", dateFormat: "DD/MM/YYYY" },
+    tax: { enabled: false, rate: 0 },
+    appearance: { theme: "system", language: "ar" },
+    discounts: { enabled: false, value: 0, label: "" },
+  },
 
-  dashboardMetrics: sampleData.dashboardMetrics,
+  dashboardMetrics: {
+    todayRevenue: 0,
+    sessionRevenue: 0,
+    inventoryRevenue: 0,
+    activeSessions: 0,
+    newCustomersToday: 0,
+    activeSubscriptions: 0,
+    resourceUtilization: 0,
+  },
   lowStockAlerts: [],
   recentActivity: [],
   revenueChart: [],
 
-  revenueData: sampleData.revenueData,
-  utilizationData: sampleData.utilizationData,
+  revenueData: {
+    today: { sessions: 0, inventory: 0, total: 0 },
+    thisWeek: { sessions: 0, inventory: 0, total: 0 },
+    thisMonth: { sessions: 0, inventory: 0, total: 0 },
+    comparison: { lastMonth: { sessions: 0, inventory: 0, total: 0 }, percentChange: 0 },
+  },
+  utilizationData: {
+    overallRate: 0,
+    byResource: [],
+    peakHours: [],
+    averageSessionDuration: 0,
+  },
   operationHistory: [],
   topCustomers: [],
 
-  planTypes: sampleData.planTypes,
-  categories: sampleData.categories,
+  planTypes: [
+    { id: "weekly", labelEn: "Weekly", labelAr: "أسبوعي", days: 7, price: 0 },
+    { id: "half-monthly", labelEn: "Half-Monthly", labelAr: "نصف شهري", days: 15, price: 0 },
+    { id: "monthly", labelEn: "Monthly", labelAr: "شهري", days: 30, price: 0 },
+  ],
+  categories: [
+    { id: "beverage", labelEn: "Beverages", labelAr: "مشروبات" },
+    { id: "snack", labelEn: "Snacks", labelAr: "وجبات خفيفة" },
+    { id: "meal", labelEn: "Meals", labelAr: "وجبات" },
+    { id: "other", labelEn: "Other", labelAr: "أخرى" },
+  ],
 
   theme: "system",
-  language: "en",
-  isRTL: false,
+  language: "ar",
+  isRTL: true,
   sidebarCollapsed: false,
   isLoading: false,
 
@@ -218,6 +250,17 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   },
 
   init: async () => {
+    // Fetch settings first to set language/RTL
+    try {
+      const settings = await invoke<Settings | null>("get_settings");
+      if (settings) {
+        set({ settings });
+        get().setLanguage(settings.appearance.language);
+        get().setTheme(settings.appearance.theme);
+      }
+    } catch (e) {
+      console.error("Failed to load settings", e);
+    }
     await get().refreshAll();
   },
 
@@ -258,6 +301,8 @@ export const useAppStore = create<AppStore>()((set, get) => ({
     } else {
       root.classList.add(theme);
     }
+    // Persist
+    invoke("update_settings", { settings: get().settings }).catch(console.error);
   },
 
   setLanguage: (language: LanguageOption) => {
@@ -275,6 +320,8 @@ export const useAppStore = create<AppStore>()((set, get) => ({
     } else {
       document.body.classList.remove("rtl");
     }
+    // Persist
+    invoke("update_settings", { settings: get().settings }).catch(console.error);
   },
 
   setSidebarCollapsed: (collapsed: boolean) => {
