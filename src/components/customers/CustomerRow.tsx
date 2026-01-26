@@ -1,7 +1,7 @@
 import type { Customer, CustomerType } from '@/types'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
-import { TranslationKey } from '@/lib/translations'
+import type { TranslationKey } from '@/lib/translations'
 
 interface CustomerRowProps {
   customer: Customer
