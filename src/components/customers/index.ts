@@ -1,5 +1,5 @@
-export { CustomerForm } from './CustomerForm'
-export { CustomersList } from './CustomersList'
-export { CustomerDialog } from './CustomerDialog'
-export { CustomerProfile } from './CustomerProfile'
-export { CustomerRow } from './CustomerRow'
+export { CustomerDialog } from "./CustomerDialog";
+export { CustomerForm } from "./CustomerForm";
+export { CustomerProfile } from "./CustomerProfile";
+export { CustomerRow } from "./CustomerRow";
+export { CustomersList } from "./CustomersList";

@@ -1,91 +1,196 @@
-import { useState } from 'react'
-import type { Resource, ResourceType } from '@/types'
-import { ResourceCard } from './ResourceCard'
-import { Plus, LayoutGrid, List, Building2 } from 'lucide-react'
-import { useAppStore } from '@/stores/useAppStore'
+import { Building2, LayoutGrid, List, Plus } from "lucide-react";
+import { useState } from "react";
+import { useAppStore } from "@/stores/useAppStore";
+import type { Resource, ResourceType } from "@/types";
+import { ResourceCard } from "./ResourceCard";
 
 interface ResourcesListProps {
-  resources: Resource[]
-  resourceTypes: ResourceType[]
-  onView?: (id: string) => void
-  onEdit?: (id: string) => void
-  onDelete?: (id: string) => void
-  onCreate?: () => void
-  onSelectForSession?: (id: string) => void
+  resources: Resource[];
+  resourceTypes: ResourceType[];
+  onView?: (id: string) => void;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+  onCreate?: () => void;
+  onSelectForSession?: (id: string) => void;
 }
 
-export function ResourcesList({ resources, resourceTypes, onView, onEdit, onDelete, onCreate, onSelectForSession }: ResourcesListProps) {
-  const t = useAppStore((state) => state.t)
-  const isRTL = useAppStore((state) => state.isRTL)
-  const [typeFilter, setTypeFilter] = useState<ResourceType | 'all'>('all')
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+export function ResourcesList({
+  resources,
+  resourceTypes,
+  onView,
+  onEdit,
+  onDelete,
+  onCreate,
+  onSelectForSession,
+}: ResourcesListProps) {
+  const t = useAppStore((state) => state.t);
+  const isRTL = useAppStore((state) => state.isRTL);
+  const [typeFilter, setTypeFilter] = useState<ResourceType | "all">("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const filteredResources = resources.filter((resource) => typeFilter === 'all' || resource.resourceType === typeFilter)
-  const availableCount = filteredResources.filter((r) => r.isAvailable).length
-  const occupiedCount = filteredResources.filter((r) => !r.isAvailable).length
-  
-  const typeLabels: Record<ResourceType, string> = { 
-    seat: t('seat'), 
-    room: t('room'), 
-    desk: t('desk') 
-  }
+  const filteredResources = resources.filter(
+    (resource) => typeFilter === "all" || resource.resourceType === typeFilter
+  );
+  const availableCount = filteredResources.filter((r) => r.isAvailable).length;
+  const occupiedCount = filteredResources.filter((r) => !r.isAvailable).length;
+
+  const typeLabels: Record<ResourceType, string> = {
+    seat: t("seat"),
+    room: t("room"),
+    desk: t("desk"),
+  };
 
   // Group resources by type for 'all' view
-  const groupedResources = resourceTypes.map(type => ({
-    type,
-    label: typeLabels[type],
-    items: filteredResources.filter(r => r.resourceType === type)
-  })).filter(group => group.items.length > 0)
+  const groupedResources = resourceTypes
+    .map((type) => ({
+      type,
+      label: typeLabels[type],
+      items: filteredResources.filter((r) => r.resourceType === type),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
-    <div className="flex flex-col p-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className={isRTL ? 'text-end' : 'text-start'}>
-          <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">{t('resources')}</h1>
-          <p className="text-sm text-stone-500 dark:text-stone-400 mt-1"><span className="text-emerald-600 dark:text-emerald-400">{availableCount} {t('available')}</span>{' · '}<span className="text-red-600 dark:text-red-400">{occupiedCount} {t('occupied')}</span></p>
+    <div className="flex flex-col space-y-6 p-6">
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className={isRTL ? "text-end" : "text-start"}>
+          <h1 className="font-bold text-2xl text-stone-900 dark:text-stone-100">
+            {t("resources")}
+          </h1>
+          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+            <span className="text-emerald-600 dark:text-emerald-400">
+              {availableCount} {t("available")}
+            </span>
+            {" · "}
+            <span className="text-red-600 dark:text-red-400">
+              {occupiedCount} {t("occupied")}
+            </span>
+          </p>
         </div>
-        <button onClick={onCreate} className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"><Plus className="h-4 w-4" />{t('addResource')}</button>
+        <button
+          className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
+          onClick={onCreate}
+        >
+          <Plus className="h-4 w-4" />
+          {t("addResource")}
+        </button>
       </div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex bg-stone-100 dark:bg-stone-800 rounded-lg p-1">
-          <button onClick={() => setTypeFilter('all')} className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${typeFilter === 'all' ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'}`}>{t('all')} ({resources.length})</button>
+      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="flex rounded-lg bg-stone-100 p-1 dark:bg-stone-800">
+          <button
+            className={`rounded-md px-4 py-2 font-medium text-sm transition-all ${typeFilter === "all" ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
+            onClick={() => setTypeFilter("all")}
+          >
+            {t("all")} ({resources.length})
+          </button>
           {resourceTypes.map((type) => {
-            const count = resources.filter((r) => r.resourceType === type).length
-            return <button key={type} onClick={() => setTypeFilter(type)} className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${typeFilter === type ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'}`}>{typeLabels[type]} ({count})</button>
+            const count = resources.filter((r) => r.resourceType === type).length;
+            return (
+              <button
+                className={`rounded-md px-4 py-2 font-medium text-sm transition-all ${typeFilter === type ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
+                key={type}
+                onClick={() => setTypeFilter(type)}
+              >
+                {typeLabels[type]} ({count})
+              </button>
+            );
           })}
         </div>
-        <div className="flex bg-stone-100 dark:bg-stone-800 rounded-lg p-1">
-          <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' : 'text-stone-600 dark:text-stone-400'}`}><LayoutGrid className="h-4 w-4" /></button>
-          <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm' : 'text-stone-600 dark:text-stone-400'}`}><List className="h-4 w-4" /></button>
+        <div className="flex rounded-lg bg-stone-100 p-1 dark:bg-stone-800">
+          <button
+            className={`rounded-md p-2 transition-all ${viewMode === "grid" ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 dark:text-stone-400"}`}
+            onClick={() => setViewMode("grid")}
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </button>
+          <button
+            className={`rounded-md p-2 transition-all ${viewMode === "list" ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 dark:text-stone-400"}`}
+            onClick={() => setViewMode("list")}
+          >
+            <List className="h-4 w-4" />
+          </button>
         </div>
       </div>
       {filteredResources.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="p-4 bg-stone-100 dark:bg-stone-800 rounded-full mb-4"><Building2 className="h-8 w-8 text-stone-400" /></div>
-          <h3 className="text-lg font-medium text-stone-900 dark:text-stone-100">{t('noResourcesFound')}</h3>
-          <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">{typeFilter !== 'all' ? t('trySelectingDifferent') : t('addFirstResource')}</p>
-          {typeFilter === 'all' && <button onClick={onCreate} className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors"><Plus className="h-4 w-4" />{t('addResource')}</button>}
+          <div className="mb-4 rounded-full bg-stone-100 p-4 dark:bg-stone-800">
+            <Building2 className="h-8 w-8 text-stone-400" />
+          </div>
+          <h3 className="font-medium text-lg text-stone-900 dark:text-stone-100">
+            {t("noResourcesFound")}
+          </h3>
+          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+            {typeFilter !== "all" ? t("trySelectingDifferent") : t("addFirstResource")}
+          </p>
+          {typeFilter === "all" && (
+            <button
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
+              onClick={onCreate}
+            >
+              <Plus className="h-4 w-4" />
+              {t("addResource")}
+            </button>
+          )}
         </div>
-      ) : typeFilter === 'all' ? (
+      ) : typeFilter === "all" ? (
         <div className="space-y-8">
           {groupedResources.map((group) => (
             <div key={group.type}>
-              <div className="flex items-center gap-3 mb-4 px-1">
-                <h2 className="text-sm font-bold text-stone-400 uppercase tracking-[0.2em]">{group.label}</h2>
-                <div className="h-px bg-stone-100 dark:bg-stone-800 flex-1" />
-                <span className="text-xs font-bold text-stone-300 uppercase tracking-widest">{t('items', { count: group.items.length })}</span>
+              <div className="mb-4 flex items-center gap-3 px-1">
+                <h2 className="font-bold text-sm text-stone-400 uppercase tracking-[0.2em]">
+                  {group.label}
+                </h2>
+                <div className="h-px flex-1 bg-stone-100 dark:bg-stone-800" />
+                <span className="font-bold text-stone-300 text-xs uppercase tracking-widest">
+                  {t("items", { count: group.items.length })}
+                </span>
               </div>
-              <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch' : 'space-y-3'}>
-                {group.items.map((resource) => <ResourceCard key={resource.id} resource={resource} viewMode={viewMode} onClick={() => onView?.(resource.id)} onEdit={() => onEdit?.(resource.id)} onDelete={() => onDelete?.(resource.id)} onSelectForSession={resource.isAvailable ? () => onSelectForSession?.(resource.id) : undefined} />)}
+              <div
+                className={
+                  viewMode === "grid"
+                    ? "grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                    : "space-y-3"
+                }
+              >
+                {group.items.map((resource) => (
+                  <ResourceCard
+                    key={resource.id}
+                    onClick={() => onView?.(resource.id)}
+                    onDelete={() => onDelete?.(resource.id)}
+                    onEdit={() => onEdit?.(resource.id)}
+                    onSelectForSession={
+                      resource.isAvailable ? () => onSelectForSession?.(resource.id) : undefined
+                    }
+                    resource={resource}
+                    viewMode={viewMode}
+                  />
+                ))}
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className={viewMode === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch' : 'space-y-3'}>
-          {filteredResources.map((resource) => <ResourceCard key={resource.id} resource={resource} viewMode={viewMode} onClick={() => onView?.(resource.id)} onEdit={() => onEdit?.(resource.id)} onDelete={() => onDelete?.(resource.id)} onSelectForSession={resource.isAvailable ? () => onSelectForSession?.(resource.id) : undefined} />)}
+        <div
+          className={
+            viewMode === "grid"
+              ? "grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              : "space-y-3"
+          }
+        >
+          {filteredResources.map((resource) => (
+            <ResourceCard
+              key={resource.id}
+              onClick={() => onView?.(resource.id)}
+              onDelete={() => onDelete?.(resource.id)}
+              onEdit={() => onEdit?.(resource.id)}
+              onSelectForSession={
+                resource.isAvailable ? () => onSelectForSession?.(resource.id) : undefined
+              }
+              resource={resource}
+              viewMode={viewMode}
+            />
+          ))}
         </div>
       )}
     </div>
-  )
+  );
 }

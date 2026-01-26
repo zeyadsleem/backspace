@@ -1,7 +1,7 @@
-export { Dashboard } from './Dashboard'
-export { MetricCard } from './MetricCard'
-export { LowStockBanner } from './LowStockBanner'
-export { QuickActions } from './QuickActions'
-export { RevenueChart } from './RevenueChart'
-export { ActivityFeed } from './ActivityFeed'
-export { PendingInvoices } from './PendingInvoices'
+export { ActivityFeed } from "./ActivityFeed";
+export { Dashboard } from "./Dashboard";
+export { LowStockBanner } from "./LowStockBanner";
+export { MetricCard } from "./MetricCard";
+export { PendingInvoices } from "./PendingInvoices";
+export { QuickActions } from "./QuickActions";
+export { RevenueChart } from "./RevenueChart";

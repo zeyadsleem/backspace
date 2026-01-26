@@ -1,0 +1,1669 @@
+src/App.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    app.tsx
+  
+
+src/components/customers/CustomerDialog.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    customer-dialog.tsx
+  
+
+src/components/customers/CustomerDialog.tsx:42:16 lint/style/noNonNullAssertion ━━━━━━━━━━
+
+  × Forbidden non-null assertion.
+  
+    40 │       isOpen={isOpen}
+    41 │       maxWidth="max-w-2xl"
+  > 42 │       onClose={onClose!}
+       │                ^^^^^^^^
+    43 │       title={
+    44 │         <div className="flex items-center gap-3">
+  
+
+src/components/customers/CustomerForm.tsx:29:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 43 detected (max: 20).
+  
+    27 │ }
+    28 │ 
+  > 29 │ export function CustomerForm({
+       │                 ^^^^^^^^^^^^
+    30 │   initialData,
+    31 │   customerTypes,
+  
+  i Please refactor this function to reduce its complexity score from 43 to the max allowed complexity 20.
+  
+
+src/components/customers/CustomerForm.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    customer-form.tsx
+  
+
+src/components/customers/CustomerProfile.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    customer-profile.tsx
+  
+
+src/components/customers/CustomerProfile.tsx:125:9 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    124 │       <div className="flex border-stone-200 border-b dark:border-stone-800">
+  > 125 │         <button
+        │         ^^^^^^^
+  > 126 │           className={`border-b-2 px-4 py-2 font-medium text-sm transition-colors ${activeTab === "overview" ? "border-amber-500 text-amber-600 dark:text-amber-400" : "border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300"}`}
+  > 127 │           onClick={() => setActiveTab("overview")}
+  > 128 │         >
+        │         ^
+    129 │           {t("details")}
+    130 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/customers/CustomerProfile.tsx:131:9 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    129 │           {t("details")}
+    130 │         </button>
+  > 131 │         <button
+        │         ^^^^^^^
+  > 132 │           className={`border-b-2 px-4 py-2 font-medium text-sm transition-colors ${activeTab === "invoices" ? "border-amber-500 text-amber-600 dark:text-amber-400" : "border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300"}`}
+  > 133 │           onClick={() => setActiveTab("invoices")}
+  > 134 │         >
+        │         ^
+    135 │           {t("invoices")}
+    136 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/customers/CustomerProfile.tsx:137:9 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    135 │           {t("invoices")}
+    136 │         </button>
+  > 137 │         <button
+        │         ^^^^^^^
+  > 138 │           className={`border-b-2 px-4 py-2 font-medium text-sm transition-colors ${activeTab === "history" ? "border-amber-500 text-amber-600 dark:text-amber-400" : "border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300"}`}
+  > 139 │           onClick={() => setActiveTab("history")}
+  > 140 │         >
+        │         ^
+    141 │           {t("history")}
+    142 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/customers/CustomerRow.tsx:108:103 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    106 │       <div className="col-span-1 flex items-center md:col-span-2 md:justify-center">
+    107 │         <span
+  > 108 │           className={`font-medium text-sm ${customer.balance < 0 ? "text-red-600 dark:text-red-400" : customer.balance > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-stone-500 dark:text-stone-400"}`}
+        │                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    109 │         >
+    110 │           {formatBalance(customer.balance)}
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src/components/customers/CustomerRow.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    customer-row.tsx
+  
+
+src/components/customers/CustomerRow.tsx:114:9 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    112 │       </div>
+    113 │       <div className="col-span-1 flex items-center justify-end gap-1 md:col-span-2">
+  > 114 │         <button
+        │         ^^^^^^^
+  > 115 │           className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+  > 116 │           onClick={onView}
+  > 117 │           title={t("view")}
+  > 118 │         >
+        │         ^
+    119 │           <Eye className="h-4 w-4" />
+    120 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/customers/CustomerRow.tsx:121:9 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    119 │           <Eye className="h-4 w-4" />
+    120 │         </button>
+  > 121 │         <button
+        │         ^^^^^^^
+  > 122 │           className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+  > 123 │           onClick={onEdit}
+  > 124 │           title={t("edit")}
+  > 125 │         >
+        │         ^
+    126 │           <Pencil className="h-4 w-4" />
+    127 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/customers/CustomerRow.tsx:128:9 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    126 │           <Pencil className="h-4 w-4" />
+    127 │         </button>
+  > 128 │         <button
+        │         ^^^^^^^
+  > 129 │           className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+  > 130 │           onClick={onDelete}
+  > 131 │           title={t("delete")}
+  > 132 │         >
+        │         ^
+    133 │           <Trash2 className="h-4 w-4" />
+    134 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/customers/CustomersList.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    customers-list.tsx
+  
+
+src/components/customers/CustomersList.tsx:65:11 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    63 │         </div>
+    64 │         <div className="flex gap-2">
+  > 65 │           <button
+       │           ^^^^^^^
+  > 66 │             className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
+  > 67 │             onClick={onCreate}
+  > 68 │           >
+       │           ^
+    69 │             <Plus className="h-4 w-4" />
+    70 │             {t("newCustomer")}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/customers/CustomersList.tsx:127:13 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    125 │           </p>
+    126 │           {!searchQuery && typeFilter === "all" && (
+  > 127 │             <button
+        │             ^^^^^^^
+  > 128 │               className="mt-4 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
+  > 129 │               onClick={onCreate}
+  > 130 │             >
+        │             ^
+    131 │               <Plus className="h-4 w-4" />
+    132 │               {t("newCustomer")}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/customers/index.ts:1:1 lint/performance/noBarrelFile ━━━━━━━━━━
+
+  × Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
+  
+  > 1 │ export { CustomerDialog } from "./CustomerDialog";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export { CustomerForm } from "./CustomerForm";
+    3 │ export { CustomerProfile } from "./CustomerProfile";
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+src/components/dashboard/ActivityFeed.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    activity-feed.tsx
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:131:21 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    129 │                     key={invoice.id}
+    130 │                   >
+  > 131 │                     <div
+        │                     ^^^^
+  > 132 │                       className="flex cursor-pointer items-center justify-between p-2.5 transition-colors"
+  > 133 │                       onClick={() =>
+  > 134 │                         setExpandedInvoiceId(isExpanded ? null : invoice.id)
+  > 135 │                       }
+  > 136 │                     >
+        │                     ^
+    137 │                       <div className="flex items-center gap-3">
+    138 │                         <div
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:73:7 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    71 │   return (
+    72 │     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  > 73 │       <div
+       │       ^^^^
+  > 74 │         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+  > 75 │         onClick={onClose}
+  > 76 │       />
+       │       ^^
+    77 │ 
+    78 │       <div
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:73:7 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    71 │   return (
+    72 │     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  > 73 │       <div
+       │       ^^^^
+  > 74 │         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+  > 75 │         onClick={onClose}
+  > 76 │       />
+       │       ^^
+    77 │ 
+    78 │       <div
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:131:21 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    129 │                     key={invoice.id}
+    130 │                   >
+  > 131 │                     <div
+        │                     ^^^^
+  > 132 │                       className="flex cursor-pointer items-center justify-between p-2.5 transition-colors"
+  > 133 │                       onClick={() =>
+  > 134 │                         setExpandedInvoiceId(isExpanded ? null : invoice.id)
+  > 135 │                       }
+  > 136 │                     >
+        │                     ^
+    137 │                       <div className="flex items-center gap-3">
+    138 │                         <div
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:131:21 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━
+
+  × Non-interactive element should not have event handler.
+  
+    129 │                     key={invoice.id}
+    130 │                   >
+  > 131 │                     <div
+        │                     ^^^^
+  > 132 │                       className="flex cursor-pointer items-center justify-between p-2.5 transition-colors"
+  > 133 │                       onClick={() =>
+  > 134 │                         setExpandedInvoiceId(isExpanded ? null : invoice.id)
+  > 135 │                       }
+  > 136 │                     >
+        │                     ^
+    137 │                       <div className="flex items-center gap-3">
+    138 │                         <div
+  
+  i Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:222:17 lint/a11y/noLabelWithoutControl ━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    220 │             <div className="flex flex-1 flex-col gap-6">
+    221 │               <div className="space-y-3">
+  > 222 │                 <label className="block font-bold text-stone-400 text-xs uppercase tracking-widest">
+        │                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 223 │                   {t("paymentSummary")}
+  > 224 │                 </label>
+        │                 ^^^^^^^^
+    225 │                 <div className="flex flex-col items-center gap-1 rounded-2xl border border-red-100 bg-red-50 p-4 text-center dark:border-red-900/20 dark:bg-red-900/10">
+    226 │                   <span className="font-bold text-red-600/70 text-xs uppercase tracking-widest">
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:242:19 lint/a11y/noLabelWithoutControl ━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    240 │               <div className="space-y-4">
+    241 │                 <div>
+  > 242 │                   <label className="mb-2 block font-bold text-stone-400 text-xs uppercase tracking-widest">
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 243 │                     {t("paymentMethod")}
+  > 244 │                   </label>
+        │                   ^^^^^^^^
+    245 │                   <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/30 p-3 text-emerald-700 dark:bg-emerald-900/10 dark:text-emerald-400">
+    246 │                     <div className="rounded-lg bg-emerald-100 p-1.5 dark:bg-emerald-800">
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:260:19 lint/a11y/noLabelWithoutControl ━━━━━━━━━━
+
+  × A form label must be associated with an input.
+  
+    259 │                 <div className="space-y-1.5">
+  > 260 │                   <label className="block font-bold text-stone-400 text-xs uppercase tracking-widest">
+        │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 261 │                     {t("notes")}
+  > 262 │                   </label>
+        │                   ^^^^^^^^
+    263 │                   <textarea
+    264 │                     className="h-20 w-full resize-none rounded-xl border border-stone-200 bg-stone-50 p-3 text-xs outline-none transition-all focus:ring-2 focus:ring-emerald-500/10 dark:border-stone-700 dark:bg-stone-800"
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    customer-debt-dialog.tsx
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:97:11 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+     95 │             </div>
+     96 │           </div>
+   > 97 │           <button
+        │           ^^^^^^^
+   > 98 │             className="rounded-lg p-2 text-stone-400 transition-colors hover:text-stone-600 dark:hover:text-stone-300"
+   > 99 │             onClick={onClose}
+  > 100 │           >
+        │           ^
+    101 │             <X className="h-5 w-5" />
+    102 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:197:40 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    195 │                                 <tr
+    196 │                                   className="text-stone-600 dark:text-stone-300"
+  > 197 │                                   key={i}
+        │                                        ^
+    198 │                                 >
+    199 │                                   <td className="px-1 py-1.5 font-medium">
+  
+  i This is the source of the key value.
+  
+    192 │                             </thead>
+    193 │                             <tbody className="divide-y divide-stone-100 dark:divide-stone-700/30">
+  > 194 │                               {invoice.lineItems.map((item, i) => (
+        │                                                             ^
+    195 │                                 <tr
+    196 │                                   className="text-stone-600 dark:text-stone-300"
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:272:15 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    270 │               </div>
+    271 │ 
+  > 272 │               <button
+        │               ^^^^^^^
+  > 273 │                 className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 font-bold text-base text-white shadow-emerald-600/10 shadow-lg transition-all hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
+  > 274 │                 disabled={isProcessing || totalDebt <= 0}
+  > 275 │                 onClick={handlePayAll}
+  > 276 │               >
+        │               ^
+    277 │                 {isProcessing ? (
+    278 │                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:289:15 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    288 │             <div className="mt-6 border-stone-100 border-t pt-4 dark:border-stone-800">
+  > 289 │               <button
+        │               ^^^^^^^
+  > 290 │                 className="w-full py-1 font-bold text-stone-400 text-xs uppercase tracking-widest transition-colors hover:text-stone-600 dark:hover:text-stone-200"
+  > 291 │                 onClick={onGoToProfile}
+  > 292 │               >
+        │               ^
+    293 │                 {t("viewCustomerProfile")}
+    294 │               </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/dashboard/CustomerDebtDialog.tsx:73:7 lint/a11y/noNoninteractiveElementInteractions ━━━━━━━━━━
+
+  × Non-interactive element should not have event handler.
+  
+    71 │   return (
+    72 │     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  > 73 │       <div
+       │       ^^^^
+  > 74 │         className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+  > 75 │         onClick={onClose}
+  > 76 │       />
+       │       ^^
+    77 │ 
+    78 │       <div
+  
+  i Consider replace semantically interactive element like <button/> or <a href/>.
+  
+
+src/components/dashboard/Dashboard.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    dashboard.tsx
+  
+
+src/components/dashboard/LowStockBanner.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    low-stock-banner.tsx
+  
+
+src/components/dashboard/LowStockBanner.tsx:37:15 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    35 │           <div className="mt-3 flex flex-wrap gap-2">
+    36 │             {alerts.slice(0, 3).map((alert) => (
+  > 37 │               <button
+       │               ^^^^^^^
+  > 38 │                 className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-sm transition-colors hover:bg-amber-50 dark:border-amber-800 dark:bg-stone-900 dark:hover:bg-amber-950/50"
+  > 39 │                 key={alert.id}
+  > 40 │                 onClick={() => onViewItem?.(alert.id)}
+  > 41 │               >
+       │               ^
+    42 │                 <span className="font-medium text-stone-700 dark:text-stone-300">
+    43 │                   {alert.name}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/dashboard/LowStockBanner.tsx:57:9 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    55 │           </div>
+    56 │         </div>
+  > 57 │         <button
+       │         ^^^^^^^
+  > 58 │           className="flex flex-shrink-0 items-center gap-1 font-medium text-amber-700 text-sm transition-colors hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200"
+  > 59 │           onClick={onViewAll}
+  > 60 │         >
+       │         ^
+    61 │           {t("viewAll")}
+    62 │           <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/dashboard/MetricCard.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    metric-card.tsx
+  
+
+src/components/dashboard/MetricCard.tsx:46:5 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    45 │   return (
+  > 46 │     <button
+       │     ^^^^^^^
+  > 47 │       className={`w-full rounded-xl border p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] ${styles.container} ${onClick ? "cursor-pointer" : "cursor-default"} ${isRTL ? "text-right" : "text-left"}`}
+  > 48 │       onClick={onClick}
+  > 49 │     >
+       │     ^
+    50 │       <div className="flex items-start justify-between gap-3">
+    51 │         <div className={`min-w-0 flex-1 ${isRTL ? "text-right" : "text-left"}`}>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/dashboard/PendingInvoices.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    pending-invoices.tsx
+  
+
+src/components/dashboard/PendingInvoices.tsx:80:17 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    78 │               );
+    79 │               return (
+  > 80 │                 <button
+       │                 ^^^^^^^
+  > 81 │                   className="group flex w-full items-center justify-between rounded-xl border border-stone-100 p-4 shadow-sm transition-all hover:border-red-100 hover:bg-red-50/30 dark:border-stone-800/50 dark:hover:bg-red-900/10"
+  > 82 │                   key={customerId}
+  > 83 │                   onClick={() => onViewCustomerDebt?.(customerId)}
+  > 84 │                 >
+       │                 ^
+    85 │                   <div className="text-start">
+    86 │                     <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/dashboard/QuickActions.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    quick-actions.tsx
+  
+
+src/components/dashboard/QuickActions.tsx:18:7 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    16 │   return (
+    17 │     <div className={`flex flex-wrap gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+  > 18 │       <button
+       │       ^^^^^^^
+  > 19 │         className="inline-flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-4 py-2.5 font-medium text-sm text-stone-700 shadow-sm transition-all hover:border-stone-300 hover:bg-stone-50 hover:shadow dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300 dark:hover:border-stone-600 dark:hover:bg-stone-800"
+  > 20 │         onClick={onNewCustomer}
+  > 21 │       >
+       │       ^
+    22 │         <UserPlus className="h-4 w-4" />
+    23 │         {t("newCustomer")}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/dashboard/QuickActions.tsx:25:7 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    23 │         {t("newCustomer")}
+    24 │       </button>
+  > 25 │       <button
+       │       ^^^^^^^
+  > 26 │         className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 font-medium text-sm text-white shadow-sm transition-all hover:bg-amber-600 hover:shadow-md"
+  > 27 │         onClick={onStartSession}
+  > 28 │       >
+       │       ^
+    29 │         <Play className="h-4 w-4" />
+    30 │         {t("startSession")}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/dashboard/RevenueChart.tsx:61:19 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    59 │               {p === "today"
+    60 │                 ? t("today")
+  > 61 │                 : p === "week"
+       │                   ^^^^^^^^^^^^
+  > 62 │                   ? t("thisWeek")
+  > 63 │                   : t("thisMonth")}
+       │                   ^^^^^^^^^^^^^^^^
+    64 │             </button>
+    65 │           ))}
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src/components/dashboard/RevenueChart.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    revenue-chart.tsx
+  
+
+src/components/dashboard/RevenueChart.tsx:54:13 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    52 │         <div className="flex rounded-lg bg-stone-100 p-1 dark:bg-stone-800">
+    53 │           {(["today", "week", "month"] as Period[]).map((p) => (
+  > 54 │             <button
+       │             ^^^^^^^
+  > 55 │               className={`rounded-md px-3 py-1.5 font-medium text-xs transition-all ${period === p ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
+  > 56 │               key={p}
+  > 57 │               onClick={() => setPeriod(p)}
+  > 58 │             >
+       │             ^
+    59 │               {p === "today"
+    60 │                 ? t("today")
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/dashboard/RevenueChart.tsx:91:20 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    89 │             <div
+    90 │               className="flex h-full flex-1 flex-col items-center justify-end gap-1"
+  > 91 │               key={index}
+       │                    ^^^^^
+    92 │             >
+    93 │               <div className="flex min-h-0 w-full flex-1 flex-col-reverse items-center">
+  
+  i This is the source of the key value.
+  
+    84 │       <div className="flex min-h-0 flex-1 items-end gap-2 pt-4">
+  > 85 │         {data.map((point, index) => {
+       │                           ^^^^^
+    86 │           const sessionHeight = (point.sessions / maxValue) * 100;
+    87 │           const inventoryHeight = (point.inventory / maxValue) * 100;
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src/components/dashboard/index.ts:1:1 lint/performance/noBarrelFile ━━━━━━━━━━
+
+  × Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
+  
+  > 1 │ export { ActivityFeed } from "./ActivityFeed";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export { Dashboard } from "./Dashboard";
+    3 │ export { LowStockBanner } from "./LowStockBanner";
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+src/components/inventory/InventoryDialog.tsx:45:16 lint/style/noNonNullAssertion ━━━━━━━━━━
+
+  × Forbidden non-null assertion.
+  
+    43 │       isOpen={isOpen}
+    44 │       maxWidth="max-w-2xl"
+  > 45 │       onClose={onClose!}
+       │                ^^^^^^^^
+    46 │       title={
+    47 │         <div className="flex items-center gap-3">
+  
+
+src/components/inventory/InventoryDialog.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    inventory-dialog.tsx
+  
+
+src/components/inventory/InventoryForm.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    inventory-form.tsx
+  
+
+src/components/inventory/InventoryItemCard.tsx:128:11 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    126 │         {/* Quick Actions */}
+    127 │         <div className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white p-1 shadow-sm dark:border-stone-700 dark:bg-stone-800">
+  > 128 │           <button
+        │           ^^^^^^^
+  > 129 │             className="flex h-7 w-7 items-center justify-center rounded bg-stone-100 text-stone-600 transition-colors hover:bg-red-100 hover:text-red-600 disabled:opacity-30 dark:bg-stone-700 dark:text-stone-300"
+  > 130 │             disabled={item.quantity <= 0}
+  > 131 │             onClick={() => onAdjustQuantity?.(-1)}
+  > 132 │           >
+        │           ^
+    133 │             <Minus className="h-4 w-4" />
+    134 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/inventory/InventoryItemCard.tsx:78:11 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    76 │             <Pencil className="h-4 w-4" />
+    77 │           </button>
+  > 78 │           <button
+       │           ^^^^^^^
+  > 79 │             className="rounded-lg p-1.5 text-stone-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
+  > 80 │             onClick={onDelete}
+  > 81 │           >
+       │           ^
+    82 │             <Trash2 className="h-4 w-4" />
+    83 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/inventory/InventoryItemCard.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    inventory-item-card.tsx
+  
+
+src/components/inventory/InventoryItemCard.tsx:135:11 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    133 │             <Minus className="h-4 w-4" />
+    134 │           </button>
+  > 135 │           <button
+        │           ^^^^^^^
+  > 136 │             className="flex h-7 w-7 items-center justify-center rounded bg-stone-100 text-stone-600 transition-colors hover:bg-emerald-100 hover:text-emerald-600 dark:bg-stone-700 dark:text-stone-300"
+  > 137 │             onClick={() => onAdjustQuantity?.(1)}
+  > 138 │           >
+        │           ^
+    139 │             <Plus className="h-4 w-4" />
+    140 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/inventory/InventoryItemCard.tsx:72:11 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    71 │         <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+  > 72 │           <button
+       │           ^^^^^^^
+  > 73 │             className="rounded-lg p-1.5 text-stone-400 transition-colors hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/20"
+  > 74 │             onClick={onEdit}
+  > 75 │           >
+       │           ^
+    76 │             <Pencil className="h-4 w-4" />
+    77 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/inventory/InventoryList.tsx:184:32 lint/style/noNonNullAssertion ━━━━━━━━━━
+
+  × Forbidden non-null assertion.
+  
+    182 │           <div className={`${gridClass} pb-6`}>
+    183 │             {filteredInventory.map((item) => {
+  > 184 │               const category = categories.find((c) => c.id === item.category)!;
+        │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    185 │               return (
+    186 │                 <InventoryItemCard
+  
+
+src/components/inventory/InventoryList.tsx:151:13 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    149 │             </p>
+    150 │           </div>
+  > 151 │         ) : categoryFilter === "all" ? (
+        │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 152 │           <div className="space-y-10 pb-6">
+         ...
+  > 198 │           </div>
+  > 199 │         )}
+        │         ^
+    200 │       </div>
+    201 │     </div>
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src/components/inventory/InventoryList.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    inventory-list.tsx
+  
+
+src/components/inventory/InventoryList.tsx:88:11 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    86 │             </p>
+    87 │           </div>
+  > 88 │           <button
+       │           ^^^^^^^
+  > 89 │             className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
+  > 90 │             onClick={onCreate}
+  > 91 │           >
+       │           ^
+    92 │             <Plus className="h-4 w-4" />
+    93 │             {t("newItem")}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/inventory/InventoryList.tsx:118:13 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    116 │           </div>
+    117 │           <div className="flex overflow-x-auto rounded-xl bg-stone-100 p-1 dark:bg-stone-800">
+  > 118 │             <button
+        │             ^^^^^^^
+  > 119 │               className={`whitespace-nowrap rounded-lg px-4 py-1.5 font-medium text-sm transition-all ${categoryFilter === "all" ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-500 hover:text-stone-700"}`}
+  > 120 │               onClick={() => setCategoryFilter("all")}
+  > 121 │             >
+        │             ^
+    122 │               {t("allCategories")}
+    123 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/inventory/InventoryList.tsx:125:15 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    123 │             </button>
+    124 │             {categories.map((cat) => (
+  > 125 │               <button
+        │               ^^^^^^^
+  > 126 │                 className={`whitespace-nowrap rounded-lg px-4 py-1.5 font-medium text-sm transition-all ${categoryFilter === cat.id ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-500 hover:text-stone-700"}`}
+  > 127 │                 key={cat.id}
+  > 128 │                 onClick={() => setCategoryFilter(cat.id)}
+  > 129 │               >
+        │               ^
+    130 │                 {isRTL ? cat.labelAr : cat.labelEn}
+    131 │               </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/inventory/LowStockAlert.tsx:38:19 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    36 │               <div className="mt-3 flex flex-wrap gap-2">
+    37 │                 {outOfStockItems.slice(0, 5).map((item) => (
+  > 38 │                   <button
+       │                   ^^^^^^^
+  > 39 │                     className="inline-flex items-center rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-stone-900 dark:hover:bg-red-950/50"
+  > 40 │                     key={item.id}
+  > 41 │                     onClick={() => onItemClick?.(item.id)}
+  > 42 │                   >
+       │                   ^
+    43 │                     <span className="font-medium text-stone-700 dark:text-stone-300">
+    44 │                       {item.name}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/inventory/LowStockAlert.tsx:73:19 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    71 │               <div className="mt-3 flex flex-wrap gap-2">
+    72 │                 {lowStockItems.slice(0, 5).map((item) => (
+  > 73 │                   <button
+       │                   ^^^^^^^
+  > 74 │                     className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-sm transition-colors hover:bg-amber-50 dark:border-amber-800 dark:bg-stone-900 dark:hover:bg-amber-950/50"
+  > 75 │                     key={item.id}
+  > 76 │                     onClick={() => onItemClick?.(item.id)}
+  > 77 │                   >
+       │                   ^
+    78 │                     <span className="font-medium text-stone-700 dark:text-stone-300">
+    79 │                       {item.name}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/inventory/LowStockAlert.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    low-stock-alert.tsx
+  
+
+src/components/inventory/index.ts:1:1 lint/performance/noBarrelFile ━━━━━━━━━━
+
+  × Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
+  
+  > 1 │ export { InventoryDialog } from "./InventoryDialog";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export { InventoryForm } from "./InventoryForm";
+    3 │ export { InventoryItemCard } from "./InventoryItemCard";
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+src/components/invoices/InvoiceDialog.tsx:64:16 lint/style/noNonNullAssertion ━━━━━━━━━━
+
+  × Forbidden non-null assertion.
+  
+    62 │       isOpen={isOpen}
+    63 │       maxWidth="max-w-lg"
+  > 64 │       onClose={onClose!}
+       │                ^^^^^^^^
+    65 │       showCloseButton={false}
+    66 │     >
+  
+
+src/components/invoices/InvoiceDialog.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    invoice-dialog.tsx
+  
+
+src/components/invoices/InvoiceDialog.tsx:75:9 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    73 │           </span>
+    74 │         </div>
+  > 75 │         <button
+       │         ^^^^^^^
+  > 76 │           className="rounded-lg p-2 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+  > 77 │           onClick={onClose}
+  > 78 │         >
+       │         ^
+    79 │           <X className="h-5 w-5" />
+    80 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/invoices/InvoiceDialog.tsx:139:26 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    137 │             <tbody className="divide-y divide-stone-50 dark:divide-stone-800/50">
+    138 │               {invoice.lineItems.map((item, i) => (
+  > 139 │                 <tr key={i}>
+        │                          ^
+    140 │                   <td className="px-4 py-3 text-stone-700 dark:text-stone-300">
+    141 │                     {item.description}
+  
+  i This is the source of the key value.
+  
+    136 │             </thead>
+    137 │             <tbody className="divide-y divide-stone-50 dark:divide-stone-800/50">
+  > 138 │               {invoice.lineItems.map((item, i) => (
+        │                                             ^
+    139 │                 <tr key={i}>
+    140 │                   <td className="px-4 py-3 text-stone-700 dark:text-stone-300">
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src/components/invoices/InvoiceDialog.tsx:180:11 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    178 │       {invoice.status !== "paid" && onRecordPayment && (
+    179 │         <div className="border-stone-100 border-t bg-stone-50 px-6 py-4 dark:border-stone-800 dark:bg-stone-800/50">
+  > 180 │           <button
+        │           ^^^^^^^
+  > 181 │             className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 font-bold text-base text-white shadow-emerald-200 shadow-lg transition-all hover:bg-emerald-700 active:scale-[0.98] dark:shadow-none"
+  > 182 │             onClick={onRecordPayment}
+  > 183 │           >
+        │           ^
+    184 │             <CreditCard className="h-5 w-5" />
+    185 │             <span>{t("recordPayment")}</span>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/invoices/InvoiceRow.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    invoice-row.tsx
+  
+
+src/components/invoices/InvoiceRow.tsx:103:9 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    102 │       <div className="col-span-1 flex items-center justify-end gap-1 md:col-span-2">
+  > 103 │         <button
+        │         ^^^^^^^
+  > 104 │           className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+  > 105 │           onClick={onView}
+  > 106 │           title={t("viewInvoice")}
+  > 107 │         >
+        │         ^
+    108 │           <Eye className="h-4 w-4" />
+    109 │         </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/invoices/InvoiceRow.tsx:111:11 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    109 │         </button>
+    110 │         {invoice.status !== "paid" && invoice.status !== "cancelled" && (
+  > 111 │           <button
+        │           ^^^^^^^
+  > 112 │             className="rounded-lg p-2 text-emerald-600 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
+  > 113 │             onClick={onRecordPayment}
+  > 114 │             title={t("recordPayment")}
+  > 115 │           >
+        │           ^
+    116 │             <CreditCard className="h-4 w-4" />
+    117 │           </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/invoices/InvoicesList.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    invoices-list.tsx
+  
+
+src/components/invoices/InvoicesList.tsx:89:13 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    87 │         <div className="flex rounded-lg bg-stone-100 p-1 dark:bg-stone-800">
+    88 │           {(["all", "paid", "unpaid", "cancelled"] as const).map((status) => (
+  > 89 │             <button
+       │             ^^^^^^^
+  > 90 │               className={`rounded-md px-4 py-2 font-medium text-sm transition-all ${statusFilter === status ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 dark:text-stone-400"}`}
+  > 91 │               key={status}
+  > 92 │               onClick={() => setStatusFilter(status)}
+  > 93 │             >
+       │             ^
+    94 │               {status === "all" ? t("all") : t(status)} ({statusCounts[status]})
+    95 │             </button>
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/invoices/PaymentDialog.tsx:89:16 lint/style/noNonNullAssertion ━━━━━━━━━━
+
+  × Forbidden non-null assertion.
+  
+    87 │       isOpen={isOpen}
+    88 │       maxWidth="max-w-md"
+  > 89 │       onClose={onClose!}
+       │                ^^^^^^^^
+    90 │       showCloseButton={false}
+    91 │       title={
+  
+
+src/components/invoices/PaymentDialog.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    payment-dialog.tsx
+  
+
+src/components/invoices/index.ts:1:1 lint/performance/noBarrelFile ━━━━━━━━━━
+
+  × Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
+  
+  > 1 │ export { InvoiceDialog } from "./InvoiceDialog";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ export { InvoiceRow } from "./InvoiceRow";
+    3 │ export { InvoicesList } from "./InvoicesList";
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+src/components/reports/OperationHistory.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    operation-history.tsx
+  
+
+src/components/reports/OperationHistory.tsx:144:17 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    142 │               const Icon = config.icon;
+    143 │               return (
+  > 144 │                 <button
+        │                 ^^^^^^^
+  > 145 │                   className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+  > 146 │                   key={operation.id}
+  > 147 │                   onClick={() => onOperationClick?.(operation.id)}
+  > 148 │                 >
+        │                 ^
+    149 │                   <div className={`flex-shrink-0 rounded-lg p-2 ${config.bg}`}>
+    150 │                     <Icon className={`h-4 w-4 ${config.color}`} />
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/reports/ReportsPage.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    reports-page.tsx
+  
+
+src/components/reports/ReportsPage.tsx:59:13 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    57 │           const Icon = tab.icon;
+    58 │           return (
+  > 59 │             <button
+       │             ^^^^^^^
+  > 60 │               className={`inline-flex items-center gap-2 rounded-md px-4 py-2 font-medium text-sm transition-all ${activeTab === tab.id ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
+  > 61 │               key={tab.id}
+  > 62 │               onClick={() => setActiveTab(tab.id)}
+  > 63 │             >
+       │             ^
+    64 │               <Icon className="h-4 w-4" />
+    65 │               {tab.label}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/reports/RevenueReport.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    revenue-report.tsx
+  
+
+src/components/reports/RevenueReport.tsx:105:24 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    103 │                 <div
+    104 │                   className="flex flex-1 flex-col items-center gap-1"
+  > 105 │                   key={index}
+        │                        ^^^^^
+    106 │                 >
+    107 │                   <div
+  
+  i This is the source of the key value.
+  
+    93 │           </div>
+    94 │           <div className="flex h-48 items-end gap-2">
+  > 95 │             {revenueChart.map((point, index) => {
+       │                                       ^^^^^
+    96 │               const maxValue = Math.max(
+    97 │                 ...revenueChart.map((d) => d.sessions + d.inventory)
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src/components/reports/RevenueReport.tsx:152:15 lint/a11y/useButtonType ━━━━━━━━━━
+
+  × Provide an explicit type prop for the button element.
+  
+    150 │           <div className="space-y-3">
+    151 │             {topCustomers.map((customer, index) => (
+  > 152 │               <button
+        │               ^^^^^^^
+  > 153 │                 className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-stone-50 dark:hover:bg-stone-800"
+  > 154 │                 key={customer.id}
+  > 155 │                 onClick={() => onCustomerClick?.(customer.id)}
+  > 156 │               >
+        │               ^
+    157 │                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700 text-xs dark:bg-amber-900/30 dark:text-amber-300">
+    158 │                   {index + 1}
+  
+  i The default type of a button is submit, which causes the submission of a form when placed inside a `form` element. This is likely not the behaviour that you want inside a React application.
+  
+  i Allowed button types are: submit, button or reset
+  
+
+src/components/reports/UtilizationReport.tsx:97:111 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    95 │                 <div className="h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
+    96 │                   <div
+  > 97 │                     className={`h-full rounded-full transition-all ${resource.rate >= 80 ? "bg-emerald-500" : resource.rate >= 50 ? "bg-amber-500" : "bg-red-500"}`}
+       │                                                                                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    98 │                     style={{ width: `${resource.rate}%` }}
+    99 │                   />
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src/components/reports/UtilizationReport.tsx:118:103 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    116 │                 <div className="h-6 flex-1 overflow-hidden rounded bg-stone-100 dark:bg-stone-800">
+    117 │                   <div
+  > 118 │                     className={`h-full rounded transition-all ${hour.occupancy >= 80 ? "bg-red-500" : hour.occupancy >= 60 ? "bg-amber-500" : hour.occupancy >= 40 ? "bg-emerald-500" : "bg-emerald-300"}`}
+        │                                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    119 │                     style={{ width: `${hour.occupancy}%` }}
+    120 │                   />
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src/stores/hooks.ts:11:1 lint/performance/noBarrelFile ━━━━━━━━━━
+
+  × Avoid barrel files, they slow down performance, and cause large module graphs with modules that go unused.
+  
+    10 │ // Re-export useAppStore so it can be used directly
+  > 11 │ export { useAppStore } from "./useAppStore";
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ 
+    13 │ // Optimized hooks to prevent infinite loops
+  
+  i Check this thorough explanation to better understand the context.
+  
+
+src/stores/hooks.ts:49:5 lint/complexity/noForEach ━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    47 │     let inventoryRev = 0;
+    48 │ 
+  > 49 │     todayInvoices.forEach((inv) => {
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 50 │       inv.lineItems.forEach((item) => {
+        ...
+  > 63 │       });
+  > 64 │     });
+       │     ^^
+    65 │ 
+    66 │     const todayTotal = sessionRev + inventoryRev;
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src/stores/hooks.ts:50:7 lint/complexity/noForEach ━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    49 │     todayInvoices.forEach((inv) => {
+  > 50 │       inv.lineItems.forEach((item) => {
+       │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 51 │         // Simple logic: if description contains 'Session' or 'اشتراك' or 'Subscription' it's session/service revenue
+        ...
+  > 62 │         }
+  > 63 │       });
+       │       ^^
+    64 │     });
+    65 │ 
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+src/stores/useAppStore.ts lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    use-app-store.ts
+  
+
+src/stores/useAppStore.ts:482:18 lint/suspicious/useAwait ━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    480 │   },
+    481 │ 
+  > 482 │   recordPayment: async (invoiceId, amount, method, notes) => {
+        │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 483 │     get().processPayment({
+         ...
+  > 488 │     });
+  > 489 │   },
+        │   ^
+    490 │ 
+    491 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    480 │   },
+    481 │ 
+  > 482 │   recordPayment: async (invoiceId, amount, method, notes) => {
+        │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 483 │     get().processPayment({
+         ...
+  > 488 │     });
+  > 489 │   },
+        │   ^
+    490 │ 
+    491 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+src/stores/useAppStore.ts:492:22 lint/suspicious/useAwait ━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    491 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  > 492 │   recordBulkPayment: async (invoiceIds, _amount, _method, _notes) => {
+        │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 493 │     // Bulk payment logic needs backend support or loop here.
+         ...
+  > 501 │     toast.success("Bulk payment not fully implemented yet");
+  > 502 │   },
+        │   ^
+    503 │ 
+    504 │   // Subscription Actions
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    491 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  > 492 │   recordBulkPayment: async (invoiceIds, _amount, _method, _notes) => {
+        │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 493 │     // Bulk payment logic needs backend support or loop here.
+         ...
+  > 501 │     toast.success("Bulk payment not fully implemented yet");
+  > 502 │   },
+        │   ^
+    503 │ 
+    504 │   // Subscription Actions
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+src/stores/useAppStore.ts:615:20 lint/suspicious/useAwait ━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    614 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  > 615 │   updatePlanPrice: async (_planId, _price) => {
+        │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 616 │     // Backend doesn't have granulur plan update yet, relies on settings blob or hardcoded
+  > 617 │     toast.success("Plan price updated (Simulation)");
+  > 618 │   },
+        │   ^
+    619 │ 
+    620 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    614 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  > 615 │   updatePlanPrice: async (_planId, _price) => {
+        │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 616 │     // Backend doesn't have granulur plan update yet, relies on settings blob or hardcoded
+  > 617 │     toast.success("Plan price updated (Simulation)");
+  > 618 │   },
+        │   ^
+    619 │ 
+    620 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+src/stores/useAppStore.ts:621:28 lint/suspicious/useAwait ━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    620 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  > 621 │   updateResourceTypePrice: async (_typeId, _price) => {
+        │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 622 │     toast.success("Resource Type price updated (Simulation)");
+  > 623 │   },
+        │   ^
+    624 │ 
+    625 │   // Inventory Adjustments
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    620 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  > 621 │   updateResourceTypePrice: async (_typeId, _price) => {
+        │                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 622 │     toast.success("Resource Type price updated (Simulation)");
+  > 623 │   },
+        │   ^
+    624 │ 
+    625 │   // Inventory Adjustments
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+src/stores/useAppStore.ts:626:28 lint/suspicious/useAwait ━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    625 │   // Inventory Adjustments
+  > 626 │   adjustInventoryQuantity: async (id, delta) => {
+        │                            ^^^^^^^^^^^^^^^^^^^^^^
+  > 627 │     // Ideally fetch item, calc new quantity, call update_inventory
+         ...
+  > 637 │     toast.success("Inventory quantity adjusted (Simulation)");
+  > 638 │   },
+        │   ^
+    639 │ 
+    640 │   // Session Extras
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    625 │   // Inventory Adjustments
+  > 626 │   adjustInventoryQuantity: async (id, delta) => {
+        │                            ^^^^^^^^^^^^^^^^^^^^^^
+  > 627 │     // Ideally fetch item, calc new quantity, call update_inventory
+         ...
+  > 637 │     toast.success("Inventory quantity adjusted (Simulation)");
+  > 638 │   },
+        │   ^
+    639 │ 
+    640 │   // Session Extras
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+src/stores/useAppStore.ts:642:31 lint/suspicious/useAwait ━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    640 │   // Session Extras
+    641 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  > 642 │   removeInventoryFromSession: async (_sessionId, _inventoryId) => {
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 643 │     toast.success("Item removed from session (Simulation)");
+  > 644 │   },
+        │   ^
+    645 │ 
+    646 │   updateInventoryInSession: async (_sessionId, _inventoryId, quantity) => {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    640 │   // Session Extras
+    641 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  > 642 │   removeInventoryFromSession: async (_sessionId, _inventoryId) => {
+        │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 643 │     toast.success("Item removed from session (Simulation)");
+  > 644 │   },
+        │   ^
+    645 │ 
+    646 │   updateInventoryInSession: async (_sessionId, _inventoryId, quantity) => {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+src/stores/useAppStore.ts:646:29 lint/suspicious/useAwait ━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    644 │   },
+    645 │ 
+  > 646 │   updateInventoryInSession: async (_sessionId, _inventoryId, quantity) => {
+        │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 647 │     toast.success(`Session inventory updated to ${quantity} (Simulation)`);
+  > 648 │   },
+        │   ^
+    649 │ 
+    650 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    644 │   },
+    645 │ 
+  > 646 │   updateInventoryInSession: async (_sessionId, _inventoryId, quantity) => {
+        │                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 647 │     toast.success(`Session inventory updated to ${quantity} (Simulation)`);
+  > 648 │   },
+        │   ^
+    649 │ 
+    650 │   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 189.
+Checked 112 files in 886ms. No fixes applied.
+Found 289 errors.
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

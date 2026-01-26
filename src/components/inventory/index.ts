@@ -1,5 +1,5 @@
-export { InventoryList } from './InventoryList'
-export { InventoryItemCard } from './InventoryItemCard'
-export { InventoryForm } from './InventoryForm'
-export { InventoryDialog } from './InventoryDialog'
-export { LowStockAlert } from './LowStockAlert'
+export { InventoryDialog } from "./InventoryDialog";
+export { InventoryForm } from "./InventoryForm";
+export { InventoryItemCard } from "./InventoryItemCard";
+export { InventoryList } from "./InventoryList";
+export { LowStockAlert } from "./LowStockAlert";

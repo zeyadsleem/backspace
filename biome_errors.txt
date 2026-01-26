@@ -1,0 +1,20 @@
+error: unknown option '--max-diagnostics'
+
+
+
+Usage: ultracite check [options] [specific files to lint...]
+
+Run linter without fixing files
+
+Arguments:
+  specific files to lint                     array specific files to lint
+
+Options:
+  --diagnostic-level [string]                level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. (choices: "info", "warn", "error")
+  --linter [string]                          linter to use (biome, eslint, or oxlint) (choices: "biome", "eslint", "oxlint")
+  --type-aware [boolean]                     enable type-aware linting rules (oxlint only)
+  --type-check [boolean]                     enable TypeScript compiler diagnostics (oxlint only)
+  --no-error-on-unmatched-pattern [boolean]  suppress errors when files don't match patterns (useful for hooks/CI)
+  --error-on-warnings [boolean]              treat warnings as errors (biome only)
+  -h, --help                                 display help for command
+

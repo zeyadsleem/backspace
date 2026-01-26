@@ -1,30 +1,40 @@
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Package, DollarSign, Hash } from 'lucide-react'
-import { useAppStore } from '@/stores/useAppStore'
-import { inventorySchema, type InventoryFormData } from '@/lib/validations'
-import type { InventoryCategory } from '@/types'
-import { Button } from '@/components/ui/button'
-import { FormField, FormLabel, FormInput, FormSelect, FormError } from '@/components/ui/form'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DollarSign, Hash, Package } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { FormError, FormField, FormInput, FormLabel, FormSelect } from "@/components/ui/form";
+import { type InventoryFormData, inventorySchema } from "@/lib/validations";
+import { useAppStore } from "@/stores/useAppStore";
+import type { InventoryCategory } from "@/types";
 
 interface InventoryFormProps {
   initialData?: {
-    name: string
-    category: InventoryCategory
-    price: number
-    quantity: number
-    minStock: number
-  }
-  categories: Array<{ id: InventoryCategory; labelEn: string; labelAr: string }>
-  onSubmit?: (data: InventoryFormData) => void
-  onCancel?: () => void
-  isLoading?: boolean
+    name: string;
+    category: InventoryCategory;
+    price: number;
+    quantity: number;
+    minStock: number;
+  };
+  categories: Array<{
+    id: InventoryCategory;
+    labelEn: string;
+    labelAr: string;
+  }>;
+  onSubmit?: (data: InventoryFormData) => void;
+  onCancel?: () => void;
+  isLoading?: boolean;
 }
 
-export function InventoryForm({ initialData, categories, onSubmit, onCancel, isLoading = false }: InventoryFormProps) {
-  const t = useAppStore((state) => state.t)
-  const language = useAppStore((state) => state.language)
-  const isRTL = useAppStore((state) => state.isRTL)
+export function InventoryForm({
+  initialData,
+  categories,
+  onSubmit,
+  onCancel,
+  isLoading = false,
+}: InventoryFormProps) {
+  const t = useAppStore((state) => state.t);
+  const language = useAppStore((state) => state.language);
+  const isRTL = useAppStore((state) => state.isRTL);
 
   const {
     register,
@@ -34,42 +44,42 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
   } = useForm<InventoryFormData>({
     resolver: zodResolver(inventorySchema),
     defaultValues: {
-      name: initialData?.name ?? '',
-      category: initialData?.category ?? 'beverage',
+      name: initialData?.name ?? "",
+      category: initialData?.category ?? "beverage",
       price: initialData?.price ?? 0,
       quantity: initialData?.quantity ?? 0,
       minStock: initialData?.minStock ?? 5,
     },
-    mode: 'onChange',
-  })
+    mode: "onChange",
+  });
 
   const onFormSubmit = (data: InventoryFormData) => {
-    onSubmit?.(data)
-  }
+    onSubmit?.(data);
+  };
 
   const handleReset = () => {
-    reset()
-    onCancel?.()
-  }
+    reset();
+    onCancel?.();
+  };
 
-  const isEditing = !!initialData
+  const isEditing = !!initialData;
 
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <form className="space-y-6" onSubmit={handleSubmit(onFormSubmit)}>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Name Field */}
         <FormField>
           <FormLabel htmlFor="name" icon={<Package className="h-4 w-4" />} required>
-            {t('itemName') || 'Item Name'}
+            {t("itemName") || "Item Name"}
           </FormLabel>
           <FormInput
             id="name"
             type="text"
-            {...register('name')}
-            placeholder={t('inventoryExample') || 'Enter item name'}
+            {...register("name")}
+            disabled={isLoading}
             error={!!errors.name}
             isRTL={isRTL}
-            disabled={isLoading}
+            placeholder={t("inventoryExample") || "Enter item name"}
           />
           <FormError>{errors.name?.message}</FormError>
         </FormField>
@@ -77,17 +87,17 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
         {/* Price Field */}
         <FormField>
           <FormLabel htmlFor="price" icon={<DollarSign className="h-4 w-4" />} required>
-            {t('price') || `Price (${t('egp')})`}
+            {t("price") || `Price (${t("egp")})`}
           </FormLabel>
           <FormInput
             id="price"
-            type="number"
-            step="any"
             min="0"
-            {...register('price', { valueAsNumber: true })}
-            placeholder="0.00"
-            error={!!errors.price}
+            step="any"
+            type="number"
+            {...register("price", { valueAsNumber: true })}
             disabled={isLoading}
+            error={!!errors.price}
+            placeholder="0.00"
           />
           <FormError>{errors.price?.message}</FormError>
         </FormField>
@@ -95,16 +105,16 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
         {/* Quantity Field */}
         <FormField>
           <FormLabel htmlFor="quantity" icon={<Hash className="h-4 w-4" />} required>
-            {t('quantity') || 'Quantity'}
+            {t("quantity") || "Quantity"}
           </FormLabel>
           <FormInput
             id="quantity"
-            type="number"
             min="0"
-            {...register('quantity', { valueAsNumber: true })}
-            placeholder="0"
-            error={!!errors.quantity}
+            type="number"
+            {...register("quantity", { valueAsNumber: true })}
             disabled={isLoading}
+            error={!!errors.quantity}
+            placeholder="0"
           />
           <FormError>{errors.quantity?.message}</FormError>
         </FormField>
@@ -112,16 +122,16 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
         {/* Min Stock Field */}
         <FormField>
           <FormLabel htmlFor="minStock" icon={<Hash className="h-4 w-4" />} required>
-            {t('minStock') || 'Minimum Stock'}
+            {t("minStock") || "Minimum Stock"}
           </FormLabel>
           <FormInput
             id="minStock"
-            type="number"
             min="0"
-            {...register('minStock', { valueAsNumber: true })}
-            placeholder="5"
-            error={!!errors.minStock}
+            type="number"
+            {...register("minStock", { valueAsNumber: true })}
             disabled={isLoading}
+            error={!!errors.minStock}
+            placeholder="5"
           />
           <FormError>{errors.minStock?.message}</FormError>
         </FormField>
@@ -130,17 +140,17 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
       {/* Category Field - Full Width */}
       <FormField>
         <FormLabel htmlFor="category" required>
-          {t('category') || 'Category'}
+          {t("category") || "Category"}
         </FormLabel>
         <FormSelect
           id="category"
-          {...register('category')}
-          error={!!errors.category}
+          {...register("category")}
           disabled={isLoading}
+          error={!!errors.category}
         >
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
-              {language === 'ar' ? category.labelAr : category.labelEn}
+              {language === "ar" ? category.labelAr : category.labelEn}
             </option>
           ))}
         </FormSelect>
@@ -148,25 +158,20 @@ export function InventoryForm({ initialData, categories, onSubmit, onCancel, isL
       </FormField>
 
       {/* Action Buttons */}
-      <div className="flex gap-3 pt-4 border-t border-stone-100 dark:border-stone-800">
-        <Button
-          type="button"
-          onClick={handleReset}
-          disabled={isLoading}
-          variant="outline"
-        >
-          {t('cancel')}
+      <div className="flex gap-3 border-stone-100 border-t pt-4 dark:border-stone-800">
+        <Button disabled={isLoading} onClick={handleReset} type="button" variant="outline">
+          {t("cancel")}
         </Button>
         <Button
-          type="submit"
-          disabled={isLoading || !isValid || (!isDirty && !isEditing)}
-          variant="primary"
-          isLoading={isLoading}
           className="flex-1"
+          disabled={isLoading || !isValid || !(isDirty || isEditing)}
+          isLoading={isLoading}
+          type="submit"
+          variant="primary"
         >
-          {isEditing ? t('updateItem') : t('newItem')}
+          {isEditing ? t("updateItem") : t("newItem")}
         </Button>
       </div>
     </form>
-  )
+  );
 }

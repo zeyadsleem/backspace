@@ -1,5 +1,5 @@
-export { ResourcesList } from './ResourcesList'
-export { ResourceCard } from './ResourceCard'
-export { ResourceForm } from './ResourceForm'
-export { ResourceDialog } from './ResourceDialog'
-export { ResourceDetailsDialog } from './ResourceDetailsDialog'
+export { ResourceCard } from "./ResourceCard";
+export { ResourceDetailsDialog } from "./ResourceDetailsDialog";
+export { ResourceDialog } from "./ResourceDialog";
+export { ResourceForm } from "./ResourceForm";
+export { ResourcesList } from "./ResourcesList";

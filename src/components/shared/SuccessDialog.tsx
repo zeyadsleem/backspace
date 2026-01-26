@@ -1,36 +1,38 @@
-import { CheckCircle, X } from 'lucide-react'
+import { CheckCircle, X } from "lucide-react";
 
 interface SuccessDialogProps {
-  isOpen: boolean
-  title: string
-  description?: string
-  primaryActionText?: string
-  secondaryActionText?: string
-  onPrimaryAction?: () => void
-  onSecondaryAction?: () => void
-  onClose?: () => void
+  isOpen: boolean;
+  title: string;
+  description?: string;
+  primaryActionText?: string;
+  secondaryActionText?: string;
+  onPrimaryAction?: () => void;
+  onSecondaryAction?: () => void;
+  onClose?: () => void;
 }
 
 export function SuccessDialog({
   isOpen,
   title,
   description,
-  primaryActionText = 'Continue',
+  primaryActionText = "Continue",
   secondaryActionText,
   onPrimaryAction,
   onSecondaryAction,
   onClose,
 }: SuccessDialogProps) {
-  if (!isOpen) return null
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-stone-900">
         <button
-          type="button"
+          className="absolute top-4 right-4 rounded-lg p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-lg p-2 text-stone-400 hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+          type="button"
         >
           <X className="h-5 w-5" />
         </button>
@@ -38,28 +40,30 @@ export function SuccessDialog({
           <CheckCircle className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
         </div>
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">{title}</h3>
-          {description && <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">{description}</p>}
+          <h3 className="font-semibold text-lg text-stone-900 dark:text-stone-100">{title}</h3>
+          {description && (
+            <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">{description}</p>
+          )}
         </div>
         <div className="mt-6 flex gap-3">
           {secondaryActionText && onSecondaryAction && (
             <button
-              type="button"
+              className="flex-1 rounded-lg border border-stone-300 bg-white px-4 py-2 font-medium text-sm text-stone-700 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
               onClick={onSecondaryAction}
-              className="flex-1 rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-300 dark:hover:bg-stone-700"
+              type="button"
             >
               {secondaryActionText}
             </button>
           )}
           <button
-            type="button"
+            className="flex-1 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
             onClick={onPrimaryAction}
-            className="flex-1 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
+            type="button"
           >
             {primaryActionText}
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
