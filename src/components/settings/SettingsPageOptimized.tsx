@@ -29,7 +29,7 @@ export function SettingsPageOptimized() {
   const [localSettings, setLocalSettings] = useState(settings)
   const [hasChanges, setHasChanges] = useState(false)
 
-  const handleSettingsChange = (newSettings: any) => {
+  const handleSettingsChange = (newSettings: Partial<typeof settings>) => {
     setLocalSettings({ ...localSettings, ...newSettings })
     setHasChanges(true)
   }
@@ -171,7 +171,7 @@ export function SettingsPageOptimized() {
             </label>
             <select
               value={theme}
-              onChange={(e) => setTheme(e.target.value as any)}
+              onChange={(e) => setTheme(e.target.value as 'light' | 'dark' | 'system')}
               className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             >
               <option value="light">{t('light')}</option>
@@ -186,7 +186,7 @@ export function SettingsPageOptimized() {
             </label>
             <select
               value={language}
-              onChange={(e) => setLanguage(e.target.value as any)}
+              onChange={(e) => setLanguage(e.target.value as 'en' | 'ar')}
               className="w-full px-3 py-2 border border-stone-300 dark:border-stone-600 rounded-lg bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
             >
               <option value="en">English</option>

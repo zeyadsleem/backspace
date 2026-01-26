@@ -49,6 +49,7 @@ export function EndSessionDialog({ isOpen, session, onClose, onRemoveItem, onCon
     // Reset local state when dialog opens/closes or session changes
     useEffect(() => {
         if (isOpen) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setPaymentMode('pay-now')
             setUserInputAmount(null)
             setNotes('')

@@ -1,6 +1,0 @@
-export { InvoicesList } from './InvoicesList'
-export { InvoiceRow } from './InvoiceRow'
-export { InvoiceForm } from './InvoiceForm'
-export { InvoiceDialog } from './InvoiceDialog'
-export { PaymentForm } from './PaymentForm'
-export { PaymentDialog } from './PaymentDialog'

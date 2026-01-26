@@ -30,6 +30,7 @@ export function PaymentDialog({ isOpen, invoice, onSubmit, onClose, isLoading }:
 
   useEffect(() => {
     if (invoice && isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         amount: invoice.total - invoice.paidAmount,
         method: 'cash',

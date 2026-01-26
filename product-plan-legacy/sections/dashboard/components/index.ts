@@ -1,6 +1,0 @@
-export { Dashboard } from './Dashboard'
-export { MetricCard } from './MetricCard'
-export { LowStockBanner } from './LowStockBanner'
-export { QuickActions } from './QuickActions'
-export { RevenueChart } from './RevenueChart'
-export { ActivityFeed } from './ActivityFeed'

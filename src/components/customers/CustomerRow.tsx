@@ -1,6 +1,7 @@
 import type { Customer, CustomerType } from '@/types'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { useAppStore } from '@/stores/useAppStore'
+import { TranslationKey } from '@/lib/translations'
 
 interface CustomerRowProps {
   customer: Customer
@@ -11,14 +12,14 @@ interface CustomerRowProps {
 
 export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowProps) {
   const t = useAppStore((state) => state.t)
-  
-  const typeConfig: Record<CustomerType, { labelKey: string; color: string; bg: string }> = {
+
+  const typeConfig: Record<CustomerType, { labelKey: TranslationKey; color: string; bg: string }> = {
     visitor: { labelKey: 'visitorType', color: 'text-stone-600 dark:text-stone-400', bg: 'bg-stone-100 dark:bg-stone-800' },
     weekly: { labelKey: 'weeklyMember', color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/30' },
     'half-monthly': { labelKey: 'halfMonthlyMember', color: 'text-purple-600 dark:text-purple-400', bg: 'bg-purple-50 dark:bg-purple-900/30' },
     monthly: { labelKey: 'monthlyMember', color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/30' },
   }
-  
+
   const config = typeConfig[customer.customerType]
   const initials = customer.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
   const formatBalance = (balance: number) => {
@@ -49,7 +50,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
         <span className="text-sm text-stone-600 dark:text-stone-400 font-mono">{customer.phone}</span>
       </div>
       <div className="col-span-1 md:col-span-2 flex items-center">
-        <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${config.bg} ${config.color}`}>{t(config.labelKey as any)}</span>
+        <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${config.bg} ${config.color}`}>{t(config.labelKey)}</span>
       </div>
       <div className="col-span-1 md:col-span-2 flex items-center md:justify-center">
         <span className={`text-sm font-medium ${customer.balance < 0 ? 'text-red-600 dark:text-red-400' : customer.balance > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-stone-500 dark:text-stone-400'}`}>{formatBalance(customer.balance)}</span>
