@@ -1,51 +1,52 @@
 import { Coffee, CreditCard, History, Play, Receipt, Search, Square, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useAppStore } from "@/stores/useAppStore";
+import type { TranslationKey } from "@/lib/translations";
 import type { OperationRecord, OperationType } from "@/types";
 
 const operationConfig: Record<
   OperationType,
-  { icon: typeof Play; label: string; color: string; bg: string }
+  { icon: typeof Play; labelKey: TranslationKey; color: string; bg: string }
 > = {
   session_start: {
     icon: Play,
-    label: "Session Started",
+    labelKey: "session_start",
     color: "text-emerald-600 dark:text-emerald-400",
     bg: "bg-emerald-100 dark:bg-emerald-900/30",
   },
   session_end: {
     icon: Square,
-    label: "Session Ended",
+    labelKey: "session_end",
     color: "text-stone-600 dark:text-stone-400",
     bg: "bg-stone-100 dark:bg-stone-800",
   },
   inventory_add: {
     icon: Coffee,
-    label: "Inventory Added",
+    labelKey: "inventory_add",
     color: "text-amber-600 dark:text-amber-400",
     bg: "bg-amber-100 dark:bg-amber-900/30",
   },
   invoice_created: {
     icon: Receipt,
-    label: "Invoice Created",
+    labelKey: "invoice_created",
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-100 dark:bg-blue-900/30",
   },
   payment_received: {
     icon: CreditCard,
-    label: "Payment Received",
+    labelKey: "payment_received",
     color: "text-emerald-600 dark:text-emerald-400",
     bg: "bg-emerald-100 dark:bg-emerald-900/30",
   },
   customer_new: {
     icon: UserPlus,
-    label: "New Customer",
+    labelKey: "customer_new",
     color: "text-purple-600 dark:text-purple-400",
     bg: "bg-purple-100 dark:bg-purple-900/30",
   },
   subscription_new: {
     icon: CreditCard,
-    label: "New Subscription",
+    labelKey: "subscription_new",
     color: "text-indigo-600 dark:text-indigo-400",
     bg: "bg-indigo-100 dark:bg-indigo-900/30",
   },
@@ -59,7 +60,9 @@ interface OperationHistoryProps {
 export function OperationHistory({ operations, onOperationClick }: OperationHistoryProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<OperationType | "all">("all");
+  const t = useAppStore((state) => state.t);
   const isRTL = useAppStore((state) => state.isRTL);
+  const language = useAppStore((state) => state.language);
 
   const filteredOperations = operations.filter((op) => {
     const matchesSearch = op.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -68,7 +71,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
   });
 
   const formatTime = (timestamp: string) =>
-    new Date(timestamp).toLocaleString("en-US", {
+    new Date(timestamp).toLocaleString(language === "ar" ? "ar-EG" : "en-US", {
       month: "short",
       day: "numeric",
       hour: "numeric",
@@ -77,28 +80,28 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className={`flex flex-col gap-3 sm:flex-row ${isRTL ? "sm:flex-row-reverse" : ""}`}>
         <div className="relative flex-1">
           <Search
-            className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 ${isRTL ? "end-3" : "start-3"}`}
+            className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 ${isRTL ? "right-3" : "left-3"}`}
           />
           <input
-            className={`w-full rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "ps-10 pe-4 text-end" : "ps-10 pe-4 text-start"}`}
+            className={`w-full rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "pr-10 pl-4 text-right" : "pl-10 pr-4 text-left"}`}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search operations..."
+            placeholder={t("searchInvoices")} // Reusing key for simplicity or add searchOperations
             type="text"
             value={searchQuery}
           />
         </div>
         <select
-          className={`rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "text-end" : "text-start"}`}
+          className={`rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "text-right" : "text-left"}`}
           onChange={(e) => setTypeFilter(e.target.value as OperationType | "all")}
           value={typeFilter}
         >
-          <option value="all">All Types</option>
+          <option value="all">{t("all")}</option>
           {Object.entries(operationConfig).map(([type, config]) => (
             <option key={type} value={type}>
-              {config.label}
+              {t(config.labelKey)}
             </option>
           ))}
         </select>
@@ -110,12 +113,12 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
             <History className="h-8 w-8 text-stone-400" />
           </div>
           <h3 className="font-medium text-lg text-stone-900 dark:text-stone-100">
-            No operations found
+            {t("noOperations")}
           </h3>
           <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
             {searchQuery || typeFilter !== "all"
-              ? "Try adjusting your search or filters"
-              : "Operations will appear here as they happen"}
+              ? t("tryAdjustingFilters")
+              : t("noOperations")}
           </p>
         </div>
       ) : (
@@ -126,7 +129,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
               const Icon = config.icon;
               return (
                 <button
-                  className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+                  className={`flex w-full items-center gap-4 p-4 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50 ${isRTL ? "text-right flex-row-reverse" : "text-left"}`}
                   key={operation.id}
                   onClick={() => onOperationClick?.(operation.id)}
                   type="button"
@@ -139,7 +142,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
                       {operation.description}
                     </p>
                     <p className="mt-0.5 text-stone-500 text-xs dark:text-stone-400">
-                      {config.label}
+                      {t(config.labelKey)}
                     </p>
                   </div>
                   <span className="flex-shrink-0 text-stone-500 text-xs dark:text-stone-400">

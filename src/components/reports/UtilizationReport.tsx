@@ -1,4 +1,5 @@
 import { Clock } from "lucide-react";
+import { useMemo } from "react";
 import { useAppStore } from "@/stores/useAppStore";
 import type { UtilizationData } from "@/types";
 
@@ -12,9 +13,22 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}${t("hours").charAt(0)} ${mins}${t("minutes").charAt(0)}`;
+    const mins = Math.round(minutes % 60);
+    if (hours > 0) {
+      return `${hours}${t("hour").charAt(0)} ${mins}${t("minute").charAt(0)}`;
+    }
+    return `${mins}${t("minute").charAt(0)}`;
   };
+
+  const peakHourData = useMemo(() => {
+    if (!utilizationData.peakHours || utilizationData.peakHours.length === 0) {
+      return { hour: 0, occupancy: 0 };
+    }
+    return utilizationData.peakHours.reduce((max, h) => (h.occupancy > max.occupancy ? h : max), {
+      hour: 0,
+      occupancy: 0,
+    });
+  }, [utilizationData.peakHours]);
 
   return (
     <div className="space-y-6">
@@ -24,11 +38,11 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
             {t("overallUtilization")}
           </p>
           <p className="mt-1 font-bold text-3xl text-amber-600 dark:text-amber-400">
-            {utilizationData.overallRate}%
+            {Math.round(utilizationData.overallRate)}%
           </p>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
             <div
-              className="h-full rounded-full bg-amber-500"
+              className="h-full rounded-full bg-amber-500 transition-all duration-500"
               style={{ width: `${utilizationData.overallRate}%` }}
             />
           </div>
@@ -49,18 +63,10 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
             {t("peakHour")}
           </p>
           <p className="mt-1 font-bold text-2xl text-stone-900 dark:text-stone-100">
-            {
-              utilizationData.peakHours.reduce((max, h) => (h.occupancy > max.occupancy ? h : max))
-                .hour
-            }
-            :00
+            {peakHourData.hour.toString().padStart(2, "0")}:00
           </p>
           <p className="mt-1 text-stone-500 text-xs dark:text-stone-400">
-            {
-              utilizationData.peakHours.reduce((max, h) => (h.occupancy > max.occupancy ? h : max))
-                .occupancy
-            }
-            % {t("occupancy")}
+            {Math.round(peakHourData.occupancy)}% {t("occupancy")}
           </p>
         </div>
       </div>

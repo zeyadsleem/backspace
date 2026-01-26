@@ -237,6 +237,13 @@ export const translations = {
     topCustomers: "Top Customers",
     operationHistory: "Operation History",
     noOperations: "No operations recorded",
+    session_start: "Session Started",
+    session_end: "Session Ended",
+    inventory_add: "Inventory Added",
+    invoice_created: "Invoice Created",
+    payment_received: "Payment Received",
+    customer_new: "New Customer",
+    subscription_new: "New Subscription",
 
     // Settings
     manageSettings: "Manage your application settings",
@@ -671,6 +678,13 @@ export const translations = {
     topCustomers: "أفضل العملاء",
     operationHistory: "سجل العمليات",
     noOperations: "لا توجد عمليات مسجلة",
+    session_start: "بدء جلسة",
+    session_end: "إنهاء جلسة",
+    inventory_add: "إضافة للمخزون",
+    invoice_created: "إنشاء فاتورة",
+    payment_received: "استلام دفعة",
+    customer_new: "عميل جديد",
+    subscription_new: "اشتراك جديد",
 
     // Settings
     manageSettings: "إدارة إعدادات التطبيق",

@@ -16,7 +16,8 @@ export function RevenueReport({
   onCustomerClick,
 }: RevenueReportProps) {
   const t = useAppStore((state) => state.t);
-  const formatCurrency = (amount: number) => `${amount.toLocaleString()} ${t("egpCurrency")}`;
+  const language = useAppStore((state) => state.language);
+  const formatCurrency = (amount: number) => `${amount.toLocaleString(language === "ar" ? "ar-EG" : "en-US")} ${t("egp")}`;
   const percentChange = revenueData.comparison.percentChange;
   const isPositive = percentChange >= 0;
 
@@ -31,7 +32,7 @@ export function RevenueReport({
             {formatCurrency(revenueData.today.total)}
           </p>
           <p className="mt-1 text-stone-500 text-xs dark:text-stone-400">
-            {t("sessions")}: {formatCurrency(revenueData.today.sessions)} · {t("inventory")}:{" "}
+            {t("sessionsLabel")}: {formatCurrency(revenueData.today.sessions)} · {t("inventoryLabel")}:{" "}
             {formatCurrency(revenueData.today.inventory)}
           </p>
         </div>
@@ -43,7 +44,7 @@ export function RevenueReport({
             {formatCurrency(revenueData.thisWeek.total)}
           </p>
           <p className="mt-1 text-stone-500 text-xs dark:text-stone-400">
-            {t("sessions")}: {formatCurrency(revenueData.thisWeek.sessions)} · {t("inventory")}:{" "}
+            {t("sessionsLabel")}: {formatCurrency(revenueData.thisWeek.sessions)} · {t("inventoryLabel")}:{" "}
             {formatCurrency(revenueData.thisWeek.inventory)}
           </p>
         </div>
@@ -55,7 +56,7 @@ export function RevenueReport({
             {formatCurrency(revenueData.thisMonth.total)}
           </p>
           <p className="mt-1 text-stone-500 text-xs dark:text-stone-400">
-            {t("sessions")}: {formatCurrency(revenueData.thisMonth.sessions)} · {t("inventory")}:{" "}
+            {t("sessionsLabel")}: {formatCurrency(revenueData.thisMonth.sessions)} · {t("inventoryLabel")}:{" "}
             {formatCurrency(revenueData.thisMonth.inventory)}
           </p>
         </div>
@@ -91,7 +92,7 @@ export function RevenueReport({
           </div>
           <div className="flex h-48 items-end gap-2">
             {revenueChart.map((point) => {
-              const maxValue = Math.max(...revenueChart.map((d) => d.sessions + d.inventory));
+              const maxValue = Math.max(...revenueChart.map((d) => d.sessions + d.inventory)) || 1;
               const sessionHeight = (point.sessions / maxValue) * 100;
               const inventoryHeight = (point.inventory / maxValue) * 100;
               const date = new Date(point.date);
@@ -106,12 +107,12 @@ export function RevenueReport({
                       style={{ height: `${sessionHeight}%` }}
                     />
                     <div
-                      className="w-full max-w-8 rounded-t bg-emerald-500"
+                      className={`w-full max-w-8 rounded-t bg-emerald-500 ${sessionHeight > 0 ? "mb-0.5" : ""}`}
                       style={{ height: `${inventoryHeight}%` }}
                     />
                   </div>
                   <span className="text-[10px] text-stone-500 dark:text-stone-400">
-                    {date.toLocaleDateString("en-US", { weekday: "short" })}
+                    {date.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", { weekday: "short" })}
                   </span>
                 </div>
               );
@@ -120,11 +121,11 @@ export function RevenueReport({
           <div className="mt-4 flex gap-4 border-stone-100 border-t pt-4 dark:border-stone-800">
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-amber-500" />
-              <span className="text-stone-600 text-xs dark:text-stone-400">{t("sessions")}</span>
+              <span className="text-stone-600 text-xs dark:text-stone-400">{t("sessionsLabel")}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-emerald-500" />
-              <span className="text-stone-600 text-xs dark:text-stone-400">{t("inventory")}</span>
+              <span className="text-stone-600 text-xs dark:text-stone-400">{t("inventoryLabel")}</span>
             </div>
           </div>
         </div>
