@@ -16,13 +16,14 @@ export function RevenueReport({
   onCustomerClick,
 }: RevenueReportProps) {
   const t = useAppStore((state) => state.t);
+  const isRTL = useAppStore((state) => state.isRTL);
   const language = useAppStore((state) => state.language);
   const formatCurrency = (amount: number) => `${amount.toLocaleString(language === "ar" ? "ar-EG" : "en-US")} ${t("egp")}`;
   const percentChange = revenueData.comparison.percentChange;
   const isPositive = percentChange >= 0;
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${isRTL ? "text-right" : "text-left"}`}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 3xl:gap-6">
         <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900 3xl:p-6">
           <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
@@ -64,7 +65,7 @@ export function RevenueReport({
           <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
             {t("vsLastMonth")}
           </p>
-          <div className="mt-1 flex items-center gap-2">
+          <div className={`mt-1 flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
             {isPositive ? (
               <TrendingUp className="h-5 w-5 text-emerald-500" />
             ) : (
@@ -85,7 +86,7 @@ export function RevenueReport({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 3xl:gap-8">
         <div className="rounded-xl border border-stone-200 bg-white p-5 lg:col-span-2 dark:border-stone-800 dark:bg-stone-900 3xl:p-8">
-          <div className="mb-4 flex items-center justify-between">
+          <div className={`mb-4 flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
             <h3 className="font-semibold text-stone-900 3xl:text-xl dark:text-stone-100">
               {t("revenueTrend")}
             </h3>

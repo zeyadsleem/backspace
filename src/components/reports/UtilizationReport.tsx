@@ -10,6 +10,7 @@ interface UtilizationReportProps {
 
 export function UtilizationReport({ utilizationData, onResourceClick }: UtilizationReportProps) {
   const t = useAppStore((state) => state.t);
+  const isRTL = useAppStore((state) => state.isRTL);
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -31,7 +32,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
   }, [utilizationData.peakHours]);
 
   return (
-    <div className="space-y-6 3xl:space-y-8">
+    <div className={`space-y-6 3xl:space-y-8 ${isRTL ? "text-right" : "text-left"}`}>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 3xl:gap-6">
         <div className="rounded-xl border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900 3xl:p-6">
           <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400 3xl:text-sm">
@@ -51,7 +52,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
           <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400 3xl:text-sm">
             {t("avgSessionDuration")}
           </p>
-          <div className="mt-1 flex items-center gap-2">
+          <div className={`mt-1 flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
             <Clock className="h-5 w-5 text-stone-400 3xl:h-6 3xl:w-6" />
             <p className="font-bold text-2xl text-stone-900 dark:text-stone-100 3xl:text-3xl">
               {formatDuration(utilizationData.averageSessionDuration)}
@@ -73,7 +74,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 3xl:gap-8">
         <div className="rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900 3xl:p-8">
-          <div className="mb-4 flex items-center justify-between">
+          <div className={`mb-4 flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
             <h3 className="font-semibold text-stone-900 3xl:text-xl dark:text-stone-100">
               {t("resourceUtilization")}
             </h3>

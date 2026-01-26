@@ -36,6 +36,7 @@ export function ReportsPage({
   onOperationClick,
 }: ReportsPageProps) {
   const t = useAppStore((state) => state.t);
+  const isRTL = useAppStore((state) => state.isRTL);
   const [activeTab, setActiveTab] = useState<Tab>("revenue");
   const tabs = [
     { id: "revenue" as Tab, label: t("revenue"), icon: BarChart3 },
@@ -45,7 +46,7 @@ export function ReportsPage({
 
   return (
     <div className="flex h-full flex-col overflow-hidden p-4 sm:p-6 3xl:p-8">
-      <div className="flex-shrink-0 space-y-6 pb-6">
+      <div className={`flex-shrink-0 space-y-6 pb-6 ${isRTL ? "text-right" : "text-left"}`}>
         <div>
           <h1 className="font-bold text-2xl tracking-tight text-stone-900 lg:text-3xl dark:text-stone-100">
             {t("reports")}
@@ -55,7 +56,7 @@ export function ReportsPage({
           </p>
         </div>
 
-        <div className="flex w-fit rounded-lg bg-stone-100 p-1 dark:bg-stone-800">
+        <div className={`flex w-fit rounded-lg bg-stone-100 p-1 dark:bg-stone-800 ${isRTL ? "flex-row-reverse" : ""}`}>
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (

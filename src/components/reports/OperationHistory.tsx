@@ -1,4 +1,4 @@
-import { Coffee, CreditCard, History, Play, Receipt, Search, Square, UserPlus } from "lucide-react";
+import { Coffee, CreditCard, Filter, History, Play, Receipt, Search, Square, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useAppStore } from "@/stores/useAppStore";
 import type { TranslationKey } from "@/lib/translations";
@@ -88,23 +88,26 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
           <input
             className={`w-full rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "pr-10 pl-4 text-right" : "pl-10 pr-4 text-left"}`}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("searchCustomers")}
+            placeholder={t("searchByNamePhone")}
             type="text"
             value={searchQuery}
           />
         </div>
-        <select
-          className={`rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "text-right" : "text-left"}`}
-          onChange={(e) => setTypeFilter(e.target.value as OperationType | "all")}
-          value={typeFilter}
-        >
-          <option value="all">{t("all")}</option>
-          {Object.entries(operationConfig).map(([type, config]) => (
-            <option key={type} value={type}>
-              {t(config.labelKey)}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <Filter className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 ${isRTL ? "right-3" : "left-3"}`} />
+          <select
+            className={`cursor-pointer appearance-none rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "pr-10 pl-8 text-right" : "pl-10 pr-8 text-left"}`}
+            onChange={(e) => setTypeFilter(e.target.value as OperationType | "all")}
+            value={typeFilter}
+          >
+            <option value="all">{t("allTypes")}</option>
+            {Object.entries(operationConfig).map(([type, config]) => (
+              <option key={type} value={type}>
+                {t(config.labelKey)}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
