@@ -73,28 +73,35 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
             </h3>
           </div>
           <div className="space-y-3">
-            {utilizationData.byResource.map((resource) => (
-              <button
-                className="w-full text-left"
-                key={resource.id}
-                onClick={() => onResourceClick?.(resource.id)}
-              >
-                <div className="mb-1 flex items-center justify-between">
-                  <span className="font-medium text-sm text-stone-700 dark:text-stone-300">
-                    {resource.name}
-                  </span>
-                  <span className="font-semibold text-sm text-stone-900 dark:text-stone-100">
-                    {resource.rate}%
-                  </span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
-                  <div
-                    className={`h-full rounded-full transition-all ${resource.rate >= 80 ? "bg-emerald-500" : resource.rate >= 50 ? "bg-amber-500" : "bg-red-500"}`}
-                    style={{ width: `${resource.rate}%` }}
-                  />
-                </div>
-              </button>
-            ))}
+            {utilizationData.byResource.map((resource) => {
+              let barColor = "bg-red-500";
+              if (resource.rate >= 80) barColor = "bg-emerald-500";
+              else if (resource.rate >= 50) barColor = "bg-amber-500";
+
+              return (
+                <button
+                  className="w-full text-left"
+                  key={resource.id}
+                  onClick={() => onResourceClick?.(resource.id)}
+                  type="button"
+                >
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="font-medium text-sm text-stone-700 dark:text-stone-300">
+                      {resource.name}
+                    </span>
+                    <span className="font-bold font-mono text-sm text-stone-900 dark:text-stone-100">
+                      {Math.round(resource.rate)}%
+                    </span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
+                    <div
+                      className={`h-full rounded-full transition-all ${barColor}`}
+                      style={{ width: `${resource.rate}%` }}
+                    />
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -103,22 +110,29 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
             {t("peakHours")}
           </h3>
           <div className="space-y-2">
-            {utilizationData.peakHours.map((hour) => (
-              <div className="flex items-center gap-3" key={hour.hour}>
-                <span className="w-12 text-right text-stone-500 text-xs dark:text-stone-400">
-                  {hour.hour}:00
-                </span>
-                <div className="h-6 flex-1 overflow-hidden rounded bg-stone-100 dark:bg-stone-800">
-                  <div
-                    className={`h-full rounded transition-all ${hour.occupancy >= 80 ? "bg-red-500" : hour.occupancy >= 60 ? "bg-amber-500" : hour.occupancy >= 40 ? "bg-emerald-500" : "bg-emerald-300"}`}
-                    style={{ width: `${hour.occupancy}%` }}
-                  />
+            {utilizationData.peakHours.map((hour) => {
+              let barColor = "bg-emerald-300";
+              if (hour.occupancy >= 80) barColor = "bg-red-500";
+              else if (hour.occupancy >= 60) barColor = "bg-amber-500";
+              else if (hour.occupancy >= 40) barColor = "bg-emerald-500";
+
+              return (
+                <div className="flex items-center gap-3" key={hour.hour}>
+                  <span className="w-12 text-right text-stone-500 text-xs dark:text-stone-400">
+                    {hour.hour}:00
+                  </span>
+                  <div className="h-6 flex-1 overflow-hidden rounded bg-stone-100 dark:bg-stone-800">
+                    <div
+                      className={`h-full rounded transition-all ${barColor}`}
+                      style={{ width: `${hour.occupancy}%` }}
+                    />
+                  </div>
+                  <span className="w-10 font-medium text-stone-600 text-xs dark:text-stone-400">
+                    {hour.occupancy}%
+                  </span>
                 </div>
-                <span className="w-10 font-medium text-stone-600 text-xs dark:text-stone-400">
-                  {hour.occupancy}%
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="mt-4 flex gap-4 border-stone-100 border-t pt-4 dark:border-stone-800">
             <div className="flex items-center gap-1.5">

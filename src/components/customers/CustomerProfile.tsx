@@ -114,18 +114,21 @@ export function CustomerProfile({
         <button
           className={`border-b-2 px-4 py-2 font-medium text-sm transition-colors ${activeTab === "overview" ? "border-amber-500 text-amber-600 dark:text-amber-400" : "border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300"}`}
           onClick={() => setActiveTab("overview")}
+          type="button"
         >
           {t("details")}
         </button>
         <button
           className={`border-b-2 px-4 py-2 font-medium text-sm transition-colors ${activeTab === "invoices" ? "border-amber-500 text-amber-600 dark:text-amber-400" : "border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300"}`}
           onClick={() => setActiveTab("invoices")}
+          type="button"
         >
           {t("invoices")}
         </button>
         <button
           className={`border-b-2 px-4 py-2 font-medium text-sm transition-colors ${activeTab === "history" ? "border-amber-500 text-amber-600 dark:text-amber-400" : "border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300"}`}
           onClick={() => setActiveTab("history")}
+          type="button"
         >
           {t("history")}
         </button>

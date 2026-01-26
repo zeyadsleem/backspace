@@ -125,6 +125,20 @@ pub async fn start_session(pool: State<'_, DbPool>, customer_id: String, resourc
         .await
         .map_err(|e| e.to_string())?;
 
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, customer_id, resource_id, performed_at) VALUES (?, ?, ?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("session_start")
+    .bind(format!("Session started for customer {} on resource {}", customer_id, resource_id))
+    .bind(&customer_id)
+    .bind(&resource_id)
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
     tx.commit().await.map_err(|e| e.to_string())?;
 
     Ok(id)
@@ -132,6 +146,7 @@ pub async fn start_session(pool: State<'_, DbPool>, customer_id: String, resourc
 
 #[tauri::command]
 pub async fn add_session_inventory(pool: State<'_, DbPool>, session_id: String, item: AddInventoryDto) -> Result<(), String> {
+    let now = chrono::Local::now().naive_local();
     let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
 
     // Get item info & check stock
@@ -180,12 +195,175 @@ pub async fn add_session_inventory(pool: State<'_, DbPool>, session_id: String, 
 
     // Update session total
     let amount = price * Decimal::from(item.quantity);
-    // Update session total: "inventory_total"
-    // Fetch current total to avoid SQL math on string/real mix if possible, OR trust sql engine.
-    // Better to do: inventory_total = inventory_total + ?
-    // Bind amount as string (sqlite will sum it if column is numeric).
     sqlx::query("UPDATE sessions SET inventory_total = inventory_total + ?, updated_at = ? WHERE id = ?")
         .bind(amount.to_string())
+        .bind(now)
+        .bind(&session_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, performed_at) VALUES (?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("inventory_add")
+    .bind(format!("Added {} x {} to session {}", item.quantity, name, session_id))
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+
+#[tauri::command]
+pub async fn remove_session_inventory(pool: State<'_, DbPool>, session_id: String, inventory_id: String) -> Result<(), String> {
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+
+    use sqlx::Row;
+    use std::str::FromStr;
+
+    // Get all consumptions for this item in this session
+    let rows = sqlx::query("SELECT id, quantity, price_at_time FROM session_inventory WHERE session_id = ? AND inventory_id = ?")
+        .bind(&session_id)
+        .bind(&inventory_id)
+        .fetch_all(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if rows.is_empty() {
+        return Err("Item not found in session".to_string());
+    }
+
+    let mut total_quantity = 0i64;
+    let mut total_amount = Decimal::ZERO;
+
+    for row in rows {
+        let q: i64 = row.try_get("quantity").unwrap_or(0);
+        let p_s: String = row.try_get("price_at_time").unwrap_or_default();
+        let p = Decimal::from_str(&p_s).unwrap_or(Decimal::ZERO);
+        
+        total_quantity += q;
+        total_amount += p * Decimal::from(q);
+
+        // Delete the record
+        let id: String = row.try_get("id").unwrap_or_default();
+        sqlx::query("DELETE FROM session_inventory WHERE id = ?")
+            .bind(id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
+    // Return stock
+    sqlx::query("UPDATE inventory SET quantity = quantity + ? WHERE id = ?")
+        .bind(total_quantity)
+        .bind(&inventory_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    // Update session total
+    sqlx::query("UPDATE sessions SET inventory_total = inventory_total - ?, updated_at = ? WHERE id = ?")
+        .bind(total_amount.to_string())
+        .bind(chrono::Local::now().naive_local())
+        .bind(&session_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn update_session_inventory(pool: State<'_, DbPool>, session_id: String, inventory_id: String, quantity: i64) -> Result<(), String> {
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+
+    use sqlx::Row;
+    use std::str::FromStr;
+
+    // Get current total quantity in session
+    let rows = sqlx::query("SELECT id, quantity, price_at_time FROM session_inventory WHERE session_id = ? AND inventory_id = ?")
+        .bind(&session_id)
+        .bind(&inventory_id)
+        .fetch_all(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if rows.is_empty() {
+        return Err("Item not found in session".to_string());
+    }
+
+    let mut current_quantity = 0i64;
+    let mut current_amount = Decimal::ZERO;
+    let mut last_price = Decimal::ZERO;
+
+    for row in rows {
+        let q: i64 = row.try_get("quantity").unwrap_or(0);
+        let p_s: String = row.try_get("price_at_time").unwrap_or_default();
+        let p = Decimal::from_str(&p_s).unwrap_or(Decimal::ZERO);
+        
+        current_quantity += q;
+        current_amount += p * Decimal::from(q);
+        last_price = p;
+
+        // Delete old records to replace with a single one
+        let id: String = row.try_get("id").unwrap_or_default();
+        sqlx::query("DELETE FROM session_inventory WHERE id = ?")
+            .bind(id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
+    let diff = quantity - current_quantity;
+
+    // Check stock if increasing
+    if diff > 0 {
+        let inv_stock: i64 = sqlx::query_scalar("SELECT quantity FROM inventory WHERE id = ?")
+            .bind(&inventory_id)
+            .fetch_one(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        if inv_stock < diff {
+            return Err("Insufficient stock".to_string());
+        }
+    }
+
+    // Update stock
+    sqlx::query("UPDATE inventory SET quantity = quantity - ? WHERE id = ?")
+        .bind(diff)
+        .bind(&inventory_id)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    // Create new record
+    let consumption_id = Uuid::new_v4().to_string();
+    sqlx::query(
+        "INSERT INTO session_inventory (id, session_id, inventory_id, quantity, price_at_time) VALUES (?, ?, ?, ?, ?)"
+    )
+    .bind(&consumption_id)
+    .bind(&session_id)
+    .bind(&inventory_id)
+    .bind(quantity)
+    .bind(last_price.to_string())
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    // Update session total
+    let new_amount = last_price * Decimal::from(quantity);
+    let amount_diff = new_amount - current_amount;
+
+    sqlx::query("UPDATE sessions SET inventory_total = inventory_total + ?, updated_at = ? WHERE id = ?")
+        .bind(amount_diff.to_string())
         .bind(chrono::Local::now().naive_local())
         .bind(&session_id)
         .execute(&mut *tx)
@@ -360,6 +538,20 @@ pub async fn end_session(pool: State<'_, DbPool>, session_id: String) -> Result<
         .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, customer_id, resource_id, performed_at) VALUES (?, ?, ?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("session_end")
+    .bind(format!("Session ended for customer {} on resource {}. Total: {}", customer_id, resource_id, total_amount))
+    .bind(&customer_id)
+    .bind(&resource_id)
+    .bind(end_time)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
 
     tx.commit().await.map_err(|e| e.to_string())?;
 

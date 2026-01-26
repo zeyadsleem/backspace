@@ -66,6 +66,7 @@ export const translations = {
     edit: "Edit",
     delete: "Delete",
     noCustomersFound: "No customers found",
+    noItemsFound: "No items found",
     tryAdjustingFilters: "Try adjusting your search or filters",
 
     // Customer Profile
@@ -88,6 +89,7 @@ export const translations = {
     totalResources: "{count} total resources",
     newResource: "New Resource",
     searchResources: "Search resources...",
+    manageResourcesMessage: "Manage your coworking space resources and availability",
     seat: "Seat",
     room: "Room",
     desk: "Desk",
@@ -496,6 +498,7 @@ export const translations = {
     edit: "تعديل",
     delete: "حذف",
     noCustomersFound: "لم يتم العثور على عملاء",
+    noItemsFound: "لم يتم العثور على منتجات",
     tryAdjustingFilters: "حاول تعديل البحث أو الفلاتر",
 
     // Customer Profile
@@ -518,6 +521,7 @@ export const translations = {
     totalResources: "{count} مورد",
     newResource: "مورد جديد",
     searchResources: "البحث في الموارد...",
+    manageResourcesMessage: "إدارة موارد مساحة العمل الخاصة بك وتوافرها",
     seat: "مقعد",
     room: "غرفة",
     desk: "مكتب",
@@ -873,9 +877,9 @@ export function t(
 ): string {
   let text: string = translations[lang][key] || translations.en[key] || key;
   if (params) {
-    Object.entries(params).forEach(([k, v]) => {
+    for (const [k, v] of Object.entries(params)) {
       text = text.replace(`{${k}}`, String(v));
-    });
+    }
   }
   return text;
 }

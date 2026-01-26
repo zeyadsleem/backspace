@@ -29,7 +29,7 @@ export function InventoryList({
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<InventoryCategory | "all">("all");
 
-  const filteredInventory = inventory.filter((item) => {
+  const filteredItems = inventory.filter((item) => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === "all" || item.category === categoryFilter;
     return matchesSearch && matchesCategory;
@@ -39,20 +39,6 @@ export function InventoryList({
     (item) => item.quantity <= item.minStock && item.quantity > 0
   );
   const outOfStockItems = inventory.filter((item) => item.quantity === 0);
-
-  const groupedInventory = categories.reduce(
-    (acc, category) => {
-      const items = filteredInventory.filter((item) => item.category === category.id);
-      if (items.length > 0) {
-        acc.push({ category, items });
-      }
-      return acc;
-    },
-    [] as Array<{ category: CategoryOption; items: InventoryItem[] }>
-  );
-
-  const gridClass =
-    "grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4 items-stretch";
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -81,6 +67,7 @@ export function InventoryList({
           <button
             className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
             onClick={onCreate}
+            type="button"
           >
             <Plus className="h-4 w-4" />
             {t("newItem")}
@@ -111,6 +98,7 @@ export function InventoryList({
             <button
               className={`whitespace-nowrap rounded-lg px-4 py-1.5 font-medium text-sm transition-all ${categoryFilter === "all" ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-500 hover:text-stone-700"}`}
               onClick={() => setCategoryFilter("all")}
+              type="button"
             >
               {t("allCategories")}
             </button>
@@ -119,6 +107,7 @@ export function InventoryList({
                 className={`whitespace-nowrap rounded-lg px-4 py-1.5 font-medium text-sm transition-all ${categoryFilter === cat.id ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-500 hover:text-stone-700"}`}
                 key={cat.id}
                 onClick={() => setCategoryFilter(cat.id)}
+                type="button"
               >
                 {isRTL ? cat.labelAr : cat.labelEn}
               </button>
@@ -128,63 +117,65 @@ export function InventoryList({
       </div>
 
       {/* Scrollable Items Grid */}
-      <div className="scrollbar-thin flex-1 overflow-y-auto p-6 pt-2">
-        {filteredInventory.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="mb-4 rounded-full bg-stone-100 p-4 dark:bg-stone-800">
-              <Package className="h-8 w-8 text-stone-400" />
-            </div>
-            <h3 className="font-medium text-lg text-stone-900 dark:text-stone-100">
-              {t("noInventoryFound")}
-            </h3>
-            <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-              {t("tryAdjustingFilters")}
+      <div className="min-h-0 flex-1 overflow-y-auto px-6">
+        {filteredItems.length === 0 ? (
+          <div className="flex h-64 flex-col items-center justify-center rounded-xl border-2 border-stone-100 border-dashed dark:border-stone-800">
+            <Package className="mb-2 h-10 w-10 text-stone-300 dark:text-stone-700" />
+            <p className="font-medium text-stone-500 dark:text-stone-400">
+              {t("noItemsFound")}
             </p>
           </div>
-        ) : categoryFilter === "all" ? (
-          <div className="space-y-10 pb-6">
-            {groupedInventory.map(({ category, items }) => (
-              <div key={category.id}>
-                <div className="mb-5 flex items-center gap-3 px-1">
-                  <h2 className="font-bold text-sm text-stone-400 uppercase tracking-[0.2em]">
-                    {isRTL ? category.labelAr : category.labelEn}
-                  </h2>
-                  <div className="h-px flex-1 bg-stone-100 dark:bg-stone-800" />
-                  <span className="font-bold text-stone-300 text-xs uppercase tracking-widest">
-                    {t("items", { count: items.length })}
-                  </span>
-                </div>{" "}
-                <div className={gridClass}>
-                  {items.map((item) => (
-                    <InventoryItemCard
-                      category={category}
-                      item={item}
-                      key={item.id}
-                      onAdjustQuantity={(delta) => onAdjustQuantity?.(item.id, delta)}
-                      onDelete={() => onDelete?.(item.id)}
-                      onEdit={() => onEdit?.(item.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
         ) : (
-          <div className={`${gridClass} pb-6`}>
-            {filteredInventory.map((item) => {
-              const category = categories.find((c) => c.id === item.category)!;
-              return (
-                <InventoryItemCard
-                  category={category}
-                  item={item}
-                  key={item.id}
-                  onAdjustQuantity={(delta) => onAdjustQuantity?.(item.id, delta)}
-                  onDelete={() => onDelete?.(item.id)}
-                  onEdit={() => onEdit?.(item.id)}
-                />
-              );
-            })}
-          </div>
+          <>
+            {categoryFilter === "all" ? (
+              <div className="space-y-10 pb-6">
+                {categories.map((category) => {
+                  const categoryItems = filteredItems.filter(
+                    (item) => item.category === category.id
+                  );
+                  if (categoryItems.length === 0) return null;
+
+                  return (
+                    <div className="space-y-4" key={category.id}>
+                      <div className="flex items-center gap-2 border-stone-100 border-b pb-2 dark:border-stone-800">
+                        <h2 className="font-bold text-sm text-stone-900 uppercase tracking-widest dark:text-stone-100">
+                          {isRTL ? category.labelAr : category.labelEn}
+                        </h2>
+                        <span className="rounded-full bg-stone-100 px-2 py-0.5 font-bold text-stone-500 text-xs dark:bg-stone-800">
+                          {categoryItems.length}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                        {categoryItems.map((item) => (
+                          <InventoryItemCard
+                            category={category}
+                            item={item}
+                            key={item.id}
+                            onAdjustQuantity={(delta) => onAdjustQuantity?.(item.id, delta)}
+                            onDelete={() => onDelete?.(item.id)}
+                            onEdit={() => onEdit?.(item.id)}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4 pb-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {filteredItems.map((item) => (
+                  <InventoryItemCard
+                    category={categories.find((c) => c.id === item.category)!}
+                    item={item}
+                    key={item.id}
+                    onAdjustQuantity={(delta) => onAdjustQuantity?.(item.id, delta)}
+                    onDelete={() => onDelete?.(item.id)}
+                    onEdit={() => onEdit?.(item.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

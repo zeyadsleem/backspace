@@ -90,13 +90,13 @@ export function RevenueReport({
             </h3>
           </div>
           <div className="flex h-48 items-end gap-2">
-            {revenueChart.map((point, index) => {
+            {revenueChart.map((point) => {
               const maxValue = Math.max(...revenueChart.map((d) => d.sessions + d.inventory));
               const sessionHeight = (point.sessions / maxValue) * 100;
               const inventoryHeight = (point.inventory / maxValue) * 100;
               const date = new Date(point.date);
               return (
-                <div className="flex flex-1 flex-col items-center gap-1" key={index}>
+                <div className="flex flex-1 flex-col items-center gap-1" key={point.date}>
                   <div
                     className="flex w-full flex-col-reverse items-center"
                     style={{ height: "160px" }}
@@ -142,6 +142,7 @@ export function RevenueReport({
                 className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition-colors hover:bg-stone-50 dark:hover:bg-stone-800"
                 key={customer.id}
                 onClick={() => onCustomerClick?.(customer.id)}
+                type="button"
               >
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700 text-xs dark:bg-amber-900/30 dark:text-amber-300">
                   {index + 1}

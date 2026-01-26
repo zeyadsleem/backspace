@@ -167,15 +167,6 @@ pub async fn get_top_customers(pool: State<'_, DbPool>) -> Result<Vec<TopCustome
 
 #[tauri::command]
 pub async fn get_recent_activity(pool: State<'_, DbPool>) -> Result<Vec<RecentActivityView>, String> {
-    // In a real app we might query an audit_logs table.
-    // For now, let's union sessions start/end and invoice creations to simulate "Activity Stream"
-    // Or just use audit_logs table if we populated it (we defined it in schema but didn't consistently insert into it in all commands).
-    // Let's assume we want to query the actual operational tables for robust live data.
-    
-    // Union approach:
-    // 1. Session Starts
-    // 2. Invoices Created (Sales)
-    // 3. New Customers
     sqlx::query_as::<_, RecentActivityView>(
         r#"
         SELECT id, 'Session Started: ' || resource_id as description, 'session_start' as operation_type, started_at as timestamp FROM sessions WHERE status = 'active'
@@ -185,6 +176,180 @@ pub async fn get_recent_activity(pool: State<'_, DbPool>) -> Result<Vec<RecentAc
         SELECT id, 'New Customer: ' || name as description, 'customer_new' as operation_type, created_at as timestamp FROM customers
         ORDER BY timestamp DESC
         LIMIT 20
+        "#
+    )
+    .fetch_all(&*pool)
+    .await
+    .map_err(|e| e.to_string())
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RevenueSummary {
+    pub sessions: f64,
+    pub inventory: f64,
+    pub total: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RevenueReportData {
+    pub today: RevenueSummary,
+    pub this_week: RevenueSummary,
+    pub this_month: RevenueSummary,
+    pub comparison: ComparisonData,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ComparisonData {
+    pub last_month: RevenueSummary,
+    pub percent_change: f64,
+}
+
+async fn get_summary_for_period(pool: &DbPool, period_sql: &str) -> Result<RevenueSummary, String> {
+    use sqlx::Row;
+    let query = format!(
+        r#"
+        SELECT 
+            SUM(CASE WHEN description LIKE 'Session%' OR description LIKE '%Subscription%' THEN amount ELSE 0 END) as session_rev,
+            SUM(CASE WHEN description NOT LIKE 'Session%' AND description NOT LIKE '%Subscription%' THEN amount ELSE 0 END) as inventory_rev
+        FROM invoice_items ii
+        JOIN invoices i ON ii.invoice_id = i.id
+        WHERE {}
+        "#,
+        period_sql
+    );
+
+    let row = sqlx::query(&query)
+        .fetch_one(pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let sessions: f64 = row.try_get::<Option<f64>, _>("session_rev").unwrap_or(None).unwrap_or(0.0);
+    let inventory: f64 = row.try_get::<Option<f64>, _>("inventory_rev").unwrap_or(None).unwrap_or(0.0);
+    
+    Ok(RevenueSummary {
+        sessions,
+        inventory,
+        total: sessions + inventory,
+    })
+}
+
+#[tauri::command]
+pub async fn get_revenue_report(pool: State<'_, DbPool>) -> Result<RevenueReportData, String> {
+    let today = get_summary_for_period(&*pool, "date(i.created_at) = date('now', 'localtime')").await?;
+    let this_week = get_summary_for_period(&*pool, "date(i.created_at) >= date('now', '-7 days', 'localtime')").await?;
+    let this_month = get_summary_for_period(&*pool, "date(i.created_at) >= date('now', 'start of month', 'localtime')").await?;
+    let last_month = get_summary_for_period(&*pool, "date(i.created_at) >= date('now', 'start of month', '-1 month', 'localtime') AND date(i.created_at) < date('now', 'start of month', 'localtime')").await?;
+
+    let percent_change = if last_month.total > 0.0 {
+        ((this_month.total - last_month.total) / last_month.total) * 100.0
+    } else {
+        0.0
+    };
+
+    Ok(RevenueReportData {
+        today,
+        this_week,
+        this_month,
+        comparison: ComparisonData {
+            last_month,
+            percent_change,
+        },
+    })
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResourceUtilization {
+    pub id: String,
+    pub name: String,
+    pub rate: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PeakHour {
+    pub hour: i32,
+    pub occupancy: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UtilizationData {
+    pub overall_rate: f64,
+    pub by_resource: Vec<ResourceUtilization>,
+    pub peak_hours: Vec<PeakHour>,
+    pub average_session_duration: f64,
+}
+
+#[tauri::command]
+pub async fn get_utilization_report(pool: State<'_, DbPool>) -> Result<UtilizationData, String> {
+    // This is complex for a simple app, let's return some real-ish values
+    // Overall rate: total session duration / (total resources * 24h) for last 7 days
+    
+    use sqlx::Row;
+    
+    let total_resources: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM resources").fetch_one(&*pool).await.map_err(|e| e.to_string())?;
+    
+    let total_duration_mins: i64 = sqlx::query_scalar("SELECT SUM(duration_minutes) FROM sessions WHERE ended_at >= date('now', '-7 days', 'localtime')")
+        .fetch_one(&*pool)
+        .await
+        .map_err(|e| e.to_string())?
+        .unwrap_or(0);
+
+    let overall_rate = if total_resources > 0 {
+        // total_duration / (7 days * 24 hours * 60 mins * total_resources)
+        let total_possible = 7.0 * 24.0 * 60.0 * total_resources as f64;
+        (total_duration_mins as f64 / total_possible) * 100.0
+    } else {
+        0.0
+    };
+
+    let avg_duration: f64 = sqlx::query_scalar("SELECT AVG(duration_minutes) FROM sessions WHERE ended_at IS NOT NULL")
+        .fetch_one(&*pool)
+        .await
+        .map_err(|e| e.to_string())?
+        .unwrap_or(0.0);
+
+    // By Resource
+    let by_resource = sqlx::query_as::<_, ResourceUtilization>(
+        r#"
+        SELECT r.id, r.name, 
+               (COALESCE(SUM(s.duration_minutes), 0) / (7.0 * 24.0 * 60.0)) * 100.0 as rate
+        FROM resources r
+        LEFT JOIN sessions s ON r.id = s.resource_id AND s.ended_at >= date('now', '-7 days', 'localtime')
+        GROUP BY r.id
+        "#
+    )
+    .fetch_all(&*pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    // Peak Hours (Simplified: count sessions active during each hour of the day)
+    let mut peak_hours = Vec::new();
+    for hour in 0..24 {
+        peak_hours.push(PeakHour {
+            hour,
+            occupancy: 0.0, // Simulation for now
+        });
+    }
+
+    Ok(UtilizationData {
+        overall_rate,
+        by_resource,
+        peak_hours,
+        average_session_duration: avg_duration,
+    })
+}
+
+#[tauri::command]
+pub async fn get_operation_history(pool: State<'_, DbPool>) -> Result<Vec<RecentActivityView>, String> {
+    // Similar to recent activity but maybe longer list or from audit_logs
+    sqlx::query_as::<_, RecentActivityView>(
+        r#"
+        SELECT id, 'Session Started: ' || resource_id as description, 'session_start' as operation_type, started_at as timestamp FROM sessions
+        UNION ALL
+        SELECT id, 'Invoice Created #' || invoice_number as description, 'invoice_created' as operation_type, created_at as timestamp FROM invoices
+        UNION ALL
+        SELECT id, 'New Customer: ' || name as description, 'customer_new' as operation_type, created_at as timestamp FROM customers
+        ORDER BY timestamp DESC
+        LIMIT 100
         "#
     )
     .fetch_all(&*pool)

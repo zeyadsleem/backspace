@@ -16,6 +16,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
   const updatePlanPrice = useAppStore((state) => state.updatePlanPrice);
   const updateResourceTypePrice = useAppStore((state) => state.updateResourceTypePrice);
   const isRTL = useAppStore((state) => state.isRTL);
+  const updateSettings = useAppStore((state) => state.updateSettings);
 
   const resourceCategories: Array<{ id: ResourceType; label: string }> = [
     { id: "seat", label: t("seatType") },
@@ -33,6 +34,15 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
     { id: "en" as LanguageOption, nativeLabel: "English" },
     { id: "ar" as LanguageOption, nativeLabel: "العربية" },
   ];
+
+  const handleCompanyUpdate = (field: keyof Settings["company"], value: string) => {
+    updateSettings({
+      company: {
+        ...settings.company,
+        [field]: value,
+      },
+    });
+  };
 
   return (
     <div className="flex h-full flex-col gap-6 overflow-hidden p-6">
@@ -67,6 +77,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                 <input
                   className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800"
                   defaultValue={settings.company.name}
+                  onBlur={(e) => handleCompanyUpdate("name", e.target.value)}
                   type="text"
                 />
               </div>
@@ -77,6 +88,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                 <input
                   className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800"
                   defaultValue={settings.company.email}
+                  onBlur={(e) => handleCompanyUpdate("email", e.target.value)}
                   type="email"
                 />
               </div>
@@ -87,6 +99,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                 <input
                   className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800"
                   defaultValue={settings.company.phone}
+                  onBlur={(e) => handleCompanyUpdate("phone", e.target.value)}
                   type="tel"
                 />
               </div>
@@ -97,6 +110,7 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                 <input
                   className="w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800"
                   defaultValue={settings.company.address}
+                  onBlur={(e) => handleCompanyUpdate("address", e.target.value)}
                   type="text"
                 />
               </div>

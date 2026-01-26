@@ -70,6 +70,7 @@ pub async fn add_subscription(pool: State<'_, DbPool>, data: CreateSubscriptionD
         .map_err(|_| "Customer not found".to_string())?;
 
     let now = chrono::Local::now().naive_local();
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
 
     // Insert
     sqlx::query(
@@ -83,12 +84,24 @@ pub async fn add_subscription(pool: State<'_, DbPool>, data: CreateSubscriptionD
     .bind(end_date)
     .bind(now)
     .bind(now)
-    .execute(&*pool)
+    .execute(&mut *tx)
     .await
     .map_err(|e| e.to_string())?;
 
-    // Create Invoice for Subscription? (Optional, but good practice)
-    // For now we just return the object
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, customer_id, performed_at) VALUES (?, ?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("subscription_new")
+    .bind(format!("New {} subscription for customer {}", data.plan_type, customer_name))
+    .bind(&data.customer_id)
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
 
     Ok(Subscription {
         id,
@@ -105,50 +118,113 @@ pub async fn add_subscription(pool: State<'_, DbPool>, data: CreateSubscriptionD
 
 #[tauri::command]
 pub async fn deactivate_subscription(pool: State<'_, DbPool>, id: String) -> Result<(), String> {
+    let now = chrono::Local::now().naive_local();
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+
     sqlx::query("UPDATE subscriptions SET status = 'inactive', updated_at = ? WHERE id = ?")
-        .bind(chrono::Local::now().naive_local())
-        .bind(id)
-        .execute(&*pool)
+        .bind(now)
+        .bind(&id)
+        .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, performed_at) VALUES (?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("subscription_deactivate")
+    .bind(format!("Subscription deactivated: {}", id))
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn cancel_subscription(pool: State<'_, DbPool>, id: String) -> Result<(), String> {
+    let now = chrono::Local::now().naive_local();
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+
     sqlx::query("UPDATE subscriptions SET status = 'cancelled', updated_at = ? WHERE id = ?")
-        .bind(chrono::Local::now().naive_local())
-        .bind(id)
-        .execute(&*pool)
+        .bind(now)
+        .bind(&id)
+        .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, performed_at) VALUES (?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("subscription_cancel")
+    .bind(format!("Subscription cancelled: {}", id))
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn reactivate_subscription(pool: State<'_, DbPool>, id: String) -> Result<(), String> {
+    let now = chrono::Local::now().naive_local();
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+
     sqlx::query("UPDATE subscriptions SET status = 'active', updated_at = ? WHERE id = ?")
-        .bind(chrono::Local::now().naive_local())
-        .bind(id)
-        .execute(&*pool)
+        .bind(now)
+        .bind(&id)
+        .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, performed_at) VALUES (?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("subscription_reactivate")
+    .bind(format!("Subscription reactivated: {}", id))
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn change_subscription_plan(pool: State<'_, DbPool>, id: String, new_plan_type: String) -> Result<(), String> {
-    // This is complex: does it extend? replace? 
-    // Simplified: Just update the plan type and recalc end date from TODAY or original start? 
-    // Let's assume it restarts the subscription from now or updates the type for future renewal.
-    // For simplicity: Update plan type and re-calculate end date from *original start* (preserving period) OR just text update.
-    // Better: Update plan type.
+    let now = chrono::Local::now().naive_local();
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+
     sqlx::query("UPDATE subscriptions SET plan_type = ?, updated_at = ? WHERE id = ?")
-        .bind(new_plan_type)
-        .bind(chrono::Local::now().naive_local())
-        .bind(id)
-        .execute(&*pool)
+        .bind(&new_plan_type)
+        .bind(now)
+        .bind(&id)
+        .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, performed_at) VALUES (?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("subscription_change")
+    .bind(format!("Subscription plan changed to {} for {}", new_plan_type, id))
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
     Ok(())
 }

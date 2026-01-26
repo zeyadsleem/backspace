@@ -91,6 +91,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
           className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-300"
           onClick={onView}
           title={t("viewInvoice")}
+          type="button"
         >
           <Eye className="h-4 w-4" />
         </button>
@@ -99,6 +100,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
             className="rounded-lg p-2 text-emerald-600 transition-colors hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
             onClick={onRecordPayment}
             title={t("recordPayment")}
+            type="button"
           >
             <CreditCard className="h-4 w-4" />
           </button>

@@ -70,6 +70,7 @@ export function PendingInvoices({ invoices, onViewCustomerDebt }: PendingInvoice
                   className="group flex w-full items-center justify-between rounded-xl border border-stone-100 p-4 shadow-sm transition-all hover:border-red-100 hover:bg-red-50/30 dark:border-stone-800/50 dark:hover:bg-red-900/10"
                   key={customerId}
                   onClick={() => onViewCustomerDebt?.(customerId)}
+                  type="button"
                 >
                   <div className="text-start">
                     <p className="font-medium text-sm text-stone-900 dark:text-stone-100">

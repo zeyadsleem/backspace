@@ -50,15 +50,22 @@ export function RevenueChart({ data }: RevenueChartProps) {
           </div>
         </div>
         <div className="flex rounded-lg bg-stone-100 p-1 dark:bg-stone-800">
-          {(["today", "week", "month"] as Period[]).map((p) => (
-            <button
-              className={`rounded-md px-3 py-1.5 font-medium text-xs transition-all ${period === p ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
-              key={p}
-              onClick={() => setPeriod(p)}
-            >
-              {p === "today" ? t("today") : p === "week" ? t("thisWeek") : t("thisMonth")}
-            </button>
-          ))}
+          {(["today", "week", "month"] as Period[]).map((p) => {
+            let label = t("thisMonth");
+            if (p === "today") label = t("today");
+            if (p === "week") label = t("thisWeek");
+
+            return (
+              <button
+                className={`rounded-md px-3 py-1.5 font-medium text-xs transition-all ${period === p ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
+                key={p}
+                onClick={() => setPeriod(p)}
+                type="button"
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -78,11 +85,14 @@ export function RevenueChart({ data }: RevenueChartProps) {
       </div>
 
       <div className="flex min-h-0 flex-1 items-end gap-2 pt-4">
-        {data.map((point, index) => {
+        {data.map((point) => {
           const sessionHeight = (point.sessions / maxValue) * 100;
           const inventoryHeight = (point.inventory / maxValue) * 100;
           return (
-            <div className="flex h-full flex-1 flex-col items-center justify-end gap-1" key={index}>
+            <div
+              className="flex h-full flex-1 flex-col items-center justify-end gap-1"
+              key={point.date}
+            >
               <div className="flex min-h-0 w-full flex-1 flex-col-reverse items-center">
                 <div
                   className="w-full max-w-10 rounded-t bg-amber-500 transition-all duration-300"

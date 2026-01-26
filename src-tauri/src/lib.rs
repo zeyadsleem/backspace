@@ -39,13 +39,17 @@ pub fn run() {
         commands::inventory::add_inventory,
         commands::inventory::update_inventory,
         commands::inventory::delete_inventory,
+        commands::inventory::adjust_inventory_quantity,
         commands::sessions::get_active_sessions,
         commands::sessions::start_session,
         commands::sessions::end_session,
         commands::sessions::add_session_inventory,
+        commands::sessions::remove_session_inventory,
+        commands::sessions::update_session_inventory,
         commands::invoices::get_invoices,
         commands::invoices::get_invoice_items,
         commands::invoices::process_payment,
+        commands::invoices::process_bulk_payment,
         commands::settings::get_settings,
         commands::settings::update_settings,
         commands::subscriptions::get_subscriptions,
@@ -57,7 +61,10 @@ pub fn run() {
         commands::reports::get_dashboard_metrics,
         commands::reports::get_revenue_chart_data,
         commands::reports::get_top_customers,
-        commands::reports::get_recent_activity
+        commands::reports::get_recent_activity,
+        commands::reports::get_revenue_report,
+        commands::reports::get_utilization_report,
+        commands::reports::get_operation_history
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

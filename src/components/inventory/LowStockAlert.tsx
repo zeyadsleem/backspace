@@ -35,7 +35,9 @@ export function LowStockAlert({ lowStockItems, outOfStockItems, onItemClick }: L
                     className="inline-flex items-center rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm transition-colors hover:bg-red-50 dark:border-red-800 dark:bg-stone-900 dark:hover:bg-red-950/50"
                     key={item.id}
                     onClick={() => onItemClick?.(item.id)}
+                    type="button"
                   >
+                    {" "}
                     <span className="font-medium text-stone-700 dark:text-stone-300">
                       {item.name}
                     </span>
@@ -70,6 +72,7 @@ export function LowStockAlert({ lowStockItems, outOfStockItems, onItemClick }: L
                     className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-sm transition-colors hover:bg-amber-50 dark:border-amber-800 dark:bg-stone-900 dark:hover:bg-amber-950/50"
                     key={item.id}
                     onClick={() => onItemClick?.(item.id)}
+                    type="button"
                   >
                     <span className="font-medium text-stone-700 dark:text-stone-300">
                       {item.name}

@@ -41,15 +41,18 @@ pub async fn get_resources(pool: State<'_, DbPool>) -> Result<Vec<Resource>, Str
 #[tauri::command]
 pub async fn add_resource(pool: State<'_, DbPool>, data: CreateResourceDto) -> Result<Resource, String> {
     let id = uuid::Uuid::new_v4().to_string();
+    let now = chrono::Local::now().naive_local();
     let resource = Resource {
         id: id.clone(),
         name: data.name,
         resource_type: data.resource_type,
         rate_per_hour: data.rate_per_hour,
         is_available: true,
-        created_at: chrono::Local::now().naive_local(),
-        updated_at: chrono::Local::now().naive_local(),
+        created_at: now,
+        updated_at: now,
     };
+
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
 
     sqlx::query(
         "INSERT INTO resources (id, name, resource_type, rate_per_hour, is_available, created_at, updated_at) 
@@ -62,15 +65,33 @@ pub async fn add_resource(pool: State<'_, DbPool>, data: CreateResourceDto) -> R
     .bind(resource.is_available)
     .bind(resource.created_at)
     .bind(resource.updated_at)
-    .execute(&*pool)
+    .execute(&mut *tx)
     .await
     .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, resource_id, performed_at) VALUES (?, ?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("resource_new")
+    .bind(format!("New resource added: {}", resource.name))
+    .bind(&resource.id)
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
 
     Ok(resource)
 }
 
 #[tauri::command]
 pub async fn update_resource(pool: State<'_, DbPool>, id: String, data: UpdateResourceDto) -> Result<(), String> {
+    let now = chrono::Local::now().naive_local();
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+
     sqlx::query("UPDATE resources SET 
         name = COALESCE(?, name), 
         resource_type = COALESCE(?, resource_type), 
@@ -78,24 +99,56 @@ pub async fn update_resource(pool: State<'_, DbPool>, id: String, data: UpdateRe
         is_available = COALESCE(?, is_available),
         updated_at = ?
         WHERE id = ?")
-        .bind(data.name)
+        .bind(&data.name)
         .bind(data.resource_type)
         .bind(data.rate_per_hour)
         .bind(data.is_available)
-        .bind(chrono::Local::now().naive_local())
-        .bind(id)
-        .execute(&*pool)
+        .bind(now)
+        .bind(&id)
+        .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, resource_id, performed_at) VALUES (?, ?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("resource_update")
+    .bind(format!("Resource updated: {}", data.name.unwrap_or_else(|| "ID: ".to_string() + &id)))
+    .bind(&id)
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
     Ok(())
 }
 
 #[tauri::command]
 pub async fn delete_resource(pool: State<'_, DbPool>, id: String) -> Result<(), String> {
+    let now = chrono::Local::now().naive_local();
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+
     sqlx::query("DELETE FROM resources WHERE id = ?")
-        .bind(id)
-        .execute(&*pool)
+        .bind(&id)
+        .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, performed_at) VALUES (?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("resource_delete")
+    .bind(format!("Resource deleted: {}", id))
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
     Ok(())
 }

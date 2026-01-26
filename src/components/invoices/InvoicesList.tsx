@@ -73,6 +73,7 @@ export function InvoicesList({ invoices, onView, onRecordPayment }: InvoicesList
               className={`rounded-md px-4 py-2 font-medium text-sm transition-all ${statusFilter === status ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 dark:text-stone-400"}`}
               key={status}
               onClick={() => setStatusFilter(status)}
+              type="button"
             >
               {status === "all" ? t("all") : t(status)} ({statusCounts[status]})
             </button>

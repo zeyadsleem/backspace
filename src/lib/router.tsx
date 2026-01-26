@@ -1,32 +1,132 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
-import { CustomerProfilePage } from "../pages/CustomerProfilePage";
-import { CustomersPage } from "../pages/CustomersPage";
-import { DashboardPage } from "../pages/DashboardPage";
-import { InventoryPage } from "../pages/InventoryPage";
-import { InvoicesPage } from "../pages/InvoicesPage";
-import { ReportsPageWrapper } from "../pages/ReportsPageWrapper";
-import { ResourcesPage } from "../pages/ResourcesPage";
-import { SessionsPage } from "../pages/SessionsPage";
-import { SettingsPageWrapper } from "../pages/SettingsPageWrapper";
-import { SubscriptionsPage } from "../pages/SubscriptionsPage";
+import { LoadingState } from "../components/shared/LoadingState";
+
+const DashboardPage = lazy(() =>
+  import("../pages/DashboardPage").then((m) => ({ default: m.DashboardPage }))
+);
+const CustomersPage = lazy(() =>
+  import("../pages/CustomersPage").then((m) => ({ default: m.CustomersPage }))
+);
+const CustomerProfilePage = lazy(() =>
+  import("../pages/CustomerProfilePage").then((m) => ({ default: m.CustomerProfilePage }))
+);
+const ResourcesPage = lazy(() =>
+  import("../pages/ResourcesPage").then((m) => ({ default: m.ResourcesPage }))
+);
+const SessionsPage = lazy(() =>
+  import("../pages/SessionsPage").then((m) => ({ default: m.SessionsPage }))
+);
+const SubscriptionsPage = lazy(() =>
+  import("../pages/SubscriptionsPage").then((m) => ({ default: m.SubscriptionsPage }))
+);
+const InventoryPage = lazy(() =>
+  import("../pages/InventoryPage").then((m) => ({ default: m.InventoryPage }))
+);
+const InvoicesPage = lazy(() =>
+  import("../pages/InvoicesPage").then((m) => ({ default: m.InvoicesPage }))
+);
+const ReportsPageWrapper = lazy(() =>
+  import("../pages/ReportsPageWrapper").then((m) => ({ default: m.ReportsPageWrapper }))
+);
+const SettingsPageWrapper = lazy(() =>
+  import("../pages/SettingsPageWrapper").then((m) => ({ default: m.SettingsPageWrapper }))
+);
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      { index: true, element: <DashboardPage /> },
-      { path: "dashboard", element: <DashboardPage /> },
-      { path: "customers", element: <CustomersPage /> },
-      { path: "customers/:id", element: <CustomerProfilePage /> },
-      { path: "resources", element: <ResourcesPage /> },
-      { path: "sessions", element: <SessionsPage /> },
-      { path: "subscriptions", element: <SubscriptionsPage /> },
-      { path: "inventory", element: <InventoryPage /> },
-      { path: "invoices", element: <InvoicesPage /> },
-      { path: "reports", element: <ReportsPageWrapper /> },
-      { path: "settings", element: <SettingsPageWrapper /> },
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <DashboardPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "dashboard",
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <DashboardPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "customers",
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <CustomersPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "customers/:id",
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <CustomerProfilePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "resources",
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <ResourcesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "sessions",
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <SessionsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "subscriptions",
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <SubscriptionsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "inventory",
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <InventoryPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "invoices",
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <InvoicesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "reports",
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <ReportsPageWrapper />
+          </Suspense>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <Suspense fallback={<LoadingState />}>
+            <SettingsPageWrapper />
+          </Suspense>
+        ),
+      },
     ],
   },
 ]);

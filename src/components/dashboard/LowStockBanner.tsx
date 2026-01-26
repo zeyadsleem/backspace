@@ -32,6 +32,7 @@ export function LowStockBanner({ alerts, onViewItem, onViewAll }: LowStockBanner
                 className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-sm transition-colors hover:bg-amber-50 dark:border-amber-800 dark:bg-stone-900 dark:hover:bg-amber-950/50"
                 key={alert.id}
                 onClick={() => onViewItem?.(alert.id)}
+                type="button"
               >
                 <span className="font-medium text-stone-700 dark:text-stone-300">{alert.name}</span>
                 <span className="font-semibold text-amber-600 dark:text-amber-400">
@@ -49,6 +50,7 @@ export function LowStockBanner({ alerts, onViewItem, onViewAll }: LowStockBanner
         <button
           className="flex flex-shrink-0 items-center gap-1 font-medium text-amber-700 text-sm transition-colors hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200"
           onClick={onViewAll}
+          type="button"
         >
           {t("viewAll")}
           <ChevronRight className="h-4 w-4 rtl:rotate-180" />

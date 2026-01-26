@@ -44,6 +44,7 @@ export function MetricCard({
     <button
       className={`w-full rounded-xl border p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] ${styles.container} ${onClick ? "cursor-pointer" : "cursor-default"} ${isRTL ? "text-right" : "text-left"}`}
       onClick={onClick}
+      type="button"
     >
       <div className="flex items-start justify-between gap-3">
         <div className={`min-w-0 flex-1 ${isRTL ? "text-right" : "text-left"}`}>

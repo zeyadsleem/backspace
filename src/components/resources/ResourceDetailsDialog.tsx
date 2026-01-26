@@ -127,6 +127,7 @@ export function ResourceDetailsDialog({
               onStartSession();
               onClose();
             }}
+            type="button"
           >
             <Play className="h-4 w-4" /> {t("startSession")}
           </button>
@@ -138,6 +139,7 @@ export function ResourceDetailsDialog({
               onEdit();
               onClose();
             }}
+            type="button"
           >
             <Pencil className="h-4 w-4" /> {t("edit")}
           </button>
@@ -147,6 +149,7 @@ export function ResourceDetailsDialog({
               onDelete();
               onClose();
             }}
+            type="button"
           >
             <Trash2 className="h-4 w-4" /> {t("delete")}
           </button>

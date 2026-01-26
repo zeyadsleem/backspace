@@ -58,6 +58,7 @@ export function ReportsPage({
               className={`inline-flex items-center gap-2 rounded-md px-4 py-2 font-medium text-sm transition-all ${activeTab === tab.id ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              type="button"
             >
               <Icon className="h-4 w-4" />
               {tab.label}

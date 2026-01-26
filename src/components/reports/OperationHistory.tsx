@@ -129,6 +129,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
                   className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
                   key={operation.id}
                   onClick={() => onOperationClick?.(operation.id)}
+                  type="button"
                 >
                   <div className={`flex-shrink-0 rounded-lg p-2 ${config.bg}`}>
                     <Icon className={`h-4 w-4 ${config.color}`} />

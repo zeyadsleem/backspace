@@ -64,6 +64,7 @@ export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: Inv
         <button
           className="rounded-lg p-2 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
           onClick={onClose}
+          type="button"
         >
           <X className="h-5 w-5" />
         </button>
@@ -122,8 +123,8 @@ export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: Inv
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-50 dark:divide-stone-800/50">
-              {invoice.lineItems.map((item, i) => (
-                <tr key={i}>
+              {invoice.lineItems.map((item, index) => (
+                <tr key={`${item.description}-${index}`}>
                   <td className="px-4 py-3 text-stone-700 dark:text-stone-300">
                     {item.description}
                   </td>
@@ -163,6 +164,7 @@ export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: Inv
           <button
             className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 font-bold text-base text-white shadow-emerald-200 shadow-lg transition-all hover:bg-emerald-700 active:scale-[0.98] dark:shadow-none"
             onClick={onRecordPayment}
+            type="button"
           >
             <CreditCard className="h-5 w-5" />
             <span>{t("recordPayment")}</span>

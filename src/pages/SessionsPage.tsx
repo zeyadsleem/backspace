@@ -22,9 +22,9 @@ export function SessionsPage() {
         availableInventory={inventory}
         onAddInventory={(sessionId, items) => {
           // Add each item to the session
-          items.forEach((item) => {
+          for (const item of items) {
             addInventoryToSession(sessionId, item.inventoryId, item.quantity);
-          });
+          }
         }}
         onEndSession={(sessionId, paymentData) => {
           endSessionWithPayment(sessionId, paymentData.method, paymentData.amount);

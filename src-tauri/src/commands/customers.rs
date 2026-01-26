@@ -57,10 +57,11 @@ pub async fn add_customer(pool: State<'_, DbPool>, data: CreateCustomerDto) -> R
         .map_err(|e| e.to_string())?;
     let human_id = format!("C-{:03}", count + 1);
 
+    let now = chrono::Local::now().naive_local();
     let customer = Customer {
         id: id.clone(),
         human_id,
-        name: data.name,
+        name: data.name.clone(),
         phone: data.phone,
         email: data.email,
         customer_type: data.customer_type,
@@ -68,9 +69,11 @@ pub async fn add_customer(pool: State<'_, DbPool>, data: CreateCustomerDto) -> R
         total_spent: 0.0,
         total_sessions: 0,
         notes: data.notes,
-        created_at: chrono::Local::now().naive_local(),
-        updated_at: chrono::Local::now().naive_local(),
+        created_at: now,
+        updated_at: now,
     };
+
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
 
     sqlx::query(
         "INSERT INTO customers (id, human_id, name, phone, email, customer_type, balance, total_spent, total_sessions, notes, created_at, updated_at) 
@@ -88,7 +91,7 @@ pub async fn add_customer(pool: State<'_, DbPool>, data: CreateCustomerDto) -> R
     .bind(&customer.notes)
     .bind(customer.created_at)
     .bind(customer.updated_at)
-    .execute(&*pool)
+    .execute(&mut *tx)
     .await
     .map_err(|e| {
         if e.to_string().contains("UNIQUE constraint failed") {
@@ -97,11 +100,29 @@ pub async fn add_customer(pool: State<'_, DbPool>, data: CreateCustomerDto) -> R
         e.to_string()
     })?;
 
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, customer_id, performed_at) VALUES (?, ?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("customer_new")
+    .bind(format!("New customer registered: {}", customer.name))
+    .bind(&customer.id)
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
+
     Ok(customer)
 }
 
 #[tauri::command]
 pub async fn update_customer(pool: State<'_, DbPool>, id: String, data: UpdateCustomerDto) -> Result<(), String> {
+    let now = chrono::Local::now().naive_local();
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+
     sqlx::query::<sqlx::Sqlite>("UPDATE customers SET 
         name = COALESCE(?, name), 
         phone = COALESCE(?, phone), 
@@ -110,26 +131,58 @@ pub async fn update_customer(pool: State<'_, DbPool>, id: String, data: UpdateCu
         notes = COALESCE(?, notes),
         updated_at = ?
         WHERE id = ?")
-        .bind(data.name)
+        .bind(&data.name)
         .bind(data.phone)
         .bind(data.email)
         .bind(data.customer_type)
         .bind(data.notes)
-        .bind(chrono::Local::now().naive_local())
-        .bind(id)
-        .execute(&*pool)
+        .bind(now)
+        .bind(&id)
+        .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, customer_id, performed_at) VALUES (?, ?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("customer_update")
+    .bind(format!("Customer updated: {}", data.name.unwrap_or_else(|| "ID: ".to_string() + &id)))
+    .bind(&id)
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
         
     Ok(())
 }
 
 #[tauri::command]
 pub async fn delete_customer(pool: State<'_, DbPool>, id: String) -> Result<(), String> {
+    let now = chrono::Local::now().naive_local();
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+
     sqlx::query::<sqlx::Sqlite>("DELETE FROM customers WHERE id = ?")
-        .bind(id)
-        .execute(&*pool)
+        .bind(&id)
+        .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, performed_at) VALUES (?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("customer_delete")
+    .bind(format!("Customer deleted: {}", id))
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
     Ok(())
 }

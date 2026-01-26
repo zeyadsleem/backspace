@@ -85,6 +85,7 @@ export function CustomerDebtDialog({
           <button
             className="rounded-lg p-2 text-stone-400 transition-colors hover:text-stone-600 dark:hover:text-stone-300"
             onClick={onClose}
+            type="button"
           >
             <X className="h-5 w-5" />
           </button>
@@ -171,8 +172,11 @@ export function CustomerDebtDialog({
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-100 dark:divide-stone-700/30">
-                              {invoice.lineItems.map((item, i) => (
-                                <tr className="text-stone-600 dark:text-stone-300" key={i}>
+                              {invoice.lineItems.map((item) => (
+                                <tr
+                                  className="text-stone-600 dark:text-stone-300"
+                                  key={item.description}
+                                >
                                   <td className="px-1 py-1.5 font-medium">{item.description}</td>
                                   <td className="px-1 py-1.5 text-end font-bold font-mono">
                                     {item.amount.toLocaleString()}
@@ -194,9 +198,9 @@ export function CustomerDebtDialog({
           <div className="flex flex-1 flex-col overflow-y-auto bg-white p-5 dark:bg-stone-900">
             <div className="flex flex-1 flex-col gap-6">
               <div className="space-y-3">
-                <label className="block font-bold text-stone-400 text-xs uppercase tracking-widest">
+                <div className="block font-bold text-stone-400 text-xs uppercase tracking-widest">
                   {t("paymentSummary")}
-                </label>
+                </div>
                 <div className="flex flex-col items-center gap-1 rounded-2xl border border-red-100 bg-red-50 p-4 text-center dark:border-red-900/20 dark:bg-red-900/10">
                   <span className="font-bold text-red-600/70 text-xs uppercase tracking-widest">
                     {t("totalAmountToPay")}
@@ -212,9 +216,9 @@ export function CustomerDebtDialog({
 
               <div className="space-y-4">
                 <div>
-                  <label className="mb-2 block font-bold text-stone-400 text-xs uppercase tracking-widest">
+                  <div className="mb-2 block font-bold text-stone-400 text-xs uppercase tracking-widest">
                     {t("paymentMethod")}
-                  </label>
+                  </div>
                   <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/30 p-3 text-emerald-700 dark:bg-emerald-900/10 dark:text-emerald-400">
                     <div className="rounded-lg bg-emerald-100 p-1.5 dark:bg-emerald-800">
                       <Wallet className="h-4 w-4" />
@@ -230,11 +234,15 @@ export function CustomerDebtDialog({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block font-bold text-stone-400 text-xs uppercase tracking-widest">
+                  <label
+                    className="block font-bold text-stone-400 text-xs uppercase tracking-widest"
+                    htmlFor="payment-notes"
+                  >
                     {t("notes")}
                   </label>
                   <textarea
                     className="h-20 w-full resize-none rounded-xl border border-stone-200 bg-stone-50 p-3 text-xs outline-none transition-all focus:ring-2 focus:ring-emerald-500/10 dark:border-stone-700 dark:bg-stone-800"
+                    id="payment-notes"
                     onChange={(e) => setPaymentNotes(e.target.value)}
                     placeholder={t("addPaymentNotes")}
                     value={paymentNotes}
@@ -246,6 +254,7 @@ export function CustomerDebtDialog({
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 font-bold text-base text-white shadow-emerald-600/10 shadow-lg transition-all hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
                 disabled={isProcessing || totalDebt <= 0}
                 onClick={handlePayAll}
+                type="button"
               >
                 {isProcessing ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -262,6 +271,7 @@ export function CustomerDebtDialog({
               <button
                 className="w-full py-1 font-bold text-stone-400 text-xs uppercase tracking-widest transition-colors hover:text-stone-600 dark:hover:text-stone-200"
                 onClick={onGoToProfile}
+                type="button"
               >
                 {t("viewCustomerProfile")}
               </button>

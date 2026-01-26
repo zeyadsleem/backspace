@@ -1,5 +1,6 @@
 import { Eye, Pencil, Trash2 } from "lucide-react";
 import type { TranslationKey } from "@/lib/translations";
+import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Customer, CustomerType } from "@/types";
 
@@ -94,7 +95,12 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
       </div>
       <div className="col-span-1 flex items-center md:col-span-2 md:justify-center">
         <span
-          className={`font-medium text-sm ${customer.balance < 0 ? "text-red-600 dark:text-red-400" : customer.balance > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-stone-500 dark:text-stone-400"}`}
+          className={cn(
+            "font-medium text-sm",
+            customer.balance < 0 && "text-red-600 dark:text-red-400",
+            customer.balance > 0 && "text-emerald-600 dark:text-emerald-400",
+            customer.balance === 0 && "text-stone-500 dark:text-stone-400"
+          )}
         >
           {formatBalance(customer.balance)}
         </span>
@@ -104,6 +110,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
           className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-300"
           onClick={onView}
           title={t("view")}
+          type="button"
         >
           <Eye className="h-4 w-4" />
         </button>
@@ -111,6 +118,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
           className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800 dark:hover:text-stone-300"
           onClick={onEdit}
           title={t("edit")}
+          type="button"
         >
           <Pencil className="h-4 w-4" />
         </button>
@@ -118,6 +126,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
           className="rounded-lg p-2 text-stone-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
           onClick={onDelete}
           title={t("delete")}
+          type="button"
         >
           <Trash2 className="h-4 w-4" />
         </button>

@@ -1,4 +1,8 @@
+import type { FieldErrors } from "react-hook-form";
 import { z } from "zod";
+
+const EGYPTIAN_PHONE_REGEX = /^(0|20)?1[0125]\d{8}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Customer validation schema
 export const customerSchema = z.object({
@@ -10,7 +14,7 @@ export const customerSchema = z.object({
   phone: z
     .string()
     .min(1, "Phone number is required")
-    .regex(/^(0|20)?1[0125]\d{8}$/, "Invalid Egyptian phone number format"),
+    .regex(EGYPTIAN_PHONE_REGEX, "Invalid Egyptian phone number format"),
   email: z.string().email("Invalid email format").optional().or(z.literal("")),
   customerType: z.enum(["visitor", "weekly", "half-monthly", "monthly"] as const),
   notes: z.string().max(500, "Notes must be less than 500 characters").optional().or(z.literal("")),
@@ -108,23 +112,21 @@ export type SettingsFormData = z.infer<typeof settingsSchema>;
 // Helper functions for validation
 export const validatePhoneNumber = (phone: string): boolean => {
   const normalized = phone.replace(/[\s\-+]/g, "");
-  return /^(0|20)?1[0125]\d{8}$/.test(normalized);
+  return EGYPTIAN_PHONE_REGEX.test(normalized);
 };
 
 export const validateEmail = (email: string): boolean => {
   if (!email) {
     return true;
   }
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return EMAIL_REGEX.test(email);
 };
 
 // Form validation helpers
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getFieldError = (errors: any, fieldName: string): string | undefined => {
-  return errors[fieldName]?.message;
+export const getFieldError = (errors: FieldErrors, fieldName: string): string | undefined => {
+  return errors[fieldName]?.message as string | undefined;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const hasFieldError = (errors: any, fieldName: string): boolean => {
+export const hasFieldError = (errors: FieldErrors, fieldName: string): boolean => {
   return !!errors[fieldName];
 };

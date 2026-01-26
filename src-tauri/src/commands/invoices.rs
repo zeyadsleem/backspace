@@ -126,10 +126,8 @@ pub async fn process_payment(pool: State<'_, DbPool>, data: PaymentDto) -> Resul
     let now = chrono::Local::now().naive_local();
 
     // Record Transaction
-    // Insert Payment (transactions table?) Wait, schema has payments
-    // Using sqlx::query
     sqlx::query(
-        "INSERT INTO payments (id, invoice_id, amount, method, notes, payment_date) VALUES (?, ?, ?, ?, ?, ?)"
+        "INSERT INTO transactions (id, invoice_id, amount, payment_method, notes, payment_date) VALUES (?, ?, ?, ?, ?, ?)"
     )
     .bind(transaction_id)
     .bind(&data.invoice_id)
@@ -141,7 +139,6 @@ pub async fn process_payment(pool: State<'_, DbPool>, data: PaymentDto) -> Resul
     .await
     .map_err(|e| e.to_string())?;
 
-    // Update Invoice
     // Update Invoice
     let paid_date = if status == "paid" { Some(now) } else { None };
     sqlx::query("UPDATE invoices SET paid_amount = ?, status = ?, paid_date = ?, updated_at = ? WHERE id = ?")
@@ -164,6 +161,129 @@ pub async fn process_payment(pool: State<'_, DbPool>, data: PaymentDto) -> Resul
         .execute(&mut *tx)
         .await
         .map_err(|e| e.to_string())?;
+
+    // Audit Log
+    sqlx::query(
+        "INSERT INTO audit_logs (id, operation_type, description, performed_at) VALUES (?, ?, ?, ?)"
+    )
+    .bind(uuid::Uuid::new_v4().to_string())
+    .bind("payment_received")
+    .bind(format!("Payment of {} received for invoice {}", data.amount, data.invoice_id))
+    .bind(now)
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    tx.commit().await.map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[derive(Deserialize)]
+pub struct BulkPaymentDto {
+    pub invoice_ids: Vec<String>,
+    pub amount: Decimal,
+    pub payment_method: String,
+    pub notes: Option<String>,
+}
+
+#[tauri::command]
+pub async fn process_bulk_payment(pool: State<'_, DbPool>, data: BulkPaymentDto) -> Result<(), String> {
+    let mut tx = pool.begin().await.map_err(|e| e.to_string())?;
+    let mut remaining_amount = data.amount;
+    let now = chrono::Local::now().naive_local();
+
+    for invoice_id in data.invoice_ids {
+        if remaining_amount.is_zero() {
+            break;
+        }
+
+        let row = sqlx::query(
+            "SELECT total, paid_amount, status, customer_id FROM invoices WHERE id = ?"
+        )
+        .bind(&invoice_id)
+        .fetch_optional(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?
+        .ok_or_else(|| format!("Invoice {} not found", invoice_id))?;
+
+        let total_s: String = row.try_get("total").unwrap_or_default();
+        let total = Decimal::from_str_exact(&total_s).unwrap_or(Decimal::ZERO);
+        
+        let paid_s: String = row.try_get("paid_amount").unwrap_or_default();
+        let paid_amount = Decimal::from_str_exact(&paid_s).unwrap_or(Decimal::ZERO);
+        
+        let status: String = row.try_get("status").unwrap_or_default();
+        let customer_id: String = row.try_get("customer_id").unwrap_or_default();
+
+        if status == "cancelled" || status == "paid" {
+            continue;
+        }
+
+        let balance_due = total - paid_amount;
+        let amount_to_pay = remaining_amount.min(balance_due);
+        
+        if amount_to_pay.is_zero() {
+            continue;
+        }
+
+        let new_paid = paid_amount + amount_to_pay;
+        let mut new_status = "partially_paid";
+        if new_paid >= total {
+            new_status = "paid";
+        }
+
+        let transaction_id = Uuid::new_v4().to_string();
+        
+        // Record Transaction
+        sqlx::query(
+            "INSERT INTO transactions (id, invoice_id, amount, payment_method, notes, payment_date) VALUES (?, ?, ?, ?, ?, ?)"
+        )
+        .bind(transaction_id)
+        .bind(&invoice_id)
+        .bind(amount_to_pay.to_string())
+        .bind(&data.payment_method)
+        .bind(&data.notes)
+        .bind(now)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+
+        // Update Invoice
+        let paid_date = if new_status == "paid" { Some(now) } else { None };
+        sqlx::query("UPDATE invoices SET paid_amount = ?, status = ?, paid_date = ?, updated_at = ? WHERE id = ?")
+            .bind(new_paid.to_string())
+            .bind(new_status)
+            .bind(paid_date)
+            .bind(now)
+            .bind(&invoice_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        // Update Customer Stats
+        sqlx::query("UPDATE customers SET total_spent = total_spent + ?, balance = balance - ?, updated_at = ? WHERE id = ?")
+            .bind(amount_to_pay.to_string())
+            .bind(amount_to_pay.to_string())
+            .bind(now)
+            .bind(customer_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        // Audit Log
+        sqlx::query(
+            "INSERT INTO audit_logs (id, operation_type, description, performed_at) VALUES (?, ?, ?, ?)"
+        )
+        .bind(uuid::Uuid::new_v4().to_string())
+        .bind("payment_received")
+        .bind(format!("Bulk payment part of {} received for invoice {}", amount_to_pay, invoice_id))
+        .bind(now)
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| e.to_string())?;
+
+        remaining_amount -= amount_to_pay;
+    }
 
     tx.commit().await.map_err(|e| e.to_string())?;
     Ok(())
