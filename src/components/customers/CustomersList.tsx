@@ -1,5 +1,6 @@
 import { Filter, Plus, Search, Users } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Customer, CustomerType } from "@/types";
 import { CustomerRow } from "./CustomerRow";
@@ -61,14 +62,10 @@ export function CustomersList({
           </p>
         </div>
         <div className="flex gap-2">
-          <button
-            className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
-            onClick={onCreate}
-            type="button"
-          >
+          <Button onClick={onCreate} size="md" variant="primary">
             <Plus className="h-4 w-4" />
             {t("newCustomer")}
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -122,14 +119,10 @@ export function CustomersList({
             {t("tryAdjustingFilters")}
           </p>
           {!searchQuery && typeFilter === "all" && (
-            <button
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
-              onClick={onCreate}
-              type="button"
-            >
+            <Button className="mt-4" onClick={onCreate} size="md" variant="primary">
               <Plus className="h-4 w-4" />
               {t("newCustomer")}
-            </button>
+            </Button>
           )}
         </div>
       ) : (

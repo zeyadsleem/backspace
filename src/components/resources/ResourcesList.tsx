@@ -1,5 +1,6 @@
 import { LayoutGrid, List, Monitor, Plus } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Resource, ResourceType } from "@/types";
 import { ResourceCard } from "./ResourceCard";
@@ -49,14 +50,10 @@ export function ResourcesList({ resources, resourceTypes, onView, onCreate }: Re
             </span>
           </p>
         </div>
-        <button
-          className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
-          onClick={onCreate}
-          type="button"
-        >
+        <Button onClick={onCreate} size="md" variant="primary">
           <Plus className="h-4 w-4" />
           {t("addResource")}
-        </button>
+        </Button>
       </div>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="flex rounded-lg bg-stone-100 p-1 dark:bg-stone-800">

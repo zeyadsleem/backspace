@@ -1,5 +1,6 @@
 import { Clock, Plus } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { ActiveSession, InventoryItem, InvoiceStatus, PaymentMethod } from "@/types";
 import { ActiveSessionCard } from "./ActiveSessionCard";
@@ -55,14 +56,10 @@ export function ActiveSessions({
             {t("sessionsInProgress", { count: activeSessions.length })}
           </p>
         </div>
-        <button
-          className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
-          onClick={onStartSession}
-          type="button"
-        >
+        <Button onClick={onStartSession} size="md" variant="primary">
           <Plus className="h-4 w-4" />
           {t("startSession")}
-        </button>
+        </Button>
       </div>
 
       {activeSessions.length === 0 ? (
@@ -76,13 +73,10 @@ export function ActiveSessions({
           <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
             {t("startNewSessionPrompt")}
           </p>
-          <button
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
-            onClick={onStartSession}
-          >
+          <Button className="mt-4" onClick={onStartSession} size="md" variant="primary">
             <Plus className="h-4 w-4" />
             {t("startSession")}
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="grid 3xl:grid-cols-6 4xl:grid-cols-8 grid-cols-1 items-stretch gap-4 pb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">

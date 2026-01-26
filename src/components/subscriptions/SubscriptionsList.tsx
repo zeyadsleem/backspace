@@ -1,5 +1,6 @@
 import { CreditCard, Filter, Plus } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { PlanType, PlanTypeOption, Subscription } from "@/types";
 import { SubscriptionCard } from "./SubscriptionCard";
@@ -56,13 +57,10 @@ export function SubscriptionsList({
             )}
           </p>
         </div>
-        <button
-          className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
-          onClick={onCreate}
-        >
+        <Button onClick={onCreate} size="md" variant="primary">
           <Plus className="h-4 w-4" />
           {t("newSubscription")}
-        </button>
+        </Button>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
@@ -108,13 +106,10 @@ export function SubscriptionsList({
               : t("createFirstSubscription")}
           </p>
           {statusFilter === "all" && typeFilter === "all" && (
-            <button
-              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
-              onClick={onCreate}
-            >
+            <Button className="mt-4" onClick={onCreate} size="md" variant="primary">
               <Plus className="h-4 w-4" />
               {t("newSubscription")}
-            </button>
+            </Button>
           )}
         </div>
       ) : (

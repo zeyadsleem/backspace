@@ -1,5 +1,6 @@
 import { Package, Plus, Search } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { CategoryOption, InventoryCategory, InventoryItem } from "@/types";
 import { InventoryItemCard } from "./InventoryItemCard";
@@ -64,14 +65,10 @@ export function InventoryList({
               )}
             </p>
           </div>
-          <button
-            className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 font-medium text-sm text-white transition-colors hover:bg-amber-600"
-            onClick={onCreate}
-            type="button"
-          >
+          <Button onClick={onCreate} size="md" variant="primary">
             <Plus className="h-4 w-4" />
             {t("newItem")}
-          </button>
+          </Button>
         </div>
 
         {(lowStockItems.length > 0 || outOfStockItems.length > 0) && (
