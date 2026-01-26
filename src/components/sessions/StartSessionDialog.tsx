@@ -84,7 +84,7 @@ export function StartSessionDialog({
         </DialogHeader>
 
         <DialogBody className="p-5">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
               {/* Customer Selection */}
               <div className="flex flex-col gap-3">
@@ -131,15 +131,15 @@ export function StartSessionDialog({
                           >
                             <div className="flex flex-col">
                               <span
-                                className={`text-sm ${
+                                className={`font-medium text-sm ${
                                   isSelected
-                                    ? "font-semibold text-amber-700 dark:text-amber-400"
-                                    : "font-medium text-stone-700 dark:text-stone-300"
+                                    ? "text-amber-700 dark:text-amber-400"
+                                    : "text-stone-700 dark:text-stone-300"
                                 }`}
                               >
                                 {customer.name}
                               </span>
-                              <span className="font-mono font-normal text-stone-400 text-xs uppercase">
+                              <span className="font-mono text-stone-400 text-xs uppercase">
                                 {customer.humanId}
                               </span>
                             </div>
@@ -183,15 +183,15 @@ export function StartSessionDialog({
                           type="button"
                         >
                           <span
-                            className={`text-sm ${
+                            className={`font-medium text-sm line-clamp-1 text-center ${
                               isSelected
-                                ? "font-semibold text-amber-700 dark:text-amber-400"
-                                : "font-medium text-stone-700 dark:text-stone-200"
-                            } line-clamp-1 text-center`}
+                                ? "text-amber-700 dark:text-amber-400"
+                                : "text-stone-700 dark:text-stone-200"
+                            }`}
                           >
                             {resource.name}
                           </span>
-                          <span className="font-bold text-stone-400 text-xs uppercase">
+                          <span className="font-semibold text-stone-400 text-xs uppercase">
                             {resource.ratePerHour} {t("egp")}
                           </span>
                         </button>
@@ -207,29 +207,29 @@ export function StartSessionDialog({
               <div className="flex items-center justify-between rounded-xl border border-stone-100 bg-stone-50 p-4 px-6 dark:border-stone-800 dark:bg-stone-800/50">
                 <div className="flex items-center gap-8">
                   <div className="flex flex-col">
-                    <span className="font-bold text-stone-400 text-xs uppercase tracking-tight">
+                    <span className="font-semibold text-stone-400 text-xs uppercase tracking-tight">
                       {t("customer")}
                     </span>
-                    <span className="font-bold text-sm text-stone-800 dark:text-stone-100">
+                    <span className="font-medium text-sm text-stone-800 dark:text-stone-100">
                       {selectedCustomerData.name}
                     </span>
                   </div>
                   <div className="h-8 w-px bg-stone-200 dark:bg-stone-700" />
                   <div className="flex flex-col">
-                    <span className="font-bold text-stone-400 text-xs uppercase tracking-tight">
+                    <span className="font-semibold text-stone-400 text-xs uppercase tracking-tight">
                       {t("resource")}
                     </span>
-                    <span className="font-bold text-sm text-stone-800 dark:text-stone-100">
+                    <span className="font-medium text-sm text-stone-800 dark:text-stone-100">
                       {selectedResourceData.name}
                     </span>
                   </div>
                 </div>
                 <div className="text-end">
-                  <span className="block font-bold text-stone-400 text-xs uppercase tracking-tight">
+                  <span className="block font-semibold text-stone-400 text-xs uppercase tracking-tight">
                     {t("rate")}
                   </span>
                   <span
-                    className={`font-black text-base ${
+                    className={`font-bold text-base ${
                       isSubscribed ? "text-emerald-600" : "text-amber-600"
                     }`}
                   >
@@ -240,11 +240,11 @@ export function StartSessionDialog({
                 </div>
               </div>
             )}
-          </form>
+          </div>
         </DialogBody>
 
         <DialogFooter>
-          <Button className="flex-1" disabled={isLoading} onClick={handleClose} variant="outline">
+          <Button className="flex-1" disabled={isLoading} onClick={handleClose} size="md" variant="ghost">
             {t("cancel")}
           </Button>
           <Button
@@ -252,6 +252,7 @@ export function StartSessionDialog({
             disabled={isLoading || !selectedCustomer || !selectedResource}
             isLoading={isLoading}
             onClick={handleSubmit}
+            size="md"
             variant="primary"
           >
             {!isLoading && <Clock className="h-4 w-4" />}
