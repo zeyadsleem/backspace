@@ -1,6 +1,9 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite/biome/core", "ultracite/biome/react"],
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react"
+  ],
   "linter": {
     "rules": {
       "style": {
@@ -8,7 +11,11 @@
           "level": "error",
           "options": {
             "requireAscii": true,
-            "filenameCases": ["kebab-case", "PascalCase"]
+            "filenameCases": [
+              "kebab-case",
+              "PascalCase",
+              "camelCase"
+            ]
           }
         },
         "noNonNullAssertion": "off"

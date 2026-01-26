@@ -466,7 +466,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
     }
   },
 
-  recordPayment: async (invoiceId, amount, method, notes) => {
+  recordPayment: (invoiceId, amount, method, notes) => {
     get().processPayment({
       invoice_id: invoiceId,
       amount,
@@ -476,7 +476,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   },
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  recordBulkPayment: async (invoiceIds, _amount, _method, _notes) => {
+  recordBulkPayment: (invoiceIds, _amount, _method, _notes) => {
     // Bulk payment logic needs backend support or loop here.
     // For now loop:
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -596,18 +596,18 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   },
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updatePlanPrice: async (_planId, _price) => {
+  updatePlanPrice: (_planId, _price) => {
     // Backend doesn't have granulur plan update yet, relies on settings blob or hardcoded
     toast.success("Plan price updated (Simulation)");
   },
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  updateResourceTypePrice: async (_typeId, _price) => {
+  updateResourceTypePrice: (_typeId, _price) => {
     toast.success("Resource Type price updated (Simulation)");
   },
 
   // Inventory Adjustments
-  adjustInventoryQuantity: async (id, delta) => {
+  adjustInventoryQuantity: (id, delta) => {
     // Ideally fetch item, calc new quantity, call update_inventory
     // For now, simulation to avoid complex race conditions without backend support for "increment"
     set(
@@ -623,11 +623,11 @@ export const useAppStore = create<AppStore>()((set, get) => ({
 
   // Session Extras
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  removeInventoryFromSession: async (_sessionId, _inventoryId) => {
+  removeInventoryFromSession: (_sessionId, _inventoryId) => {
     toast.success("Item removed from session (Simulation)");
   },
 
-  updateInventoryInSession: async (_sessionId, _inventoryId, quantity) => {
+  updateInventoryInSession: (_sessionId, _inventoryId, quantity) => {
     toast.success(`Session inventory updated to ${quantity} (Simulation)`);
   },
 
