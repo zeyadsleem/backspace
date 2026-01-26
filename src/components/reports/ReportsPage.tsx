@@ -46,7 +46,7 @@ export function ReportsPage({
 
   return (
     <div className="flex h-full flex-col overflow-hidden 3xl:p-8 p-4 sm:p-6">
-      <div className={`flex-shrink-0 space-y-6 pb-6 ${isRTL ? "text-right" : "text-left"}`}>
+      <div className={`flex-shrink-0 space-y-6 pb-6 ${isRTL ? "text-end" : "text-start"}`}>
         <div>
           <h1 className="font-bold text-2xl text-stone-900 tracking-tight lg:text-3xl dark:text-stone-100">
             {t("reports")}

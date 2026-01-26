@@ -32,10 +32,10 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
   }, [utilizationData.peakHours]);
 
   return (
-    <div className={`3xl:space-y-8 space-y-6 ${isRTL ? "text-right" : "text-left"}`}>
+    <div className={`3xl:space-y-8 space-y-6 ${isRTL ? "text-end" : "text-start"}`}>
       <div className="grid grid-cols-1 3xl:gap-6 gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-6 p-4 dark:border-stone-800 dark:bg-stone-900">
-          <p className="font-medium 3xl:text-sm text-stone-500 text-xs uppercase dark:text-stone-400">
+          <p className="font-semibold 3xl:text-sm text-stone-500 text-xs uppercase dark:text-stone-400">
             {t("overallUtilization")}
           </p>
           <p className="mt-1 font-bold 3xl:text-4xl text-3xl text-amber-600 dark:text-amber-400">
@@ -49,7 +49,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
           </div>
         </div>
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-6 p-4 dark:border-stone-800 dark:bg-stone-900">
-          <p className="font-medium 3xl:text-sm text-stone-500 text-xs uppercase dark:text-stone-400">
+          <p className="font-semibold 3xl:text-sm text-stone-500 text-xs uppercase dark:text-stone-400">
             {t("avgSessionDuration")}
           </p>
           <div className={`mt-1 flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
@@ -60,7 +60,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
           </div>
         </div>
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-6 p-4 dark:border-stone-800 dark:bg-stone-900">
-          <p className="font-medium 3xl:text-sm text-stone-500 text-xs uppercase dark:text-stone-400">
+          <p className="font-semibold 3xl:text-sm text-stone-500 text-xs uppercase dark:text-stone-400">
             {t("peakHour")}
           </p>
           <p className="mt-1 font-bold 3xl:text-3xl text-2xl text-stone-900 dark:text-stone-100">
@@ -92,7 +92,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
 
               return (
                 <button
-                  className={`group w-full ${isRTL ? "text-right" : "text-left"}`}
+                  className={`group w-full ${isRTL ? "text-end" : "text-start"}`}
                   key={resource.id}
                   onClick={() => onResourceClick?.(resource.id)}
                   type="button"
@@ -121,7 +121,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
 
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-8 p-5 dark:border-stone-800 dark:bg-stone-900">
           <h3
-            className={`mb-4 font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100 ${isRTL ? "text-right" : "text-left"}`}
+            className={`mb-4 font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100 ${isRTL ? "text-end" : "text-start"}`}
           >
             {t("peakHours")}
           </h3>
@@ -142,7 +142,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
                   key={hour.hour}
                 >
                   <span
-                    className={`3xl:w-16 w-14 font-mono 3xl:text-sm text-stone-500 text-xs dark:text-stone-400 ${isRTL ? "text-left" : "text-right"}`}
+                    className={`3xl:w-16 w-14 font-mono 3xl:text-sm text-stone-500 text-xs dark:text-stone-400 ${isRTL ? "text-start" : "text-end"}`}
                   >
                     {hour.hour.toString().padStart(2, "0")}:00
                   </span>
@@ -153,7 +153,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
                     />
                   </div>
                   <span
-                    className={`3xl:w-12 w-10 font-bold font-mono 3xl:text-sm text-stone-600 text-xs dark:text-stone-400 ${isRTL ? "text-right" : "text-left"}`}
+                    className={`3xl:w-12 w-10 font-bold font-mono 3xl:text-sm text-stone-600 text-xs dark:text-stone-400 ${isRTL ? "text-end" : "text-start"}`}
                   >
                     {Math.round(hour.occupancy)}%
                   </span>

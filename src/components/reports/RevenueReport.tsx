@@ -24,10 +24,10 @@ export function RevenueReport({
   const isPositive = percentChange >= 0;
 
   return (
-    <div className={`space-y-6 ${isRTL ? "text-right" : "text-left"}`}>
+    <div className={`space-y-6 ${isRTL ? "text-end" : "text-start"}`}>
       <div className="grid grid-cols-1 3xl:gap-6 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-6 p-4 dark:border-stone-800 dark:bg-stone-900">
-          <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
+          <p className="font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
             {t("today")}
           </p>
           <p className="mt-1 font-bold 3xl:text-3xl text-2xl text-stone-900 dark:text-stone-100">
@@ -39,7 +39,7 @@ export function RevenueReport({
           </p>
         </div>
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-6 p-4 dark:border-stone-800 dark:bg-stone-900">
-          <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
+          <p className="font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
             {t("thisWeek")}
           </p>
           <p className="mt-1 font-bold 3xl:text-3xl text-2xl text-stone-900 dark:text-stone-100">
@@ -51,7 +51,7 @@ export function RevenueReport({
           </p>
         </div>
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-6 p-4 dark:border-stone-800 dark:bg-stone-900">
-          <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
+          <p className="font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
             {t("thisMonth")}
           </p>
           <p className="mt-1 font-bold 3xl:text-3xl text-2xl text-amber-600 dark:text-amber-400">
@@ -63,7 +63,7 @@ export function RevenueReport({
           </p>
         </div>
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-6 p-4 dark:border-stone-800 dark:bg-stone-900">
-          <p className="font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
+          <p className="font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
             {t("vsLastMonth")}
           </p>
           <div className={`mt-1 flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
@@ -152,7 +152,7 @@ export function RevenueReport({
           <div className="space-y-3">
             {topCustomers.map((customer, index) => (
               <button
-                className={`flex w-full items-center gap-3 rounded-lg p-2 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
+                className={`flex w-full items-center gap-3 rounded-lg p-2 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800 ${isRTL ? "flex-row-reverse text-end" : "text-start"}`}
                 key={customer.id}
                 onClick={() => onCustomerClick?.(customer.id)}
                 type="button"
