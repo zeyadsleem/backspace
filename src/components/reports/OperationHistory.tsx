@@ -79,8 +79,8 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
     });
 
   return (
-    <div className="space-y-6">
-      <div className={`flex flex-col gap-3 sm:flex-row ${isRTL ? "sm:flex-row-reverse" : ""}`}>
+    <div className="flex h-full flex-col space-y-6">
+      <div className={`flex flex-shrink-0 flex-col gap-3 sm:flex-row ${isRTL ? "sm:flex-row-reverse" : ""}`}>
         <div className="relative flex-1">
           <Search
             className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 ${isRTL ? "right-3" : "left-3"}`}
@@ -88,7 +88,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
           <input
             className={`w-full rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "pr-10 pl-4 text-right" : "pl-10 pr-4 text-left"}`}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t("searchInvoices")} // Reusing key for simplicity or add searchOperations
+            placeholder={t("searchCustomers")}
             type="text"
             value={searchQuery}
           />
@@ -107,24 +107,22 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
         </select>
       </div>
 
-      {filteredOperations.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-4 rounded-full bg-stone-100 p-4 dark:bg-stone-800">
-            <History className="h-8 w-8 text-stone-400" />
-          </div>
-          <h3 className="font-medium text-lg text-stone-900 dark:text-stone-100">
-            {t("noOperations")}
-          </h3>
-          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-            {searchQuery || typeFilter !== "all"
-              ? t("tryAdjustingFilters")
-              : t("noOperations")}
-          </p>
-        </div>
-      ) : (
-        <div className="overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
-          <div className="divide-y divide-stone-100 dark:divide-stone-800">
-            {filteredOperations.map((operation) => {
+      <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
+        <div className="scrollbar-thin h-full overflow-y-auto divide-y divide-stone-100 dark:divide-stone-800">
+          {filteredOperations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="mb-4 rounded-full bg-stone-100 p-4 dark:bg-stone-800">
+                <History className="h-8 w-8 text-stone-400" />
+              </div>
+              <h3 className="font-medium text-lg text-stone-900 dark:text-stone-100">
+                {t("noOperations")}
+              </h3>
+              <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                {searchQuery || typeFilter !== "all" ? t("tryAdjustingFilters") : t("noOperations")}
+              </p>
+            </div>
+          ) : (
+            filteredOperations.map((operation) => {
               const config = operationConfig[operation.type];
               const Icon = config.icon;
               return (
@@ -150,10 +148,10 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
                   </span>
                 </button>
               );
-            })}
-          </div>
+            })
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

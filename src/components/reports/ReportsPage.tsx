@@ -22,6 +22,7 @@ interface ReportsPageProps {
   operationHistory: OperationRecord[];
   onCustomerClick?: (id: string) => void;
   onResourceClick?: (id: string) => void;
+  onOperationClick?: (id: string) => void;
 }
 
 export function ReportsPage({
@@ -32,6 +33,7 @@ export function ReportsPage({
   operationHistory,
   onCustomerClick,
   onResourceClick,
+  onOperationClick,
 }: ReportsPageProps) {
   const t = useAppStore((state) => state.t);
   const [activeTab, setActiveTab] = useState<Tab>("revenue");
@@ -42,43 +44,55 @@ export function ReportsPage({
   ];
 
   return (
-    <div className="flex flex-col space-y-6 p-6">
-      <div>
-        <h1 className="font-bold text-2xl text-stone-900 dark:text-stone-100">{t("reports")}</h1>
-        <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-          {t("analyticsAndInsights")}
-        </p>
+    <div className="flex h-full flex-col overflow-hidden p-4 sm:p-6 3xl:p-8">
+      <div className="flex-shrink-0 space-y-6 pb-6">
+        <div>
+          <h1 className="font-bold text-2xl tracking-tight text-stone-900 lg:text-3xl dark:text-stone-100">
+            {t("reports")}
+          </h1>
+          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+            {t("analyticsAndInsights")}
+          </p>
+        </div>
+
+        <div className="flex w-fit rounded-lg bg-stone-100 p-1 dark:bg-stone-800">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                className={`inline-flex items-center gap-2 rounded-md px-4 py-2 font-medium text-sm transition-all ${activeTab === tab.id ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                type="button"
+              >
+                <Icon className="h-4 w-4" />
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      <div className="flex w-fit rounded-lg bg-stone-100 p-1 dark:bg-stone-800">
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          return (
-            <button
-              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 font-medium text-sm transition-all ${activeTab === tab.id ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              type="button"
-            >
-              <Icon className="h-4 w-4" />
-              {tab.label}
-            </button>
-          );
-        })}
+      <div className="min-h-0 flex-1">
+        {activeTab === "revenue" && (
+          <div className="scrollbar-thin h-full overflow-y-auto pb-6">
+            <RevenueReport
+              onCustomerClick={onCustomerClick}
+              revenueChart={revenueChart}
+              revenueData={revenueData}
+              topCustomers={topCustomers}
+            />
+          </div>
+        )}
+        {activeTab === "utilization" && (
+          <div className="scrollbar-thin h-full overflow-y-auto pb-6">
+            <UtilizationReport onResourceClick={onResourceClick} utilizationData={utilizationData} />
+          </div>
+        )}
+        {activeTab === "history" && (
+          <OperationHistory onOperationClick={onOperationClick} operations={operationHistory} />
+        )}
       </div>
-
-      {activeTab === "revenue" && (
-        <RevenueReport
-          onCustomerClick={onCustomerClick}
-          revenueChart={revenueChart}
-          revenueData={revenueData}
-          topCustomers={topCustomers}
-        />
-      )}
-      {activeTab === "utilization" && (
-        <UtilizationReport onResourceClick={onResourceClick} utilizationData={utilizationData} />
-      )}
-      {activeTab === "history" && <OperationHistory operations={operationHistory} />}
     </div>
   );
 }
