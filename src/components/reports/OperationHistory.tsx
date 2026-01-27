@@ -7,15 +7,18 @@ import {
   Search,
   Square,
   UserPlus,
+  History as HistoryIcon,
+  FileText
 } from "lucide-react";
 import { useState } from "react";
 import type { TranslationKey } from "@/lib/translations";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { useAppStore } from "@/stores/useAppStore";
 import type { OperationRecord, OperationType } from "@/types";
+import { DashboardCard } from "@/components/shared";
 
 const operationConfig: Record<
-  OperationType,
+  string,
   { icon: typeof Play; labelKey: TranslationKey; color: string; bg: string }
 > = {
   session_start: {
@@ -37,13 +40,19 @@ const operationConfig: Record<
     bg: "bg-amber-100 dark:bg-amber-900/30",
   },
   invoice_created: {
-    icon: Receipt,
+    icon: FileText,
     labelKey: "invoice_created",
-    color: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-100 dark:bg-blue-900/30",
+    color: "text-teal-600 dark:text-teal-400",
+    bg: "bg-teal-100 dark:bg-teal-900/30",
   },
   payment_received: {
     icon: CreditCard,
+    labelKey: "payment_received",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bg: "bg-emerald-100 dark:bg-emerald-900/30",
+  },
+  invoice_paid: {
+    icon: Receipt,
     labelKey: "payment_received",
     color: "text-emerald-600 dark:text-emerald-400",
     bg: "bg-emerald-100 dark:bg-emerald-900/30",
@@ -71,7 +80,6 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<OperationType | "all">("all");
   const t = useAppStore((state) => state.t);
-
   const language = useAppStore((state) => state.language);
 
   const filteredOperations = operations.filter((op) => {
@@ -89,7 +97,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
     });
 
   return (
-    <div className="flex h-full flex-col space-y-6">
+    <div className="flex flex-1 flex-col space-y-6 h-full">
       <div className="flex flex-shrink-0 flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <Search
@@ -122,48 +130,56 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
-        <div className="scrollbar-thin h-full divide-y divide-stone-100 overflow-y-auto dark:divide-stone-800">
-          {filteredOperations.length === 0 ? (
-            <EmptyState
-              description={
-                searchQuery || typeFilter !== "all" ? t("tryAdjustingFilters") : t("noOperations")
-              }
-              icon="history"
-              size="sm"
-              title={t("noOperations")}
-            />
-          ) : (
-            filteredOperations.map((operation) => {
-              const config = operationConfig[operation.type];
-              const Icon = config.icon;
-              return (
-                <button
-                  className="flex w-full items-center gap-4 p-4 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50 text-start"
-                  key={operation.id}
-                  onClick={() => onOperationClick?.(operation.id)}
-                  type="button"
-                >
-                  <div className={`flex-shrink-0 rounded-lg p-2 ${config.bg}`}>
-                    <Icon className={`h-4 w-4 ${config.color}`} />
-                  </div>
-                  <div className="min-w-0 flex-1 text-start">
-                    <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
-                      {operation.description}
-                    </p>
-                    <p className="mt-0.5 text-stone-500 text-xs dark:text-stone-400">
-                      {t(config.labelKey)}
-                    </p>
-                  </div>
-                  <span className="flex-shrink-0 text-stone-500 text-xs dark:text-stone-400">
-                    {formatTime(operation.timestamp)}
-                  </span>
-                </button>
-              );
-            })
-          )}
-        </div>
-      </div>
+      <DashboardCard
+        className="flex-1"
+        contentClassName="divide-y divide-stone-100 dark:divide-stone-800"
+        icon={<HistoryIcon className="h-4 w-4" />}
+        title={t("operationHistory")}
+      >
+        {filteredOperations.length === 0 ? (
+          <EmptyState
+            description={
+              searchQuery || typeFilter !== "all" ? t("tryAdjustingFilters") : t("noOperations")
+            }
+            icon="history"
+            size="sm"
+            title={t("noOperations")}
+          />
+        ) : (
+          filteredOperations.map((operation) => {
+            const config = operationConfig[operation.type] || {
+              icon: HistoryIcon,
+              labelKey: "history",
+              color: "text-stone-500",
+              bg: "bg-stone-100",
+            };
+            const Icon = config.icon;
+            return (
+              <button
+                className="flex w-full items-center gap-4 p-4 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50 text-start"
+                key={operation.id}
+                onClick={() => onOperationClick?.(operation.id)}
+                type="button"
+              >
+                <div className={`flex-shrink-0 rounded-lg p-2 ${config.bg}`}>
+                  <Icon className={`h-4 w-4 ${config.color}`} />
+                </div>
+                <div className="min-w-0 flex-1 text-start">
+                  <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
+                    {operation.description}
+                  </p>
+                  <p className="mt-0.5 text-stone-500 text-xs dark:text-stone-400">
+                    {t(config.labelKey as TranslationKey)}
+                  </p>
+                </div>
+                <span className="flex-shrink-0 text-stone-500 text-xs dark:text-stone-400">
+                  {formatTime(operation.timestamp)}
+                </span>
+              </button>
+            );
+          })
+        )}
+      </DashboardCard>
     </div>
   );
 }
