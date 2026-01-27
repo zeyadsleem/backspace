@@ -5,7 +5,7 @@ import {
   CreditCard,
   Edit,
   FileText,
-  History,
+  History as HistoryIcon,
   Mail,
   Phone,
   Receipt,
@@ -314,7 +314,7 @@ export function CustomerProfile({
             </div>
           ) : (
             <div className="py-12 text-center text-stone-500 dark:text-stone-400">
-              <History className="mx-auto mb-2 h-8 w-8 opacity-50" />
+              <HistoryIcon className="mx-auto mb-2 h-8 w-8 opacity-50" />
               <p>{t("noOperations")}</p>
             </div>
           )}

@@ -1,4 +1,4 @@
-import { Activity, BarChart3, History } from "lucide-react";
+import { Activity, BarChart3, History as HistoryIcon } from "lucide-react";
 import { useState } from "react";
 import { useAppStore } from "@/stores/useAppStore";
 import type {
@@ -41,7 +41,7 @@ export function ReportsPage({
   const tabs = [
     { id: "revenue" as Tab, label: t("revenue"), icon: BarChart3 },
     { id: "utilization" as Tab, label: t("utilization"), icon: Activity },
-    { id: "history" as Tab, label: t("history"), icon: History },
+    { id: "history" as Tab, label: t("history"), icon: HistoryIcon },
   ];
 
   return (

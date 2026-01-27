@@ -95,7 +95,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 w-full">
+      <div className="min-h-[300px] flex-1 w-full">
         <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
           <BarChart
             data={data}

@@ -2,7 +2,7 @@ import {
   Clock,
   CreditCard,
   FileText,
-  History,
+  History as HistoryIcon,
   Inbox,
   Monitor,
   Package,
@@ -43,7 +43,7 @@ const iconMap: Record<EmptyStateIcon, React.ComponentType<{ className?: string }
   invoices: FileText,
   subscriptions: CreditCard,
   search: Search,
-  history: History,
+  history: HistoryIcon,
   default: Inbox,
 };
 
