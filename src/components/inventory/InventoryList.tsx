@@ -118,10 +118,8 @@ export function InventoryList({
       <div className="min-h-0 flex-1 overflow-y-auto px-6">
         {filteredItems.length === 0 ? (
           <EmptyState
-            actionText={t("newItem")}
             description={t("noItemsFound")}
             icon="inventory"
-            onAction={onCreate}
             title={t("noItemsFound")}
           />
         ) : categoryFilter === "all" ? (

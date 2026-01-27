@@ -65,10 +65,8 @@ export function ActiveSessions({
 
       {activeSessions.length === 0 ? (
         <EmptyState
-          actionText={t("startSession")}
           description={t("startNewSessionPrompt")}
           icon="sessions"
-          onAction={onStartSession}
           title={t("noActiveSessions")}
         />
       ) : (

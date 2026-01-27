@@ -95,16 +95,12 @@ export function SubscriptionsList({
 
       {filteredSubscriptions.length === 0 ? (
         <EmptyState
-          actionText={
-            statusFilter === "all" && typeFilter === "all" ? t("newSubscription") : undefined
-          }
           description={
             statusFilter !== "all" || typeFilter !== "all"
               ? t("tryAdjustingFilters")
               : t("createFirstSubscription")
           }
           icon="subscriptions"
-          onAction={onCreate}
           title={t("noSubscriptionsFound")}
         />
       ) : (

@@ -110,10 +110,8 @@ export function CustomersList({
       {/* Content */}
       {filteredCustomers.length === 0 ? (
         <EmptyState
-          actionText={!searchQuery && typeFilter === "all" ? t("newCustomer") : undefined}
           description={t("tryAdjustingFilters")}
           icon="users"
-          onAction={onCreate}
           title={t("noCustomersFound")}
         />
       ) : (
