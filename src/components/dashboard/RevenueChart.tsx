@@ -11,6 +11,7 @@ type Period = "today" | "week" | "month";
 
 export function RevenueChart({ data }: RevenueChartProps) {
   const t = useAppStore((state) => state.t);
+  const isRTL = useAppStore((state) => state.isRTL);
   const language = useAppStore((state) => state.language);
   const [period, setPeriod] = useState<Period>("week");
 
@@ -35,8 +36,8 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
   return (
     <div className="flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900">
-      <div className="mb-5 flex flex-shrink-0 items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className={`mb-5 flex flex-shrink-0 items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
+        <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
           <div className="rounded-lg bg-amber-100 p-2 dark:bg-amber-900/50">
             <TrendingUp className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </div>
@@ -73,14 +74,14 @@ export function RevenueChart({ data }: RevenueChartProps) {
         </div>
       </div>
 
-      <div className="mb-4 flex flex-shrink-0 gap-4">
-        <div className="flex items-center gap-2">
+      <div className={`mb-4 flex flex-shrink-0 gap-4 ${isRTL ? "flex-row-reverse" : ""}`}>
+        <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
           <div className="h-3 w-3 rounded-full bg-amber-500" />
           <span className="text-stone-600 text-xs dark:text-stone-400">
             {t("sessionsLabel")} ({formatCurrency(totalSessions)} {t("egp")})
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
           <div className="h-3 w-3 rounded-full bg-emerald-500" />
           <span className="text-stone-600 text-xs dark:text-stone-400">
             {t("inventoryLabel")} ({formatCurrency(totalInventory)} {t("egp")})

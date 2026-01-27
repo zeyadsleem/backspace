@@ -40,7 +40,7 @@ export function Dashboard({
     <div className="scrollbar-thin flex h-auto flex-col overflow-y-auto lg:h-full lg:overflow-hidden">
       {/* Top Section - Metric Cards */}
       <div className="flex-shrink-0 space-y-6 p-4 sm:p-6 lg:pb-4">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className={`flex flex-col justify-between gap-4 sm:flex-row sm:items-center ${isRTL ? "sm:flex-row-reverse" : ""}`}>
           <div className={isRTL ? "text-end" : "text-start"}>
             <h1 className="font-bold text-2xl text-stone-900 tracking-tight lg:text-3xl dark:text-stone-100">
               {t("dashboard")}
