@@ -13,13 +13,13 @@ export function QuickActions({ onNewCustomer, onStartSession }: QuickActionsProp
 
   return (
     <div className="flex flex-wrap gap-3">
-      <Button onClick={onNewCustomer} size="md" variant="outline">
-        <UserPlus className="h-4 w-4" />
-        {t("newCustomer")}
-      </Button>
       <Button onClick={onStartSession} size="md" variant="primary">
         <Play className="h-4 w-4" />
         {t("startSession")}
+      </Button>
+      <Button onClick={onNewCustomer} size="md" variant="outline">
+        <UserPlus className="h-4 w-4" />
+        {t("newCustomer")}
       </Button>
     </div>
   );

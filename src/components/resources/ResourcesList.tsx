@@ -98,7 +98,7 @@ export function ResourcesList({ resources, resourceTypes, onView, onCreate }: Re
       </div>
       {filteredResources.length === 0 ? (
         <EmptyState
-          description={t("noResourcesFound")}
+          description={t("addResource")}
           icon="resources"
           title={t("noResourcesFound")}
         />
