@@ -1,7 +1,7 @@
 import { Check, Coffee, Minus, Package, Plus, Search, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { Modal } from "@/components/shared";
-import { Button } from "@/components/ui/button";
+import { Button, IconButton } from "@/components/ui/button";
 import { FormInput } from "@/components/ui/form";
 import { useAppStore } from "@/stores/useAppStore";
 import type { ActiveSession, InventoryItem } from "@/types";
@@ -49,9 +49,9 @@ export function InventoryAddModal({
         prev.map((cartItem, index) =>
           index === existingIndex
             ? {
-                ...cartItem,
-                quantity: Math.min(cartItem.quantity + 1, item.quantity),
-              }
+              ...cartItem,
+              quantity: Math.min(cartItem.quantity + 1, item.quantity),
+            }
             : cartItem
         )
       );
@@ -73,9 +73,9 @@ export function InventoryAddModal({
       prev.map((cartItem) =>
         cartItem.item.id === itemId
           ? {
-              ...cartItem,
-              quantity: Math.min(newQuantity, cartItem.item.quantity),
-            }
+            ...cartItem,
+            quantity: Math.min(newQuantity, cartItem.item.quantity),
+          }
           : cartItem
       )
     );
@@ -167,22 +167,20 @@ export function InventoryAddModal({
 
                     return (
                       <button
-                        className={`group relative flex h-full min-h-[100px] flex-col rounded-xl border p-3 text-start transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
-                          isInCart
+                        className={`group relative flex h-full min-h-[100px] flex-col rounded-xl border p-3 text-start transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${isInCart
                             ? "border-amber-500 bg-amber-50 ring-1 ring-amber-500/20 dark:bg-amber-900/10"
                             : "border-stone-200 bg-white hover:border-amber-300 hover:shadow-md dark:border-stone-700 dark:bg-stone-800 dark:hover:border-stone-600"
-                        }`}
+                          }`}
                         disabled={availableQuantity <= 0}
                         key={item.id}
                         onClick={() => handleItemAdd(item)}
                       >
                         <div className="mb-3 flex w-full items-start justify-between">
                           <div
-                            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
-                              isInCart
+                            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${isInCart
                                 ? "bg-amber-500 text-white shadow-sm"
                                 : "bg-stone-100 text-stone-400 group-hover:bg-amber-100 group-hover:text-amber-600 dark:bg-stone-700 dark:group-hover:bg-amber-900/30"
-                            }`}
+                              }`}
                           >
                             {isInCart ? (
                               <Check className="h-4 w-4" />
@@ -251,33 +249,36 @@ export function InventoryAddModal({
                           {cartItem.item.price} {t("egpCurrency")} / {t("item")}
                         </p>
                       </div>
-                      <button
-                        className="rounded-lg p-1.5 text-stone-300 transition-all hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                      <IconButton
+                        className="text-stone-300 hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20"
+                        icon={<Minus className="h-4 w-4" />}
+                        label="Remove item"
                         onClick={() => handleItemRemove(cartItem.item.id)}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </button>
+                        variant="ghost"
+                      />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center rounded-lg border border-stone-200 bg-white p-1 dark:border-stone-700 dark:bg-stone-900">
-                        <button
-                          className="flex h-7 w-7 items-center justify-center rounded-md text-stone-500 transition-colors hover:bg-stone-100 disabled:opacity-30 dark:hover:bg-stone-800"
+                        <IconButton
+                          className="h-7 w-7 text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800"
                           disabled={cartItem.quantity <= 0}
+                          icon={<Minus className="h-3.5 w-3.5" />}
+                          label="Decrease"
                           onClick={() => updateQuantity(cartItem.item.id, cartItem.quantity - 1)}
-                        >
-                          <Minus className="h-3.5 w-3.5" />
-                        </button>
+                          variant="ghost"
+                        />
                         <span className="w-8 text-center font-bold font-mono text-sm text-stone-700 dark:text-stone-200">
                           {cartItem.quantity}
                         </span>
-                        <button
-                          className="flex h-7 w-7 items-center justify-center rounded-md text-stone-500 transition-colors hover:bg-stone-100 disabled:opacity-30 dark:hover:bg-stone-800"
+                        <IconButton
+                          className="h-7 w-7 text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-800"
                           disabled={cartItem.quantity >= cartItem.item.quantity}
+                          icon={<Plus className="h-3.5 w-3.5" />}
+                          label="Increase"
                           onClick={() => updateQuantity(cartItem.item.id, cartItem.quantity + 1)}
-                        >
-                          <Plus className="h-3.5 w-3.5" />
-                        </button>
+                          variant="ghost"
+                        />
                       </div>
                       <span className="font-bold font-mono text-sm text-stone-900 dark:text-stone-100">
                         {cartItem.item.price * cartItem.quantity}{" "}

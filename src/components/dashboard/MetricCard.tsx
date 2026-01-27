@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useAppStore } from "@/stores/useAppStore";
+
 
 interface MetricCardProps {
   title: string;
@@ -18,7 +18,7 @@ export function MetricCard({
   variant = "default",
   onClick,
 }: MetricCardProps) {
-  const isRTL = useAppStore((state) => state.isRTL);
+
   const variantStyles = {
     default: {
       container: "bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800",
@@ -42,12 +42,12 @@ export function MetricCard({
 
   return (
     <button
-      className={`w-full rounded-xl border 3xl:p-6 p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] ${styles.container} ${onClick ? "cursor-pointer" : "cursor-default"} ${isRTL ? "text-right" : "text-left"}`}
+      className={`w-full rounded-xl border 3xl:p-6 p-4 transition-all duration-200 hover:scale-[1.02] hover:shadow-md active:scale-[0.98] ${styles.container} ${onClick ? "cursor-pointer" : "cursor-default"} text-start`}
       onClick={onClick}
       type="button"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className={`min-w-0 flex-1 ${isRTL ? "text-right" : "text-left"}`}>
+        <div className="min-w-0 flex-1 text-start">
           <p className="font-bold 3xl:text-xs text-[10px] text-stone-500 uppercase tracking-[0.15em] dark:text-stone-400">
             {title}
           </p>

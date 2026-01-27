@@ -9,10 +9,10 @@ interface QuickActionsProps {
 
 export function QuickActions({ onNewCustomer, onStartSession }: QuickActionsProps) {
   const t = useAppStore((state) => state.t);
-  const isRTL = useAppStore((state) => state.isRTL);
+
 
   return (
-    <div className={`flex flex-wrap gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+    <div className="flex flex-wrap gap-3">
       <Button onClick={onNewCustomer} size="md" variant="outline">
         <UserPlus className="h-4 w-4" />
         {t("newCustomer")}

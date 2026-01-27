@@ -1,8 +1,9 @@
-import { FileText, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Invoice, InvoiceStatus } from "@/types";
 import { InvoiceRow } from "./InvoiceRow";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface InvoicesListProps {
   invoices: Invoice[];
@@ -82,19 +83,15 @@ export function InvoicesList({ invoices, onView, onRecordPayment }: InvoicesList
       </div>
 
       {filteredInvoices.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-4 rounded-full bg-stone-100 p-4 dark:bg-stone-800">
-            <FileText className="h-8 w-8 text-stone-400" />
-          </div>
-          <h3 className="font-medium text-lg text-stone-900 dark:text-stone-100">
-            {searchQuery || statusFilter !== "all" ? t("noInvoicesFound") : t("noInvoicesYet")}
-          </h3>
-          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-            {searchQuery || statusFilter !== "all"
+        <EmptyState
+          description={
+            searchQuery || statusFilter !== "all"
               ? t("tryAdjustingFilters")
-              : t("createFirstInvoice")}
-          </p>
-        </div>
+              : t("createFirstInvoice")
+          }
+          icon="invoices"
+          title={searchQuery || statusFilter !== "all" ? t("noInvoicesFound") : t("noInvoicesYet")}
+        />
       ) : (
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
           {/* Table Header - Fixed */}
@@ -133,7 +130,8 @@ export function InvoicesList({ invoices, onView, onRecordPayment }: InvoicesList
             </div>
           </div>
         </div>
-      )}
+      )
+      }
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Invoice } from "@/types";
+import { formatCurrency } from "@/lib/formatters";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface PendingInvoicesProps {
   invoices: Invoice[];
@@ -54,9 +56,12 @@ export function PendingInvoices({ invoices, onViewCustomerDebt }: PendingInvoice
       {/* Content */}
       <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto p-4">
         {unpaidInvoices.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center py-8 text-center opacity-50">
-            <p className="font-medium text-sm text-stone-500">{t("noInvoicesFound")}</p>
-          </div>
+          <EmptyState
+            description=""
+            icon="invoices"
+            size="sm"
+            title={t("noInvoicesFound")}
+          />
         ) : (
           <div className="space-y-3">
             {sortedCustomerIds.map((customerId) => {
@@ -85,7 +90,7 @@ export function PendingInvoices({ invoices, onViewCustomerDebt }: PendingInvoice
                   <div className="flex items-center gap-4 text-end">
                     <div>
                       <p className="font-mono font-semibold text-base text-red-600">
-                        {totalDue.toLocaleString()}
+                        {formatCurrency(totalDue)}
                       </p>
                       <p className="font-medium text-stone-400 text-xs uppercase tracking-wider">
                         {t("totalDue")}

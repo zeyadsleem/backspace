@@ -1,4 +1,5 @@
 import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { TranslationKey } from "@/lib/translations";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
@@ -15,28 +16,28 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
   const t = useAppStore((state) => state.t);
 
   const typeConfig: Record<CustomerType, { labelKey: TranslationKey; color: string; bg: string }> =
-    {
-      visitor: {
-        labelKey: "visitorType",
-        color: "text-stone-600 dark:text-stone-400",
-        bg: "bg-stone-100 dark:bg-stone-800",
-      },
-      weekly: {
-        labelKey: "weeklyMember",
-        color: "text-blue-600 dark:text-blue-400",
-        bg: "bg-blue-50 dark:bg-blue-900/30",
-      },
-      "half-monthly": {
-        labelKey: "halfMonthlyMember",
-        color: "text-purple-600 dark:text-purple-400",
-        bg: "bg-purple-50 dark:bg-purple-900/30",
-      },
-      monthly: {
-        labelKey: "monthlyMember",
-        color: "text-amber-600 dark:text-amber-400",
-        bg: "bg-amber-50 dark:bg-amber-900/30",
-      },
-    };
+  {
+    visitor: {
+      labelKey: "visitorType",
+      color: "text-stone-600 dark:text-stone-400",
+      bg: "bg-stone-100 dark:bg-stone-800",
+    },
+    weekly: {
+      labelKey: "weeklyMember",
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-50 dark:bg-blue-900/30",
+    },
+    "half-monthly": {
+      labelKey: "halfMonthlyMember",
+      color: "text-purple-600 dark:text-purple-400",
+      bg: "bg-purple-50 dark:bg-purple-900/30",
+    },
+    monthly: {
+      labelKey: "monthlyMember",
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-50 dark:bg-amber-900/30",
+    },
+  };
 
   const config = typeConfig[customer.customerType];
   const initials = customer.name
@@ -122,33 +123,36 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
 
       {/* Actions section */}
       <div className="flex items-center justify-end gap-2 md:col-span-2">
-        <button
-          className="flex flex-1 items-center justify-center rounded-lg bg-stone-100 p-2 text-stone-600 transition-colors hover:bg-stone-200 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-stone-700 dark:bg-stone-800 dark:text-stone-400 md:dark:bg-transparent dark:hover:bg-stone-700 md:dark:hover:text-stone-300"
+        <Button
+          className="flex-1 md:flex-none md:bg-transparent md:text-stone-400 md:hover:bg-transparent md:hover:text-stone-700 dark:md:text-stone-400 dark:md:hover:text-stone-300"
           onClick={onView}
+          size="sm"
           title={t("view")}
-          type="button"
+          variant="ghost"
         >
           <Eye className="h-4 w-4" />
           <span className="ml-2 font-medium text-xs md:hidden">{t("view")}</span>
-        </button>
-        <button
-          className="flex flex-1 items-center justify-center rounded-lg bg-stone-100 p-2 text-stone-600 transition-colors hover:bg-amber-100 hover:text-amber-700 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-amber-600 dark:bg-stone-800 dark:text-stone-400 md:dark:bg-transparent dark:hover:bg-amber-900/20"
+        </Button>
+        <Button
+          className="flex-1 md:flex-none md:bg-transparent md:text-stone-400 md:hover:bg-transparent md:hover:text-amber-600 dark:text-stone-400 dark:hover:bg-amber-900/20"
           onClick={onEdit}
+          size="sm"
           title={t("edit")}
-          type="button"
+          variant="ghost"
         >
           <Pencil className="h-4 w-4" />
           <span className="ml-2 font-medium text-xs md:hidden">{t("edit")}</span>
-        </button>
-        <button
-          className="flex flex-1 items-center justify-center rounded-lg bg-red-50 p-2 text-red-600 transition-colors hover:bg-red-100 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-red-600 dark:bg-red-900/10 dark:text-red-400 md:dark:bg-transparent dark:hover:bg-red-900/20"
+        </Button>
+        <Button
+          className="flex-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 md:flex-none md:bg-transparent md:text-stone-400 md:hover:bg-transparent md:hover:text-red-600 dark:bg-red-900/10 dark:text-red-400 dark:hover:bg-red-900/20"
           onClick={onDelete}
+          size="sm"
           title={t("delete")}
-          type="button"
+          variant="ghost"
         >
           <Trash2 className="h-4 w-4" />
           <span className="ml-2 font-medium text-xs md:hidden">{t("delete")}</span>
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,9 +1,10 @@
-import { CreditCard, Filter, Plus } from "lucide-react";
+import { Filter, Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { PlanType, PlanTypeOption, Subscription } from "@/types";
 import { SubscriptionCard } from "./SubscriptionCard";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface SubscriptionsListProps {
   subscriptions: Subscription[];
@@ -93,25 +94,19 @@ export function SubscriptionsList({
       </div>
 
       {filteredSubscriptions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-4 rounded-full bg-stone-100 p-4 dark:bg-stone-800">
-            <CreditCard className="h-8 w-8 text-stone-400" />
-          </div>
-          <h3 className="font-medium text-lg text-stone-900 dark:text-stone-100">
-            {t("noSubscriptionsFound")}
-          </h3>
-          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-            {statusFilter !== "all" || typeFilter !== "all"
+        <EmptyState
+          actionText={
+            statusFilter === "all" && typeFilter === "all" ? t("newSubscription") : undefined
+          }
+          description={
+            statusFilter !== "all" || typeFilter !== "all"
               ? t("tryAdjustingFilters")
-              : t("createFirstSubscription")}
-          </p>
-          {statusFilter === "all" && typeFilter === "all" && (
-            <Button className="mt-4" onClick={onCreate} size="md" variant="primary">
-              <Plus className="h-4 w-4" />
-              {t("newSubscription")}
-            </Button>
-          )}
-        </div>
+              : t("createFirstSubscription")
+          }
+          icon="subscriptions"
+          onAction={onCreate}
+          title={t("noSubscriptionsFound")}
+        />
       ) : (
         <div className="grid 3xl:grid-cols-6 4xl:grid-cols-8 grid-cols-1 items-stretch gap-4 pb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {filteredSubscriptions.map((subscription) => {

@@ -1,4 +1,6 @@
 import { CreditCard, Eye } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/stores/hooks";
 import { useAppStore } from "@/stores/useAppStore";
@@ -108,27 +110,28 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
         </span>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center justify-end gap-2 md:col-span-2">
-        <button
-          className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-stone-100 p-2 text-stone-600 transition-colors hover:bg-stone-200 md:flex-none md:bg-transparent md:text-stone-400 md:hover:text-stone-700 dark:bg-stone-800 dark:text-stone-400 md:dark:bg-transparent md:dark:hover:text-stone-300"
+      <div className="flex items-value justify-end gap-2 md:col-span-2">
+        <Button
+          className="flex-1 md:flex-none md:bg-transparent md:text-stone-400 md:hover:bg-transparent md:hover:text-stone-700 dark:md:text-stone-400 dark:md:hover:text-stone-300"
           onClick={onView}
+          size="sm"
           title={t("viewInvoice")}
-          type="button"
+          variant="ghost"
         >
           <Eye className="h-4 w-4" />
           <span className="font-medium text-[10px] uppercase md:hidden">{t("view")}</span>
-        </button>
+        </Button>
         {invoice.status !== "paid" && invoice.status !== "cancelled" && (
-          <button
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-emerald-50 p-2 text-emerald-600 transition-colors hover:bg-emerald-100 md:flex-none md:bg-transparent md:text-emerald-500 md:hover:text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 md:dark:bg-transparent"
+          <Button
+            className="flex-1 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 md:flex-none md:bg-transparent md:text-emerald-500 md:hover:bg-transparent md:hover:text-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-900/20"
             onClick={onRecordPayment}
+            size="sm"
             title={t("recordPayment")}
-            type="button"
+            variant="ghost"
           >
             <CreditCard className="h-4 w-4" />
             <span className="font-medium text-[10px] uppercase md:hidden">{t("payNow")}</span>
-          </button>
+          </Button>
         )}
       </div>
     </div>

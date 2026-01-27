@@ -2,6 +2,7 @@ import { Clock } from "lucide-react";
 import { useMemo } from "react";
 import { useAppStore } from "@/stores/useAppStore";
 import type { UtilizationData } from "@/types";
+import { formatNumber } from "@/lib/formatters";
 
 interface UtilizationReportProps {
   utilizationData: UtilizationData;
@@ -10,15 +11,14 @@ interface UtilizationReportProps {
 
 export function UtilizationReport({ utilizationData, onResourceClick }: UtilizationReportProps) {
   const t = useAppStore((state) => state.t);
-  const isRTL = useAppStore((state) => state.isRTL);
 
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = Math.round(minutes % 60);
     if (hours > 0) {
-      return `${hours}${t("hour").charAt(0)} ${mins}${t("minute").charAt(0)}`;
+      return `${formatNumber(hours)} ${t("hour").charAt(0)} ${formatNumber(mins)} ${t("minute").charAt(0)}`;
     }
-    return `${mins}${t("minute").charAt(0)}`;
+    return `${formatNumber(mins)} ${t("minute").charAt(0)}`;
   };
 
   const peakHourData = useMemo(() => {
@@ -32,7 +32,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
   }, [utilizationData.peakHours]);
 
   return (
-    <div className={`3xl:space-y-8 space-y-6 ${isRTL ? "text-end" : "text-start"}`}>
+    <div className="3xl:space-y-8 space-y-6">
       <div className="grid grid-cols-1 3xl:gap-6 gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-6 p-4 dark:border-stone-800 dark:bg-stone-900">
           <p className="font-semibold 3xl:text-sm text-stone-500 text-xs uppercase dark:text-stone-400">
@@ -52,7 +52,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
           <p className="font-semibold 3xl:text-sm text-stone-500 text-xs uppercase dark:text-stone-400">
             {t("avgSessionDuration")}
           </p>
-          <div className={`mt-1 flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+          <div className="mt-1 flex items-center gap-2">
             <Clock className="3xl:h-6 h-5 3xl:w-6 w-5 text-stone-400" />
             <p className="font-bold 3xl:text-3xl text-2xl text-stone-900 dark:text-stone-100">
               {formatDuration(utilizationData.averageSessionDuration)}
@@ -74,9 +74,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
 
       <div className="grid grid-cols-1 3xl:gap-8 gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-8 p-5 dark:border-stone-800 dark:bg-stone-900">
-          <div
-            className={`mb-4 flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}
-          >
+          <div className="mb-4 flex items-center justify-between">
             <h3 className="font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100">
               {t("resourceUtilization")}
             </h3>
@@ -92,14 +90,12 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
 
               return (
                 <button
-                  className={`group w-full ${isRTL ? "text-end" : "text-start"}`}
+                  className="group w-full text-start"
                   key={resource.id}
                   onClick={() => onResourceClick?.(resource.id)}
                   type="button"
                 >
-                  <div
-                    className={`mb-1.5 flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}
-                  >
+                  <div className="mb-1.5 flex items-center justify-between">
                     <span className="font-medium 3xl:text-base text-sm text-stone-700 transition-colors group-hover:text-amber-600 dark:text-stone-300 dark:group-hover:text-amber-400">
                       {resource.name}
                     </span>
@@ -109,7 +105,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
                   </div>
                   <div className="3xl:h-3.5 h-2.5 overflow-hidden rounded-full bg-stone-100 dark:bg-stone-800">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ${barColor} ${isRTL ? "origin-right" : "origin-left"}`}
+                      className={`h-full rounded-full transition-all duration-500 ${barColor} origin-left rtl:origin-right`}
                       style={{ width: `${resource.rate}%` }}
                     />
                   </div>
@@ -120,9 +116,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
         </div>
 
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-8 p-5 dark:border-stone-800 dark:bg-stone-900">
-          <h3
-            className={`mb-4 font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100 ${isRTL ? "text-end" : "text-start"}`}
-          >
+          <h3 className="mb-4 font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100">
             {t("peakHours")}
           </h3>
           <div className="space-y-2.5">
@@ -137,46 +131,37 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
               }
 
               return (
-                <div
-                  className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}
-                  key={hour.hour}
-                >
-                  <span
-                    className={`3xl:w-16 w-14 font-mono 3xl:text-sm text-stone-500 text-xs dark:text-stone-400 ${isRTL ? "text-start" : "text-end"}`}
-                  >
+                <div className="flex items-center gap-3" key={hour.hour}>
+                  <span className="3xl:w-16 w-14 font-mono 3xl:text-sm text-stone-500 text-xs dark:text-stone-400">
                     {hour.hour.toString().padStart(2, "0")}:00
                   </span>
                   <div className="3xl:h-8 h-6 flex-1 overflow-hidden rounded bg-stone-100 dark:bg-stone-800">
                     <div
-                      className={`h-full rounded transition-all duration-500 ${barColor} ${isRTL ? "origin-right" : "origin-left"}`}
+                      className={`h-full rounded transition-all duration-500 ${barColor} origin-left rtl:origin-right`}
                       style={{ width: `${hour.occupancy}%` }}
                     />
                   </div>
-                  <span
-                    className={`3xl:w-12 w-10 font-bold font-mono 3xl:text-sm text-stone-600 text-xs dark:text-stone-400 ${isRTL ? "text-end" : "text-start"}`}
-                  >
+                  <span className="3xl:w-12 w-10 font-bold font-mono 3xl:text-sm text-stone-600 text-xs dark:text-stone-400">
                     {Math.round(hour.occupancy)}%
                   </span>
                 </div>
               );
             })}
           </div>
-          <div
-            className={`mt-6 flex flex-wrap gap-4 border-stone-100 border-t pt-4 dark:border-stone-800 ${isRTL ? "flex-row-reverse" : ""}`}
-          >
-            <div className={`flex items-center gap-1.5 ${isRTL ? "flex-row-reverse" : ""}`}>
+          <div className="mt-6 flex flex-wrap gap-4 border-stone-100 border-t pt-4 dark:border-stone-800">
+            <div className="flex items-center gap-1.5">
               <div className="3xl:h-4 h-3 3xl:w-4 w-3 rounded bg-emerald-300" />
               <span className="3xl:text-sm text-stone-500 text-xs">{t("low")}</span>
             </div>
-            <div className={`flex items-center gap-1.5 ${isRTL ? "flex-row-reverse" : ""}`}>
+            <div className="flex items-center gap-1.5">
               <div className="3xl:h-4 h-3 3xl:w-4 w-3 rounded bg-emerald-500" />
               <span className="3xl:text-sm text-stone-500 text-xs">{t("medium")}</span>
             </div>
-            <div className={`flex items-center gap-1.5 ${isRTL ? "flex-row-reverse" : ""}`}>
+            <div className="flex items-center gap-1.5">
               <div className="3xl:h-4 h-3 3xl:w-4 w-3 rounded bg-amber-500" />
               <span className="3xl:text-sm text-stone-500 text-xs">{t("high")}</span>
             </div>
-            <div className={`flex items-center gap-1.5 ${isRTL ? "flex-row-reverse" : ""}`}>
+            <div className="flex items-center gap-1.5">
               <div className="3xl:h-4 h-3 3xl:w-4 w-3 rounded bg-red-500" />
               <span className="3xl:text-sm text-stone-500 text-xs">{t("peak")}</span>
             </div>

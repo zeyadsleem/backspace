@@ -2,7 +2,6 @@ import {
   Coffee,
   CreditCard,
   Filter,
-  History,
   Play,
   Receipt,
   Search,
@@ -11,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { TranslationKey } from "@/lib/translations";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { useAppStore } from "@/stores/useAppStore";
 import type { OperationRecord, OperationType } from "@/types";
 
@@ -71,7 +71,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<OperationType | "all">("all");
   const t = useAppStore((state) => state.t);
-  const isRTL = useAppStore((state) => state.isRTL);
+
   const language = useAppStore((state) => state.language);
 
   const filteredOperations = operations.filter((op) => {
@@ -81,7 +81,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
   });
 
   const formatTime = (timestamp: string) =>
-    new Date(timestamp).toLocaleString(language === "ar" ? "ar-EG" : "en-US", {
+    new Date(timestamp).toLocaleString(language === "ar" ? "ar-EG-u-nu-latn" : "en-US", {
       month: "short",
       day: "numeric",
       hour: "numeric",
@@ -90,25 +90,25 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
 
   return (
     <div className="flex h-full flex-col space-y-6">
-      <div className={`flex flex-shrink-0 flex-col gap-3 sm:flex-row ${isRTL ? "" : ""}`}>
-        <div className={`relative flex-1 ${isRTL ? "order-2" : "order-1"}`}>
+      <div className="flex flex-shrink-0 flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
           <Search
-            className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 ${isRTL ? "right-3" : "left-3"}`}
+            className="absolute top-1/2 start-3 h-4 w-4 -translate-y-1/2 text-stone-400"
           />
           <input
-            className={`w-full rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "pr-10 pl-4 text-right" : "pr-4 pl-10 text-left"}`}
+            className="w-full rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ps-10 pe-4 text-start"
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("searchByNamePhone")}
             type="text"
             value={searchQuery}
           />
         </div>
-        <div className={`relative ${isRTL ? "order-1" : "order-2"}`}>
+        <div className="relative">
           <Filter
-            className={`absolute top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 ${isRTL ? "right-3" : "left-3"}`}
+            className="absolute top-1/2 start-3 h-4 w-4 -translate-y-1/2 text-stone-400"
           />
           <select
-            className={`cursor-pointer appearance-none rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ${isRTL ? "pr-10 pl-8 text-right" : "pr-8 pl-10 text-left"}`}
+            className="cursor-pointer appearance-none rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ps-10 pe-8 text-start"
             onChange={(e) => setTypeFilter(e.target.value as OperationType | "all")}
             value={typeFilter}
           >
@@ -125,26 +125,21 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
       <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
         <div className="scrollbar-thin h-full divide-y divide-stone-100 overflow-y-auto dark:divide-stone-800">
           {filteredOperations.length === 0 ? (
-            <div
-              className={`flex flex-col items-center justify-center py-16 text-center ${isRTL ? "text-right" : "text-left"}`}
-            >
-              <div className="mb-4 rounded-full bg-stone-100 p-4 dark:bg-stone-800">
-                <History className="h-8 w-8 text-stone-400" />
-              </div>
-              <h3 className="font-medium text-lg text-stone-900 dark:text-stone-100">
-                {t("noOperations")}
-              </h3>
-              <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-                {searchQuery || typeFilter !== "all" ? t("tryAdjustingFilters") : t("noOperations")}
-              </p>
-            </div>
+            <EmptyState
+              description={
+                searchQuery || typeFilter !== "all" ? t("tryAdjustingFilters") : t("noOperations")
+              }
+              icon="history"
+              size="sm"
+              title={t("noOperations")}
+            />
           ) : (
             filteredOperations.map((operation) => {
               const config = operationConfig[operation.type];
               const Icon = config.icon;
               return (
                 <button
-                  className={`flex w-full items-center gap-4 p-4 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50 ${isRTL ? "flex-row-reverse text-right" : "text-left"}`}
+                  className="flex w-full items-center gap-4 p-4 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50 text-start"
                   key={operation.id}
                   onClick={() => onOperationClick?.(operation.id)}
                   type="button"
@@ -152,7 +147,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
                   <div className={`flex-shrink-0 rounded-lg p-2 ${config.bg}`}>
                     <Icon className={`h-4 w-4 ${config.color}`} />
                   </div>
-                  <div className={`min-w-0 flex-1 ${isRTL ? "text-right" : "text-left"}`}>
+                  <div className="min-w-0 flex-1 text-start">
                     <p className="font-medium text-sm text-stone-900 dark:text-stone-100">
                       {operation.description}
                     </p>

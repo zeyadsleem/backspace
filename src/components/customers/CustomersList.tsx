@@ -1,9 +1,10 @@
-import { Filter, Plus, Search, Users } from "lucide-react";
+import { Filter, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Customer, CustomerType } from "@/types";
 import { CustomerRow } from "./CustomerRow";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface CustomersListProps {
   customers: Customer[];
@@ -108,23 +109,13 @@ export function CustomersList({
 
       {/* Content */}
       {filteredCustomers.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-4 rounded-full bg-stone-100 p-4 dark:bg-stone-800">
-            <Users className="h-8 w-8 text-stone-400" />
-          </div>
-          <h3 className="font-medium text-lg text-stone-900 dark:text-stone-100">
-            {t("noCustomersFound")}
-          </h3>
-          <p className="mt-1 max-w-sm text-sm text-stone-500 dark:text-stone-400">
-            {t("tryAdjustingFilters")}
-          </p>
-          {!searchQuery && typeFilter === "all" && (
-            <Button className="mt-4" onClick={onCreate} size="md" variant="primary">
-              <Plus className="h-4 w-4" />
-              {t("newCustomer")}
-            </Button>
-          )}
-        </div>
+        <EmptyState
+          actionText={!searchQuery && typeFilter === "all" ? t("newCustomer") : undefined}
+          description={t("tryAdjustingFilters")}
+          icon="users"
+          onAction={onCreate}
+          title={t("noCustomersFound")}
+        />
       ) : (
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
           {/* Table Header - Fixed */}

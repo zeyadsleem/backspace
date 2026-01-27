@@ -1,10 +1,11 @@
-import { Package, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { CategoryOption, InventoryCategory, InventoryItem } from "@/types";
 import { InventoryItemCard } from "./InventoryItemCard";
 import { LowStockAlert } from "./LowStockAlert";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface InventoryListProps {
   inventory: InventoryItem[];
@@ -116,10 +117,13 @@ export function InventoryList({
       {/* Scrollable Items Grid */}
       <div className="min-h-0 flex-1 overflow-y-auto px-6">
         {filteredItems.length === 0 ? (
-          <div className="flex h-64 flex-col items-center justify-center rounded-xl border-2 border-stone-100 border-dashed dark:border-stone-800">
-            <Package className="mb-2 h-10 w-10 text-stone-300 dark:text-stone-700" />
-            <p className="font-medium text-stone-500 dark:text-stone-400">{t("noItemsFound")}</p>
-          </div>
+          <EmptyState
+            actionText={t("newItem")}
+            description={t("noItemsFound")}
+            icon="inventory"
+            onAction={onCreate}
+            title={t("noItemsFound")}
+          />
         ) : categoryFilter === "all" ? (
           <div className="space-y-10 pb-6">
             {categories.map((category) => {

@@ -8,10 +8,10 @@
   Using Tailwind's stone palette for warmth
 */
 @theme {
-  /* Font families - Noto Sans for clean, readable type */
-  --font-display: "Noto Sans", system-ui, sans-serif;
-  --font-body: "Noto Sans", system-ui, sans-serif;
-  --font-sans: "Noto Sans", system-ui, sans-serif;
+  /* Font families - Cairo for Arabic support */
+  --font-display: "Cairo", system-ui, sans-serif;
+  --font-body: "Cairo", system-ui, sans-serif;
+  --font-sans: "Cairo", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 

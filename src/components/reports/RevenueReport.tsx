@@ -1,6 +1,7 @@
 import { TrendingDown, TrendingUp, Users } from "lucide-react";
 import { useAppStore } from "@/stores/useAppStore";
 import type { RevenueData, RevenueDataPoint, TopCustomer } from "@/types";
+import { formatCurrency } from "@/lib/formatters";
 
 interface RevenueReportProps {
   revenueData: RevenueData;
@@ -16,15 +17,13 @@ export function RevenueReport({
   onCustomerClick,
 }: RevenueReportProps) {
   const t = useAppStore((state) => state.t);
-  const isRTL = useAppStore((state) => state.isRTL);
+
   const language = useAppStore((state) => state.language);
-  const formatCurrency = (amount: number) =>
-    `${amount.toLocaleString(language === "ar" ? "ar-EG" : "en-US")} ${t("egp")}`;
   const percentChange = revenueData.comparison.percentChange;
   const isPositive = percentChange >= 0;
 
   return (
-    <div className={`space-y-6 ${isRTL ? "text-end" : "text-start"}`}>
+    <div className="space-y-6">
       <div className="grid grid-cols-1 3xl:gap-6 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-6 p-4 dark:border-stone-800 dark:bg-stone-900">
           <p className="font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
@@ -66,7 +65,7 @@ export function RevenueReport({
           <p className="font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
             {t("vsLastMonth")}
           </p>
-          <div className={`mt-1 flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+          <div className="mt-1 flex items-center gap-2">
             {isPositive ? (
               <TrendingUp className="h-5 w-5 text-emerald-500" />
             ) : (
@@ -87,9 +86,7 @@ export function RevenueReport({
 
       <div className="grid grid-cols-1 3xl:gap-8 gap-6 lg:grid-cols-3">
         <div className="rounded-xl border border-stone-200 bg-white 3xl:p-8 p-5 lg:col-span-2 dark:border-stone-800 dark:bg-stone-900">
-          <div
-            className={`mb-4 flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}
-          >
+          <div className="mb-4 flex items-center justify-between">
             <h3 className="font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100">
               {t("revenueTrend")}
             </h3>
@@ -116,7 +113,7 @@ export function RevenueReport({
                     />
                   </div>
                   <span className="3xl:text-sm text-[10px] text-stone-500 dark:text-stone-400">
-                    {date.toLocaleDateString(language === "ar" ? "ar-EG" : "en-US", {
+                    {date.toLocaleDateString(language === "ar" ? "ar-EG-u-nu-latn" : "en-US", {
                       weekday: "short",
                     })}
                   </span>
@@ -124,16 +121,14 @@ export function RevenueReport({
               );
             })}
           </div>
-          <div
-            className={`mt-4 flex gap-4 border-stone-100 border-t pt-4 dark:border-stone-800 ${isRTL ? "flex-row-reverse" : ""}`}
-          >
-            <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+          <div className="mt-4 flex gap-4 border-stone-100 border-t pt-4 dark:border-stone-800">
+            <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-amber-500" />
               <span className="text-stone-600 text-xs dark:text-stone-400">
                 {t("sessionsLabel")}
               </span>
             </div>
-            <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+            <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-full bg-emerald-500" />
               <span className="text-stone-600 text-xs dark:text-stone-400">
                 {t("inventoryLabel")}
@@ -143,7 +138,7 @@ export function RevenueReport({
         </div>
 
         <div className="rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900">
-          <div className={`mb-4 flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+          <div className="mb-4 flex items-center gap-2">
             <Users className="h-4 w-4 text-stone-500" />
             <h3 className="font-semibold text-stone-900 dark:text-stone-100">
               {t("topCustomers")}
@@ -152,7 +147,7 @@ export function RevenueReport({
           <div className="space-y-3">
             {topCustomers.map((customer, index) => (
               <button
-                className={`flex w-full items-center gap-3 rounded-lg p-2 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800 ${isRTL ? "flex-row-reverse text-end" : "text-start"}`}
+                className="flex w-full items-center gap-3 rounded-lg p-2 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800 text-start"
                 key={customer.id}
                 onClick={() => onCustomerClick?.(customer.id)}
                 type="button"

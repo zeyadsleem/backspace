@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { Button, IconButton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Invoice } from "@/types";
@@ -82,13 +83,13 @@ export function CustomerDebtDialog({
               </p>
             </div>
           </div>
-          <button
-            className="rounded-lg p-2 text-stone-400 transition-colors hover:text-stone-600 dark:hover:text-stone-300"
+          <IconButton
+            className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
+            icon={<X className="h-5 w-5" />}
+            label="Close"
             onClick={onClose}
-            type="button"
-          >
-            <X className="h-5 w-5" />
-          </button>
+            variant="ghost"
+          />
         </div>
 
         <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
@@ -250,31 +251,38 @@ export function CustomerDebtDialog({
                 </div>
               </div>
 
-              <button
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 font-bold text-base text-white shadow-emerald-600/10 shadow-lg transition-all hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
+              <Button
+                className={cn(
+                  "w-full shadow-emerald-600/10 shadow-lg",
+                  // Override background if needed or rely on variant 'primary' if green is standard primary
+                  // Since 'primary' is usually brand color (amber?), we might want to keep the specific green style
+                  // or use a 'success' variant if available.
+                  // Checking button.tsx, variants are default, destructive, outline, secondary, ghost, link, primary (amber).
+                  // So we should stick to manual class overrides on top of a variant or just base Button.
+                  "bg-emerald-600 text-white hover:bg-emerald-700"
+                )}
                 disabled={isProcessing || totalDebt <= 0}
+                isLoading={isProcessing}
                 onClick={handlePayAll}
-                type="button"
+                size="lg"
               >
-                {isProcessing ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                ) : (
+                {!isProcessing && (
                   <>
                     <CreditCard className="h-5 w-5" />
                     <span>{t("payAllInvoices")}</span>
                   </>
                 )}
-              </button>
+              </Button>
             </div>
 
             <div className="mt-6 border-stone-100 border-t pt-4 dark:border-stone-800">
-              <button
-                className="w-full py-1 font-bold text-stone-400 text-xs uppercase tracking-widest transition-colors hover:text-stone-600 dark:hover:text-stone-200"
+              <Button
+                className="w-full font-bold text-stone-400 text-xs uppercase tracking-widest hover:text-stone-600 dark:hover:text-stone-200"
                 onClick={onGoToProfile}
-                type="button"
+                variant="link"
               >
                 {t("viewCustomerProfile")}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

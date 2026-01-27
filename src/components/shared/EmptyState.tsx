@@ -20,6 +20,7 @@ export type EmptyStateIcon =
   | "invoices"
   | "subscriptions"
   | "search"
+  | "history"
   | "default";
 
 export interface EmptyStateProps {
@@ -30,6 +31,7 @@ export interface EmptyStateProps {
   actionIcon?: React.ReactNode;
   onAction?: () => void;
   className?: string;
+  size?: "default" | "sm";
 }
 
 const iconMap: Record<EmptyStateIcon, React.ComponentType<{ className?: string }>> = {
@@ -40,6 +42,7 @@ const iconMap: Record<EmptyStateIcon, React.ComponentType<{ className?: string }
   invoices: FileText,
   subscriptions: CreditCard,
   search: Search,
+  history: History,
   default: Inbox,
 };
 
@@ -51,8 +54,29 @@ export function EmptyState({
   actionIcon = <Plus className="h-4 w-4" />,
   onAction,
   className,
+  size = "default",
 }: EmptyStateProps) {
   const IconComponent = iconMap[icon];
+
+  if (size === "sm") {
+    return (
+      <div className={cn("flex flex-col items-center justify-center py-8 text-center", className)}>
+        <IconComponent className="mb-2 h-6 w-6 text-stone-300 dark:text-stone-600" />
+        <h3 className="font-medium text-xs text-stone-500 dark:text-stone-400">{title}</h3>
+        {description && (
+          <p className="mt-1 max-w-[200px] text-[10px] text-stone-400 dark:text-stone-500">
+            {description}
+          </p>
+        )}
+        {actionText && onAction && (
+          <Button className="mt-3 h-8 text-xs" onClick={onAction} size="sm" variant="outline">
+            {actionIcon}
+            {actionText}
+          </Button>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={cn("flex flex-col items-center justify-center py-12 text-center", className)}>

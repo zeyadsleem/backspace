@@ -1,5 +1,6 @@
 import { Clock, Monitor, PlusCircle, Square } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { ActiveSession } from "@/types";
 
@@ -132,22 +133,22 @@ export function ActiveSessionCard({
 
       {/* 4. Actions: Slim & Practical */}
       <div className="mt-auto grid grid-cols-2 gap-px border-stone-100 border-t bg-stone-100 dark:border-stone-800 dark:bg-stone-800">
-        <button
-          className="flex 3xl:h-14 h-12 items-center justify-center gap-2 bg-white font-bold 3xl:text-sm text-stone-600 text-xs transition-colors hover:bg-stone-50 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
+        <Button
+          className="h-12 w-full rounded-none bg-white text-xs hover:bg-stone-50 3xl:h-14 3xl:text-sm dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
           onClick={onAddInventory}
-          type="button"
+          variant="ghost"
         >
-          <PlusCircle className="3xl:h-5 h-4 3xl:w-5 w-4 text-amber-500" />
+          <PlusCircle className="me-2 h-4 w-4 text-amber-500 3xl:h-5 3xl:w-5" />
           {t("addItem")}
-        </button>
-        <button
-          className="flex 3xl:h-14 h-12 items-center justify-center gap-2 bg-white font-bold 3xl:text-sm text-stone-600 text-xs transition-colors hover:bg-red-50 hover:text-red-600 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-red-900/10"
+        </Button>
+        <Button
+          className="h-12 w-full rounded-none bg-white text-xs hover:bg-red-50 hover:text-red-600 3xl:h-14 3xl:text-sm dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-red-900/10"
           onClick={onEndSession}
-          type="button"
+          variant="ghost"
         >
-          <Square className="3xl:h-5 h-4 3xl:w-5 w-4 fill-current" />
+          <Square className="me-2 h-4 w-4 fill-current 3xl:h-5 3xl:w-5" />
           {t("end")}
-        </button>
+        </Button>
       </div>
     </div>
   );

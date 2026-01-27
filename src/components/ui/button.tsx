@@ -24,9 +24,9 @@ const buttonVariants = cva(
         link: "text-amber-600 underline-offset-4 hover:underline focus:ring-0 dark:text-amber-400",
       },
       size: {
-        sm: "h-10 px-4 text-sm",
-        md: "h-11 px-6 text-sm",
-        lg: "h-14 px-8 text-base",
+        sm: "h-10 px-3 text-sm",
+        md: "h-11 px-5 text-sm",
+        lg: "h-14 px-6 text-base",
         icon: "h-10 w-10 p-0",
       },
     },
@@ -42,7 +42,7 @@ const buttonVariants = cva(
 // ============================================================================
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   isLoading?: boolean;
 }
 
@@ -69,7 +69,7 @@ Button.displayName = "Button";
 // ============================================================================
 export interface IconButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
-    Omit<VariantProps<typeof buttonVariants>, "size"> {
+  Omit<VariantProps<typeof buttonVariants>, "size"> {
   icon: React.ReactNode;
   label: string;
   isLoading?: boolean;

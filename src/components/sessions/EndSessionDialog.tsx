@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Modal } from "@/components/shared";
+import { Button, IconButton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
 import type { ActiveSession, InvoiceStatus, PaymentMethod } from "@/types";
@@ -122,12 +123,13 @@ export function EndSessionDialog({
             <p className="font-mono text-stone-500 text-xs">{session.customerName}</p>
           </div>
         </div>
-        <button
-          className="rounded-lg p-2 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+        <IconButton
+          className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
+          icon={<X className="h-5 w-5" />}
+          label={t("close")}
           onClick={onClose}
-        >
-          <X className="h-5 w-5" />
-        </button>
+          variant="ghost"
+        />
       </div>
 
       <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
@@ -197,12 +199,13 @@ export function EndSessionDialog({
                             {item.quantity * item.price}
                           </span>
                           {onRemoveItem && (
-                            <button
-                              className="text-stone-300 opacity-0 transition-opacity hover:text-red-500 group-hover:opacity-100"
+                            <IconButton
+                              className="h-6 w-6 text-stone-300 opacity-0 transition-opacity hover:bg-transparent hover:text-red-500 group-hover:opacity-100"
+                              icon={<X className="h-4 w-4" />}
+                              label="remove"
                               onClick={() => onRemoveItem(item.id)}
-                            >
-                              <X className="h-4 w-4" />
-                            </button>
+                              variant="ghost"
+                            />
                           )}
                         </div>
                       </div>
@@ -326,25 +329,25 @@ export function EndSessionDialog({
               </div>
             </div>
 
-            <button
+            <Button
               className={cn(
-                "flex h-11 w-full items-center justify-center gap-2 rounded-xl font-medium text-base text-white shadow-lg transition-all active:scale-[0.98]",
+                "w-full shadow-lg",
                 paymentMode === "pay-now"
                   ? "bg-emerald-600 shadow-emerald-200 hover:bg-emerald-700 dark:shadow-none"
                   : "bg-red-600 shadow-red-200 hover:bg-red-700 dark:shadow-none"
               )}
               disabled={isLoading}
+              isLoading={isLoading}
+              size="md"
               type="submit"
             >
-              {isLoading ? (
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-              ) : (
+              {!isLoading && (
                 <>
                   <CheckCircle2 className="h-5 w-5" />
                   {paymentMode === "pay-now" ? t("confirmPayment") : t("confirmDebt")}
                 </>
               )}
-            </button>
+            </Button>
           </form>
         </div>
       </div>

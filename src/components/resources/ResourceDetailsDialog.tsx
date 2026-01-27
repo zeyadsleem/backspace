@@ -9,6 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Modal } from "@/components/shared";
+import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Resource, ResourceType } from "@/types";
 
@@ -121,38 +122,41 @@ export function ResourceDetailsDialog({
       {/* Footer Actions */}
       <div className="flex flex-col gap-3 border-stone-200 border-t bg-stone-50 p-6 dark:border-stone-800 dark:bg-stone-800/50">
         {resource.isAvailable && (
-          <button
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2.5 font-bold text-sm text-white shadow-sm transition-colors hover:bg-emerald-600"
+          <Button
+            className="w-full bg-emerald-500 hover:bg-emerald-600"
             onClick={() => {
               onStartSession();
               onClose();
             }}
-            type="button"
+            size="md"
+            variant="primary"
           >
             <Play className="h-4 w-4" /> {t("startSession")}
-          </button>
+          </Button>
         )}
         <div className="flex gap-3">
-          <button
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-4 py-2.5 font-semibold text-sm text-stone-700 transition-colors hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
+          <Button
+            className="flex-1"
             onClick={() => {
               onEdit();
               onClose();
             }}
-            type="button"
+            size="md"
+            variant="outline"
           >
             <Pencil className="h-4 w-4" /> {t("edit")}
-          </button>
-          <button
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-stone-200 bg-white px-4 py-2.5 font-semibold text-red-600 text-sm transition-colors hover:bg-red-50 dark:border-stone-700 dark:bg-stone-900 dark:text-red-400 dark:hover:bg-red-900/20"
+          </Button>
+          <Button
+            className="flex-1 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
             onClick={() => {
               onDelete();
               onClose();
             }}
-            type="button"
+            size="md"
+            variant="outline"
           >
             <Trash2 className="h-4 w-4" /> {t("delete")}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

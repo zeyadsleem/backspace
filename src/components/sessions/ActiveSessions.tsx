@@ -1,4 +1,4 @@
-import { Clock, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
@@ -7,6 +7,7 @@ import { ActiveSessionCard } from "./ActiveSessionCard";
 import { EditInventoryModal } from "./EditInventoryModal";
 import { EndSessionDialog } from "./EndSessionDialog";
 import { InventoryAddModal } from "./InventoryAddModal";
+import { EmptyState } from "@/components/shared/EmptyState";
 
 interface ActiveSessionsProps {
   activeSessions: ActiveSession[];
@@ -63,21 +64,13 @@ export function ActiveSessions({
       </div>
 
       {activeSessions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="mb-4 rounded-full bg-stone-100 p-4 dark:bg-stone-800">
-            <Clock className="h-8 w-8 text-stone-400" />
-          </div>
-          <h3 className="font-medium text-lg text-stone-900 dark:text-stone-100">
-            {t("noActiveSessions")}
-          </h3>
-          <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-            {t("startNewSessionPrompt")}
-          </p>
-          <Button className="mt-4" onClick={onStartSession} size="md" variant="primary">
-            <Plus className="h-4 w-4" />
-            {t("startSession")}
-          </Button>
-        </div>
+        <EmptyState
+          actionText={t("startSession")}
+          description={t("startNewSessionPrompt")}
+          icon="sessions"
+          onAction={onStartSession}
+          title={t("noActiveSessions")}
+        />
       ) : (
         <div className="grid 3xl:grid-cols-6 4xl:grid-cols-8 grid-cols-1 items-stretch gap-4 pb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {activeSessions.map((session) => (

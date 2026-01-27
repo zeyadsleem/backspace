@@ -1,6 +1,7 @@
 import { Power, RefreshCw, X } from "lucide-react";
 import { useState } from "react";
 import { Modal } from "@/components/shared";
+import { Button, IconButton } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { PlanTypeOption, Subscription } from "@/types";
 
@@ -80,12 +81,13 @@ export function SubscriptionDetailsDialog({
         <h2 className="font-bold text-lg text-stone-900 dark:text-stone-100">
           {t("subscriptionDetails")}
         </h2>
-        <button
-          className="rounded-lg p-2 text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-300"
+        <IconButton
+          className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
+          icon={<X className="h-5 w-5" />}
+          label="Close"
           onClick={onClose}
-        >
-          <X className="h-5 w-5" />
-        </button>
+          variant="ghost"
+        />
       </div>
 
       <div className="flex-1 space-y-5 overflow-y-auto p-6">
@@ -261,19 +263,23 @@ export function SubscriptionDetailsDialog({
       {/* Actions */}
       <div className="flex gap-3 border-stone-100 border-t bg-stone-50 p-6 dark:border-stone-800 dark:bg-stone-800/50">
         {subscription.status !== "active" ? (
-          <button
-            className="flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 font-bold text-sm text-white shadow-emerald-600/10 shadow-lg transition-colors hover:bg-emerald-700"
+          <Button
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
             onClick={handleReactivate}
+            size="md"
+            variant="primary"
           >
             <RefreshCw className="h-4 w-4" /> {t("reactivateSubscription")}
-          </button>
+          </Button>
         ) : (
-          <button
-            className="h-11 flex-1 rounded-xl border border-stone-200 font-bold text-sm text-stone-600 transition-colors hover:bg-white dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"
+          <Button
+            className="flex-1"
             onClick={onClose}
+            size="md"
+            variant="outline"
           >
             {t("close")}
-          </button>
+          </Button>
         )}
       </div>
     </Modal>

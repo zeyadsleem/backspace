@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { invoke } from "@/lib/tauri";
 import { produce } from "immer";
 import toast from "react-hot-toast";
 import { create } from "zustand";

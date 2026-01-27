@@ -1,7 +1,8 @@
 import { ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import { RTLIcon } from "@/components/ui/RTLIcon";
-import { useAppStore } from "@/stores/useAppStore";
+
 
 interface Breadcrumb {
   label: string;
@@ -23,15 +24,15 @@ export function PageHeader({
   actions,
   onBreadcrumbClick,
 }: PageHeaderProps) {
-  const isRTL = useAppStore((state) => state.isRTL);
+
 
   return (
     <div className="mb-6 space-y-2">
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav className={`flex items-center gap-1 text-sm ${isRTL ? "flex-row-reverse" : ""}`}>
+        <nav className="flex items-center gap-1 text-sm">
           {breadcrumbs.map((item, index) => (
             <div
-              className={`flex items-center gap-1 ${isRTL ? "flex-row-reverse" : ""}`}
+              className="flex items-center gap-1"
               key={item.label}
             >
               {index > 0 && (
@@ -40,13 +41,13 @@ export function PageHeader({
                 </RTLIcon>
               )}
               {item.href ? (
-                <button
-                  className="text-stone-600 hover:text-amber-600 dark:text-stone-400 dark:hover:text-amber-400"
+                <Button
+                  className="h-auto p-0 font-normal text-sm text-stone-600 hover:bg-transparent hover:text-amber-600 dark:text-stone-400 dark:hover:text-amber-400"
                   onClick={() => onBreadcrumbClick?.(item.href!)}
-                  type="button"
+                  variant="ghost"
                 >
                   {item.label}
-                </button>
+                </Button>
               ) : (
                 <span className="text-stone-900 dark:text-stone-100">{item.label}</span>
               )}
@@ -54,7 +55,7 @@ export function PageHeader({
           ))}
         </nav>
       )}
-      <div className={`flex items-center justify-between gap-4 ${isRTL ? "flex-row-reverse" : ""}`}>
+      <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="font-bold text-2xl text-stone-900 dark:text-stone-100">{title}</h1>
           {subtitle && (
@@ -62,7 +63,7 @@ export function PageHeader({
           )}
         </div>
         {actions && (
-          <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+          <div className="flex items-center gap-2">
             {actions}
           </div>
         )}

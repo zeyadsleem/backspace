@@ -6,6 +6,7 @@ import { LowStockBanner } from "./LowStockBanner";
 import { MetricCard } from "./MetricCard";
 import { PendingInvoices } from "./PendingInvoices";
 import { QuickActions } from "./QuickActions";
+import { formatCurrency } from "@/lib/formatters";
 
 interface DashboardProps {
   onNewCustomer?: () => void;
@@ -23,26 +24,19 @@ export function Dashboard({
   onViewCustomerDebt,
 }: DashboardProps) {
   const t = useTranslation();
-  const isRTL = useAppStore((state) => state.isRTL);
+
   const invoices = useAppStore((state) => state.invoices);
   const { dashboardMetrics: metrics, lowStockAlerts, recentActivity } = useDashboardData();
 
-  const formatCurrency = (amount: number) => {
-    const formattedNumber = new Intl.NumberFormat("en-EG", {
-      style: "decimal",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-    return `${formattedNumber} ${t("egp")}`;
-  };
+
 
   return (
     <div className="scrollbar-thin flex h-auto flex-col overflow-y-auto lg:h-full lg:overflow-hidden">
       {/* Top Section - Metric Cards */}
       <div className="flex-shrink-0 space-y-6 p-4 sm:p-6 lg:pb-4">
-        <div className={`flex flex-col justify-between gap-4 sm:flex-row sm:items-center ${isRTL ? "sm:flex-row-reverse" : ""}`}>
-          <div className={isRTL ? "text-end" : "text-start"}>
-            <h1 className="font-bold text-2xl text-stone-900 tracking-tight lg:text-3xl dark:text-stone-100">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <h1 className="font-bold text-2xl text-stone-900 dark:text-stone-100">
               {t("dashboard")}
             </h1>
           </div>
@@ -61,9 +55,9 @@ export function Dashboard({
           <MetricCard
             icon={<DollarSign className="h-5 w-5" />}
             onClick={() => onNavigateToSection?.("sessions")}
-            subtitle={`${t("sessionsLabel")}: ${formatCurrency(metrics.sessionRevenue)} · ${t("inventoryLabel")}: ${formatCurrency(metrics.inventoryRevenue)}`}
+            subtitle={`${t("sessionsLabel")}: ${formatCurrency(metrics.sessionRevenue)} ${t("egp")} · ${t("inventoryLabel")}: ${formatCurrency(metrics.inventoryRevenue)} ${t("egp")}`}
             title={t("todaysRevenue")}
-            value={formatCurrency(metrics.todayRevenue)}
+            value={`${formatCurrency(metrics.todayRevenue)} ${t("egp")}`}
             variant="primary"
           />
           <MetricCard
