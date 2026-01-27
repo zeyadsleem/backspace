@@ -1,8 +1,23 @@
 import { TrendingUp } from "lucide-react";
 import { useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useAppStore } from "@/stores/useAppStore";
 import type { RevenueDataPoint } from "@/types";
 import { formatCurrency } from "@/lib/formatters";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
 
 interface RevenueChartProps {
   data: RevenueDataPoint[];
@@ -12,14 +27,25 @@ type Period = "today" | "week" | "month";
 
 export function RevenueChart({ data }: RevenueChartProps) {
   const t = useAppStore((state) => state.t);
-
   const language = useAppStore((state) => state.language);
   const [period, setPeriod] = useState<Period>("week");
 
-  const maxValue = Math.max(...data.map((d) => d.sessions + d.inventory));
+  const isRTL = useAppStore((state) => state.isRTL);
+
   const totalSessions = data.reduce((sum, d) => sum + d.sessions, 0);
   const totalInventory = data.reduce((sum, d) => sum + d.inventory, 0);
   const total = totalSessions + totalInventory;
+
+  const chartConfig = {
+    sessions: {
+      label: t("sessionsLabel"),
+      color: "var(--chart-5)",
+    },
+    inventory: {
+      label: t("inventoryLabel"),
+      color: "var(--chart-2)",
+    },
+  } satisfies ChartConfig;
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -69,48 +95,49 @@ export function RevenueChart({ data }: RevenueChartProps) {
         </div>
       </div>
 
-      <div className="mb-4 flex flex-shrink-0 gap-4">
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-amber-500" />
-          <span className="text-stone-600 text-xs dark:text-stone-400">
-            {t("sessionsLabel")} ({formatCurrency(totalSessions)} {t("egp")})
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-emerald-500" />
-          <span className="text-stone-600 text-xs dark:text-stone-400">
-            {t("inventoryLabel")} ({formatCurrency(totalInventory)} {t("egp")})
-          </span>
-        </div>
-      </div>
-
-      <div className="flex min-h-0 flex-1 items-end gap-2 pt-4">
-        {data.map((point) => {
-          const sessionHeight = (point.sessions / maxValue) * 100;
-          const inventoryHeight = (point.inventory / maxValue) * 100;
-          return (
-            <div
-              className="flex h-full flex-1 flex-col items-center justify-end gap-1"
-              key={point.date}
-            >
-              <div className="flex min-h-0 w-full flex-1 flex-col-reverse items-center">
-                <div
-                  className="w-full max-w-10 rounded-t bg-amber-500 transition-all duration-300"
-                  style={{ height: `${sessionHeight}%` }}
-                  title={`${t("sessionsLabel")}: ${formatCurrency(point.sessions)} ${t("egp")}`}
-                />
-                <div
-                  className="w-full max-w-10 rounded-t bg-emerald-500 transition-all duration-300"
-                  style={{ height: `${inventoryHeight}%` }}
-                  title={`${t("inventoryLabel")}: ${formatCurrency(point.inventory)} ${t("egp")}`}
-                />
-              </div>
-              <span className="mt-1 flex-shrink-0 text-center text-[10px] text-stone-500 dark:text-stone-400">
-                {formatDate(point.date)}
-              </span>
-            </div>
-          );
-        })}
+      <div className="min-h-0 flex-1 w-full">
+        <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+          <BarChart
+            data={data}
+            margin={{ top: 10, right: isRTL ? -20 : 10, left: isRTL ? 10 : -20, bottom: 0 }}
+            accessibilityLayer
+          >
+            <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              tickMargin={10}
+              axisLine={false}
+              tickFormatter={(value) => formatDate(value)}
+              className="text-[10px]"
+              reversed={isRTL}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={10}
+              orientation={isRTL ? "right" : "left"}
+              className="text-[10px]"
+              tickFormatter={(value) => formatCurrency(value)}
+            />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <ChartLegend content={<ChartLegendContent />} />
+            <Bar
+              dataKey="inventory"
+              stackId="a"
+              fill="var(--color-inventory)"
+              radius={[0, 0, 0, 0]}
+              barSize={32}
+            />
+            <Bar
+              dataKey="sessions"
+              stackId="a"
+              fill="var(--color-sessions)"
+              radius={[4, 4, 0, 0]}
+              barSize={32}
+            />
+          </BarChart>
+        </ChartContainer>
       </div>
     </div>
   );

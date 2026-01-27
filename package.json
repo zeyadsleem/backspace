@@ -33,6 +33,7 @@
     "react-hook-form": "^7.70.0",
     "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.9.6",
+    "recharts": "^3.7.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.17",
     "tailwindcss-animate": "^1.0.7",

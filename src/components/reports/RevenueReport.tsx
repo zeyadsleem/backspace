@@ -1,8 +1,23 @@
 import { TrendingDown, TrendingUp, Users, BarChart3 } from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { useAppStore } from "@/stores/useAppStore";
 import type { RevenueData, RevenueDataPoint, TopCustomer } from "@/types";
 import { formatCurrency } from "@/lib/formatters";
 import { DashboardCard } from "@/components/shared";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
 
 interface RevenueReportProps {
   revenueData: RevenueData;
@@ -18,10 +33,30 @@ export function RevenueReport({
   onCustomerClick,
 }: RevenueReportProps) {
   const t = useAppStore((state) => state.t);
-
   const language = useAppStore((state) => state.language);
   const percentChange = revenueData.comparison.percentChange;
   const isPositive = percentChange >= 0;
+
+  const isRTL = useAppStore((state) => state.isRTL);
+
+  const chartConfig = {
+    sessions: {
+      label: t("sessionsLabel"),
+      color: "var(--chart-5)",
+    },
+    inventory: {
+      label: t("inventoryLabel"),
+      color: "var(--chart-2)",
+    },
+  } satisfies ChartConfig;
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString(language === "ar" ? "ar-EG-u-nu-latn" : "en-US", {
+      weekday: "short",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -92,49 +127,76 @@ export function RevenueReport({
           icon={<BarChart3 className="h-4 w-4" />}
           title={t("revenueTrend")}
         >
-          <div className="flex 3xl:h-96 h-48 items-end gap-2 sm:h-64">
-            {revenueChart.map((point) => {
-              const maxValue = Math.max(...revenueChart.map((d) => d.sessions + d.inventory)) || 1;
-              const sessionHeight = (point.sessions / maxValue) * 100;
-              const inventoryHeight = (point.inventory / maxValue) * 100;
-              const date = new Date(point.date);
-              return (
-                <div className="flex flex-1 flex-col items-center gap-1" key={point.date}>
-                  <div
-                    className="flex w-full flex-col-reverse items-center"
-                    style={{ height: "100%" }}
-                  >
-                    <div
-                      className="w-full 3xl:max-w-12 max-w-8 rounded-t bg-amber-500"
-                      style={{ height: `${sessionHeight}%` }}
+          <div className="h-[300px] w-full sm:h-[400px]">
+            <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+              <AreaChart
+                data={revenueChart}
+                margin={{ top: 10, right: isRTL ? -20 : 10, left: isRTL ? 10 : -20, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="fillSessions" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-sessions)"
+                      stopOpacity={0.3}
                     />
-                    <div
-                      className={`w-full 3xl:max-w-12 max-w-8 rounded-t bg-emerald-500 ${sessionHeight > 0 ? "mb-0.5" : ""}`}
-                      style={{ height: `${inventoryHeight}%` }}
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-sessions)"
+                      stopOpacity={0.1}
                     />
-                  </div>
-                  <span className="3xl:text-sm text-[10px] text-stone-500 dark:text-stone-400">
-                    {date.toLocaleDateString(language === "ar" ? "ar-EG-u-nu-latn" : "en-US", {
-                      weekday: "short",
-                    })}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-4 flex gap-4 border-stone-100 border-t pt-4 dark:border-stone-800">
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-amber-500" />
-              <span className="text-stone-600 text-xs dark:text-stone-400">
-                {t("sessionsLabel")}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-emerald-500" />
-              <span className="text-stone-600 text-xs dark:text-stone-400">
-                {t("inventoryLabel")}
-              </span>
-            </div>
+                  </linearGradient>
+                  <linearGradient id="fillInventory" x1="0" y1="0" x2="0" y2="1">
+                    <stop
+                      offset="5%"
+                      stopColor="var(--color-inventory)"
+                      stopOpacity={0.3}
+                    />
+                    <stop
+                      offset="95%"
+                      stopColor="var(--color-inventory)"
+                      stopOpacity={0.1}
+                    />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  tickFormatter={(value) => formatDate(value)}
+                  className="text-[10px]"
+                  reversed={isRTL}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  orientation={isRTL ? "right" : "left"}
+                  className="text-[10px]"
+                  tickFormatter={(value) => formatCurrency(value)}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Area
+                  dataKey="inventory"
+                  type="monotone"
+                  fill="url(#fillInventory)"
+                  fillOpacity={0.4}
+                  stroke="var(--color-inventory)"
+                  stackId="a"
+                />
+                <Area
+                  dataKey="sessions"
+                  type="monotone"
+                  fill="url(#fillSessions)"
+                  fillOpacity={0.4}
+                  stroke="var(--color-sessions)"
+                  stackId="a"
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+              </AreaChart>
+            </ChartContainer>
           </div>
         </DashboardCard>
 
