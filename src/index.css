@@ -8,11 +8,14 @@
   Using Tailwind's stone palette for warmth
 */
 @theme {
-  /* Font families - Cairo for Arabic support */
-  --font-display: "Cairo", system-ui, sans-serif;
-  --font-body: "Cairo", system-ui, sans-serif;
-  --font-sans: "Cairo", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  /* 
+    Cairo for Arabic - Classic and trusted for Arabic UI
+    Inter for English - Modern and clean
+  */
+  --font-sans: "Cairo", "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Cairo", "Inter", system-ui, sans-serif;
+  --font-body: "Cairo", "Inter", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
 /* Shadcn theme integration */

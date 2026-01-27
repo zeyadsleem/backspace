@@ -106,7 +106,7 @@ export function EndSessionDialog({
     <Modal
       className="overflow-hidden"
       isOpen={isOpen}
-      maxWidth="max-w-3xl"
+      maxWidth="3xl"
       onClose={onClose}
       showCloseButton={false}
     >

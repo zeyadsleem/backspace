@@ -49,9 +49,9 @@ export function InventoryAddModal({
         prev.map((cartItem, index) =>
           index === existingIndex
             ? {
-              ...cartItem,
-              quantity: Math.min(cartItem.quantity + 1, item.quantity),
-            }
+                ...cartItem,
+                quantity: Math.min(cartItem.quantity + 1, item.quantity),
+              }
             : cartItem
         )
       );
@@ -73,9 +73,9 @@ export function InventoryAddModal({
       prev.map((cartItem) =>
         cartItem.item.id === itemId
           ? {
-            ...cartItem,
-            quantity: Math.min(newQuantity, cartItem.item.quantity),
-          }
+              ...cartItem,
+              quantity: Math.min(newQuantity, cartItem.item.quantity),
+            }
           : cartItem
       )
     );
@@ -100,7 +100,7 @@ export function InventoryAddModal({
     <Modal
       className="flex h-[70vh] flex-col overflow-hidden p-0"
       isOpen={true}
-      maxWidth="max-w-4xl"
+      maxWidth="4xl"
       onClose={onClose!}
       showCloseButton={true}
       title={
@@ -167,20 +167,22 @@ export function InventoryAddModal({
 
                     return (
                       <button
-                        className={`group relative flex h-full min-h-[100px] flex-col rounded-xl border p-3 text-start transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${isInCart
+                        className={`group relative flex h-full min-h-[100px] flex-col rounded-xl border p-3 text-start transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
+                          isInCart
                             ? "border-amber-500 bg-amber-50 ring-1 ring-amber-500/20 dark:bg-amber-900/10"
                             : "border-stone-200 bg-white hover:border-amber-300 hover:shadow-md dark:border-stone-700 dark:bg-stone-800 dark:hover:border-stone-600"
-                          }`}
+                        }`}
                         disabled={availableQuantity <= 0}
                         key={item.id}
                         onClick={() => handleItemAdd(item)}
                       >
                         <div className="mb-3 flex w-full items-start justify-between">
                           <div
-                            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${isInCart
+                            className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                              isInCart
                                 ? "bg-amber-500 text-white shadow-sm"
                                 : "bg-stone-100 text-stone-400 group-hover:bg-amber-100 group-hover:text-amber-600 dark:bg-stone-700 dark:group-hover:bg-amber-900/30"
-                              }`}
+                            }`}
                           >
                             {isInCart ? (
                               <Check className="h-4 w-4" />

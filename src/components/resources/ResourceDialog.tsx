@@ -25,7 +25,7 @@ export function ResourceDialog({ isOpen, title, onClose, ...formProps }: Resourc
   return (
     <Modal
       isOpen={isOpen}
-      maxWidth="max-w-2xl"
+      maxWidth="2xl"
       onClose={onClose!}
       title={
         <div className="flex items-center gap-3">

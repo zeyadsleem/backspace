@@ -31,7 +31,7 @@ export function DeleteConfirmDialog({
   }
 
   return (
-    <Modal isOpen={isOpen} maxWidth="max-w-sm" onClose={onCancel!} showCloseButton={false}>
+    <Modal isOpen={isOpen} maxWidth="sm" onClose={onCancel!} showCloseButton={false}>
       <div className="p-6 text-center">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
           <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />

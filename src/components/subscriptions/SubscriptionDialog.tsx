@@ -26,7 +26,7 @@ export function SubscriptionDialog({
     <Modal
       className="flex max-h-[85vh] flex-col overflow-hidden"
       isOpen={isOpen}
-      maxWidth="max-w-3xl"
+      maxWidth="3xl"
       onClose={onClose!}
       title={
         <div className="flex items-center gap-3">

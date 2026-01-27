@@ -49,7 +49,7 @@ export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: Inv
     <Modal
       className="flex max-h-[90vh] flex-col overflow-hidden"
       isOpen={isOpen}
-      maxWidth="max-w-lg"
+      maxWidth="lg"
       onClose={onClose!}
       showCloseButton={false}
     >

@@ -1,8 +1,6 @@
 use crate::database::DbPool;
-use rust_decimal::Decimal;
-use rust_decimal::prelude::Zero;
 use serde::{Deserialize, Serialize};
-use sqlx::FromRow;
+use sqlx::{Row, sqlite::SqliteRow};
 use tauri::State;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -16,21 +14,21 @@ pub struct DashboardMetrics {
     pub resource_utilization: i64,
 }
 
-#[derive(Debug, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RevenueDataPoint {
     pub date: String,
     pub sessions: f64,
     pub inventory: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TopCustomer {
     pub id: String,
     pub name: String,
     pub revenue: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize, FromRow)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RecentActivityView {
     pub id: String,
     pub description: String,
@@ -40,17 +38,6 @@ pub struct RecentActivityView {
 
 #[tauri::command]
 pub async fn get_dashboard_metrics(pool: State<'_, DbPool>) -> Result<DashboardMetrics, String> {
-    let now = chrono::Local::now().naive_local();
-    let today_str = now.date().to_string(); // YYYY-MM-DD
-
-    // 1. Today's Revenue (Invoices paid today OR Sessions ended today? Usually Invoices created/paid today)
-    // Let's use Invoices CREATED today for revenue tracking regardless of payment status? Or Paid?
-    // Revenue usually implies earned. Let's go with Total of Invoices created today for simplicity of "Sales", 
-    // or Paid amount today for "Cash Flow".
-    // Sample data logic seemed to track "Revenue" as sales. Let's sum invoice items created today.
-    
-    // Revenue breakdown
-    use sqlx::Row;
     let row = sqlx::query(
         r#"
         SELECT 
@@ -65,45 +52,34 @@ pub async fn get_dashboard_metrics(pool: State<'_, DbPool>) -> Result<DashboardM
     .await
     .map_err(|e| e.to_string())?;
 
-    let session_revenue: f64 = row.try_get::<Option<f64>, _>("session_rev").unwrap_or(None).unwrap_or(0.0);
-    let inventory_revenue: f64 = row.try_get::<Option<f64>, _>("inventory_rev").unwrap_or(None).unwrap_or(0.0);
+    let session_revenue: f64 = row.try_get::<Option<f64>, _>("session_rev").unwrap_or_default().unwrap_or(0.0);
+    let inventory_revenue: f64 = row.try_get::<Option<f64>, _>("inventory_rev").unwrap_or_default().unwrap_or(0.0);
     
     let today_revenue = session_revenue + inventory_revenue;
 
-    // Note: SQLx might return these as f64 or Decimal or i64 depending on driver inference.
-    // Explicitly casting via 'as' if compatible, or use simple mapping.
-    // For SQLite SUM(DECIMAL) -> REAL usually (f64).
-    // Safest is to let SQLx map to what it thinks, then we convert.
-    // But query! macro infers types from DB. We migrated as DECIMAL.
-    // Let's assume it returns Option<f64> or similar. We'll handle conversion.
-    // Actually, macro output fields have specific types.
-    // We'll coerce to f64.
-    
-
-
-    // 2. Active Sessions
-    let active_sessions: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM sessions WHERE status = 'active'")
+    let active_sessions: i64 = sqlx::query("SELECT COUNT(*) FROM sessions WHERE status = 'active'")
         .fetch_one(&*pool)
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())?
+        .get(0);
 
-    // 3. New Customers Today
-    let new_customers_today: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM customers WHERE date(created_at) = date('now', 'localtime')")
+    let new_customers_today: i64 = sqlx::query("SELECT COUNT(*) FROM customers WHERE date(created_at) = date('now', 'localtime')")
         .fetch_one(&*pool)
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())?
+        .get(0);
 
-    // 4. Active Subscriptions
-    let active_subscriptions: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM subscriptions WHERE status = 'active' AND start_date <= date('now') AND end_date >= date('now')")
+    let active_subscriptions: i64 = sqlx::query("SELECT COUNT(*) FROM subscriptions WHERE status = 'active' AND start_date <= date('now') AND end_date >= date('now')")
         .fetch_one(&*pool)
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())?
+        .get(0);
 
-    // 5. Resource Utilization (Active Sessions / Total Resources)
-    let total_resources: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM resources")
+    let total_resources: i64 = sqlx::query("SELECT COUNT(*) FROM resources")
         .fetch_one(&*pool)
         .await
-        .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())?
+        .get(0);
     
     let resource_utilization = if total_resources > 0 {
         ((active_sessions as f64 / total_resources as f64) * 100.0) as i64
@@ -124,8 +100,7 @@ pub async fn get_dashboard_metrics(pool: State<'_, DbPool>) -> Result<DashboardM
 
 #[tauri::command]
 pub async fn get_revenue_chart_data(pool: State<'_, DbPool>) -> Result<Vec<RevenueDataPoint>, String> {
-    // Last 7 days
-    sqlx::query_as::<_, RevenueDataPoint>(
+    let rows = sqlx::query(
         r#"
         WITH RECURSIVE dates(date) AS (
             SELECT date('now', '-6 days', 'localtime')
@@ -136,8 +111,8 @@ pub async fn get_revenue_chart_data(pool: State<'_, DbPool>) -> Result<Vec<Reven
         )
         SELECT 
             d.date,
-            COALESCE(SUM(CASE WHEN ii.id IS NOT NULL AND (ii.description LIKE 'Session%' OR ii.description LIKE '%Subscription%') THEN ii.amount ELSE 0 END), 0) as sessions,
-            COALESCE(SUM(CASE WHEN ii.id IS NOT NULL AND (ii.description NOT LIKE 'Session%' AND ii.description NOT LIKE '%Subscription%') THEN ii.amount ELSE 0 END), 0) as inventory
+            CAST(COALESCE(SUM(CASE WHEN ii.id IS NOT NULL AND (ii.description LIKE 'Session%' OR ii.description LIKE '%Subscription%') THEN ii.amount ELSE 0 END), 0) AS REAL) as sessions,
+            CAST(COALESCE(SUM(CASE WHEN ii.id IS NOT NULL AND (ii.description NOT LIKE 'Session%' AND ii.description NOT LIKE '%Subscription%') THEN ii.amount ELSE 0 END), 0) AS REAL) as inventory
         FROM dates d
         LEFT JOIN invoices i ON date(i.created_at) = d.date
         LEFT JOIN invoice_items ii ON i.id = ii.invoice_id
@@ -147,14 +122,20 @@ pub async fn get_revenue_chart_data(pool: State<'_, DbPool>) -> Result<Vec<Reven
     )
     .fetch_all(&*pool)
     .await
-    .map_err(|e| e.to_string())
+    .map_err(|e| e.to_string())?;
+
+    Ok(rows.into_iter().map(|r| RevenueDataPoint {
+        date: r.get(0),
+        sessions: r.get(1),
+        inventory: r.get(2),
+    }).collect())
 }
 
 #[tauri::command]
 pub async fn get_top_customers(pool: State<'_, DbPool>) -> Result<Vec<TopCustomer>, String> {
-    sqlx::query_as::<_, TopCustomer>(
+    let rows = sqlx::query(
         r#"
-        SELECT id, name, total_spent as revenue 
+        SELECT id, name, CAST(total_spent AS REAL) as revenue 
         FROM customers 
         ORDER BY total_spent DESC 
         LIMIT 5
@@ -162,12 +143,18 @@ pub async fn get_top_customers(pool: State<'_, DbPool>) -> Result<Vec<TopCustome
     )
     .fetch_all(&*pool)
     .await
-    .map_err(|e| e.to_string())
+    .map_err(|e| e.to_string())?;
+
+    Ok(rows.into_iter().map(|r| TopCustomer {
+        id: r.get(0),
+        name: r.get(1),
+        revenue: r.get(2),
+    }).collect())
 }
 
 #[tauri::command]
 pub async fn get_recent_activity(pool: State<'_, DbPool>) -> Result<Vec<RecentActivityView>, String> {
-    sqlx::query_as::<_, RecentActivityView>(
+    let rows = sqlx::query(
         r#"
         SELECT id, 'Session Started: ' || resource_id as description, 'session_start' as operation_type, started_at as timestamp FROM sessions WHERE status = 'active'
         UNION ALL
@@ -180,7 +167,14 @@ pub async fn get_recent_activity(pool: State<'_, DbPool>) -> Result<Vec<RecentAc
     )
     .fetch_all(&*pool)
     .await
-    .map_err(|e| e.to_string())
+    .map_err(|e| e.to_string())?;
+
+    Ok(rows.into_iter().map(|r| RecentActivityView {
+        id: r.get(0),
+        description: r.get(1),
+        operation_type: r.get(2),
+        timestamp: r.get(3),
+    }).collect())
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -205,7 +199,6 @@ pub struct ComparisonData {
 }
 
 async fn get_summary_for_period(pool: &DbPool, period_sql: &str) -> Result<RevenueSummary, String> {
-    use sqlx::Row;
     let query = format!(
         r#"
         SELECT 
@@ -223,8 +216,8 @@ async fn get_summary_for_period(pool: &DbPool, period_sql: &str) -> Result<Reven
         .await
         .map_err(|e| e.to_string())?;
 
-    let sessions: f64 = row.try_get::<Option<f64>, _>("session_rev").unwrap_or(None).unwrap_or(0.0);
-    let inventory: f64 = row.try_get::<Option<f64>, _>("inventory_rev").unwrap_or(None).unwrap_or(0.0);
+    let sessions: f64 = row.try_get::<Option<f64>, _>("session_rev").unwrap_or_default().unwrap_or(0.0);
+    let inventory: f64 = row.try_get::<Option<f64>, _>("inventory_rev").unwrap_or_default().unwrap_or(0.0);
     
     Ok(RevenueSummary {
         sessions,
@@ -280,38 +273,38 @@ pub struct UtilizationData {
 
 #[tauri::command]
 pub async fn get_utilization_report(pool: State<'_, DbPool>) -> Result<UtilizationData, String> {
-    // This is complex for a simple app, let's return some real-ish values
-    // Overall rate: total session duration / (total resources * 24h) for last 7 days
-    
-    use sqlx::Row;
-    
-    let total_resources: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM resources").fetch_one(&*pool).await.map_err(|e| e.to_string())?;
-    
-    let total_duration_mins: i64 = sqlx::query_scalar("SELECT SUM(duration_minutes) FROM sessions WHERE ended_at >= date('now', '-7 days', 'localtime')")
+    let total_resources: i64 = sqlx::query("SELECT COUNT(*) FROM resources")
         .fetch_one(&*pool)
         .await
         .map_err(|e| e.to_string())?
+        .get(0);
+    
+    let total_duration_mins: i64 = sqlx::query("SELECT SUM(duration_minutes) FROM sessions WHERE ended_at >= date('now', '-7 days', 'localtime')")
+        .fetch_one(&*pool)
+        .await
+        .map_err(|e| e.to_string())?
+        .get::<Option<i64>, _>(0)
         .unwrap_or(0);
 
     let overall_rate = if total_resources > 0 {
-        // total_duration / (7 days * 24 hours * 60 mins * total_resources)
         let total_possible = 7.0 * 24.0 * 60.0 * total_resources as f64;
         (total_duration_mins as f64 / total_possible) * 100.0
     } else {
         0.0
     };
 
-    let avg_duration: f64 = sqlx::query_scalar("SELECT AVG(duration_minutes) FROM sessions WHERE ended_at IS NOT NULL")
+    let avg_duration: f64 = sqlx::query("SELECT AVG(duration_minutes) FROM sessions WHERE ended_at IS NOT NULL")
         .fetch_one(&*pool)
         .await
         .map_err(|e| e.to_string())?
+        .get::<Option<f64>, _>(0)
         .unwrap_or(0.0);
 
     // By Resource
-    let by_resource = sqlx::query_as::<_, ResourceUtilization>(
+    let rows = sqlx::query(
         r#"
         SELECT r.id, r.name, 
-               (COALESCE(SUM(s.duration_minutes), 0) / (7.0 * 24.0 * 60.0)) * 100.0 as rate
+               (CAST(COALESCE(SUM(s.duration_minutes), 0) AS REAL) / (7.0 * 24.0 * 60.0)) * 100.0 as rate
         FROM resources r
         LEFT JOIN sessions s ON r.id = s.resource_id AND s.ended_at >= date('now', '-7 days', 'localtime')
         GROUP BY r.id
@@ -321,12 +314,18 @@ pub async fn get_utilization_report(pool: State<'_, DbPool>) -> Result<Utilizati
     .await
     .map_err(|e| e.to_string())?;
 
-    // Peak Hours (Simplified: count sessions active during each hour of the day)
+    let by_resource = rows.into_iter().map(|r| ResourceUtilization {
+        id: r.get(0),
+        name: r.get(1),
+        rate: r.get(2),
+    }).collect();
+
+    // Peak Hours
     let mut peak_hours = Vec::new();
     for hour in 0..24 {
         peak_hours.push(PeakHour {
             hour,
-            occupancy: 0.0, // Simulation for now
+            occupancy: 0.0,
         });
     }
 
@@ -340,8 +339,7 @@ pub async fn get_utilization_report(pool: State<'_, DbPool>) -> Result<Utilizati
 
 #[tauri::command]
 pub async fn get_operation_history(pool: State<'_, DbPool>) -> Result<Vec<RecentActivityView>, String> {
-    // Similar to recent activity but maybe longer list or from audit_logs
-    sqlx::query_as::<_, RecentActivityView>(
+    let rows = sqlx::query(
         r#"
         SELECT id, 'Session Started: ' || resource_id as description, 'session_start' as operation_type, started_at as timestamp FROM sessions
         UNION ALL
@@ -354,5 +352,12 @@ pub async fn get_operation_history(pool: State<'_, DbPool>) -> Result<Vec<Recent
     )
     .fetch_all(&*pool)
     .await
-    .map_err(|e| e.to_string())
+    .map_err(|e| e.to_string())?;
+
+    Ok(rows.into_iter().map(|r| RecentActivityView {
+        id: r.get(0),
+        description: r.get(1),
+        operation_type: r.get(2),
+        timestamp: r.get(3),
+    }).collect())
 }

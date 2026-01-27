@@ -1,10 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ReportsPage } from "@/components/reports";
 import { useAppStore } from "@/stores/useAppStore";
 
 export function ReportsPageWrapper() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+
   const revenueData = useAppStore((state) => state.revenueData);
   const revenueChart = useAppStore((state) => state.revenueChart);
   const topCustomers = useAppStore((state) => state.topCustomers);
@@ -13,8 +15,23 @@ export function ReportsPageWrapper() {
   const fetchDashboardData = useAppStore((state) => state.fetchDashboardData);
 
   useEffect(() => {
-    fetchDashboardData();
+    async function loadData() {
+      try {
+        await fetchDashboardData();
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
   }, [fetchDashboardData]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-amber-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <ReportsPage

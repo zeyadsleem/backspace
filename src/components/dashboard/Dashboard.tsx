@@ -1,4 +1,5 @@
 import { Activity, Clock, CreditCard, DollarSign, Users } from "lucide-react";
+import { formatCurrency } from "@/lib/formatters";
 import { useDashboardData, useTranslation } from "@/stores/hooks";
 import { useAppStore } from "@/stores/useAppStore";
 import { ActivityFeed } from "./ActivityFeed";
@@ -7,7 +8,6 @@ import { MetricCard } from "./MetricCard";
 import { PendingInvoices } from "./PendingInvoices";
 import { QuickActions } from "./QuickActions";
 import { RevenueChart } from "./RevenueChart";
-import { formatCurrency } from "@/lib/formatters";
 
 interface DashboardProps {
   onNewCustomer?: () => void;
@@ -27,9 +27,12 @@ export function Dashboard({
   const t = useTranslation();
 
   const invoices = useAppStore((state) => state.invoices);
-  const { dashboardMetrics: metrics, lowStockAlerts, recentActivity, revenueChart } = useDashboardData();
-
-
+  const {
+    dashboardMetrics: metrics,
+    lowStockAlerts,
+    recentActivity,
+    revenueChart,
+  } = useDashboardData();
 
   return (
     <div className="scrollbar-thin flex h-auto flex-col overflow-y-auto lg:h-full lg:overflow-hidden">
@@ -98,13 +101,8 @@ export function Dashboard({
 
       {/* Bottom Section - Two Column Layout */}
       <div className="min-h-0 flex-1 px-4 pb-4 sm:px-6 sm:pb-6">
-        <div className="grid h-full grid-cols-1 gap-6 lg:grid-cols-12 3xl:gap-8">
-          {/* Column 1: Unpaid Invoices (Taking 5 columns) */}
-          <div className="lg:col-span-5 lg:h-full">
-            <PendingInvoices invoices={invoices} onViewCustomerDebt={onViewCustomerDebt} />
-          </div>
-
-          {/* Column 2: Revenue Trend + Activity Feed (Taking 7 columns) */}
+        <div className="grid h-full grid-cols-1 3xl:gap-8 gap-6 lg:grid-cols-12">
+          {/* Column 1: Revenue Trend + Activity Feed (Taking 7 columns) */}
           <div className="flex flex-col gap-6 lg:col-span-7 lg:h-full">
             <div className="h-[350px] flex-shrink-0">
               <RevenueChart data={revenueChart} />
@@ -112,6 +110,11 @@ export function Dashboard({
             <div className="min-h-0 flex-1">
               <ActivityFeed activities={recentActivity} />
             </div>
+          </div>
+
+          {/* Column 2: Unpaid Invoices (Taking 5 columns) */}
+          <div className="lg:col-span-5 lg:h-full">
+            <PendingInvoices invoices={invoices} onViewCustomerDebt={onViewCustomerDebt} />
           </div>
         </div>
       </div>

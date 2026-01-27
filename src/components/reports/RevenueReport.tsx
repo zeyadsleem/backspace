@@ -1,23 +1,17 @@
-import { TrendingDown, TrendingUp, Users, BarChart3 } from "lucide-react";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { useAppStore } from "@/stores/useAppStore";
-import type { RevenueData, RevenueDataPoint, TopCustomer } from "@/types";
-import { formatCurrency } from "@/lib/formatters";
+import { BarChart3, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { DashboardCard } from "@/components/shared";
 import {
   type ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
 } from "@/components/ui/chart";
+import { formatCurrency } from "@/lib/formatters";
+import { useAppStore } from "@/stores/useAppStore";
+import type { RevenueData, RevenueDataPoint, TopCustomer } from "@/types";
 
 interface RevenueReportProps {
   revenueData: RevenueData;
@@ -123,77 +117,63 @@ export function RevenueReport({
       <div className="grid grid-cols-1 3xl:gap-8 gap-6 lg:grid-cols-3">
         <DashboardCard
           className="lg:col-span-2"
-          contentClassName="3xl:p-8 p-5"
+          contentClassName="3xl:p-6 p-4"
           icon={<BarChart3 className="h-4 w-4" />}
           title={t("revenueTrend")}
         >
           <div className="h-[300px] w-full sm:h-[400px]">
-            <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
-              <AreaChart
-                data={revenueChart}
-                margin={{ top: 10, right: isRTL ? -20 : 10, left: isRTL ? 10 : -20, bottom: 0 }}
-              >
+            <ChartContainer className="h-[300px] w-full sm:h-[400px]" config={chartConfig}>
+              <AreaChart data={revenueChart} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="fillSessions" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor="var(--color-sessions)"
-                      stopOpacity={0.3}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="var(--color-sessions)"
-                      stopOpacity={0.1}
-                    />
+                  <linearGradient id="fillSessions" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-sessions)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--color-sessions)" stopOpacity={0.1} />
                   </linearGradient>
-                  <linearGradient id="fillInventory" x1="0" y1="0" x2="0" y2="1">
-                    <stop
-                      offset="5%"
-                      stopColor="var(--color-inventory)"
-                      stopOpacity={0.3}
-                    />
-                    <stop
-                      offset="95%"
-                      stopColor="var(--color-inventory)"
-                      stopOpacity={0.1}
-                    />
+                  <linearGradient id="fillInventory" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-inventory)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--color-inventory)" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
+                <CartesianGrid
+                  className="stroke-border/50"
+                  strokeDasharray="3 3"
+                  vertical={false}
+                />
                 <XAxis
-                  dataKey="date"
-                  tickLine={false}
                   axisLine={false}
-                  tickMargin={8}
-                  tickFormatter={(value) => formatDate(value)}
-                  className="text-[10px]"
+                  className="font-medium text-[10px]"
+                  dataKey="date"
                   reversed={isRTL}
+                  tickFormatter={(value) => formatDate(value)}
+                  tickLine={false}
+                  tickMargin={8}
                 />
                 <YAxis
-                  tickLine={false}
                   axisLine={false}
-                  tickMargin={8}
+                  className="font-medium text-[10px]"
                   orientation={isRTL ? "right" : "left"}
-                  className="text-[10px]"
                   tickFormatter={(value) => formatCurrency(value)}
+                  tickLine={false}
+                  tickMargin={8}
                 />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <Area
                   dataKey="inventory"
-                  type="monotone"
                   fill="url(#fillInventory)"
                   fillOpacity={0.4}
-                  stroke="var(--color-inventory)"
                   stackId="a"
+                  stroke="var(--color-inventory)"
+                  type="monotone"
                 />
                 <Area
                   dataKey="sessions"
-                  type="monotone"
                   fill="url(#fillSessions)"
                   fillOpacity={0.4}
-                  stroke="var(--color-sessions)"
                   stackId="a"
+                  stroke="var(--color-sessions)"
+                  type="monotone"
                 />
+                {/* @ts-ignore */}
                 <ChartLegend content={<ChartLegendContent />} />
               </AreaChart>
             </ChartContainer>
@@ -208,7 +188,7 @@ export function RevenueReport({
           <div className="space-y-3">
             {topCustomers.map((customer, index) => (
               <button
-                className="flex w-full items-center gap-3 rounded-lg p-2 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800 text-start"
+                className="flex w-full items-center gap-3 rounded-lg p-2 text-start transition-colors hover:bg-stone-50 dark:hover:bg-stone-800"
                 key={customer.id}
                 onClick={() => onCustomerClick?.(customer.id)}
                 type="button"

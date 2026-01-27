@@ -73,7 +73,7 @@ export function SubscriptionDetailsDialog({
     <Modal
       className="flex max-h-[90vh] flex-col overflow-hidden"
       isOpen={isOpen}
-      maxWidth="max-w-lg"
+      maxWidth="lg"
       onClose={onClose}
       showCloseButton={false}
     >
@@ -272,12 +272,7 @@ export function SubscriptionDetailsDialog({
             <RefreshCw className="h-4 w-4" /> {t("reactivateSubscription")}
           </Button>
         ) : (
-          <Button
-            className="flex-1"
-            onClick={onClose}
-            size="md"
-            variant="outline"
-          >
+          <Button className="flex-1" onClick={onClose} size="md" variant="outline">
             {t("close")}
           </Button>
         )}

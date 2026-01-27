@@ -1,23 +1,17 @@
 import { TrendingUp } from "lucide-react";
 import { useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { useAppStore } from "@/stores/useAppStore";
-import type { RevenueDataPoint } from "@/types";
-import { formatCurrency } from "@/lib/formatters";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
   type ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
 } from "@/components/ui/chart";
+import { formatCurrency } from "@/lib/formatters";
+import { useAppStore } from "@/stores/useAppStore";
+import type { RevenueDataPoint } from "@/types";
 
 interface RevenueChartProps {
   data: RevenueDataPoint[];
@@ -28,7 +22,7 @@ type Period = "today" | "week" | "month";
 export function RevenueChart({ data }: RevenueChartProps) {
   const t = useAppStore((state) => state.t);
   const language = useAppStore((state) => state.language);
-  const [period, setPeriod] = useState<Period>("week");
+  const [period, setPeriod] = useState<Period>("today");
 
   const isRTL = useAppStore((state) => state.isRTL);
 
@@ -56,14 +50,14 @@ export function RevenueChart({ data }: RevenueChartProps) {
   };
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900">
-      <div className="mb-5 flex flex-shrink-0 items-center justify-between">
+    <div className="flex h-full flex-col overflow-hidden rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-800 dark:bg-stone-900">
+      <div className="mb-4 flex flex-shrink-0 items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="rounded-lg bg-amber-100 p-2 dark:bg-amber-900/50">
             <TrendingUp className="h-4 w-4 text-amber-600 dark:text-amber-400" />
           </div>
           <div>
-            <h3 className="font-semibold text-stone-900 dark:text-stone-100">
+            <h3 className="font-bold text-[15px] text-stone-900 dark:text-stone-100">
               {t("revenueTrend")}
             </h3>
             <p className="text-stone-500 text-xs dark:text-stone-400">
@@ -83,7 +77,11 @@ export function RevenueChart({ data }: RevenueChartProps) {
 
             return (
               <button
-                className={`rounded-md px-3 py-1.5 font-medium text-xs transition-all ${period === p ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100" : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"}`}
+                className={`rounded-md px-3 py-1.5 font-semibold text-[13px] transition-all ${
+                  period === p
+                    ? "bg-white text-stone-900 shadow-sm dark:bg-stone-700 dark:text-stone-100"
+                    : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                }`}
                 key={p}
                 onClick={() => setPeriod(p)}
                 type="button"
@@ -96,45 +94,46 @@ export function RevenueChart({ data }: RevenueChartProps) {
       </div>
 
       <div className="min-h-[300px] flex-1 w-full">
-        <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+        <ChartContainer config={chartConfig} className="h-[300px] w-full">
           <BarChart
-            data={data}
-            margin={{ top: 10, right: isRTL ? -20 : 10, left: isRTL ? 10 : -20, bottom: 0 }}
             accessibilityLayer
+            data={data}
+            margin={{ top: 10, right: 20, left: 20, bottom: 0 }}
           >
-            <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
+            <CartesianGrid className="stroke-border/50" strokeDasharray="3 3" vertical={false} />
             <XAxis
+              axisLine={false}
+              className="font-medium text-[10px]"
               dataKey="date"
+              reversed={isRTL}
+              tickFormatter={(value) => formatDate(value)}
               tickLine={false}
               tickMargin={10}
-              axisLine={false}
-              tickFormatter={(value) => formatDate(value)}
-              className="text-[10px]"
-              reversed={isRTL}
             />
             <YAxis
-              tickLine={false}
               axisLine={false}
-              tickMargin={10}
+              className="font-medium text-[10px]"
               orientation={isRTL ? "right" : "left"}
-              className="text-[10px]"
               tickFormatter={(value) => formatCurrency(value)}
+              tickLine={false}
+              tickMargin={10}
             />
             <ChartTooltip content={<ChartTooltipContent />} />
+            {/* @ts-ignore */}
             <ChartLegend content={<ChartLegendContent />} />
             <Bar
+              barSize={32}
               dataKey="inventory"
-              stackId="a"
               fill="var(--color-inventory)"
               radius={[0, 0, 0, 0]}
-              barSize={32}
+              stackId="a"
             />
             <Bar
+              barSize={32}
               dataKey="sessions"
-              stackId="a"
               fill="var(--color-sessions)"
               radius={[4, 4, 0, 0]}
-              barSize={32}
+              stackId="a"
             />
           </BarChart>
         </ChartContainer>

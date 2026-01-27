@@ -134,19 +134,19 @@ export function ActiveSessionCard({
       {/* 4. Actions: Slim & Practical */}
       <div className="mt-auto grid grid-cols-2 gap-px border-stone-100 border-t bg-stone-100 dark:border-stone-800 dark:bg-stone-800">
         <Button
-          className="h-12 w-full rounded-none bg-white text-xs hover:bg-stone-50 3xl:h-14 3xl:text-sm dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
+          className="3xl:h-14 h-12 w-full rounded-none bg-white 3xl:text-sm text-xs hover:bg-stone-50 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800"
           onClick={onAddInventory}
           variant="ghost"
         >
-          <PlusCircle className="me-2 h-4 w-4 text-amber-500 3xl:h-5 3xl:w-5" />
+          <PlusCircle className="me-2 3xl:h-5 h-4 3xl:w-5 w-4 text-amber-500" />
           {t("addItem")}
         </Button>
         <Button
-          className="h-12 w-full rounded-none bg-white text-xs hover:bg-red-50 hover:text-red-600 3xl:h-14 3xl:text-sm dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-red-900/10"
+          className="3xl:h-14 h-12 w-full rounded-none bg-white 3xl:text-sm text-xs hover:bg-red-50 hover:text-red-600 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-red-900/10"
           onClick={onEndSession}
           variant="ghost"
         >
-          <Square className="me-2 h-4 w-4 fill-current 3xl:h-5 3xl:w-5" />
+          <Square className="me-2 3xl:h-5 h-4 3xl:w-5 w-4 fill-current" />
           {t("end")}
         </Button>
       </div>

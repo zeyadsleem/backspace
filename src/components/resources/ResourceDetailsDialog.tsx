@@ -67,7 +67,7 @@ export function ResourceDetailsDialog({
     <Modal
       className="overflow-hidden"
       isOpen={isOpen}
-      maxWidth="max-w-md"
+      maxWidth="md"
       onClose={onClose}
       title={t("resourceDetails") || "Resource Details"}
     >

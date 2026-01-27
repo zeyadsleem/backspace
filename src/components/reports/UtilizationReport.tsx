@@ -1,16 +1,6 @@
-import { Clock, Activity, BarChart as BarChartIcon } from "lucide-react";
+import { Activity, BarChart as BarChartIcon, Clock } from "lucide-react";
 import { useMemo } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Cell,
-} from "recharts";
-import { useAppStore } from "@/stores/useAppStore";
-import type { UtilizationData } from "@/types";
-import { formatNumber } from "@/lib/formatters";
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
 import { DashboardCard } from "@/components/shared";
 import {
   type ChartConfig,
@@ -18,6 +8,9 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { formatNumber } from "@/lib/formatters";
+import { useAppStore } from "@/stores/useAppStore";
+import type { UtilizationData } from "@/types";
 
 interface UtilizationReportProps {
   utilizationData: UtilizationData;
@@ -62,15 +55,25 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
   } satisfies ChartConfig;
 
   const getBarColor = (rate: number) => {
-    if (rate >= 80) return "var(--chart-1)"; // Lime/Green
-    if (rate >= 50) return "var(--chart-5)"; // Amber/Orange
+    if (rate >= 80) {
+      return "var(--chart-1)";
+    } // Lime/Green
+    if (rate >= 50) {
+      return "var(--chart-5)";
+    } // Amber/Orange
     return "oklch(0.586 0.253 17.585)"; // Rose/Red (standard destructive color)
   };
 
   const getOccupancyColor = (occupancy: number) => {
-    if (occupancy >= 80) return "oklch(0.586 0.253 17.585)"; // Peak - Red
-    if (occupancy >= 60) return "var(--chart-5)"; // High - Amber
-    if (occupancy >= 40) return "var(--chart-1)"; // Medium - Green
+    if (occupancy >= 80) {
+      return "oklch(0.586 0.253 17.585)";
+    } // Peak - Red
+    if (occupancy >= 60) {
+      return "var(--chart-5)";
+    } // High - Amber
+    if (occupancy >= 40) {
+      return "var(--chart-1)";
+    } // Medium - Green
     return "oklch(0.85 0.1 140)"; // Low - Light Green
   };
 
@@ -117,38 +120,42 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
 
       <div className="grid grid-cols-1 3xl:gap-8 gap-6 lg:grid-cols-2">
         <DashboardCard
-          contentClassName="3xl:p-8 p-5"
+          contentClassName="3xl:p-6 p-4"
           icon={<Activity className="h-4 w-4" />}
           title={t("resourceUtilization")}
         >
           <div className="h-[400px] w-full">
-            <ChartContainer config={resourceChartConfig} className="h-full w-full aspect-auto">
+            <ChartContainer className="h-[400px] w-full" config={resourceChartConfig}>
               <BarChart
                 data={utilizationData.byResource}
                 layout="vertical"
-                margin={{ top: 5, right: isRTL ? 40 : 30, left: isRTL ? 30 : 40, bottom: 5 }}
-                onClick={(data) => {
-                  if (data?.activePayload?.[0]?.payload?.id) {
-                    onResourceClick?.(data.activePayload[0].payload.id);
-                  }
-                }}
+                margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
               >
-                <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis type="number" hide domain={[0, 100]} reversed={isRTL} />
+                <CartesianGrid
+                  className="stroke-border/50"
+                  horizontal={false}
+                  strokeDasharray="3 3"
+                />
+                <XAxis domain={[0, 100]} hide reversed={isRTL} type="number" />
                 <YAxis
+                  axisLine={false}
+                  className="font-medium text-xs"
                   dataKey="name"
-                  type="category"
+                  orientation={isRTL ? "right" : "left"}
                   tickLine={false}
                   tickMargin={10}
-                  axisLine={false}
-                  orientation={isRTL ? "right" : "left"}
-                  className="text-xs font-medium"
+                  type="category"
                   width={80}
                 />
                 <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
-                <Bar dataKey="rate" radius={isRTL ? [4, 0, 0, 4] : [0, 4, 4, 0]} barSize={24}>
+                <Bar barSize={24} dataKey="rate" radius={isRTL ? [4, 0, 0, 4] : [0, 4, 4, 0]}>
                   {utilizationData.byResource.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getBarColor(entry.rate)} className="cursor-pointer hover:opacity-80 transition-opacity" />
+                    <Cell
+                      className="cursor-pointer transition-opacity hover:opacity-80"
+                      fill={getBarColor(entry.rate)}
+                      key={`cell-${index}`}
+                      onClick={() => onResourceClick?.(entry.id)}
+                    />
                   ))}
                 </Bar>
               </BarChart>
@@ -157,39 +164,43 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
         </DashboardCard>
 
         <DashboardCard
-          contentClassName="3xl:p-8 p-5"
+          contentClassName="3xl:p-6 p-4"
           icon={<BarChartIcon className="h-4 w-4" />}
           title={t("peakHours")}
         >
           <div className="h-[400px] w-full">
-            <ChartContainer config={peakHoursChartConfig} className="h-full w-full aspect-auto">
+            <ChartContainer className="h-[400px] w-full" config={peakHoursChartConfig}>
               <BarChart
                 data={utilizationData.peakHours}
-                margin={{ top: 5, right: isRTL ? -20 : 10, left: isRTL ? 10 : -20, bottom: 0 }}
+                margin={{ top: 5, right: 10, left: 10, bottom: 0 }}
               >
-                <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
+                <CartesianGrid
+                  className="stroke-border/50"
+                  strokeDasharray="3 3"
+                  vertical={false}
+                />
                 <XAxis
+                  axisLine={false}
+                  className="text-[10px]"
                   dataKey="hour"
+                  reversed={isRTL}
+                  tickFormatter={(value) => `${value.toString().padStart(2, "0")}:00`}
                   tickLine={false}
                   tickMargin={10}
-                  axisLine={false}
-                  tickFormatter={(value) => `${value.toString().padStart(2, "0")}:00`}
-                  className="text-[10px]"
-                  reversed={isRTL}
                 />
                 <YAxis
-                  tickLine={false}
                   axisLine={false}
-                  tickMargin={10}
-                  orientation={isRTL ? "right" : "left"}
                   className="text-[10px]"
                   domain={[0, 100]}
+                  orientation={isRTL ? "right" : "left"}
                   tickFormatter={(value) => `${value}%`}
+                  tickLine={false}
+                  tickMargin={10}
                 />
                 <ChartTooltip content={<ChartTooltipContent hideIndicator />} />
-                <Bar dataKey="occupancy" radius={[4, 4, 0, 0]} barSize={32}>
+                <Bar barSize={32} dataKey="occupancy" radius={[4, 4, 0, 0]}>
                   {utilizationData.peakHours.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getOccupancyColor(entry.occupancy)} />
+                    <Cell fill={getOccupancyColor(entry.occupancy)} key={`cell-${index}`} />
                   ))}
                 </Bar>
               </BarChart>

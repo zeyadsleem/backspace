@@ -33,7 +33,7 @@ export function CustomerDialog({ isOpen, title, onClose, ...formProps }: Custome
   return (
     <Modal
       isOpen={isOpen}
-      maxWidth="max-w-2xl"
+      maxWidth="2xl"
       onClose={onClose!}
       title={
         <div className="flex items-center gap-3">

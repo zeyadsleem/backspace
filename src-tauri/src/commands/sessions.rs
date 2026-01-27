@@ -424,8 +424,11 @@ pub async fn end_session(pool: State<'_, DbPool>, session_id: String) -> Result<
     let total_amount = session_cost + inventory_total;
 
     // Update session
-    sqlx::query("UPDATE sessions SET ended_at = ?, status = 'completed', updated_at = ? WHERE id = ?")
+    sqlx::query("UPDATE sessions SET ended_at = ?, duration_minutes = ?, session_cost = ?, total_amount = ?, status = 'completed', updated_at = ? WHERE id = ?")
         .bind(end_time)
+        .bind(duration_minutes)
+        .bind(session_cost.to_string())
+        .bind(total_amount.to_string())
         .bind(end_time)
         .bind(&session_id)
         .execute(&mut *tx)
