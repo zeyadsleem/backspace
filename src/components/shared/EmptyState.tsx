@@ -2,6 +2,7 @@ import {
   Clock,
   CreditCard,
   FileText,
+  History,
   Inbox,
   Monitor,
   Package,
