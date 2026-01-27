@@ -11,7 +11,7 @@ import { useAppStore } from "@/stores/useAppStore";
 import type { RevenueDataPoint } from "@/types";
 import { formatCurrency } from "@/lib/formatters";
 import {
-  ChartConfig,
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,

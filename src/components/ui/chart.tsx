@@ -309,6 +309,7 @@ function getChartConfig(config: ChartConfig, item: any, key: string) {
 }
 
 export {
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,

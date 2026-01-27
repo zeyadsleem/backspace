@@ -11,7 +11,7 @@ import type { RevenueData, RevenueDataPoint, TopCustomer } from "@/types";
 import { formatCurrency } from "@/lib/formatters";
 import { DashboardCard } from "@/components/shared";
 import {
-  ChartConfig,
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,

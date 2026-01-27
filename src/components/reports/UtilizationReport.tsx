@@ -13,7 +13,7 @@ import type { UtilizationData } from "@/types";
 import { formatNumber } from "@/lib/formatters";
 import { DashboardCard } from "@/components/shared";
 import {
-  ChartConfig,
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
