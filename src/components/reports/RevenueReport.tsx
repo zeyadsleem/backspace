@@ -1,7 +1,8 @@
-import { TrendingDown, TrendingUp, Users } from "lucide-react";
+import { TrendingDown, TrendingUp, Users, BarChart3 } from "lucide-react";
 import { useAppStore } from "@/stores/useAppStore";
 import type { RevenueData, RevenueDataPoint, TopCustomer } from "@/types";
 import { formatCurrency } from "@/lib/formatters";
+import { DashboardCard } from "@/components/shared";
 
 interface RevenueReportProps {
   revenueData: RevenueData;
@@ -85,12 +86,12 @@ export function RevenueReport({
       </div>
 
       <div className="grid grid-cols-1 3xl:gap-8 gap-6 lg:grid-cols-3">
-        <div className="rounded-xl border border-stone-200 bg-white 3xl:p-8 p-5 lg:col-span-2 dark:border-stone-800 dark:bg-stone-900">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100">
-              {t("revenueTrend")}
-            </h3>
-          </div>
+        <DashboardCard
+          className="lg:col-span-2"
+          contentClassName="3xl:p-8 p-5"
+          icon={<BarChart3 className="h-4 w-4" />}
+          title={t("revenueTrend")}
+        >
           <div className="flex 3xl:h-96 h-48 items-end gap-2 sm:h-64">
             {revenueChart.map((point) => {
               const maxValue = Math.max(...revenueChart.map((d) => d.sessions + d.inventory)) || 1;
@@ -135,15 +136,13 @@ export function RevenueReport({
               </span>
             </div>
           </div>
-        </div>
+        </DashboardCard>
 
-        <div className="rounded-xl border border-stone-200 bg-white p-5 dark:border-stone-800 dark:bg-stone-900">
-          <div className="mb-4 flex items-center gap-2">
-            <Users className="h-4 w-4 text-stone-500" />
-            <h3 className="font-semibold text-stone-900 dark:text-stone-100">
-              {t("topCustomers")}
-            </h3>
-          </div>
+        <DashboardCard
+          contentClassName="p-5"
+          icon={<Users className="h-4 w-4" />}
+          title={t("topCustomers")}
+        >
           <div className="space-y-3">
             {topCustomers.map((customer, index) => (
               <button
@@ -166,7 +165,7 @@ export function RevenueReport({
               </button>
             ))}
           </div>
-        </div>
+        </DashboardCard>
       </div>
     </div>
   );

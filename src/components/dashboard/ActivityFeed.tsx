@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useAppStore } from "@/stores/useAppStore";
 import type { RecentActivity } from "@/types";
+import { DashboardCard } from "@/components/shared";
 
 interface ActivityFeedProps {
   activities: RecentActivity[];
@@ -82,48 +83,41 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
   };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
-      {/* Header - Fixed */}
-      <div className="flex flex-shrink-0 items-center gap-2 border-stone-200 border-b p-4 dark:border-stone-800">
-        <div className="rounded-lg bg-stone-100 p-2 dark:bg-stone-800">
-          <Activity className="h-4 w-4 text-stone-600 dark:text-stone-400" />
-        </div>
-        <h3 className="font-semibold text-stone-900 dark:text-stone-100">{t("recentActivity")}</h3>
-      </div>
-
-      {/* Content - Scrollable */}
-      <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto p-2">
-        <div className="divide-y divide-stone-100 dark:divide-stone-800/50">
-          {activities.length === 0 ? (
-            <p className="py-8 text-center text-sm text-stone-500 dark:text-stone-400">
-              {t("noRecentActivity")}
-            </p>
-          ) : (
-            activities.map((activity) => {
-              const config = activityConfig[activity.type];
-              const Icon = config.icon;
-              return (
-                <div
-                  className="flex items-start gap-3 p-3 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
-                  key={activity.id}
-                >
-                  <div className={`flex-shrink-0 rounded-lg p-2 ${config.bg}`}>
-                    <Icon className={`h-4 w-4 ${config.color}`} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm text-stone-700 leading-snug dark:text-stone-300">
-                      {activity.description}
-                    </p>
-                    <p className="mt-1 text-stone-400 text-xs dark:text-stone-500">
-                      {formatTime(activity.timestamp)}
-                    </p>
-                  </div>
+    <DashboardCard
+      contentClassName="p-2"
+      icon={<Activity className="h-4 w-4" />}
+      title={t("recentActivity")}
+    >
+      <div className="divide-y divide-stone-100 dark:divide-stone-800/50">
+        {activities.length === 0 ? (
+          <p className="py-8 text-center text-sm text-stone-500 dark:text-stone-400">
+            {t("noRecentActivity")}
+          </p>
+        ) : (
+          activities.map((activity) => {
+            const config = activityConfig[activity.type];
+            const Icon = config.icon;
+            return (
+              <div
+                className="flex items-start gap-3 p-3 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+                key={activity.id}
+              >
+                <div className={`flex-shrink-0 rounded-lg p-2 ${config.bg}`}>
+                  <Icon className={`h-4 w-4 ${config.color}`} />
                 </div>
-              );
-            })
-          )}
-        </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-sm text-stone-700 leading-snug dark:text-stone-300">
+                    {activity.description}
+                  </p>
+                  <p className="mt-1 text-stone-400 text-xs dark:text-stone-500">
+                    {formatTime(activity.timestamp)}
+                  </p>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
-    </div>
+    </DashboardCard>
   );
 }

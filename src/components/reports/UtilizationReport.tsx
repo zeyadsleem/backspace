@@ -1,8 +1,9 @@
-import { Clock } from "lucide-react";
+import { Clock, Activity, BarChart } from "lucide-react";
 import { useMemo } from "react";
 import { useAppStore } from "@/stores/useAppStore";
 import type { UtilizationData } from "@/types";
 import { formatNumber } from "@/lib/formatters";
+import { DashboardCard } from "@/components/shared";
 
 interface UtilizationReportProps {
   utilizationData: UtilizationData;
@@ -73,12 +74,11 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
       </div>
 
       <div className="grid grid-cols-1 3xl:gap-8 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-stone-200 bg-white 3xl:p-8 p-5 dark:border-stone-800 dark:bg-stone-900">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100">
-              {t("resourceUtilization")}
-            </h3>
-          </div>
+        <DashboardCard
+          contentClassName="3xl:p-8 p-5"
+          icon={<Activity className="h-4 w-4" />}
+          title={t("resourceUtilization")}
+        >
           <div className="space-y-4">
             {utilizationData.byResource.map((resource) => {
               let barColor = "bg-red-500";
@@ -113,12 +113,13 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
               );
             })}
           </div>
-        </div>
+        </DashboardCard>
 
-        <div className="rounded-xl border border-stone-200 bg-white 3xl:p-8 p-5 dark:border-stone-800 dark:bg-stone-900">
-          <h3 className="mb-4 font-semibold 3xl:text-xl text-stone-900 dark:text-stone-100">
-            {t("peakHours")}
-          </h3>
+        <DashboardCard
+          contentClassName="3xl:p-8 p-5"
+          icon={<BarChart className="h-4 w-4" />}
+          title={t("peakHours")}
+        >
           <div className="space-y-2.5">
             {utilizationData.peakHours.map((hour) => {
               let barColor = "bg-emerald-300";
@@ -166,7 +167,7 @@ export function UtilizationReport({ utilizationData, onResourceClick }: Utilizat
               <span className="3xl:text-sm text-stone-500 text-xs">{t("peak")}</span>
             </div>
           </div>
-        </div>
+        </DashboardCard>
       </div>
     </div>
   );
