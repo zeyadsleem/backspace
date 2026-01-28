@@ -110,7 +110,7 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
         </span>
       </div>
 
-      <div className="flex items-value justify-end gap-2 md:col-span-2">
+      <div className="items-value flex justify-end gap-2 md:col-span-2">
         <Button
           className="flex-1 md:flex-none md:bg-transparent md:text-stone-400 md:hover:bg-transparent md:hover:text-stone-700 dark:md:text-stone-400 dark:md:hover:text-stone-300"
           onClick={onView}

@@ -1,6 +1,6 @@
 use crate::database::DbPool;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, sqlite::SqliteRow};
+use sqlx::Row;
 use tauri::State;
 
 #[derive(Debug, Serialize, Deserialize)]

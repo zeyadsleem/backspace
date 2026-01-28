@@ -1,9 +1,9 @@
 import { AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { DashboardCard } from "@/components/shared";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { formatCurrency } from "@/lib/formatters";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Invoice } from "@/types";
-import { formatCurrency } from "@/lib/formatters";
-import { EmptyState } from "@/components/shared/EmptyState";
-import { DashboardCard } from "@/components/shared";
 
 interface PendingInvoicesProps {
   invoices: Invoice[];

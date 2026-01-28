@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 
-
 interface MetricCardProps {
   title: string;
   value: string;
@@ -18,7 +17,6 @@ export function MetricCard({
   variant = "default",
   onClick,
 }: MetricCardProps) {
-
   const variantStyles = {
     default: {
       container: "bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800",
@@ -48,14 +46,14 @@ export function MetricCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1 text-start">
-          <p className="font-bold 3xl:text-xs text-[10px] text-stone-500 uppercase tracking-[0.15em] dark:text-stone-400">
+          <p className="font-bold 3xl:text-sm text-[11px] text-stone-500 dark:text-stone-400">
             {title}
           </p>
           <p className={`mt-1 font-black text-2xl lg:text-3xl ${styles.value} 3xl:text-4xl`}>
             {value}
           </p>
           {subtitle && (
-            <p className="mt-1.5 truncate font-medium 3xl:text-sm text-stone-500 text-xs dark:text-stone-400">
+            <p className="mt-1.5 font-medium 3xl:text-sm text-stone-600 text-xs dark:text-stone-400">
               {subtitle}
             </p>
           )}

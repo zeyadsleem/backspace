@@ -10,7 +10,6 @@ interface QuickActionsProps {
 export function QuickActions({ onNewCustomer, onStartSession }: QuickActionsProps) {
   const t = useAppStore((state) => state.t);
 
-
   return (
     <div className="flex flex-wrap gap-3">
       <Button onClick={onStartSession} size="md" variant="primary">

@@ -1,10 +1,10 @@
 import { LayoutGrid, List, Plus } from "lucide-react";
 import { useState } from "react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Resource, ResourceType } from "@/types";
 import { ResourceCard } from "./ResourceCard";
-import { EmptyState } from "@/components/shared/EmptyState";
 
 interface ResourcesListProps {
   resources: Resource[];
@@ -97,11 +97,7 @@ export function ResourcesList({ resources, resourceTypes, onView, onCreate }: Re
         </div>
       </div>
       {filteredResources.length === 0 ? (
-        <EmptyState
-          description={t("addResource")}
-          icon="resources"
-          title={t("noResourcesFound")}
-        />
+        <EmptyState description={t("addResource")} icon="resources" title={t("noResourcesFound")} />
       ) : typeFilter === "all" ? (
         <div className="space-y-8">
           {resourceTypes.map((type) => {

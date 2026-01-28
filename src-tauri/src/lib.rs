@@ -58,6 +58,7 @@ pub fn run() {
         commands::subscriptions::change_subscription_plan,
         commands::subscriptions::cancel_subscription,
         commands::subscriptions::reactivate_subscription,
+        /*
         commands::reports::get_dashboard_metrics,
         commands::reports::get_revenue_chart_data,
         commands::reports::get_top_customers,
@@ -65,6 +66,7 @@ pub fn run() {
         commands::reports::get_revenue_report,
         commands::reports::get_utilization_report,
         commands::reports::get_operation_history
+        */
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

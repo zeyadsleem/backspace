@@ -8,9 +8,9 @@ import {
   Square,
   UserPlus,
 } from "lucide-react";
+import { DashboardCard } from "@/components/shared";
 import { useAppStore } from "@/stores/useAppStore";
 import type { RecentActivity } from "@/types";
-import { DashboardCard } from "@/components/shared";
 
 interface ActivityFeedProps {
   activities: RecentActivity[];

@@ -1,10 +1,10 @@
 import { Filter, Plus, Search } from "lucide-react";
 import { useState } from "react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Customer, CustomerType } from "@/types";
 import { CustomerRow } from "./CustomerRow";
-import { EmptyState } from "@/components/shared/EmptyState";
 
 interface CustomersListProps {
   customers: Customer[];

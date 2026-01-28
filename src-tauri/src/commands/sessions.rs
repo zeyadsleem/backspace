@@ -1,8 +1,8 @@
 use crate::database::DbPool;
 use rust_decimal::Decimal;
-use rust_decimal::prelude::Zero;
+// use rust_decimal::prelude::Zero;
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, Row};
+use sqlx::FromRow;
 use tauri::State;
 use uuid::Uuid;
 
@@ -488,7 +488,7 @@ pub async fn end_session(pool: State<'_, DbPool>, session_id: String) -> Result<
     // 2. Inventory Items
     // Use Vec of struct or explicit parsing
     struct SessItem {
-        inventory_id: String,
+        _inventory_id: String,
         name: String,
         quantity: i64,
         price_at_time: Decimal,
@@ -510,7 +510,7 @@ pub async fn end_session(pool: State<'_, DbPool>, session_id: String) -> Result<
         let price_s: String = row.try_get("price_at_time").unwrap_or_default();
         let price = Decimal::from_str(&price_s).unwrap_or(Decimal::ZERO);
         session_items.push(SessItem {
-            inventory_id: row.try_get("inventory_id").unwrap_or_default(),
+            _inventory_id: row.try_get("inventory_id").unwrap_or_default(),
             name: row.try_get("name").unwrap_or_default(),
             quantity: row.try_get("quantity").unwrap_or(0),
             price_at_time: price,

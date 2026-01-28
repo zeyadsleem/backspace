@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { ActiveSession, InventoryItem, InvoiceStatus, PaymentMethod } from "@/types";
@@ -7,7 +8,6 @@ import { ActiveSessionCard } from "./ActiveSessionCard";
 import { EditInventoryModal } from "./EditInventoryModal";
 import { EndSessionDialog } from "./EndSessionDialog";
 import { InventoryAddModal } from "./InventoryAddModal";
-import { EmptyState } from "@/components/shared/EmptyState";
 
 interface ActiveSessionsProps {
   activeSessions: ActiveSession[];

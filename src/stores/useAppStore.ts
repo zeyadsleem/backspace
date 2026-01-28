@@ -15,7 +15,6 @@ import type {
   OperationRecord,
   PlanTypeOption,
   RecentActivity,
-  RecentActivityView,
   Resource,
   RevenueData,
   RevenueDataPoint,
@@ -26,12 +25,15 @@ import type {
   UtilizationData,
 } from "@/types";
 
+/*
 interface RevenueSummary {
   sessions: number;
   inventory: number;
   total: number;
 }
+*/
 
+/*
 interface RevenueReportData {
   today: RevenueSummary;
   this_week: RevenueSummary;
@@ -48,6 +50,7 @@ interface UtilizationReportData {
   peak_hours: { hour: number; occupancy: number }[];
   average_session_duration: number;
 }
+*/
 
 interface AppState {
   // Data
@@ -648,6 +651,7 @@ export const useAppStore = create<AppStore>()((set, get) => ({
   // Dashboard Actions
   fetchDashboardData: async () => {
     try {
+      /*
       const [
         metrics,
         chart,
@@ -665,7 +669,18 @@ export const useAppStore = create<AppStore>()((set, get) => ({
         invoke<UtilizationReportData>("get_utilization_report"),
         invoke<RecentActivityView[]>("get_operation_history"),
       ]);
+      */
 
+      // Temporary disabled reports/metrics calls to avoid errors while backend is suspended
+      // Fetch only essential metrics if still available, or use defaults
+      let metrics = get().dashboardMetrics;
+      try {
+        metrics = await invoke<DashboardMetrics>("get_dashboard_metrics");
+      } catch (e) {
+        console.warn("Dashboard metrics unavailable", e);
+      }
+
+      /*
       const mappedActivity: RecentActivity[] = recentActivity.map((a) => ({
         id: a.id,
         type: a.operation_type as RecentActivity["type"],
@@ -699,15 +714,18 @@ export const useAppStore = create<AppStore>()((set, get) => ({
         peakHours: utilizationReport.peak_hours,
         averageSessionDuration: utilizationReport.average_session_duration,
       };
+      */
 
       set({
         dashboardMetrics: metrics,
+        /*
         revenueChart: chart,
         topCustomers,
         recentActivity: mappedActivity,
         revenueData: mappedRevenue,
         utilizationData: mappedUtilization,
         operationHistory: mappedHistory,
+        */
       });
     } catch (err) {
       console.error("Failed to fetch dashboard data", err);

@@ -1,21 +1,21 @@
 import {
   Coffee,
   CreditCard,
+  FileText,
   Filter,
+  History as HistoryIcon,
   Play,
   Receipt,
   Search,
   Square,
   UserPlus,
-  History as HistoryIcon,
-  FileText
 } from "lucide-react";
 import { useState } from "react";
-import type { TranslationKey } from "@/lib/translations";
+import { DashboardCard } from "@/components/shared";
 import { EmptyState } from "@/components/shared/EmptyState";
+import type { TranslationKey } from "@/lib/translations";
 import { useAppStore } from "@/stores/useAppStore";
 import type { OperationRecord, OperationType } from "@/types";
-import { DashboardCard } from "@/components/shared";
 
 const operationConfig: Record<
   string,
@@ -97,14 +97,12 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
     });
 
   return (
-    <div className="flex flex-1 flex-col space-y-6 h-full">
+    <div className="flex h-full flex-1 flex-col space-y-6">
       <div className="flex flex-shrink-0 flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <Search
-            className="absolute top-1/2 start-3 h-4 w-4 -translate-y-1/2 text-stone-400"
-          />
+          <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
           <input
-            className="w-full rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ps-10 pe-4 text-start"
+            className="w-full rounded-lg border border-stone-200 bg-white py-2 ps-10 pe-4 text-start text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900"
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t("searchByNamePhone")}
             type="text"
@@ -112,11 +110,9 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
           />
         </div>
         <div className="relative">
-          <Filter
-            className="absolute top-1/2 start-3 h-4 w-4 -translate-y-1/2 text-stone-400"
-          />
+          <Filter className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
           <select
-            className="cursor-pointer appearance-none rounded-lg border border-stone-200 bg-white py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900 ps-10 pe-8 text-start"
+            className="cursor-pointer appearance-none rounded-lg border border-stone-200 bg-white py-2 ps-10 pe-8 text-start text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900"
             onChange={(e) => setTypeFilter(e.target.value as OperationType | "all")}
             value={typeFilter}
           >
@@ -156,7 +152,7 @@ export function OperationHistory({ operations, onOperationClick }: OperationHist
             const Icon = config.icon;
             return (
               <button
-                className="flex w-full items-center gap-4 p-4 transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50 text-start"
+                className="flex w-full items-center gap-4 p-4 text-start transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
                 key={operation.id}
                 onClick={() => onOperationClick?.(operation.id)}
                 type="button"

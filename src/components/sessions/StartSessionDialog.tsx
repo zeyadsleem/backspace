@@ -73,7 +73,19 @@ export function StartSessionDialog({
   };
 
   const handleOpenChange = (open: boolean) => {
-    if (!open) handleClose();
+    if (!open) {
+      handleClose();
+    }
+  };
+
+  const getCustomerButtonStyle = (isSelected: boolean, customerHasActiveSession: boolean) => {
+    if (isSelected) {
+      return "bg-amber-50 dark:bg-amber-900/20";
+    }
+    if (customerHasActiveSession) {
+      return "cursor-not-allowed bg-stone-50 opacity-50 dark:bg-stone-800/20";
+    }
+    return "hover:bg-stone-50 dark:hover:bg-stone-800/50";
   };
 
   return (
@@ -83,9 +95,9 @@ export function StartSessionDialog({
           <DialogTitle>{t("startNewSession")}</DialogTitle>
         </DialogHeader>
 
-        <DialogBody className="p-5">
+        <DialogBody className="p-4 sm:p-5">
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Customer Selection */}
               <div className="flex flex-col gap-3">
                 <FormLabel icon={<User className="h-4 w-4" />}>{t("selectCustomer")}</FormLabel>
@@ -115,13 +127,7 @@ export function StartSessionDialog({
 
                         return (
                           <button
-                            className={`flex w-full items-center justify-between p-3.5 text-start transition-all ${
-                              isSelected
-                                ? "bg-amber-50 dark:bg-amber-900/20"
-                                : customerHasActiveSession
-                                  ? "cursor-not-allowed bg-stone-50 opacity-50 dark:bg-stone-800/20"
-                                  : "hover:bg-stone-50 dark:hover:bg-stone-800/50"
-                            }`}
+                            className={`flex w-full items-center justify-between p-3.5 text-start transition-all ${getCustomerButtonStyle(isSelected, customerHasActiveSession)}`}
                             disabled={customerHasActiveSession}
                             key={customer.id}
                             onClick={() =>
@@ -166,9 +172,9 @@ export function StartSessionDialog({
               {/* Resource Selection */}
               <div className="flex flex-col gap-3">
                 <FormLabel icon={<Monitor className="h-4 w-4" />}>{t("selectResource")}</FormLabel>
-                <div className="h-11" /> {/* Align with search box */}
+                <div className="hidden h-11 lg:block" /> {/* Align with search box on desktop */}
                 <div className="scrollbar-thin h-64 overflow-y-auto">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-2">
                     {availableResources.map((resource) => {
                       const isSelected = selectedResource === resource.id;
                       return (
@@ -183,7 +189,7 @@ export function StartSessionDialog({
                           type="button"
                         >
                           <span
-                            className={`font-medium text-sm line-clamp-1 text-center ${
+                            className={`line-clamp-1 text-center font-medium text-sm ${
                               isSelected
                                 ? "text-amber-700 dark:text-amber-400"
                                 : "text-stone-700 dark:text-stone-200"
@@ -204,19 +210,19 @@ export function StartSessionDialog({
 
             {/* Summary */}
             {selectedCustomerData && selectedResourceData && (
-              <div className="flex items-center justify-between rounded-xl border border-stone-100 bg-stone-50 p-4 px-6 dark:border-stone-800 dark:bg-stone-800/50">
-                <div className="flex items-center gap-8">
+              <div className="flex flex-col gap-4 rounded-xl border border-stone-100 bg-stone-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-stone-800 dark:bg-stone-800/50">
+                <div className="flex flex-wrap items-center gap-4 sm:gap-8">
                   <div className="flex flex-col">
-                    <span className="font-semibold text-stone-400 text-xs uppercase tracking-tight">
+                    <span className="font-semibold text-[10px] text-stone-400 uppercase tracking-tight">
                       {t("customer")}
                     </span>
                     <span className="font-medium text-sm text-stone-800 dark:text-stone-100">
                       {selectedCustomerData.name}
                     </span>
                   </div>
-                  <div className="h-8 w-px bg-stone-200 dark:bg-stone-700" />
+                  <div className="hidden h-8 w-px bg-stone-200 sm:block dark:bg-stone-700" />
                   <div className="flex flex-col">
-                    <span className="font-semibold text-stone-400 text-xs uppercase tracking-tight">
+                    <span className="font-semibold text-[10px] text-stone-400 uppercase tracking-tight">
                       {t("resource")}
                     </span>
                     <span className="font-medium text-sm text-stone-800 dark:text-stone-100">
@@ -224,8 +230,8 @@ export function StartSessionDialog({
                     </span>
                   </div>
                 </div>
-                <div className="text-end">
-                  <span className="block font-semibold text-stone-400 text-xs uppercase tracking-tight">
+                <div className="flex flex-col border-stone-200 border-t pt-3 sm:border-0 sm:pt-0 sm:text-end dark:border-stone-700">
+                  <span className="block font-semibold text-[10px] text-stone-400 uppercase tracking-tight">
                     {t("rate")}
                   </span>
                   <span
@@ -243,12 +249,18 @@ export function StartSessionDialog({
           </div>
         </DialogBody>
 
-        <DialogFooter>
-          <Button className="flex-1" disabled={isLoading} onClick={handleClose} size="md" variant="ghost">
+        <DialogFooter className="flex-col-reverse sm:flex-row">
+          <Button
+            className="w-full sm:flex-1"
+            disabled={isLoading}
+            onClick={handleClose}
+            size="md"
+            variant="ghost"
+          >
             {t("cancel")}
           </Button>
           <Button
-            className="flex-1"
+            className="w-full sm:flex-1"
             disabled={isLoading || !selectedCustomer || !selectedResource}
             isLoading={isLoading}
             onClick={handleSubmit}

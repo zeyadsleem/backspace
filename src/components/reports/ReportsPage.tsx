@@ -48,9 +48,7 @@ export function ReportsPage({
     <div className="flex h-full flex-col overflow-hidden 3xl:p-8 p-4 sm:p-6">
       <div className="flex-shrink-0 space-y-6 pb-6">
         <div>
-          <h1 className="font-bold text-2xl text-stone-900 dark:text-stone-100">
-            {t("reports")}
-          </h1>
+          <h1 className="font-bold text-2xl text-stone-900 dark:text-stone-100">{t("reports")}</h1>
           <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
             {t("analyticsAndInsights")}
           </p>

@@ -1,9 +1,9 @@
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Invoice, InvoiceStatus } from "@/types";
 import { InvoiceRow } from "./InvoiceRow";
-import { EmptyState } from "@/components/shared/EmptyState";
 
 interface InvoicesListProps {
   invoices: Invoice[];
@@ -130,8 +130,7 @@ export function InvoicesList({ invoices, onView, onRecordPayment }: InvoicesList
             </div>
           </div>
         </div>
-      )
-      }
+      )}
     </div>
   );
 }

@@ -1,10 +1,10 @@
 import { Filter, Plus } from "lucide-react";
 import { useState } from "react";
+import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
 import type { PlanType, PlanTypeOption, Subscription } from "@/types";
 import { SubscriptionCard } from "./SubscriptionCard";
-import { EmptyState } from "@/components/shared/EmptyState";
 
 interface SubscriptionsListProps {
   subscriptions: Subscription[];

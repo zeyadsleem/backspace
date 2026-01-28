@@ -1,5 +1,4 @@
 import {
-  BarChart3,
   Clock,
   CreditCard,
   FileText,
@@ -55,11 +54,13 @@ function App() {
       href: "/invoices",
       icon: <FileText className="h-5 w-5" />,
     },
+    /*
     {
       label: t("reports"),
       href: "/reports",
       icon: <BarChart3 className="h-5 w-5" />,
     },
+    */
   ].map((item) => ({
     ...item,
     isActive:

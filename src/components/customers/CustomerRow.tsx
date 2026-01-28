@@ -16,28 +16,28 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
   const t = useAppStore((state) => state.t);
 
   const typeConfig: Record<CustomerType, { labelKey: TranslationKey; color: string; bg: string }> =
-  {
-    visitor: {
-      labelKey: "visitorType",
-      color: "text-stone-600 dark:text-stone-400",
-      bg: "bg-stone-100 dark:bg-stone-800",
-    },
-    weekly: {
-      labelKey: "weeklyMember",
-      color: "text-blue-600 dark:text-blue-400",
-      bg: "bg-blue-50 dark:bg-blue-900/30",
-    },
-    "half-monthly": {
-      labelKey: "halfMonthlyMember",
-      color: "text-purple-600 dark:text-purple-400",
-      bg: "bg-purple-50 dark:bg-purple-900/30",
-    },
-    monthly: {
-      labelKey: "monthlyMember",
-      color: "text-amber-600 dark:text-amber-400",
-      bg: "bg-amber-50 dark:bg-amber-900/30",
-    },
-  };
+    {
+      visitor: {
+        labelKey: "visitorType",
+        color: "text-stone-600 dark:text-stone-400",
+        bg: "bg-stone-100 dark:bg-stone-800",
+      },
+      weekly: {
+        labelKey: "weeklyMember",
+        color: "text-blue-600 dark:text-blue-400",
+        bg: "bg-blue-50 dark:bg-blue-900/30",
+      },
+      "half-monthly": {
+        labelKey: "halfMonthlyMember",
+        color: "text-purple-600 dark:text-purple-400",
+        bg: "bg-purple-50 dark:bg-purple-900/30",
+      },
+      monthly: {
+        labelKey: "monthlyMember",
+        color: "text-amber-600 dark:text-amber-400",
+        bg: "bg-amber-50 dark:bg-amber-900/30",
+      },
+    };
 
   const config = typeConfig[customer.customerType];
   const initials = customer.name

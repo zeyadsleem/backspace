@@ -93,8 +93,8 @@ export function RevenueChart({ data }: RevenueChartProps) {
         </div>
       </div>
 
-      <div className="min-h-[300px] flex-1 w-full">
-        <ChartContainer config={chartConfig} className="h-[300px] w-full">
+      <div className="min-h-[250px] w-full flex-1">
+        <ChartContainer className="h-[250px] w-full" config={chartConfig}>
           <BarChart
             accessibilityLayer
             data={data}

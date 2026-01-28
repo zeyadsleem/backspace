@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { RTLIcon } from "@/components/ui/RTLIcon";
 
-
 interface Breadcrumb {
   label: string;
   href?: string;
@@ -24,17 +23,12 @@ export function PageHeader({
   actions,
   onBreadcrumbClick,
 }: PageHeaderProps) {
-
-
   return (
     <div className="mb-6 space-y-2">
       {breadcrumbs && breadcrumbs.length > 0 && (
         <nav className="flex items-center gap-1 text-sm">
           {breadcrumbs.map((item, index) => (
-            <div
-              className="flex items-center gap-1"
-              key={item.label}
-            >
+            <div className="flex items-center gap-1" key={item.label}>
               {index > 0 && (
                 <RTLIcon>
                   <ChevronRight className="h-4 w-4 text-stone-400" />
@@ -62,11 +56,7 @@ export function PageHeader({
             <p className="mt-1 text-sm text-stone-600 dark:text-stone-400">{subtitle}</p>
           )}
         </div>
-        {actions && (
-          <div className="flex items-center gap-2">
-            {actions}
-          </div>
-        )}
+        {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
     </div>
   );

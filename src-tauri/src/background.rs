@@ -1,9 +1,9 @@
 use crate::database::DbPool;
-use crate::commands::sessions::end_session; // Reuse existing logic if possible, or replicate it
+// use crate::commands::sessions::end_session; // Reuse existing logic if possible, or replicate it
 // Note: end_session is an async tauri command, calling it directly requires State, which we can mock or just extract logic.
 // Better to extract logic to a service if time permitted, but here we will replicate "Close Session" query logic or just call DB directly.
 use std::time::Duration;
-use sqlx::Row;
+// use sqlx::Row;
 use tauri::Manager;
 
 pub fn init_background_worker(app_handle: tauri::AppHandle) {
@@ -18,7 +18,7 @@ pub fn init_background_worker(app_handle: tauri::AppHandle) {
             };
 
             // 1. Get Closing Time from Settings
-            if let Ok(Some(row)) = sqlx::query("SELECT value FROM settings WHERE key = 'app_settings'") // Tuple (value,)
+            if let Ok(Some(_row)) = sqlx::query("SELECT value FROM settings WHERE key = 'app_settings'") // Tuple (value,)
                 .fetch_optional(&*pool)
                 .await 
             {
@@ -39,7 +39,7 @@ pub fn init_background_worker(app_handle: tauri::AppHandle) {
     });
 }
 
-async fn close_stale_sessions(pool: &DbPool) -> Result<(), String> {
+async fn close_stale_sessions(_pool: &DbPool) -> Result<(), String> {
     // Logic to find and close stale sessions
     // For now, we will leave this as a skeleton until we define "Stale" rigorously with the user
     // or use the existing 'end_session' logic manually.

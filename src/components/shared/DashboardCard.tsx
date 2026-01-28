@@ -33,7 +33,7 @@ export function DashboardCard({
         <div className="flex items-center gap-2">
           {icon && (
             <div className="rounded-lg bg-stone-100 p-2 dark:bg-stone-800">
-              <div className="h-4 w-4 text-stone-600 dark:text-stone-400 flex items-center justify-center">
+              <div className="flex h-4 w-4 items-center justify-center text-stone-600 dark:text-stone-400">
                 {icon}
               </div>
             </div>
