@@ -152,7 +152,7 @@ const isWailsAvailable = () => {
 };
 
 // Wait for Wails to be ready with a timeout
-const waitForWails = async (retries = 10, delay = 100): Promise<boolean> => {
+const waitForWails = async (retries = 50, delay = 100): Promise<boolean> => {
   if (isWailsAvailable()) return true;
   if (retries === 0) return false;
   await new Promise((resolve) => setTimeout(resolve, delay));
@@ -242,38 +242,42 @@ export const useAppStore = create<AppStore>()(
           set({ isRTL });
 
           // 2. Wait for Wails to be ready before fetching data
+          console.log("Waiting for Wails runtime...");
           const ready = await waitForWails();
+          console.log("Wails Ready Status:", ready);
           set({ isWailsReady: ready });
 
           if (ready) {
             // 3. Sync Settings from Backend
-            const settings = await App.GetSettings();
-            if (settings) {
-              set(
-                produce((state: AppState) => {
-                  state.settings = settings as any;
-                  // If backend has different appearance settings, respect them or keep local?
-                  // Usually, local user preference overrides backend if they conflict on startup,
-                  // or sync them. Let's sync backend to match local if they differ, or vice-versa.
-                  // Here we prioritize the backend settings if they exist.
-                  if (settings.appearance.theme) {
-                    state.theme = settings.appearance.theme as ThemeOption;
-                  }
-                  if (settings.appearance.language) {
-                     state.language = settings.appearance.language as LanguageOption;
-                  }
-                })
-              );
-              // Re-apply in case backend settings changed them
-              const newTheme = settings.appearance.theme as ThemeOption;
-              const newLang = settings.appearance.language as LanguageOption;
-              get().setTheme(newTheme);
-              get().setLanguage(newLang);
+            try {
+                const settings = await App.GetSettings();
+                if (settings) {
+                  set(
+                    produce((state: AppState) => {
+                      state.settings = settings as any;
+                      if (settings.appearance.theme) {
+                        state.theme = settings.appearance.theme as ThemeOption;
+                      }
+                      if (settings.appearance.language) {
+                         state.language = settings.appearance.language as LanguageOption;
+                      }
+                    })
+                  );
+                  // Re-apply in case backend settings changed them
+                  const newTheme = settings.appearance.theme as ThemeOption;
+                  const newLang = settings.appearance.language as LanguageOption;
+                  get().setTheme(newTheme);
+                  get().setLanguage(newLang);
+                }
+            } catch (err) {
+                console.error("Failed to fetch settings from backend:", err);
             }
+            
             // 4. Fetch all other data
             await get().refreshAll();
           } else {
-            console.warn("Wails runtime not found. Running in offline/demo mode (UI only).");
+            console.error("Wails runtime not found. App running in detached mode.");
+            toast.error("خطأ في الاتصال بالنظام (Backend Disconnected)");
           }
         } catch (e) {
           console.error("Failed to initialize app", e);
