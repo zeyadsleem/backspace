@@ -1,0 +1,24 @@
+{
+  "name": "backspace",
+  "version": "1.0.0",
+  "description": "This is the official Wails React-TS template.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zeyadsleem/backspace.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zeyadsleem/backspace/issues"
+  },
+  "homepage": "https://github.com/zeyadsleem/backspace#readme",
+  "devDependencies": {
+    "lefthook": "^2.0.16"
+  }
+}

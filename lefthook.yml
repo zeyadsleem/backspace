@@ -2,5 +2,6 @@ pre-commit:
   parallel: true
   commands:
     lint:
+      root: "frontend/"
       glob: "*.{js,ts,jsx,tsx}"
       run: bun run lint
