@@ -1,81 +1,19 @@
-# Backspace
+# README
 
-**Backspace** is a modern, reliable, and RTL-first desktop application for managing coworking spaces. It streamlines daily operations including customer management, session tracking, inventory control, and billing.
+## About
 
-## 🚀 Key Features
+This is the official Wails React-TS template.
 
-- **Session Management**: Track active sessions with real-time duration and cost calculation.
-- **Inventory & POS**: Manage stock (beverages, snacks) and add items directly to active sessions.
-- **Billing & Invoices**: Generate invoices automatically, track payments, and manage partial/bulk payments.
-- **Customer Management**: Detailed profiles, membership history, and debt tracking.
-- **Subscriptions**: Manage day-based subscriptions (Weekly, Monthly) with auto-expiry.
-- **Reports & Analytics**: Track revenue, resource utilization, and operation history.
-- **RTL Support**: Built from the ground up for Arabic users with full RTL directionality.
+You can configure the project by editing `wails.json`. More information about the project settings can be found
+here: https://wails.io/docs/reference/project-config
 
-## 🛠️ Technology Stack
+## Live Development
 
-### Frontend
-- **Framework**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **UI Components**: [Radix UI](https://www.radix-ui.com/) + [Lucide Icons](https://lucide.dev/)
-- **State Management**: [Zustand](https://github.com/pmndrs/zustand) + [Immer](https://github.com/immerjs/immer)
-- **Routing**: [React Router v7](https://reactrouter.com/)
+To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
+server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
+and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
+to this in your browser, and you can call your Go code from devtools.
 
-### Backend (Desktop)
-- **Core**: [Tauri v2](https://tauri.app/) (Rust)
-- **Database**: SQLite (via [SQLx](https://github.com/launchbadge/sqlx))
-- **Architecture**: Command-based architecture with async background workers.
+## Building
 
-## 📂 Project Structure
-
-```
-├── src/                # React Frontend
-│   ├── components/     # UI Components (Shell, Shared, Features)
-│   ├── context/        # React Contexts
-│   ├── hooks/          # Custom Hooks
-│   ├── lib/            # Utilities & Translations
-│   ├── pages/          # Application Pages
-│   └── stores/         # Zustand Global Store
-│
-├── src-tauri/          # Rust Backend
-│   ├── src/
-│   │   ├── commands/   # Tauri Commands (Business Logic)
-│   │   ├── database/   # DB Initialization & Migrations
-│   │   └── main.rs     # Entry Point
-│   └── migrations/     # SQLx Migrations
-│
-└── product-plan/       # Project Documentation & Standards
-```
-
-## ⚡ Getting Started
-
-### Prerequisites
-- Node.js & npm/bun
-- Rust & Cargo (for Tauri)
-- Basic development tools (GCC, etc.)
-
-### Development
-
-1. **Install Dependencies**
-   ```bash
-   npm install
-   # or
-   bun install
-   ```
-
-2. **Run in Development Mode**
-   ```bash
-   # This runs both the Vite dev server and the Tauri desktop window
-   npm run tauri dev
-   # or
-   bun tauri dev
-   ```
-
-## 🌍 Localization
-
-The application is fully localized for English and Arabic.
-- **RTL/LTR**: Automatically supported based on selected language.
-- **Translations**: Managed in `src/lib/translations.ts`.
-
----
-*Built with ❤️ for coworking spaces.*
+To build a redistributable, production mode package, use `wails build`.
