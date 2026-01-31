@@ -54,6 +54,10 @@ export function DeleteResource(arg1) {
   return window['go']['main']['App']['DeleteResource'](arg1);
 }
 
+export function DeleteSubscription(arg1) {
+  return window['go']['main']['App']['DeleteSubscription'](arg1);
+}
+
 export function EndSession(arg1) {
   return window['go']['main']['App']['EndSession'](arg1);
 }
@@ -136,4 +140,8 @@ export function UpdateSessionInventory(arg1, arg2, arg3) {
 
 export function UpdateSettings(arg1) {
   return window['go']['main']['App']['UpdateSettings'](arg1);
+}
+
+export function UpdateSubscription(arg1, arg2) {
+  return window['go']['main']['App']['UpdateSubscription'](arg1, arg2);
 }

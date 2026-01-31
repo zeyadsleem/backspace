@@ -82,6 +82,8 @@ interface AppActions {
   changeSubscription: (id: string, newPlanType: string) => Promise<void>;
   cancelSubscription: (id: string) => Promise<void>;
   reactivateSubscription: (id: string) => Promise<void>;
+  updateSubscription: (id: string, data: Partial<Subscription>) => Promise<void>;
+  deleteSubscription: (id: string) => Promise<void>;
   fetchResources: () => Promise<void>;
   addResource: (data: Partial<Resource>) => Promise<void>;
   updateResource: (id: string, data: Partial<Resource>) => Promise<void>;
@@ -620,12 +622,16 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      addSubscription: async (customerId, planType, startDate) => {
+      addSubscription: async (customerId: string, planType: string, startDate: string) => {
         if (!isWailsAvailable()) return;
         try {
+          const plan = get().planTypes.find((p) => p.id === planType);
+          const price = plan ? toPiasters(plan.price) : 0;
+
           await App.AddSubscription({
             customer_id: customerId,
             plan_type: planType,
+            price: price,
             start_date: startDate,
           });
           toast.success(get().t("success"));
@@ -680,6 +686,29 @@ export const useAppStore = create<AppStore>()(
           toast.success(get().t("success"));
           get().fetchSubscriptions();
           get().fetchDashboardData();
+        } catch (err) {
+          toast.error(String(err));
+        }
+      },
+
+      updateSubscription: async (id, data) => {
+        if (!isWailsAvailable()) return;
+        try {
+          await App.UpdateSubscription(id, data as any);
+          toast.success(get().t("success"));
+          get().fetchSubscriptions();
+        } catch (err) {
+          toast.error(String(err));
+        }
+      },
+
+      deleteSubscription: async (id) => {
+        if (!isWailsAvailable()) return;
+        try {
+          await App.DeleteSubscription(id);
+          toast.success(get().t("success"));
+          get().fetchSubscriptions();
+          get().fetchCustomers();
         } catch (err) {
           toast.error(String(err));
         }

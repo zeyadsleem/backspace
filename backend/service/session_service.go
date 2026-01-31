@@ -34,7 +34,12 @@ func (s *SessionService) StartSession(customerID, resourceID string) (*models.Se
 			return errors.New("resource is already occupied")
 		}
 
-		// 2. Create the session
+		// 2. Check for active subscription
+		var activeSub int64
+		tx.Model(&models.Subscription{}).Where("customer_id = ? AND is_active = ?", customerID, true).Count(&activeSub)
+		isSubscribed := activeSub > 0
+
+		// 3. Create the session
 		session = &models.Session{
 			BaseModel:    models.BaseModel{ID: fmt.Sprintf("sess_%d", time.Now().UnixNano())},
 			CustomerID:   customerID,
@@ -42,13 +47,14 @@ func (s *SessionService) StartSession(customerID, resourceID string) (*models.Se
 			ResourceRate: resource.RatePerHour,
 			StartedAt:    time.Now(),
 			Status:       "active",
+			IsSubscribed: isSubscribed,
 		}
 
 		if err := tx.Create(session).Error; err != nil {
 			return err
 		}
 
-		// 3. Mark resource as unavailable
+		// 4. Mark resource as unavailable
 		if err := tx.Model(&resource).Update("is_available", false).Error; err != nil {
 			return err
 		}
@@ -139,7 +145,11 @@ func (s *SessionService) EndSessionWithTx(tx *gorm.DB, sessionID string) (*model
 	// 2. Calculate Costs
 	endTime := time.Now()
 	duration := int(endTime.Sub(session.StartedAt).Minutes())
-	sessionCost := finance.CalculateSessionCost(duration, session.ResourceRate)
+	
+	sessionCost := int64(0)
+	if !session.IsSubscribed {
+		sessionCost = finance.CalculateSessionCost(duration, session.ResourceRate)
+	}
 
 	totalAmount := sessionCost + session.InventoryTotal
 

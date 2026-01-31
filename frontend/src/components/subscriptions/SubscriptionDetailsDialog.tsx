@@ -13,6 +13,7 @@ interface SubscriptionDetailsDialogProps {
   onClose: () => void;
   onChangePlan?: (id: string, newPlanType: string) => void;
   onCancelSubscription?: (id: string, refundAmount: number) => void;
+  onDeleteSubscription?: (id: string) => void;
 }
 
 export function SubscriptionDetailsDialog({
@@ -48,6 +49,13 @@ export function SubscriptionDetailsDialog({
   const handleChangePlan = (newPlanId: string) => {
     onChangePlan?.(subscription.id, newPlanId);
     setShowChangePlan(false);
+  };
+
+  const handleDelete = () => {
+    if (window.confirm(t("areYouSureItem"))) {
+      onDeleteSubscription?.(subscription.id);
+      onClose();
+    }
   };
 
   const formatDate = (dateStr: string) =>
@@ -263,14 +271,24 @@ export function SubscriptionDetailsDialog({
       {/* Actions */}
       <div className="flex gap-3 border-stone-100 border-t bg-stone-50 p-6 dark:border-stone-800 dark:bg-stone-800/50">
         {subscription.status !== "active" ? (
-          <Button
-            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-            onClick={handleReactivate}
-            size="md"
-            variant="primary"
-          >
-            <RefreshCw className="h-4 w-4" /> {t("reactivateSubscription")}
-          </Button>
+          <>
+            <Button
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleReactivate}
+              size="md"
+              variant="primary"
+            >
+              <RefreshCw className="h-4 w-4" /> {t("reactivateSubscription")}
+            </Button>
+            <Button
+              className="flex-1 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-900/20"
+              onClick={handleDelete}
+              size="md"
+              variant="outline"
+            >
+              {t("delete")}
+            </Button>
+          </>
         ) : (
           <Button className="flex-1" onClick={onClose} size="md" variant="outline">
             {t("close")}

@@ -2,6 +2,7 @@ import { Calendar, CreditCard, User } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormActions, FormError, FormField, FormLabel, TextField } from "@/components/ui/form";
+import { formatCurrency } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
 import type { Customer, PlanType, PlanTypeOption } from "@/types";
@@ -132,8 +133,11 @@ export function SubscriptionForm({
                   >
                     {isRTL ? plan.labelAr : plan.labelEn}
                   </p>
-                  <p className="text-stone-500 text-xs dark:text-stone-400">
+                  <p className="text-stone-500 text-[10px] dark:text-stone-400">
                     {plan.days} {t("days")}
+                  </p>
+                  <p className="mt-1 font-bold text-amber-600 text-xs dark:text-amber-400">
+                    {formatCurrency(plan.price)} {t("egp")}
                   </p>
                 </button>
               ))}
@@ -188,6 +192,12 @@ export function SubscriptionForm({
               {t("duration")}:{" "}
               <span className="font-medium text-stone-900 dark:text-stone-100">
                 {formData.startDate} → {calculateEndDate(formData.startDate, selectedPlan.days)}
+              </span>
+            </p>
+            <p className="text-stone-600 dark:text-stone-400">
+              {t("price")}:{" "}
+              <span className="font-bold text-amber-600 dark:text-amber-400">
+                {formatCurrency(selectedPlan.price)} {t("egp")}
               </span>
             </p>
           </div>

@@ -46,10 +46,12 @@ type Subscription struct {
 	CustomerID    string    `json:"customerId"`
 	CustomerName  string    `json:"customerName" gorm:"-"` // Populated manually
 	PlanType      string    `json:"planType"`              // weekly, half-monthly, monthly
+	Price         int64     `json:"price"`                 // Price at the time of subscription (in piasters)
 	StartDate     time.Time `json:"startDate" ts_type:"string"`
 	EndDate       time.Time `json:"endDate" ts_type:"string"`
 	IsActive      bool      `json:"isActive"`
 	Status        string    `json:"status"` // active, expired, inactive
+	InvoiceID     *string   `json:"invoiceId"`
 	DaysRemaining int       `json:"daysRemaining" gorm:"-"`
 }
 

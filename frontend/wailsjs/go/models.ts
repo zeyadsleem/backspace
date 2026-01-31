@@ -3,6 +3,7 @@ export namespace main {
 	export class AddSubscriptionData {
 	    customer_id: string;
 	    plan_type: string;
+	    price: number;
 	    start_date: string;
 	
 	    static createFrom(source: any = {}) {
@@ -13,6 +14,7 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.customer_id = source["customer_id"];
 	        this.plan_type = source["plan_type"];
+	        this.price = source["price"];
 	        this.start_date = source["start_date"];
 	    }
 	}
@@ -210,10 +212,12 @@ export namespace models {
 	    customerId: string;
 	    customerName: string;
 	    planType: string;
+	    price: number;
 	    startDate: string;
 	    endDate: string;
 	    isActive: boolean;
 	    status: string;
+	    invoiceId?: string;
 	    daysRemaining: number;
 	
 	    static createFrom(source: any = {}) {
@@ -228,10 +232,12 @@ export namespace models {
 	        this.customerId = source["customerId"];
 	        this.customerName = source["customerName"];
 	        this.planType = source["planType"];
+	        this.price = source["price"];
 	        this.startDate = source["startDate"];
 	        this.endDate = source["endDate"];
 	        this.isActive = source["isActive"];
 	        this.status = source["status"];
+	        this.invoiceId = source["invoiceId"];
 	        this.daysRemaining = source["daysRemaining"];
 	    }
 	}

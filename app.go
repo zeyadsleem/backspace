@@ -17,9 +17,10 @@ import (
 
 // App struct
 type App struct {
-	ctx            context.Context
-	sessionService *service.SessionService
-	invoiceService *service.InvoiceService
+	ctx                 context.Context
+	sessionService      *service.SessionService
+	invoiceService      *service.InvoiceService
+	subscriptionService *service.SubscriptionService
 }
 
 // NewApp creates a new App application struct
@@ -33,6 +34,7 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 	a.sessionService = service.NewSessionService()
 	a.invoiceService = service.NewInvoiceService()
+	a.subscriptionService = service.NewSubscriptionService()
 	a.SeedDatabase() // Auto seed on startup
 }
 
@@ -224,36 +226,30 @@ func (a *App) GetSubscriptions() []models.Subscription {
 type AddSubscriptionData struct {
 	CustomerID string `json:"customer_id"`
 	PlanType   string `json:"plan_type"`
+	Price      int64  `json:"price"` // Price in piasters
 	StartDate  string `json:"start_date"`
 }
 
 func (a *App) AddSubscription(data AddSubscriptionData) error {
-	startDate, _ := time.Parse(time.RFC3339, data.StartDate)
-	days := 30
-	if data.PlanType == "weekly" {
-		days = 7
-	} else if data.PlanType == "half-monthly" {
-		days = 15
-	}
-	endDate := startDate.AddDate(0, 0, days)
-
-	sub := models.Subscription{
-		BaseModel:  models.BaseModel{ID: uuid.NewString()},
-		CustomerID: data.CustomerID,
-		PlanType:   data.PlanType,
-		StartDate:  startDate,
-		EndDate:    endDate,
-		IsActive:   true,
-		Status:     "active",
+	startDate, err := time.Parse(time.RFC3339, data.StartDate)
+	if err != nil {
+		startDate = time.Now()
 	}
 
-	database.DB.Model(&models.Customer{}).Where("id = ?", data.CustomerID).Update("customer_type", data.PlanType)
+	_, err = a.subscriptionService.CreateSubscription(data.CustomerID, data.PlanType, data.Price, startDate)
+	return err
+}
 
-	return database.DB.Create(&sub).Error
+func (a *App) UpdateSubscription(id string, data models.Subscription) error {
+	return database.DB.Model(&models.Subscription{}).Where("id = ?", id).Updates(data).Error
+}
+
+func (a *App) DeleteSubscription(id string) error {
+	return database.DB.Delete(&models.Subscription{}, "id = ?", id).Error
 }
 
 func (a *App) DeactivateSubscription(id string) error {
-	return database.DB.Model(&models.Subscription{}).Where("id = ?", id).Updates(map[string]interface{}{"is_active": false, "status": "inactive"}).Error
+	return a.subscriptionService.CancelSubscription(id)
 }
 
 func (a *App) ChangeSubscriptionPlan(id string, newPlanType string) error {
@@ -261,11 +257,22 @@ func (a *App) ChangeSubscriptionPlan(id string, newPlanType string) error {
 }
 
 func (a *App) CancelSubscription(id string) error {
-	return a.DeactivateSubscription(id)
+	return a.subscriptionService.CancelSubscription(id)
 }
 
 func (a *App) ReactivateSubscription(id string) error {
-	return database.DB.Model(&models.Subscription{}).Where("id = ?", id).Updates(map[string]interface{}{"is_active": true, "status": "active"}).Error
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		var sub models.Subscription
+		if err := tx.First(&sub, "id = ?", id).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Model(&sub).Updates(map[string]interface{}{"is_active": true, "status": "active"}).Error; err != nil {
+			return err
+		}
+
+		return tx.Model(&models.Customer{}).Where("id = ?", sub.CustomerID).Update("customer_type", sub.PlanType).Error
+	})
 }
 
 // --- Invoices ---

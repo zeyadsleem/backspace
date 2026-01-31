@@ -29,6 +29,8 @@ export function DeleteInventory(arg1:string):Promise<void>;
 
 export function DeleteResource(arg1:string):Promise<void>;
 
+export function DeleteSubscription(arg1:string):Promise<void>;
+
 export function EndSession(arg1:string):Promise<string>;
 
 export function GetActiveSessions():Promise<Array<models.Session>>;
@@ -70,3 +72,5 @@ export function UpdateResource(arg1:string,arg2:models.Resource):Promise<void>;
 export function UpdateSessionInventory(arg1:string,arg2:string,arg3:number):Promise<void>;
 
 export function UpdateSettings(arg1:models.Settings):Promise<void>;
+
+export function UpdateSubscription(arg1:string,arg2:models.Subscription):Promise<void>;
