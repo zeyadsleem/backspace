@@ -120,14 +120,13 @@ export function CustomerDebtDialog({
         </div>
 
         <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
-          {/* RIGHT PANEL: INVOICES LIST */}
           <div className="flex flex-[1.6] flex-col overflow-hidden border-stone-100 border-e bg-stone-50/30 dark:border-stone-800 dark:bg-stone-900/30">
             <div className="flex items-center justify-between border-stone-100 border-b bg-white/50 p-3 px-4 dark:border-stone-800 dark:bg-stone-800/50">
               <div className="flex items-center gap-3">
                 <div className="flex items-center cursor-pointer" onClick={handleToggleAll}>
                   <input
                     checked={selectedInvoiceIds.length === invoices.length && invoices.length > 0}
-                    className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-800 cursor-pointer"
+                    className="h-4 w-4 rounded border-stone-300 accent-amber-600 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-800 cursor-pointer"
                     onChange={() => {}} 
                     type="checkbox"
                   />
@@ -136,7 +135,7 @@ export function CustomerDebtDialog({
                   {t("invoiceList")}
                 </span>
               </div>
-              <span className="rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 font-bold text-stone-600 text-xs dark:border-stone-700 dark:bg-stone-800 dark:text-stone-400">
+              <span className="rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 font-bold text-amber-600 text-xs dark:border-stone-700 dark:bg-stone-800 dark:text-amber-400">
                 {selectedInvoiceIds.length}/{invoices.length} {t("selected")}
               </span>
             </div>
@@ -160,7 +159,7 @@ export function CustomerDebtDialog({
                       <div className="flex items-center cursor-pointer" onClick={() => handleToggleInvoice(invoice.id)}>
                         <input
                           checked={isSelected}
-                          className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-800 cursor-pointer"
+                          className="h-4 w-4 rounded border-stone-300 accent-amber-600 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-800 cursor-pointer"
                           onChange={() => {}} 
                           type="checkbox"
                         />
