@@ -133,7 +133,7 @@ export function CustomersList({
             <div className="col-span-2 text-center font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
               {t("balance")}
             </div>
-            <div className="col-span-2 text-end font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
+            <div className="col-span-2 text-center font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
               {t("actions")}
             </div>
           </div>

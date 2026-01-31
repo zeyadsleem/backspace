@@ -114,7 +114,7 @@ export function CustomerRow({ customer, onView, onEdit, onDelete }: CustomerRowP
       </div>
 
       {/* Actions section */}
-      <div className="flex items-center justify-end gap-2 md:col-span-2">
+      <div className="flex items-center justify-end gap-2 md:col-span-2 md:justify-center">
         <Button
           className="flex-1 md:flex-none md:bg-transparent md:text-stone-400 md:hover:bg-transparent md:hover:text-stone-700 dark:md:text-stone-400 dark:md:hover:text-stone-300"
           onClick={onView}

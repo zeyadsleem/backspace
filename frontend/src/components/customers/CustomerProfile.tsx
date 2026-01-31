@@ -248,22 +248,23 @@ export function CustomerProfile({
                   <div className="col-span-2 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
                     {t("invoiceNumber")}
                   </div>
-                  <div className="col-span-3 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                    {t("customer")}
-                  </div>
-                  <div className="col-span-2 text-end font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                    {t("amount")}
-                  </div>
-                  <div className="col-span-2 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                    {t("status")}
-                  </div>
-                  <div className="col-span-1 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                    {t("dueDate")}
-                  </div>
-                  <div className="col-span-2 text-end font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                    {t("actions")}
-                  </div>
-                </div>
+                                  <div className="col-span-3 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                                    {t("customer")}
+                                  </div>
+                                  <div className="col-span-2 text-center font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                                    {t("amount")}
+                                  </div>
+                                  <div className="col-span-2 text-center font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                                    {t("status")}
+                                  </div>
+                                  <div className="col-span-1 text-center font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                                    {t("dueDate")}
+                                  </div>
+                                  <div className="col-span-2 text-center font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                                    {t("actions")}
+                                  </div>
+                                </div>
+                  
                 <div className="scrollbar-thin max-h-[350px] divide-y divide-stone-100 overflow-y-auto dark:divide-stone-800">
                   {invoices.map((invoice) => (
                     <InvoiceRow

@@ -119,7 +119,7 @@ export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: Inv
             <thead className="bg-stone-50 font-bold text-stone-500 text-xs uppercase dark:bg-stone-800/50">
               <tr>
                 <th className="px-4 py-3 text-start">{t("description")}</th>
-                <th className="px-4 py-3 text-end">{t("amount")}</th>
+                <th className="px-4 py-3 text-center">{t("amount")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-50 dark:divide-stone-800/50">
@@ -128,7 +128,7 @@ export function InvoiceDialog({ isOpen, invoice, onClose, onRecordPayment }: Inv
                   <td className="px-4 py-3 text-start text-stone-700 dark:text-stone-300">
                     {item.description}
                   </td>
-                  <td className="px-4 py-3 text-end font-medium font-mono">
+                  <td className="px-4 py-3 text-center font-medium font-mono">
                     {formatCurrency(item.amount)}
                   </td>
                 </tr>

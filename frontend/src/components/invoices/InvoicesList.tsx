@@ -111,7 +111,7 @@ export function InvoicesList({ invoices, onView, onRecordPayment }: InvoicesList
             <div className="col-span-1 text-center font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
               {t("dueDate")}
             </div>
-            <div className="col-span-2 text-end font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
+            <div className="col-span-2 text-center font-medium text-stone-500 text-xs uppercase dark:text-stone-400">
               {t("actions")}
             </div>
           </div>

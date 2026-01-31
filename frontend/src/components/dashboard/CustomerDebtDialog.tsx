@@ -1,4 +1,5 @@
 import {
+  Check,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -123,13 +124,18 @@ export function CustomerDebtDialog({
           <div className="flex flex-[1.6] flex-col overflow-hidden border-stone-100 border-e bg-stone-50/30 dark:border-stone-800 dark:bg-stone-900/30">
             <div className="flex items-center justify-between border-stone-100 border-b bg-white/50 p-3 px-4 dark:border-stone-800 dark:bg-stone-800/50">
               <div className="flex items-center gap-3">
-                <div className="flex items-center cursor-pointer" onClick={handleToggleAll}>
-                  <input
-                    checked={selectedInvoiceIds.length === invoices.length && invoices.length > 0}
-                    className="h-4 w-4 rounded border-stone-300 accent-amber-600 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-800 cursor-pointer"
-                    onChange={() => {}} 
-                    type="checkbox"
-                  />
+                <div 
+                  className={cn(
+                    "flex h-5 w-5 items-center justify-center rounded border transition-all cursor-pointer",
+                    selectedInvoiceIds.length === invoices.length && invoices.length > 0
+                      ? "bg-amber-600 border-amber-600 text-white shadow-sm" 
+                      : "bg-white border-stone-300 dark:bg-stone-800 dark:border-stone-700"
+                  )}
+                  onClick={handleToggleAll}
+                >
+                  {selectedInvoiceIds.length === invoices.length && invoices.length > 0 && (
+                    <Check className="h-3.5 w-3.5" strokeWidth={4} />
+                  )}
                 </div>
                 <span className="font-bold text-stone-400 text-xs uppercase tracking-widest">
                   {t("invoiceList")}
@@ -156,13 +162,16 @@ export function CustomerDebtDialog({
                     key={invoice.id}
                   >
                     <div className="flex items-center p-1 px-3">
-                      <div className="flex items-center cursor-pointer" onClick={() => handleToggleInvoice(invoice.id)}>
-                        <input
-                          checked={isSelected}
-                          className="h-4 w-4 rounded border-stone-300 accent-amber-600 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-800 cursor-pointer"
-                          onChange={() => {}} 
-                          type="checkbox"
-                        />
+                      <div 
+                        className={cn(
+                          "flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-all cursor-pointer",
+                          isSelected
+                            ? "bg-amber-600 border-amber-600 text-white shadow-sm" 
+                            : "bg-white border-stone-300 dark:bg-stone-800 dark:border-stone-700"
+                        )}
+                        onClick={() => handleToggleInvoice(invoice.id)}
+                      >
+                        {isSelected && <Check className="h-3.5 w-3.5" strokeWidth={4} />}
                       </div>
                       <div
                         className="flex flex-1 cursor-pointer items-center justify-between p-2.5 transition-colors"
@@ -216,7 +225,7 @@ export function CustomerDebtDialog({
                             <thead>
                               <tr className="border-stone-100 border-b font-bold text-stone-400 uppercase tracking-wider dark:border-stone-700/50">
                                 <th className="px-1 py-1 text-start">{t("description")}</th>
-                                <th className="px-1 py-1 text-end">{t("amount")}</th>
+                                <th className="px-1 py-1 text-center">{t("amount")}</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-stone-100 dark:divide-stone-700/30">
@@ -226,7 +235,7 @@ export function CustomerDebtDialog({
                                   key={item.description}
                                 >
                                   <td className="px-1 py-1.5 font-medium">{item.description}</td>
-                                  <td className="px-1 py-1.5 text-end font-bold font-mono">
+                                  <td className="px-1 py-1.5 text-center font-bold font-mono">
                                     {item.amount.toLocaleString()}
                                   </td>
                                 </tr>
