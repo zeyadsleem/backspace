@@ -167,15 +167,16 @@ func (s *SessionService) EndSessionWithTx(tx *gorm.DB, sessionID string) (*model
 }
 
 // RemoveInventoryConsumption removes an item from a session and restores stock
-func (s *SessionService) RemoveInventoryConsumption(sessionID, itemID string) error {
+func (s *SessionService) RemoveInventoryConsumption(sessionID, consumptionID string) error {
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		var consumption models.InventoryConsumption
-		if err := tx.Where("session_id = ? AND item_id = ?", sessionID, itemID).First(&consumption).Error; err != nil {
+		// Query by ID (consumption ID), ensuring it belongs to the session
+		if err := tx.Where("id = ? AND session_id = ?", consumptionID, sessionID).First(&consumption).Error; err != nil {
 			return err
 		}
 
-		// Restore Stock
-		if err := tx.Model(&models.InventoryItem{}).Where("id = ?", itemID).
+		// Restore Stock using the ItemID from the consumption record
+		if err := tx.Model(&models.InventoryItem{}).Where("id = ?", consumption.ItemID).
 			Update("quantity", gorm.Expr("quantity + ?", consumption.Quantity)).Error; err != nil {
 			return err
 		}
@@ -191,14 +192,15 @@ func (s *SessionService) RemoveInventoryConsumption(sessionID, itemID string) er
 }
 
 // UpdateInventoryConsumption updates the quantity of an item in a session
-func (s *SessionService) UpdateInventoryConsumption(sessionID, itemID string, newQuantity int) error {
+func (s *SessionService) UpdateInventoryConsumption(sessionID, consumptionID string, newQuantity int) error {
 	if newQuantity <= 0 {
-		return s.RemoveInventoryConsumption(sessionID, itemID)
+		return s.RemoveInventoryConsumption(sessionID, consumptionID)
 	}
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		var consumption models.InventoryConsumption
-		if err := tx.Where("session_id = ? AND item_id = ?", sessionID, itemID).First(&consumption).Error; err != nil {
+		// Query by ID (consumption ID)
+		if err := tx.Where("id = ? AND session_id = ?", consumptionID, sessionID).First(&consumption).Error; err != nil {
 			return err
 		}
 
@@ -207,16 +209,24 @@ func (s *SessionService) UpdateInventoryConsumption(sessionID, itemID string, ne
 		// Check stock if increasing
 		if diff > 0 {
 			var item models.InventoryItem
-			tx.First(&item, "id = ?", itemID)
+			// Use consumption.ItemID to find the inventory item
+			if err := tx.First(&item, "id = ?", consumption.ItemID).Error; err != nil {
+				return errors.New("inventory item not found")
+			}
 			if item.Quantity < diff {
 				return fmt.Errorf("insufficient stock: only %d more available", item.Quantity)
 			}
-		}
 
-		// Update Stock
-		if err := tx.Model(&models.InventoryItem{}).Where("id = ?", itemID).
-			Update("quantity", gorm.Expr("quantity - ?", diff)).Error; err != nil {
-			return err
+			// Deduct from Stock
+			if err := tx.Model(&item).Update("quantity", item.Quantity-diff).Error; err != nil {
+				return err
+			}
+		} else if diff < 0 {
+			// Restore to Stock (diff is negative, so we subtract negative = add)
+			if err := tx.Model(&models.InventoryItem{}).Where("id = ?", consumption.ItemID).
+				Update("quantity", gorm.Expr("quantity - ?", diff)).Error; err != nil {
+				return err
+			}
 		}
 
 		// Update Consumption

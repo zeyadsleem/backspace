@@ -11,8 +11,7 @@ import {
   Receipt,
   Trash2,
 } from "lucide-react";
-import { useState } from "react";
-import { useAppStore, useLanguage, useTranslation } from "@/stores/hooks"; // useAppStore added
+import { useAppStore, useLanguage, useTranslation } from "@/stores/hooks";
 import type { Customer, CustomerType, Invoice, OperationRecord } from "@/types";
 import { InvoiceRow } from "../invoices/InvoiceRow";
 
@@ -38,7 +37,6 @@ export function CustomerProfile({
   const t = useTranslation();
   const language = useLanguage();
   const isRTL = useAppStore((state) => state.isRTL);
-  const [activeTab, setActiveTab] = useState<"overview" | "invoices" | "history">("overview");
 
   const customerTypeLabels: Record<CustomerType, { label: string; color: string }> = {
     visitor: {
@@ -81,6 +79,7 @@ export function CustomerProfile({
 
   return (
     <div className="space-y-6">
+      {/* Header Actions */}
       <div className="flex items-center justify-between">
         <button
           className="flex items-center gap-2 text-sm text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-100"
@@ -110,216 +109,217 @@ export function CustomerProfile({
         </div>
       </div>
 
-      <div className="flex border-stone-200 border-b dark:border-stone-800">
-        <button
-          className={`border-b-2 px-4 py-2 font-medium text-sm transition-colors ${activeTab === "overview" ? "border-amber-500 text-amber-600 dark:text-amber-400" : "border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300"}`}
-          onClick={() => setActiveTab("overview")}
-          type="button"
-        >
-          {t("details")}
-        </button>
-        <button
-          className={`border-b-2 px-4 py-2 font-medium text-sm transition-colors ${activeTab === "invoices" ? "border-amber-500 text-amber-600 dark:text-amber-400" : "border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300"}`}
-          onClick={() => setActiveTab("invoices")}
-          type="button"
-        >
-          {t("invoices")}
-        </button>
-        <button
-          className={`border-b-2 px-4 py-2 font-medium text-sm transition-colors ${activeTab === "history" ? "border-amber-500 text-amber-600 dark:text-amber-400" : "border-transparent text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-300"}`}
-          onClick={() => setActiveTab("history")}
-          type="button"
-        >
-          {t("history")}
-        </button>
-      </div>
-
-      {activeTab === "overview" && (
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* Left Column: Info & Stats */}
+        <div className="space-y-6 lg:col-span-1">
+          {/* Info Card */}
           <div className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-800 dark:bg-stone-900">
-            <div className="flex items-start gap-5">
-              <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700 text-xl shadow-sm dark:bg-amber-900/30 dark:text-amber-400">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-700 text-3xl shadow-sm dark:bg-amber-900/30 dark:text-amber-400">
                 {initials}
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="truncate font-bold text-stone-900 text-xl dark:text-stone-100">
-                    {customer.name}
-                  </h2>
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 font-bold text-xs uppercase tracking-wider ${typeInfo.color}`}
-                  >
-                    {typeInfo.label}
+              <h2 className="mb-1 font-bold text-stone-900 text-xl dark:text-stone-100">
+                {customer.name}
+              </h2>
+              <span
+                className={`mb-2 rounded-full px-2.5 py-0.5 font-bold text-xs uppercase tracking-wider ${typeInfo.color}`}
+              >
+                {typeInfo.label}
+              </span>
+              <p className="font-mono text-stone-400 text-xs uppercase tracking-widest dark:text-stone-500">
+                {customer.humanId}
+              </p>
+            </div>
+
+            <div className="mt-6 space-y-3 border-stone-100 border-t pt-4 dark:border-stone-800">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-stone-600 text-sm dark:text-stone-400">
+                  <Phone className="h-4 w-4" />
+                  <span>{t("phone")}</span>
+                </div>
+                <span className="font-medium text-stone-900 text-sm dark:text-stone-100" dir="ltr">
+                  {customer.phone}
+                </span>
+              </div>
+              
+              {customer.email && (
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-stone-600 text-sm dark:text-stone-400">
+                    <Mail className="h-4 w-4" />
+                    <span>{t("email")}</span>
+                  </div>
+                  <span className="font-medium text-stone-900 text-sm dark:text-stone-100">
+                    {customer.email}
                   </span>
                 </div>
-                <p className="mt-0.5 font-mono text-stone-400 text-xs uppercase tracking-widest dark:text-stone-500">
-                  {customer.humanId}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-                  <div className="flex items-center gap-1.5 text-stone-600 text-xs dark:text-stone-400">
-                    <Phone className="h-4 w-4" />
-                    <span dir="ltr">{customer.phone}</span>
-                  </div>
-                  {customer.email && (
-                    <div className="flex items-center gap-1.5 text-stone-600 text-xs dark:text-stone-400">
-                      <Mail className="h-4 w-4" />
-                      <span>{customer.email}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1.5 text-stone-600 text-xs dark:text-stone-400">
-                    <Calendar className="h-4 w-4" />
-                    <span>
-                      {t("memberSince")} {formatDate(customer.createdAt)}
-                    </span>
-                  </div>
+              )}
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-stone-600 text-sm dark:text-stone-400">
+                  <Calendar className="h-4 w-4" />
+                  <span>{t("memberSince")}</span>
                 </div>
+                <span className="font-medium text-stone-900 text-sm dark:text-stone-100">
+                  {formatDate(customer.createdAt)}
+                </span>
               </div>
-              <div className="hidden text-end sm:block">
-                <p className="font-bold text-stone-400 text-xs uppercase tracking-wider">
+
+              <div className="flex items-center justify-between border-stone-100 border-t pt-3 dark:border-stone-800">
+                <span className="font-bold text-stone-500 text-xs uppercase tracking-wider">
                   {t("balance")}
-                </p>
-                <p
+                </span>
+                <span
                   className={`font-black text-lg ${customer.balance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
                 >
                   {formatCurrency(customer.balance)}
-                </p>
+                </span>
               </div>
             </div>
+
             {customer.notes && (
               <div className="mt-4 rounded-lg border border-stone-100 bg-stone-50 p-3 dark:border-stone-800 dark:bg-stone-800/50">
-                <p className="text-stone-600 text-xs leading-relaxed dark:text-stone-400">
-                  {customer.notes}
+                <p className="text-center text-stone-600 text-xs leading-relaxed italic dark:text-stone-400">
+                  "{customer.notes}"
                 </p>
               </div>
             )}
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                  <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <p className="font-bold text-[10px] text-stone-400 uppercase tracking-wider">
-                    {t("totalSessions")}
-                  </p>
-                  <p className="font-black text-lg text-stone-900 dark:text-stone-100">
-                    {realTotalSessions}
-                  </p>
-                </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 gap-3">
+            <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="font-bold text-[10px] text-stone-400 uppercase tracking-wider">
+                  {t("totalSessions")}
+                </p>
+                <p className="font-black text-lg text-stone-900 dark:text-stone-100">
+                  {realTotalSessions}
+                </p>
               </div>
             </div>
-            <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-                  <Receipt className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <p className="font-bold text-[10px] text-stone-400 uppercase tracking-wider">
-                    {t("totalSpent")}
-                  </p>
-                  <p className="font-black text-lg text-stone-900 dark:text-stone-100">
-                    {formatCurrency(realTotalSpent)}
-                  </p>
-                </div>
+            
+            <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                <Receipt className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="font-bold text-[10px] text-stone-400 uppercase tracking-wider">
+                  {t("totalSpent")}
+                </p>
+                <p className="font-black text-lg text-stone-900 dark:text-stone-100">
+                  {formatCurrency(realTotalSpent)}
+                </p>
               </div>
             </div>
-            <div className="rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900">
-              <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                  <CreditCard className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <p className="font-bold text-[10px] text-stone-400 uppercase tracking-wider">
-                    {t("avgPerSession")}
-                  </p>
-                  <p className="font-black text-lg text-stone-900 dark:text-stone-100">
-                    {formatCurrency(avgPerSession)}
-                  </p>
-                </div>
+
+            <div className="flex items-center gap-3 rounded-xl border border-stone-200 bg-white p-4 shadow-sm dark:border-stone-800 dark:bg-stone-900">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                <CreditCard className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="font-bold text-[10px] text-stone-400 uppercase tracking-wider">
+                  {t("avgPerSession")}
+                </p>
+                <p className="font-black text-lg text-stone-900 dark:text-stone-100">
+                  {formatCurrency(avgPerSession)}
+                </p>
               </div>
             </div>
           </div>
         </div>
-      )}
 
-      {activeTab === "invoices" && (
-        <div className="space-y-4">
-          {invoices.length > 0 ? (
-            <div className="overflow-hidden rounded-lg border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
-              <div
-                className={`hidden grid-cols-12 gap-4 border-stone-200 border-b bg-stone-50 px-4 py-3 md:grid dark:border-stone-800 dark:bg-stone-800/50 ${isRTL ? "text-end" : "text-start"}`}
-              >
-                <div className="col-span-2 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                  {t("invoiceNumber")}
-                </div>
-                <div className="col-span-3 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                  {t("customer")}
-                </div>
-                <div className="col-span-2 text-end font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                  {t("amount")}
-                </div>
-                <div className="col-span-2 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                  {t("status")}
-                </div>
-                <div className="col-span-1 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                  {t("dueDate")}
-                </div>
-                <div className="col-span-2 text-end font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
-                  {t("actions")}
-                </div>
-              </div>
-              <div className="divide-y divide-stone-100 dark:divide-stone-800">
-                {invoices.map((invoice) => (
-                  <InvoiceRow
-                    invoice={invoice}
-                    key={invoice.id}
-                    onView={() => onViewInvoice?.(invoice.id)}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="py-12 text-center text-stone-500 dark:text-stone-400">
-              <FileText className="mx-auto mb-2 h-8 w-8 opacity-50" />
-              <p>{t("noInvoicesFound")}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === "history" && (
-        <div className="space-y-4">
-          {history.length > 0 ? (
-            <div className="overflow-hidden rounded-lg border border-stone-200 bg-white dark:border-stone-800 dark:bg-stone-900">
-              <div className="divide-y divide-stone-100 dark:divide-stone-800">
-                {history.map((op) => (
-                  <div
-                    className="flex items-center justify-between p-4 hover:bg-stone-50 dark:hover:bg-stone-800/50"
-                    key={op.id}
-                  >
-                    <div>
-                      <p className="font-medium text-stone-900 dark:text-stone-100">
-                        {op.description}
-                      </p>
-                      <p className="text-stone-500 text-xs dark:text-stone-400">
-                        {new Date(op.timestamp).toLocaleString(
-                          language === "ar" ? "ar-EG" : "en-US"
-                        )}
-                      </p>
-                    </div>
+        {/* Right Column: Invoices & History */}
+        <div className="space-y-6 lg:col-span-2">
+          {/* Invoices Section */}
+          <div className="space-y-4">
+            <h3 className="flex items-center gap-2 font-bold text-lg text-stone-900 dark:text-stone-100">
+              <FileText className="h-5 w-5 text-stone-400" />
+              {t("invoices")}
+            </h3>
+            
+            {invoices.length > 0 ? (
+              <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
+                <div
+                  className={`hidden grid-cols-12 gap-4 border-stone-200 border-b bg-stone-50 px-4 py-3 md:grid dark:border-stone-800 dark:bg-stone-800/50 ${isRTL ? "text-end" : "text-start"}`}
+                >
+                  <div className="col-span-2 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                    {t("invoiceNumber")}
                   </div>
-                ))}
+                  <div className="col-span-3 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                    {t("customer")}
+                  </div>
+                  <div className="col-span-2 text-end font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                    {t("amount")}
+                  </div>
+                  <div className="col-span-2 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                    {t("status")}
+                  </div>
+                  <div className="col-span-1 font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                    {t("dueDate")}
+                  </div>
+                  <div className="col-span-2 text-end font-semibold text-stone-500 text-xs uppercase dark:text-stone-400">
+                    {t("actions")}
+                  </div>
+                </div>
+                <div className="scrollbar-thin max-h-[350px] divide-y divide-stone-100 overflow-y-auto dark:divide-stone-800">
+                  {invoices.map((invoice) => (
+                    <InvoiceRow
+                      invoice={invoice}
+                      key={invoice.id}
+                      onView={() => onViewInvoice?.(invoice.id)}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="py-12 text-center text-stone-500 dark:text-stone-400">
-              <HistoryIcon className="mx-auto mb-2 h-8 w-8 opacity-50" />
-              <p>{t("noOperations")}</p>
-            </div>
-          )}
+            ) : (
+              <div className="rounded-xl border border-dashed border-stone-200 bg-stone-50 py-12 text-center text-stone-500 dark:border-stone-800 dark:bg-stone-900/50 dark:text-stone-400">
+                <FileText className="mx-auto mb-2 h-8 w-8 opacity-50" />
+                <p>{t("noInvoicesFound")}</p>
+              </div>
+            )}
+          </div>
+
+          {/* History Section */}
+          <div className="space-y-4">
+            <h3 className="flex items-center gap-2 font-bold text-lg text-stone-900 dark:text-stone-100">
+              <HistoryIcon className="h-5 w-5 text-stone-400" />
+              {t("history")}
+            </h3>
+
+            {history.length > 0 ? (
+              <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
+                <div className="scrollbar-thin max-h-[350px] divide-y divide-stone-100 overflow-y-auto dark:divide-stone-800">
+                  {history.map((op) => (
+                    <div
+                      className="flex items-center justify-between p-4 hover:bg-stone-50 dark:hover:bg-stone-800/50"
+                      key={op.id}
+                    >
+                      <div>
+                        <p className="font-medium text-stone-900 text-sm dark:text-stone-100">
+                          {op.description}
+                        </p>
+                        <p className="mt-0.5 text-stone-500 text-xs dark:text-stone-400">
+                          {new Date(op.timestamp).toLocaleString(
+                            language === "ar" ? "ar-EG" : "en-US"
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-stone-200 bg-stone-50 py-12 text-center text-stone-500 dark:border-stone-800 dark:bg-stone-900/50 dark:text-stone-400">
+                <HistoryIcon className="mx-auto mb-2 h-8 w-8 opacity-50" />
+                <p>{t("noOperations")}</p>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
