@@ -136,7 +136,7 @@ export function InventoryList({
                       {categoryItems.length}
                     </span>
                   </div>
-                  <div className="grid 3xl:grid-cols-8 4xl:grid-cols-10 grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                  <div className="grid 3xl:grid-cols-9 4xl:grid-cols-12 grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
                     {categoryItems.map((item) => (
                       <InventoryItemCard
                         category={category}
@@ -153,7 +153,7 @@ export function InventoryList({
             })}
           </div>
         ) : (
-          <div className="grid 3xl:grid-cols-8 4xl:grid-cols-10 grid-cols-1 gap-4 pb-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          <div className="grid 3xl:grid-cols-9 4xl:grid-cols-12 grid-cols-1 gap-4 pb-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
             {filteredItems.map((item) => (
               <InventoryItemCard
                 category={categories.find((c) => c.id === item.category)!}

@@ -51,11 +51,11 @@ export function ResourceCard({ resource, onClick }: ResourceCardProps) {
 
   return (
     <div
-      className="group relative flex cursor-pointer items-center gap-4 rounded-xl border border-stone-200 bg-white p-4 transition-all duration-200 hover:shadow-md dark:border-stone-800 dark:bg-stone-900"
+      className="group relative flex cursor-pointer items-center gap-3 rounded-xl border border-stone-200 bg-white p-4 transition-all duration-200 hover:shadow-md dark:border-stone-800 dark:bg-stone-900"
       onClick={onClick}
     >
-      <div className={`shrink-0 rounded-lg p-3 ${config.bg}`}>
-        <Icon className={`h-6 w-6 ${config.color}`} />
+      <div className={`shrink-0 rounded-lg p-2.5 ${config.bg}`}>
+        <Icon className={`h-5 w-5 ${config.color}`} />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col justify-center">
@@ -64,21 +64,21 @@ export function ResourceCard({ resource, onClick }: ResourceCardProps) {
             {resource.name}
           </h3>
           <span
-            className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 font-bold text-[9px] uppercase tracking-wider ${statusBg} ${statusText} shadow-sm`}
+            className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 font-semibold text-[9px] uppercase tracking-wider ${statusBg} ${statusText} shadow-sm`}
           >
             {resource.isAvailable ? t("available") : t("occupied")}
           </span>
         </div>
 
-        <div className="mt-1.5 flex items-center justify-between">
-          <p className="font-medium text-stone-500 text-xs dark:text-stone-400">
+        <div className="mt-1 flex items-center justify-between">
+          <p className="font-semibold text-stone-500 text-[11px] dark:text-stone-400">
             {config.label}
           </p>
           <div className="flex items-baseline gap-1">
-            <span className="font-mono font-bold text-stone-600 text-xs dark:text-stone-400">
+            <span className="font-mono font-semibold text-stone-600 text-[11px] dark:text-stone-400">
               {formatCurrency(resource.ratePerHour)}
             </span>
-            <span className="text-[9px] text-stone-400 uppercase">{t("egp")}</span>
+            <span className="text-[9px] font-semibold text-stone-400 uppercase">{t("egp")}</span>
           </div>
         </div>
       </div>
