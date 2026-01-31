@@ -153,9 +153,12 @@ const isWailsAvailable = () => {
   );
 };
 
-// Wait for Wails to be ready with a timeout
-const waitForWails = async (retries = 50, delay = 100): Promise<boolean> => {
-  if (isWailsAvailable()) return true;
+// Wait for Wails to be ready with a more robust retry logic
+const waitForWails = async (retries = 100, delay = 200): Promise<boolean> => {
+  if (isWailsAvailable()) {
+    console.log("✅ Wails Runtime Detected");
+    return true;
+  }
   if (retries === 0) return false;
   await new Promise((resolve) => setTimeout(resolve, delay));
   return waitForWails(retries - 1, delay);
@@ -221,73 +224,59 @@ export const useAppStore = create<AppStore>()(
         translate(key, get().language, params),
 
       init: async () => {
-        try {
-          // 1. Apply persisted state immediately (UI/UX)
-          const { theme, language } = get();
+        // 1. Apply UI/UX configs (Theme/RTL) immediately
+        const { theme, language } = get();
+        const root = document.documentElement;
+        root.classList.remove("light", "dark");
+        if (theme === "system") {
+          const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          root.classList.add(systemTheme);
+        } else {
+          root.classList.add(theme);
+        }
+        const isRTL = language === "ar";
+        document.documentElement.dir = isRTL ? "rtl" : "ltr";
+        document.documentElement.lang = language;
+        set({ isRTL });
+
+        // 2. Start the connection bridge
+        console.log("🔗 Attempting to connect to Backend...");
+        const ready = await waitForWails();
+        
+        if (ready) {
+          set({ isWailsReady: true });
           
-          // Apply Theme
-          const root = document.documentElement;
-          root.classList.remove("light", "dark");
-          if (theme === "system") {
-            const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-              ? "dark"
-              : "light";
-            root.classList.add(systemTheme);
-          } else {
-            root.classList.add(theme);
-          }
-
-          // Apply Language
-          const isRTL = language === "ar";
-          document.documentElement.dir = isRTL ? "rtl" : "ltr";
-          document.documentElement.lang = language;
-          set({ isRTL });
-
-          // 2. Wait for Wails to be ready before fetching data
-          console.log("Waiting for Wails runtime...");
-          const ready = await waitForWails();
-          console.log("Wails Ready Status:", ready);
-          set({ isWailsReady: ready });
-
-          if (ready) {
-            // 3. Sync Settings from Backend
-            try {
-                const settings = await App.GetSettings();
-                if (settings) {
-                  set(
-                    produce((state: AppState) => {
-                      state.settings = settings as any;
-                      if (settings.appearance.theme) {
-                        state.theme = settings.appearance.theme as ThemeOption;
-                      }
-                      if (settings.appearance.language) {
-                         state.language = settings.appearance.language as LanguageOption;
-                      }
-                    })
-                  );
-                  // Re-apply in case backend settings changed them
-                  const newTheme = settings.appearance.theme as ThemeOption;
-                  const newLang = settings.appearance.language as LanguageOption;
-                  get().setTheme(newTheme);
-                  get().setLanguage(newLang);
-                }
-            } catch (err) {
-                console.error("Failed to fetch settings from backend:", err);
+          // 3. Sync Settings and Data
+          try {
+            const settings = await App.GetSettings();
+            if (settings) {
+              set(produce((state: AppState) => {
+                state.settings = settings as any;
+                state.theme = (settings.appearance.theme || state.theme) as ThemeOption;
+                state.language = (settings.appearance.language || state.language) as LanguageOption;
+              }));
+              get().setTheme(get().theme);
+              get().setLanguage(get().language);
             }
-            
-            // 4. Fetch all other data
             await get().refreshAll();
-          } else {
-            console.error("Wails runtime not found. App running in detached mode.");
-            toast.error("خطأ في الاتصال بالنظام (Backend Disconnected)");
+            console.log("🚀 System Synchronized Successfully");
+          } catch (err) {
+            console.error("❌ Sync Error:", err);
           }
-        } catch (e) {
-          console.error("Failed to initialize app", e);
+        } else {
+          console.warn("⚠️ Backend connection timeout. Retrying in background...");
+          // Don't show a permanent error, just wait and try again quietly
+          setTimeout(() => get().init(), 2000);
         }
       },
 
       refreshAll: async () => {
-        if (!get().isWailsReady) return;
+        // Double check availability before calling Go methods
+        if (!isWailsAvailable()) {
+          set({ isWailsReady: false });
+          return;
+        }
+        
         set({ isLoading: true });
         try {
           await Promise.all([
@@ -299,8 +288,13 @@ export const useAppStore = create<AppStore>()(
             get().fetchInvoices(),
             get().fetchDashboardData(),
           ]);
+          set({ isWailsReady: true });
         } catch (error) {
           console.error("Failed to refresh data", error);
+          // If we get a generic 'window.go is undefined' error here, set ready to false
+          if (String(error).includes("undefined")) {
+            set({ isWailsReady: false });
+          }
         } finally {
           set({ isLoading: false });
         }
