@@ -109,7 +109,7 @@ export function CustomerProfile({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         {/* Left Column: Info & Stats */}
         <div className="space-y-6 lg:col-span-1">
           {/* Info Card */}
@@ -232,7 +232,7 @@ export function CustomerProfile({
         </div>
 
         {/* Right Column: Invoices & History */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="space-y-6 lg:col-span-3">
           {/* Invoices Section */}
           <div className="space-y-4">
             <h3 className="flex items-center gap-2 font-bold text-lg text-stone-900 dark:text-stone-100">
