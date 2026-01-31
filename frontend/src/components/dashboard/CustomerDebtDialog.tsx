@@ -113,7 +113,7 @@ export function CustomerDebtDialog({
           <IconButton
             className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300"
             icon={<X className="h-5 w-5" />}
-            label="Close"
+            label={t("close")}
             onClick={onClose}
             variant="ghost"
           />
@@ -124,17 +124,19 @@ export function CustomerDebtDialog({
           <div className="flex flex-[1.6] flex-col overflow-hidden border-stone-100 border-e bg-stone-50/30 dark:border-stone-800 dark:bg-stone-900/30">
             <div className="flex items-center justify-between border-stone-100 border-b bg-white/50 p-3 px-4 dark:border-stone-800 dark:bg-stone-800/50">
               <div className="flex items-center gap-3">
-                <input
-                  checked={selectedInvoiceIds.length === invoices.length && invoices.length > 0}
-                  className="h-4 w-4 rounded border-stone-300 text-red-600 focus:ring-red-500 dark:border-stone-700 dark:bg-stone-800"
-                  onChange={handleToggleAll}
-                  type="checkbox"
-                />
+                <div className="flex items-center cursor-pointer" onClick={handleToggleAll}>
+                  <input
+                    checked={selectedInvoiceIds.length === invoices.length && invoices.length > 0}
+                    className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-800 cursor-pointer"
+                    onChange={() => {}} 
+                    type="checkbox"
+                  />
+                </div>
                 <span className="font-bold text-stone-400 text-xs uppercase tracking-widest">
                   {t("invoiceList")}
                 </span>
               </div>
-              <span className="rounded-full border border-red-100 bg-red-50 px-2 py-0.5 font-bold text-red-600 text-xs">
+              <span className="rounded-full border border-stone-200 bg-stone-100 px-2 py-0.5 font-bold text-stone-600 text-xs dark:border-stone-700 dark:bg-stone-800 dark:text-stone-400">
                 {selectedInvoiceIds.length}/{invoices.length} {t("selected")}
               </span>
             </div>
@@ -149,18 +151,20 @@ export function CustomerDebtDialog({
                     className={cn(
                       "overflow-hidden rounded-xl border transition-all",
                       isSelected
-                        ? "border-red-200 bg-white shadow-sm dark:border-red-900/50 dark:bg-stone-800"
+                        ? "border-amber-200 bg-white shadow-sm dark:border-amber-900/50 dark:bg-stone-800"
                         : "border-stone-200 bg-white/40 opacity-70 dark:border-stone-800 dark:bg-stone-900/40"
                     )}
                     key={invoice.id}
                   >
                     <div className="flex items-center p-1 px-3">
-                      <input
-                        checked={isSelected}
-                        className="h-4 w-4 rounded border-stone-300 text-red-600 focus:ring-red-500 dark:border-stone-700 dark:bg-stone-800"
-                        onChange={() => handleToggleInvoice(invoice.id)}
-                        type="checkbox"
-                      />
+                      <div className="flex items-center cursor-pointer" onClick={() => handleToggleInvoice(invoice.id)}>
+                        <input
+                          checked={isSelected}
+                          className="h-4 w-4 rounded border-stone-300 text-amber-600 focus:ring-amber-500 dark:border-stone-700 dark:bg-stone-800 cursor-pointer"
+                          onChange={() => {}} 
+                          type="checkbox"
+                        />
+                      </div>
                       <div
                         className="flex flex-1 cursor-pointer items-center justify-between p-2.5 transition-colors"
                         onClick={() => setExpandedInvoiceId(isExpanded ? null : invoice.id)}
@@ -170,7 +174,7 @@ export function CustomerDebtDialog({
                             className={cn(
                               "flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
                               isExpanded
-                                ? "border-red-100 bg-red-50 text-red-600"
+                                ? "border-amber-100 bg-amber-50 text-amber-600"
                                 : "border-stone-100 bg-stone-50 text-stone-400 dark:border-stone-700 dark:bg-stone-800"
                             )}
                           >
@@ -256,6 +260,11 @@ export function CustomerDebtDialog({
                     </span>
                     <span className="font-medium text-red-600/70 text-xs">{t("egp")}</span>
                   </div>
+                  {selectedInvoiceIds.length > 0 && selectedInvoiceIds.length < invoices.length && (
+                    <span className="mt-1 font-bold text-red-600 text-[10px] uppercase">
+                      {t("payingFor", { count: selectedInvoiceIds.length })}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -298,11 +307,6 @@ export function CustomerDebtDialog({
               <Button
                 className={cn(
                   "w-full shadow-emerald-600/10 shadow-lg",
-                  // Override background if needed or rely on variant 'primary' if green is standard primary
-                  // Since 'primary' is usually brand color (amber?), we might want to keep the specific green style
-                  // or use a 'success' variant if available.
-                  // Checking button.tsx, variants are default, destructive, outline, secondary, ghost, link, primary (amber).
-                  // So we should stick to manual class overrides on top of a variant or just base Button.
                   "bg-emerald-600 text-white hover:bg-emerald-700"
                 )}
                 disabled={isProcessing || selectedInvoiceIds.length === 0}
@@ -313,7 +317,11 @@ export function CustomerDebtDialog({
                 {!isProcessing && (
                   <>
                     <CreditCard className="h-5 w-5" />
-                    <span>{t("paySelectedInvoices")}</span>
+                    <span>
+                      {selectedInvoiceIds.length === invoices.length
+                        ? t("payAllInvoices")
+                        : t("paySelectedInvoices")}
+                    </span>
                   </>
                 )}
               </Button>

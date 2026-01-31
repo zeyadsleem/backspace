@@ -362,6 +362,9 @@ export const translations = {
     paymentSummary: "Payment Summary",
     totalAmountToPay: "Total Amount to Pay",
     payAllInvoices: "Pay All Invoices",
+    paySelectedInvoices: "Pay Selected Invoices",
+    selected: "Selected",
+    payingFor: "Paying for {count} invoice(s)",
     partial: "Partial",
 
     // Inventory specific
@@ -817,6 +820,9 @@ export const translations = {
     paymentSummary: "ملخص الدفع",
     totalAmountToPay: "إجمالي المبلغ المطلوب",
     payAllInvoices: "دفع كل الفواتير",
+    paySelectedInvoices: "دفع الفواتير المحددة",
+    selected: "مختارة",
+    payingFor: "دفع لـ {count} فاتورة",
     partial: "جزئي",
 
     // Inventory specific

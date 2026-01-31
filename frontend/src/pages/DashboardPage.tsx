@@ -123,7 +123,7 @@ export function DashboardPage() {
           }
           setCustomerDebtId(null);
         }}
-        onRecordBulkPayment={(ids, amount, notes) => recordBulkPayment(ids, amount, notes)}
+        onRecordBulkPayment={(ids, amount, notes) => recordBulkPayment(ids, amount, "cash", notes)}
       />
     </>
   );

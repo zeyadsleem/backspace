@@ -333,13 +333,82 @@ func (a *App) ProcessPayment(data ProcessPaymentData) error {
 
 type BulkPaymentData struct {
 	InvoiceIDs    []string `json:"invoice_ids"`
-	Amount        float64  `json:"amount"`
+	Amount        int64    `json:"amount"` // Received in Piasters
 	PaymentMethod string   `json:"payment_method"`
 	Notes         string   `json:"notes"`
 }
 
 func (a *App) ProcessBulkPayment(data BulkPaymentData) error {
-	return nil
+	if len(data.InvoiceIDs) == 0 || data.Amount <= 0 {
+		return nil
+	}
+
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		remainingAmount := data.Amount
+
+		for _, invoiceID := range data.InvoiceIDs {
+			if remainingAmount <= 0 {
+				break
+			}
+
+			var invoice models.Invoice
+			if err := tx.First(&invoice, "id = ?", invoiceID).Error; err != nil {
+				return err
+			}
+
+			// Calculate how much is needed to pay off this invoice
+			dueForThisInvoice := invoice.Total - invoice.PaidAmount
+			if dueForThisInvoice <= 0 {
+				continue
+			}
+
+			paymentForThisInvoice := dueForThisInvoice
+			if remainingAmount < dueForThisInvoice {
+				paymentForThisInvoice = remainingAmount
+			}
+
+			// Create payment record for this invoice
+			payment := models.Payment{
+				BaseModel: models.BaseModel{ID: uuid.NewString()},
+				InvoiceID: invoice.ID,
+				Amount:    paymentForThisInvoice,
+				Method:    data.PaymentMethod,
+				Notes:     data.Notes,
+				Date:      time.Now(),
+			}
+			if err := tx.Create(&payment).Error; err != nil {
+				return err
+			}
+
+			// Update invoice
+			invoice.PaidAmount += paymentForThisInvoice
+			if invoice.PaidAmount >= invoice.Total {
+				invoice.Status = "paid"
+				now := time.Now()
+				invoice.PaidDate = &now
+			} else {
+				invoice.Status = "partially_paid"
+			}
+
+			if err := tx.Save(&invoice).Error; err != nil {
+				return err
+			}
+
+			// Update customer total spent
+			var customer models.Customer
+			if err := tx.First(&customer, "id = ?", invoice.CustomerID).Error; err != nil {
+				return err
+			}
+			customer.TotalSpent += paymentForThisInvoice
+			if err := tx.Save(&customer).Error; err != nil {
+				return err
+			}
+
+			remainingAmount -= paymentForThisInvoice
+		}
+
+		return nil
+	})
 }
 
 // --- Settings ---
