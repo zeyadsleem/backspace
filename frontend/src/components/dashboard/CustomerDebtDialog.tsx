@@ -8,7 +8,7 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, IconButton } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/stores/useAppStore";
@@ -34,16 +34,29 @@ export function CustomerDebtDialog({
   const t = useAppStore((state) => state.t);
   const isRTL = useAppStore((state) => state.isRTL);
   const [expandedInvoiceId, setExpandedInvoiceId] = useState<string | null>(null);
+  const [selectedInvoiceIds, setSelectedInvoiceIds] = useState<string[]>([]);
   const [paymentNotes, setPaymentNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Initialize selected IDs when invoices change or dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      setSelectedInvoiceIds(invoices.map((i) => i.id));
+    }
+  }, [isOpen, invoices]);
 
   if (!isOpen) {
     return null;
   }
 
-  const totalDebt = invoices.reduce((sum, inv) => sum + (inv.total - inv.paidAmount), 0);
   const sortedInvoices = [...invoices].sort(
     (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+  );
+
+  const selectedInvoices = invoices.filter((inv) => selectedInvoiceIds.includes(inv.id));
+  const totalSelectedDebt = selectedInvoices.reduce(
+    (sum, inv) => sum + (inv.total - inv.paidAmount),
+    0
   );
 
   const formatDate = (date: string) =>
@@ -52,10 +65,24 @@ export function CustomerDebtDialog({
       day: "numeric",
     });
 
-  const handlePayAll = async () => {
+  const handleToggleInvoice = (id: string) => {
+    setSelectedInvoiceIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleAll = () => {
+    if (selectedInvoiceIds.length === invoices.length) {
+      setSelectedInvoiceIds([]);
+    } else {
+      setSelectedInvoiceIds(invoices.map((i) => i.id));
+    }
+  };
+
+  const handlePaySelected = async () => {
+    if (selectedInvoiceIds.length === 0) return;
     setIsProcessing(true);
-    const ids = invoices.map((i) => i.id);
-    await onRecordBulkPayment(ids, totalDebt, paymentNotes);
+    await onRecordBulkPayment(selectedInvoiceIds, totalSelectedDebt, paymentNotes);
     setIsProcessing(false);
     onClose();
   };
@@ -96,74 +123,91 @@ export function CustomerDebtDialog({
           {/* RIGHT PANEL: INVOICES LIST */}
           <div className="flex flex-[1.6] flex-col overflow-hidden border-stone-100 border-e bg-stone-50/30 dark:border-stone-800 dark:bg-stone-900/30">
             <div className="flex items-center justify-between border-stone-100 border-b bg-white/50 p-3 px-4 dark:border-stone-800 dark:bg-stone-800/50">
-              <span className="font-bold text-stone-400 text-xs uppercase tracking-widest">
-                {t("invoiceList")}
-              </span>
+              <div className="flex items-center gap-3">
+                <input
+                  checked={selectedInvoiceIds.length === invoices.length && invoices.length > 0}
+                  className="h-4 w-4 rounded border-stone-300 text-red-600 focus:ring-red-500 dark:border-stone-700 dark:bg-stone-800"
+                  onChange={handleToggleAll}
+                  type="checkbox"
+                />
+                <span className="font-bold text-stone-400 text-xs uppercase tracking-widest">
+                  {t("invoiceList")}
+                </span>
+              </div>
               <span className="rounded-full border border-red-100 bg-red-50 px-2 py-0.5 font-bold text-red-600 text-xs">
-                {invoices.length} {t("invoices")}
+                {selectedInvoiceIds.length}/{invoices.length} {t("selected")}
               </span>
             </div>
 
             <div className="scrollbar-thin flex-1 space-y-2.5 overflow-y-auto p-3">
               {sortedInvoices.map((invoice) => {
                 const isExpanded = expandedInvoiceId === invoice.id;
+                const isSelected = selectedInvoiceIds.includes(invoice.id);
                 const balance = invoice.total - invoice.paidAmount;
                 return (
                   <div
                     className={cn(
                       "overflow-hidden rounded-xl border transition-all",
-                      isExpanded
+                      isSelected
                         ? "border-red-200 bg-white shadow-sm dark:border-red-900/50 dark:bg-stone-800"
-                        : "border-stone-200 bg-white/80 hover:bg-white dark:border-stone-800 dark:bg-stone-900/80"
+                        : "border-stone-200 bg-white/40 opacity-70 dark:border-stone-800 dark:bg-stone-900/40"
                     )}
                     key={invoice.id}
                   >
-                    <div
-                      className="flex cursor-pointer items-center justify-between p-2.5 transition-colors"
-                      onClick={() => setExpandedInvoiceId(isExpanded ? null : invoice.id)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            "flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
-                            isExpanded
-                              ? "border-red-100 bg-red-50 text-red-600"
-                              : "border-stone-100 bg-stone-50 text-stone-400 dark:border-stone-700 dark:bg-stone-800"
-                          )}
-                        >
-                          <Receipt className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-stone-900 text-xs dark:text-stone-100">
-                            {invoice.invoiceNumber}
-                          </p>
-                          <p className="font-medium text-stone-500 text-xs">
-                            {formatDate(invoice.dueDate)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-end">
-                          <p className="font-bold text-stone-900 text-xs dark:text-stone-100">
-                            {balance.toLocaleString()}{" "}
-                            <span className="font-medium text-stone-400 text-xs">{t("egp")}</span>
-                          </p>
-                          {invoice.paidAmount > 0 && (
-                            <p className="font-bold text-emerald-600 text-xs uppercase">
-                              {t("partial")}
+                    <div className="flex items-center p-1 px-3">
+                      <input
+                        checked={isSelected}
+                        className="h-4 w-4 rounded border-stone-300 text-red-600 focus:ring-red-500 dark:border-stone-700 dark:bg-stone-800"
+                        onChange={() => handleToggleInvoice(invoice.id)}
+                        type="checkbox"
+                      />
+                      <div
+                        className="flex flex-1 cursor-pointer items-center justify-between p-2.5 transition-colors"
+                        onClick={() => setExpandedInvoiceId(isExpanded ? null : invoice.id)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={cn(
+                              "flex h-8 w-8 items-center justify-center rounded-lg border transition-colors",
+                              isExpanded
+                                ? "border-red-100 bg-red-50 text-red-600"
+                                : "border-stone-100 bg-stone-50 text-stone-400 dark:border-stone-700 dark:bg-stone-800"
+                            )}
+                          >
+                            <Receipt className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-stone-900 text-xs dark:text-stone-100">
+                              {invoice.invoiceNumber}
                             </p>
+                            <p className="font-medium text-stone-500 text-xs">
+                              {formatDate(invoice.dueDate)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-end">
+                            <p className="font-bold text-stone-900 text-xs dark:text-stone-100">
+                              {balance.toLocaleString()}{" "}
+                              <span className="font-medium text-stone-400 text-xs">{t("egp")}</span>
+                            </p>
+                            {invoice.paidAmount > 0 && (
+                              <p className="font-bold text-emerald-600 text-xs uppercase">
+                                {t("partial")}
+                              </p>
+                            )}
+                          </div>
+                          {isExpanded ? (
+                            <ChevronUp className="h-4 w-4 text-stone-400" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-stone-400" />
                           )}
                         </div>
-                        {isExpanded ? (
-                          <ChevronUp className="h-4 w-4 text-stone-400" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4 text-stone-400" />
-                        )}
                       </div>
                     </div>
 
                     {isExpanded && (
-                      <div className="animate-fade-in border-stone-50 border-t px-3 pt-1 pb-3 dark:border-stone-700/50">
+                      <div className="animate-fade-in border-stone-50 border-t px-3 pt-1 pb-3 pl-10 dark:border-stone-700/50">
                         <div className="rounded-lg bg-stone-50/50 p-2 dark:bg-stone-900/50">
                           <table className="w-full text-xs">
                             <thead>
@@ -208,7 +252,7 @@ export function CustomerDebtDialog({
                   </span>
                   <div className="flex items-baseline gap-1.5">
                     <span className="font-medium text-3xl text-red-700 dark:text-red-400">
-                      {totalDebt.toLocaleString()}
+                      {totalSelectedDebt.toLocaleString()}
                     </span>
                     <span className="font-medium text-red-600/70 text-xs">{t("egp")}</span>
                   </div>
@@ -261,15 +305,15 @@ export function CustomerDebtDialog({
                   // So we should stick to manual class overrides on top of a variant or just base Button.
                   "bg-emerald-600 text-white hover:bg-emerald-700"
                 )}
-                disabled={isProcessing || totalDebt <= 0}
+                disabled={isProcessing || selectedInvoiceIds.length === 0}
                 isLoading={isProcessing}
-                onClick={handlePayAll}
+                onClick={handlePaySelected}
                 size="lg"
               >
                 {!isProcessing && (
                   <>
                     <CreditCard className="h-5 w-5" />
-                    <span>{t("payAllInvoices")}</span>
+                    <span>{t("paySelectedInvoices")}</span>
                   </>
                 )}
               </Button>
