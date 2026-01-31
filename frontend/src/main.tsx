@@ -13,6 +13,7 @@ import "@fontsource/ibm-plex-mono/400.css";
 
 import "./index.css";
 import { router } from "./lib/router";
+import { ErrorBoundary } from "./components/error-boundary";
 
 function AppToaster() {
   const { toasts } = useToasterStore();
@@ -24,6 +25,9 @@ function AppToaster() {
       .filter((_, i) => i >= TOAST_LIMIT)
       .forEach((t) => toast.dismiss(t.id));
   }, [toasts]);
+
+  // Detect language for proper toast direction
+  const isRTL = document.documentElement.lang === "ar";
 
   return (
     <Toaster
@@ -37,18 +41,25 @@ function AppToaster() {
         className: "dark:bg-stone-900 dark:text-stone-100 dark:border-stone-800 border shadow-lg text-sm font-medium",
         duration: 4000,
         style: {
-          direction: "rtl",
-          textAlign: "right",
-          fontFamily: "'Cairo', sans-serif",
+          direction: isRTL ? "rtl" : "ltr",
+          textAlign: isRTL ? "right" : "left",
+          fontFamily: isRTL ? "'Cairo', sans-serif" : "'IBM Plex Sans', sans-serif",
         },
       }}
     />
   );
 }
 
-createRoot(document.getElementById("root")!).render(
+const rootElement = document.getElementById("root");
+if (!rootElement) {
+  throw new Error("Root element not found");
+}
+
+createRoot(rootElement).render(
   <StrictMode>
-    <RouterProvider router={router} />
-    <AppToaster />
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+      <AppToaster />
+    </ErrorBoundary>
   </StrictMode>
 );

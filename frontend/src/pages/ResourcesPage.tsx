@@ -49,7 +49,6 @@ export function ResourcesPage() {
             setSelectedResourceId(null);
             setEditId(selectedResource.id);
           }}
-          onStartSession={() => navigate(`/sessions?resource=${selectedResource.id}`)}
           resource={selectedResource}
         />
       )}

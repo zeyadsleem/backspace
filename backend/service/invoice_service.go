@@ -32,7 +32,7 @@ func (s *InvoiceService) CreateInvoiceFromSession(tx *gorm.DB, session *models.S
 		Amount:        session.TotalAmount,
 		Total:         session.TotalAmount,
 		Status:        "pending",
-		DueDate:       time.Now(),
+		DueDate:       time.Now().AddDate(0, 0, 7), // Due in 7 days
 	}
 
 	if err := tx.Create(invoice).Error; err != nil {

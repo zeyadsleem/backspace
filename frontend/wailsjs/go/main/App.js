@@ -94,10 +94,6 @@ export function GetSubscriptions() {
   return window['go']['main']['App']['GetSubscriptions']();
 }
 
-export function Greet(arg1) {
-  return window['go']['main']['App']['Greet'](arg1);
-}
-
 export function ProcessBulkPayment(arg1) {
   return window['go']['main']['App']['ProcessBulkPayment'](arg1);
 }
@@ -112,6 +108,10 @@ export function ReactivateSubscription(arg1) {
 
 export function RemoveSessionInventory(arg1, arg2) {
   return window['go']['main']['App']['RemoveSessionInventory'](arg1, arg2);
+}
+
+export function ResetAndSeedDatabase() {
+  return window['go']['main']['App']['ResetAndSeedDatabase']();
 }
 
 export function SeedDatabase() {

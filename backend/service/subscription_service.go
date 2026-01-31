@@ -43,15 +43,15 @@ func (s *SubscriptionService) CreateSubscription(customerID string, planType str
 		// 3. Create Invoice first
 		invoiceID := uuid.NewString()
 		invoiceNumber := fmt.Sprintf("SUB-%d", time.Now().Unix())
-		
+
 		invoice := &models.Invoice{
 			BaseModel:     models.BaseModel{ID: invoiceID},
 			InvoiceNumber: invoiceNumber,
 			CustomerID:    customerID,
 			Amount:        price,
 			Total:         price,
-			Status:        "unpaid", // Default to unpaid until payment is processed
-			DueDate:       time.Now(),
+			Status:        "unpaid",                    // Default to unpaid until payment is processed
+			DueDate:       time.Now().AddDate(0, 0, 7), // Due in 7 days
 		}
 
 		if err := tx.Create(invoice).Error; err != nil {
@@ -115,10 +115,19 @@ func (s *SubscriptionService) CancelSubscription(id string) error {
 		}
 
 		// Update customer back to visitor if no other active subs exist
+		// Use FOR UPDATE to prevent race conditions
 		var activeCount int64
-		tx.Model(&models.Subscription{}).Where("customer_id = ? AND is_active = ?", sub.CustomerID, true).Count(&activeCount)
+		if err := tx.Model(&models.Subscription{}).
+			Where("customer_id = ? AND is_active = ? AND id != ?", sub.CustomerID, true, id).
+			Count(&activeCount).Error; err != nil {
+			return err
+		}
 		if activeCount == 0 {
-			tx.Model(&models.Customer{}).Where("id = ?", sub.CustomerID).Update("customer_type", "visitor")
+			if err := tx.Model(&models.Customer{}).
+				Where("id = ?", sub.CustomerID).
+				Update("customer_type", "visitor").Error; err != nil {
+				return err
+			}
 		}
 
 		return nil

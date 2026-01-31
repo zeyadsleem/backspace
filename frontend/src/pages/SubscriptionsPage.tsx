@@ -4,6 +4,7 @@ import {
   SubscriptionDialog,
   SubscriptionsList,
 } from "@/components/subscriptions";
+import { DeleteConfirmDialog } from "@/components/shared";
 import { useAppStore } from "@/stores/useAppStore";
 
 export function SubscriptionsPage() {
@@ -19,6 +20,7 @@ export function SubscriptionsPage() {
 
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const selectedSubscription = selectedSubscriptionId
     ? subscriptions.find((s) => s.id === selectedSubscriptionId)
@@ -60,12 +62,28 @@ export function SubscriptionsPage() {
           onCancelSubscription={cancelSubscription}
           onChangePlan={changeSubscription}
           onClose={() => setSelectedSubscriptionId(null)}
-          onDeleteSubscription={deleteSubscription}
+          onDeleteSubscription={(id) => {
+            setSelectedSubscriptionId(null);
+            setDeleteId(id);
+          }}
           plan={selectedPlan}
           planTypes={planTypes}
           subscription={selectedSubscription}
         />
       )}
+
+      <DeleteConfirmDialog
+        description={t("areYouSure")}
+        isOpen={!!deleteId}
+        onCancel={() => setDeleteId(null)}
+        onConfirm={() => {
+          if (deleteId) {
+            deleteSubscription(deleteId);
+          }
+          setDeleteId(null);
+        }}
+        title={t("deleteSubscription")}
+      />
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createHashRouter, Navigate } from "react-router-dom";
 import App from "../App";
 import { LoadingState } from "../components/shared/LoadingState";
 
@@ -34,7 +34,7 @@ const SettingsPageWrapper = lazy(() =>
   import("../pages/SettingsPageWrapper").then((m) => ({ default: m.SettingsPageWrapper }))
 );
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   {
     path: "/",
     element: <App />,
@@ -126,6 +126,10 @@ export const router = createBrowserRouter([
             <SettingsPageWrapper />
           </Suspense>
         ),
+      },
+      {
+        path: "*",
+        element: <Navigate to="/" replace />,
       },
     ],
   },

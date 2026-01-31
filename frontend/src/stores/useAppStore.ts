@@ -140,29 +140,38 @@ interface AppActions {
 
 type AppStore = AppState & AppActions;
 
+// Extend Window interface for Wails runtime
+declare global {
+  interface Window {
+    go?: {
+      main?: {
+        App?: typeof App;
+      };
+    };
+  }
+}
+
 // Helper to check if Wails backend is available
-const isWailsAvailable = () => {
+const isWailsAvailable = (): boolean => {
   return (
     typeof window !== "undefined" &&
-    // @ts-ignore
-    window.go &&
-    // @ts-ignore
-    window.go.main &&
-    // @ts-ignore
-    window.go.main.App
+    window.go?.main?.App !== undefined
   );
 };
 
 // Wait for Wails to be ready with a more robust retry logic
-const waitForWails = async (retries = 100, delay = 200): Promise<boolean> => {
+const waitForWails = async (retries = 50, delay = 200): Promise<boolean> => {
   if (isWailsAvailable()) {
     console.log("✅ Wails Runtime Detected");
     return true;
   }
-  if (retries === 0) return false;
+  if (retries <= 0) return false;
   await new Promise((resolve) => setTimeout(resolve, delay));
   return waitForWails(retries - 1, delay);
 };
+
+// Track if init retry is already scheduled to prevent stacking
+let initRetryScheduled = false;
 
 export const useAppStore = create<AppStore>()(
   persist(
@@ -245,13 +254,14 @@ export const useAppStore = create<AppStore>()(
         
         if (ready) {
           set({ isWailsReady: true });
+          initRetryScheduled = false; // Reset retry flag on success
           
           // 3. Sync Settings and Data
           try {
             const settings = await App.GetSettings();
             if (settings) {
               set(produce((state: AppState) => {
-                state.settings = settings as any;
+                state.settings = settings as Settings;
                 state.theme = (settings.appearance.theme || state.theme) as ThemeOption;
                 state.language = (settings.appearance.language || state.language) as LanguageOption;
               }));
@@ -265,8 +275,14 @@ export const useAppStore = create<AppStore>()(
           }
         } else {
           console.warn("⚠️ Backend connection timeout. Retrying in background...");
-          // Don't show a permanent error, just wait and try again quietly
-          setTimeout(() => get().init(), 2000);
+          // Prevent multiple retry timers from stacking
+          if (!initRetryScheduled) {
+            initRetryScheduled = true;
+            setTimeout(() => {
+              initRetryScheduled = false;
+              get().init();
+            }, 2000);
+          }
         }
       },
 
@@ -319,7 +335,7 @@ export const useAppStore = create<AppStore>()(
         }
         
         if (isWailsAvailable()) {
-          App.UpdateSettings(get().settings as any).catch(console.error);
+          App.UpdateSettings(get().settings ).catch(console.error);
         }
       },
 
@@ -336,7 +352,7 @@ export const useAppStore = create<AppStore>()(
         document.documentElement.lang = language;
         
         if (isWailsAvailable()) {
-          App.UpdateSettings(get().settings as any).catch(console.error);
+          App.UpdateSettings(get().settings ).catch(console.error);
         }
       },
 
@@ -346,7 +362,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           const customers = await App.GetCustomers();
-          set({ customers: customers as any });
+          set({ customers: customers  });
         } catch (err) {
           toast.error(String(err));
         }
@@ -355,7 +371,7 @@ export const useAppStore = create<AppStore>()(
       addCustomer: async (data: Partial<Customer>) => {
         if (!isWailsAvailable()) return;
         try {
-          await App.AddCustomer(data as any);
+          await App.AddCustomer(data );
           toast.success(get().t("success"));
           get().fetchCustomers();
           get().fetchDashboardData();
@@ -367,7 +383,7 @@ export const useAppStore = create<AppStore>()(
       updateCustomer: async (id, data) => {
         if (!isWailsAvailable()) return;
         try {
-          await App.UpdateCustomer(id, data as any);
+          await App.UpdateCustomer(id, data );
           toast.success(get().t("success"));
           get().fetchCustomers();
           get().fetchDashboardData();
@@ -392,7 +408,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return null;
         try {
           const customer = await App.CheckCustomerDuplicate(name, phone);
-          return customer as any;
+          return customer ;
         } catch (err) {
           console.error("Duplicate check failed", err);
           return null;
@@ -403,7 +419,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           const resources = await App.GetResources();
-          set({ resources: resources as any });
+          set({ resources: resources  });
         } catch (err) {
           toast.error(String(err));
         }
@@ -413,7 +429,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           if (data.ratePerHour) data.ratePerHour = toPiasters(data.ratePerHour);
-          await App.AddResource(data as any);
+          await App.AddResource(data );
           toast.success(get().t("success"));
           get().fetchResources();
         } catch (err) {
@@ -425,7 +441,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           if (data.ratePerHour) data.ratePerHour = toPiasters(data.ratePerHour);
-          await App.UpdateResource(id, data as any);
+          await App.UpdateResource(id, data );
           toast.success(get().t("success"));
           get().fetchResources();
         } catch (err) {
@@ -448,7 +464,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           const inventory = await App.GetInventory();
-          set({ inventory: inventory as any });
+          set({ inventory: inventory  });
         } catch (err) {
           toast.error(String(err));
         }
@@ -458,7 +474,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           if (data.price) data.price = toPiasters(data.price);
-          await App.AddInventory(data as any);
+          await App.AddInventory(data );
           toast.success(get().t("success"));
           get().fetchInventory();
         } catch (err) {
@@ -470,7 +486,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           if (data.price) data.price = toPiasters(data.price);
-          await App.UpdateInventory(id, data as any);
+          await App.UpdateInventory(id, data );
           toast.success(get().t("success"));
           get().fetchInventory();
         } catch (err) {
@@ -493,7 +509,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           const activeSessions = await App.GetActiveSessions();
-          set({ activeSessions: activeSessions as any });
+          set({ activeSessions: activeSessions  });
         } catch (err) {
           toast.error(String(err));
         }
@@ -529,16 +545,20 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           const invoiceId = await get().endSession(sessionId);
-          if (invoiceId && amount > 0) {
+          if (!invoiceId) {
+            throw new Error("Failed to end session - no invoice generated");
+          }
+          if (amount > 0) {
             await get().processPayment({
               invoice_id: invoiceId,
               amount: amount / 100,
               payment_method: paymentMethod,
             });
           }
-          get().fetchDashboardData();
+          await get().fetchDashboardData();
         } catch (err) {
           toast.error(String(err));
+          throw err; // Re-throw so UI can handle it
         }
       },
 
@@ -559,7 +579,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           const invoices = await App.GetInvoices();
-          set({ invoices: invoices as any });
+          set({ invoices: invoices  });
         } catch (err) {
           toast.error(String(err));
         }
@@ -569,7 +589,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           const payload = { ...data, amount: toPiasters(data.amount) };
-          await App.ProcessPayment(payload as any);
+          await App.ProcessPayment(payload );
           toast.success(get().t("success"));
           get().fetchInvoices();
           get().fetchCustomers();
@@ -610,7 +630,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           const subscriptions = await App.GetSubscriptions();
-          set({ subscriptions: subscriptions as any });
+          set({ subscriptions: subscriptions  });
         } catch (err) {
           toast.error(String(err));
         }
@@ -688,7 +708,7 @@ export const useAppStore = create<AppStore>()(
       updateSubscription: async (id, data) => {
         if (!isWailsAvailable()) return;
         try {
-          await App.UpdateSubscription(id, data as any);
+          await App.UpdateSubscription(id, data );
           toast.success(get().t("success"));
           get().fetchSubscriptions();
         } catch (err) {
@@ -709,19 +729,19 @@ export const useAppStore = create<AppStore>()(
       },
 
       updateSettings: async (settings) => {
-        if (isWailsAvailable()) {
-          try {
-            await App.UpdateSettings(settings as any);
-            toast.success(get().t("success"));
-          } catch (err) {
-            toast.error(String(err));
-          }
+        if (!isWailsAvailable()) return;
+        try {
+          await App.UpdateSettings(settings as Settings);
+          set(
+            produce((state: AppState) => {
+              Object.assign(state.settings, settings);
+            })
+          );
+          toast.success(get().t("success"));
+        } catch (err) {
+          toast.error(String(err));
+          throw err;
         }
-        set(
-          produce((state: AppState) => {
-            Object.assign(state.settings, settings);
-          })
-        );
       },
 
       updatePlanPrice: (planId, price) => {
@@ -740,28 +760,28 @@ export const useAppStore = create<AppStore>()(
         const { resources } = get();
         const resourcesToUpdate = resources.filter((r) => r.resourceType === typeId);
         
+        if (!isWailsAvailable() || resourcesToUpdate.length === 0) return;
+        
         const piasters = toPiasters(price);
         
-        if (isWailsAvailable()) {
-          try {
-            await Promise.all(
-              resourcesToUpdate.map((r) => App.UpdateResource(r.id, { ratePerHour: piasters } as any))
-            );
-            toast.success(get().t("success"));
-          } catch (err) {
-            toast.error(String(err));
-          }
-        }
-
-        set(
-          produce((state: AppState) => {
-            for (const r of state.resources) {
-              if (r.resourceType === typeId) {
-                r.ratePerHour = piasters;
+        try {
+          await Promise.all(
+            resourcesToUpdate.map((r) => App.UpdateResource(r.id, { ratePerHour: piasters }))
+          );
+          set(
+            produce((state: AppState) => {
+              for (const r of state.resources) {
+                if (r.resourceType === typeId) {
+                  r.ratePerHour = piasters;
+                }
               }
-            }
-          })
-        );
+            })
+          );
+          toast.success(get().t("success"));
+        } catch (err) {
+          toast.error(String(err));
+          throw err;
+        }
       },
 
       adjustInventoryQuantity: async (id, delta) => {
@@ -779,7 +799,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           set({ isLoading: true });
-          const message = await App.SeedDatabase();
+          const message = await App.ResetAndSeedDatabase();
           toast.success(message);
           await get().refreshAll();
         } catch (err) {
@@ -793,7 +813,7 @@ export const useAppStore = create<AppStore>()(
         if (!isWailsAvailable()) return;
         try {
           const metrics = await App.GetDashboardMetrics();
-          set({ dashboardMetrics: metrics as any });
+          set({ dashboardMetrics: metrics  });
         } catch (err) {
           console.warn("Dashboard metrics unavailable", err);
         }

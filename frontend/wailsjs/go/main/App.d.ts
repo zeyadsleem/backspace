@@ -49,8 +49,6 @@ export function GetSettings():Promise<models.Settings>;
 
 export function GetSubscriptions():Promise<Array<models.Subscription>>;
 
-export function Greet(arg1:string):Promise<string>;
-
 export function ProcessBulkPayment(arg1:main.BulkPaymentData):Promise<void>;
 
 export function ProcessPayment(arg1:main.ProcessPaymentData):Promise<void>;
@@ -58,6 +56,8 @@ export function ProcessPayment(arg1:main.ProcessPaymentData):Promise<void>;
 export function ReactivateSubscription(arg1:string):Promise<void>;
 
 export function RemoveSessionInventory(arg1:string,arg2:string):Promise<void>;
+
+export function ResetAndSeedDatabase():Promise<string>;
 
 export function SeedDatabase():Promise<string>;
 

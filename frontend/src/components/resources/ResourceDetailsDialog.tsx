@@ -5,7 +5,6 @@ import {
   DoorOpen,
   Monitor,
   Pencil,
-  Play,
   Trash2,
 } from "lucide-react";
 import { Modal } from "@/components/shared";
@@ -19,7 +18,6 @@ interface ResourceDetailsDialogProps {
   onClose: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  onStartSession: () => void;
 }
 
 export function ResourceDetailsDialog({
@@ -28,7 +26,6 @@ export function ResourceDetailsDialog({
   onClose,
   onEdit,
   onDelete,
-  onStartSession,
 }: ResourceDetailsDialogProps) {
   const t = useAppStore((state) => state.t);
 
@@ -121,19 +118,6 @@ export function ResourceDetailsDialog({
 
       {/* Footer Actions */}
       <div className="flex flex-col gap-3 border-stone-200 border-t bg-stone-50 p-6 dark:border-stone-800 dark:bg-stone-800/50">
-        {resource.isAvailable && (
-          <Button
-            className="w-full bg-emerald-500 hover:bg-emerald-600"
-            onClick={() => {
-              onStartSession();
-              onClose();
-            }}
-            size="md"
-            variant="primary"
-          >
-            <Play className="h-4 w-4" /> {t("startSession")}
-          </Button>
-        )}
         <div className="flex gap-3">
           <Button
             className="flex-1"

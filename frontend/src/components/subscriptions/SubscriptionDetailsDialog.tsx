@@ -24,6 +24,7 @@ export function SubscriptionDetailsDialog({
   onClose,
   onChangePlan,
   onCancelSubscription,
+  onDeleteSubscription,
 }: SubscriptionDetailsDialogProps) {
   const t = useAppStore((state) => state.t);
   const isRTL = useAppStore((state) => state.isRTL);
@@ -52,10 +53,8 @@ export function SubscriptionDetailsDialog({
   };
 
   const handleDelete = () => {
-    if (window.confirm(t("areYouSureItem"))) {
-      onDeleteSubscription?.(subscription.id);
-      onClose();
-    }
+    onDeleteSubscription?.(subscription.id);
+    onClose();
   };
 
   const formatDate = (dateStr: string) =>

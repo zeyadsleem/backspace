@@ -9,6 +9,7 @@ import (
 	"myproject/backend/finance"
 	"myproject/backend/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -41,7 +42,7 @@ func (s *SessionService) StartSession(customerID, resourceID string) (*models.Se
 
 		// 3. Create the session
 		session = &models.Session{
-			BaseModel:    models.BaseModel{ID: fmt.Sprintf("sess_%d", time.Now().UnixNano())},
+			BaseModel:    models.BaseModel{ID: uuid.NewString()},
 			CustomerID:   customerID,
 			ResourceID:   resourceID,
 			ResourceRate: resource.RatePerHour,
@@ -90,7 +91,7 @@ func (s *SessionService) AddInventoryConsumption(sessionID, itemID string, quant
 
 		// 4. Create Consumption Record
 		consumption := models.InventoryConsumption{
-			BaseModel: models.BaseModel{ID: fmt.Sprintf("cons_%d", time.Now().UnixNano())},
+			BaseModel: models.BaseModel{ID: uuid.NewString()},
 			SessionID: sessionID,
 			ItemID:    itemID,
 			ItemName:  item.Name,
@@ -133,7 +134,7 @@ func (s *SessionService) EndSession(sessionID string) (*models.Session, error) {
 func (s *SessionService) EndSessionWithTx(tx *gorm.DB, sessionID string) (*models.Session, error) {
 	var session models.Session
 
-	// 1. Get Session
+	// 1. Get Session with Resource data
 	if err := tx.Preload("InventoryConsumptions").First(&session, "id = ?", sessionID).Error; err != nil {
 		return nil, err
 	}
@@ -142,10 +143,16 @@ func (s *SessionService) EndSessionWithTx(tx *gorm.DB, sessionID string) (*model
 		return nil, errors.New("session is already closed")
 	}
 
+	// Load Resource to get ResourceName
+	var resource models.Resource
+	if err := tx.First(&resource, "id = ?", session.ResourceID).Error; err != nil {
+		return nil, err
+	}
+
 	// 2. Calculate Costs
 	endTime := time.Now()
 	duration := int(endTime.Sub(session.StartedAt).Minutes())
-	
+
 	sessionCost := int64(0)
 	if !session.IsSubscribed {
 		sessionCost = finance.CalculateSessionCost(duration, session.ResourceRate)
@@ -172,6 +179,9 @@ func (s *SessionService) EndSessionWithTx(tx *gorm.DB, sessionID string) (*model
 
 	// Refresh session object for return
 	tx.First(&session, "id = ?", sessionID)
+
+	// Populate ResourceName for invoice generation
+	session.ResourceName = resource.Name
 
 	return &session, nil
 }
