@@ -870,7 +870,8 @@ func (a *App) SeedLargeDataset() (string, error) {
 	}
 
 	// Create some historical completed sessions with invoices and payments
-	for i := 20; i < 50 && i < len(savedCustomers) && i < len(savedResources); i++ {
+	// Only for customers WITHOUT subscriptions (indices 40-50, since 20-40 have subscriptions)
+	for i := 40; i < 50 && i < len(savedCustomers) && i < len(savedResources); i++ {
 		// Start and immediately end session to create invoice
 		session, err := a.sessionService.StartSession(savedCustomers[i].ID, savedResources[i].ID)
 		if err != nil {
@@ -888,7 +889,7 @@ func (a *App) SeedLargeDataset() (string, error) {
 			// Get the invoice to know the total
 			var invoice models.Invoice
 			if err := database.DB.First(&invoice, "id = ?", invoiceID).Error; err == nil {
-				// Only pay if there's an amount to pay (skip free sessions for subscribed customers)
+				// Only pay if there's an amount to pay
 				if invoice.Total > 0 {
 					data := ProcessPaymentData{
 						InvoiceID:     invoiceID,
