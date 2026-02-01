@@ -55,13 +55,17 @@ export function ResourceForm({
 
     reset,
 
-  } = useForm<{ name: string; resourceType: ResourceType }>({
+  } = useForm<ResourceFormData>({
+
+    resolver: zodResolver(resourceSchema),
 
     defaultValues: {
 
       name: initialData?.name ?? "",
 
       resourceType: initialData?.resourceType ?? "seat",
+
+      ratePerHour: 0,
 
     },
 
@@ -83,7 +87,7 @@ export function ResourceForm({
 
 
 
-  const onFormSubmit = (data: { name: string; resourceType: ResourceType }) => {
+  const onFormSubmit = (data: ResourceFormData) => {
 
     // Get the current rate for this resource type from existing resources
 
@@ -91,13 +95,15 @@ export function ResourceForm({
 
     const existingResource = resources.find(r => r.resourceType === data.resourceType);
 
-    const currentRate = existingResource ? existingResource.ratePerHour / 100 : 0;
+    const currentRate = existingResource ? existingResource.ratePerHour / 100 : data.ratePerHour;
 
 
 
     onSubmit?.({
 
-      ...data,
+      name: data.name,
+
+      resourceType: data.resourceType,
 
       ratePerHour: currentRate,
 

@@ -15,6 +15,8 @@ var assets embed.FS
 func main() {
 	// Initialize Database
 	database.InitDB()
+	// Ensure database is closed when application exits
+	defer database.CloseDB()
 
 	// Create an instance of the app structure
 	app := NewApp()

@@ -276,7 +276,15 @@ export function EndSessionDialog({
                     <div className="relative">
                       <input
                         className={`h-14 w-full rounded-xl border border-stone-200 bg-white px-3 font-medium font-mono text-3xl outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 dark:border-stone-700 dark:bg-stone-800 ${isRTL ? "pl-10" : "pr-10"}`}
-                        onChange={(e) => setUserInputEGP(Number(e.target.value))}
+                        min={0}
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          if (value < 0) {
+                            setUserInputEGP(0);
+                          } else {
+                            setUserInputEGP(value);
+                          }
+                        }}
                         step="any"
                         type="number"
                         value={displayEGP}

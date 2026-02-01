@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"myproject/backend/database"
@@ -14,6 +16,13 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+
+// generateShortHumanID generates a short 8-character human-readable ID
+func generateShortHumanID() string {
+	// Generate UUID and take first 8 characters
+	u := uuid.New()
+	return strings.ToUpper(hex.EncodeToString(u[:4]))
+}
 
 // App struct
 type App struct {
@@ -39,35 +48,29 @@ func (a *App) startup(ctx context.Context) {
 
 // --- Customers ---
 
-func (a *App) GetCustomers() []models.Customer {
+func (a *App) GetCustomers() ([]models.Customer, error) {
 	var customers []models.Customer
-	database.DB.Preload("Subscriptions").Preload("Invoices").Order("created_at desc").Find(&customers)
-	return customers
+	if err := database.DB.Preload("Subscriptions").Preload("Invoices").Order("created_at desc").Find(&customers).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch customers: %w", err)
+	}
+	return customers, nil
 }
 
 func (a *App) AddCustomer(data models.Customer) error {
 	data.ID = uuid.NewString()
 
-	// Automatically generate HumanID if not provided or looks like a UUID fragment
-	return database.DB.Transaction(func(tx *gorm.DB) error {
-		var lastCustomer models.Customer
-		// Find the highest HumanID that matches the pattern C + digits
-		tx.Where("human_id LIKE ?", "C%").Order("human_id desc").First(&lastCustomer)
+	// Validate required fields
+	if strings.TrimSpace(data.Name) == "" {
+		return errors.New("customer name is required")
+	}
+	if strings.TrimSpace(data.Phone) == "" {
+		return errors.New("customer phone is required")
+	}
 
-		nextNum := 1
-		if lastCustomer.HumanID != "" {
-			var currentNum int
-			_, err := fmt.Sscanf(lastCustomer.HumanID, "C%d", &currentNum)
-			if err == nil {
-				nextNum = currentNum + 1
-			}
-		}
+	// Generate short HumanID (8 chars)
+	data.HumanID = generateShortHumanID()
 
-		// Format as C followed by 3 digits (e.g., C001, C015, C123)
-		data.HumanID = fmt.Sprintf("C%03d", nextNum)
-
-		return tx.Create(&data).Error
-	})
+	return database.DB.Create(&data).Error
 }
 
 func (a *App) UpdateCustomer(id string, data models.Customer) error {
@@ -97,13 +100,23 @@ func (a *App) CheckCustomerDuplicate(name string, phone string) (*models.Custome
 
 // --- Resources ---
 
-func (a *App) GetResources() []models.Resource {
+func (a *App) GetResources() ([]models.Resource, error) {
 	var resources []models.Resource
-	database.DB.Order("name asc").Find(&resources)
-	return resources
+	if err := database.DB.Order("name asc").Find(&resources).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch resources: %w", err)
+	}
+	return resources, nil
 }
 
 func (a *App) AddResource(data models.Resource) error {
+	// Validate required fields
+	if strings.TrimSpace(data.Name) == "" {
+		return errors.New("resource name is required")
+	}
+	if data.RatePerHour < 0 {
+		return errors.New("rate per hour cannot be negative")
+	}
+
 	data.ID = uuid.NewString()
 	return database.DB.Create(&data).Error
 }
@@ -118,13 +131,29 @@ func (a *App) DeleteResource(id string) error {
 
 // --- Inventory ---
 
-func (a *App) GetInventory() []models.InventoryItem {
+func (a *App) GetInventory() ([]models.InventoryItem, error) {
 	var items []models.InventoryItem
-	database.DB.Order("name asc").Find(&items)
-	return items
+	if err := database.DB.Order("name asc").Find(&items).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch inventory: %w", err)
+	}
+	return items, nil
 }
 
 func (a *App) AddInventory(data models.InventoryItem) error {
+	// Validate required fields
+	if strings.TrimSpace(data.Name) == "" {
+		return errors.New("item name is required")
+	}
+	if data.Price < 0 {
+		return errors.New("price cannot be negative")
+	}
+	if data.Quantity < 0 {
+		return errors.New("quantity cannot be negative")
+	}
+	if data.MinStock < 0 {
+		return errors.New("minimum stock cannot be negative")
+	}
+
 	data.ID = uuid.NewString()
 	return database.DB.Create(&data).Error
 }
@@ -143,22 +172,28 @@ func (a *App) AdjustInventoryQuantity(id string, delta int) error {
 
 // --- Sessions ---
 
-func (a *App) GetActiveSessions() []models.Session {
+func (a *App) GetActiveSessions() ([]models.Session, error) {
 	var sessions []models.Session
 	// Load related data
-	database.DB.Where("status = ?", "active").
+	if err := database.DB.Where("status = ?", "active").
 		Preload("InventoryConsumptions").
-		Find(&sessions)
+		Find(&sessions).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch active sessions: %w", err)
+	}
 
 	for i := range sessions {
 		var c models.Customer
 		var r models.Resource
-		database.DB.First(&c, "id = ?", sessions[i].CustomerID)
-		database.DB.First(&r, "id = ?", sessions[i].ResourceID)
+		if err := database.DB.First(&c, "id = ?", sessions[i].CustomerID).Error; err != nil {
+			return nil, fmt.Errorf("failed to fetch session customer: %w", err)
+		}
+		if err := database.DB.First(&r, "id = ?", sessions[i].ResourceID).Error; err != nil {
+			return nil, fmt.Errorf("failed to fetch session resource: %w", err)
+		}
 		sessions[i].CustomerName = c.Name
 		sessions[i].ResourceName = r.Name
 	}
-	return sessions
+	return sessions, nil
 }
 
 func (a *App) StartSession(customerID string, resourceID string) error {
@@ -200,12 +235,16 @@ func (a *App) UpdateSessionInventory(sessionID string, inventoryID string, quant
 
 // --- Subscriptions ---
 
-func (a *App) GetSubscriptions() []models.Subscription {
+func (a *App) GetSubscriptions() ([]models.Subscription, error) {
 	var subs []models.Subscription
-	database.DB.Find(&subs)
+	if err := database.DB.Find(&subs).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch subscriptions: %w", err)
+	}
 	for i := range subs {
 		var c models.Customer
-		database.DB.First(&c, "id = ?", subs[i].CustomerID)
+		if err := database.DB.First(&c, "id = ?", subs[i].CustomerID).Error; err != nil {
+			return nil, fmt.Errorf("failed to fetch subscription customer: %w", err)
+		}
 		subs[i].CustomerName = c.Name
 
 		if subs[i].IsActive && subs[i].EndDate.After(time.Now()) {
@@ -214,7 +253,7 @@ func (a *App) GetSubscriptions() []models.Subscription {
 			subs[i].DaysRemaining = 0
 		}
 	}
-	return subs
+	return subs, nil
 }
 
 type AddSubscriptionData struct {
@@ -225,6 +264,17 @@ type AddSubscriptionData struct {
 }
 
 func (a *App) AddSubscription(data AddSubscriptionData) error {
+	// Validate plan type
+	validPlanTypes := map[string]bool{"weekly": true, "half-monthly": true, "monthly": true}
+	if !validPlanTypes[data.PlanType] {
+		return fmt.Errorf("invalid plan type: %s (must be weekly, half-monthly, or monthly)", data.PlanType)
+	}
+
+	// Validate price
+	if data.Price <= 0 {
+		return errors.New("subscription price must be positive")
+	}
+
 	startDate, err := time.Parse(time.RFC3339, data.StartDate)
 	if err != nil {
 		startDate = time.Now()
@@ -271,16 +321,20 @@ func (a *App) ReactivateSubscription(id string) error {
 
 // --- Invoices ---
 
-func (a *App) GetInvoices() []models.Invoice {
+func (a *App) GetInvoices() ([]models.Invoice, error) {
 	var invoices []models.Invoice
-	database.DB.Preload("LineItems").Preload("Payments").Order("created_at desc").Find(&invoices)
+	if err := database.DB.Preload("LineItems").Preload("Payments").Order("created_at desc").Find(&invoices).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch invoices: %w", err)
+	}
 	for i := range invoices {
 		var c models.Customer
-		database.DB.First(&c, "id = ?", invoices[i].CustomerID)
+		if err := database.DB.First(&c, "id = ?", invoices[i].CustomerID).Error; err != nil {
+			return nil, fmt.Errorf("failed to fetch invoice customer: %w", err)
+		}
 		invoices[i].CustomerName = c.Name
 		invoices[i].CustomerPhone = c.Phone
 	}
-	return invoices
+	return invoices, nil
 }
 
 type ProcessPaymentData struct {
@@ -291,25 +345,43 @@ type ProcessPaymentData struct {
 }
 
 func (a *App) ProcessPayment(data ProcessPaymentData) error {
-	payment := models.Payment{
-		BaseModel: models.BaseModel{ID: uuid.NewString()},
-		InvoiceID: data.InvoiceID,
-		Amount:    data.Amount,
-		Method:    data.PaymentMethod,
-		Notes:     data.Notes,
-		Date:      time.Now(),
+	// Validate payment amount
+	if data.Amount <= 0 {
+		return errors.New("payment amount must be positive")
 	}
 
 	return database.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&payment).Error; err != nil {
-			return err
-		}
-
+		// Get invoice first to check remaining balance
 		var invoice models.Invoice
 		if err := tx.First(&invoice, "id = ?", data.InvoiceID).Error; err != nil {
 			return err
 		}
 
+		// Calculate remaining balance
+		remainingBalance := invoice.Total - invoice.PaidAmount
+		if remainingBalance <= 0 {
+			return errors.New("invoice is already fully paid")
+		}
+
+		// Prevent overpayment
+		if data.Amount > remainingBalance {
+			return fmt.Errorf("payment amount (%d) exceeds remaining balance (%d)", data.Amount, remainingBalance)
+		}
+
+		payment := models.Payment{
+			BaseModel: models.BaseModel{ID: uuid.NewString()},
+			InvoiceID: data.InvoiceID,
+			Amount:    data.Amount,
+			Method:    data.PaymentMethod,
+			Notes:     data.Notes,
+			Date:      time.Now(),
+		}
+
+		if err := tx.Create(&payment).Error; err != nil {
+			return err
+		}
+
+		// Update invoice
 		invoice.PaidAmount += data.Amount
 		if invoice.PaidAmount >= invoice.Total {
 			invoice.Status = "paid"
@@ -323,6 +395,7 @@ func (a *App) ProcessPayment(data ProcessPaymentData) error {
 			return err
 		}
 
+		// Update customer total spent
 		var customer models.Customer
 		if err := tx.First(&customer, "id = ?", invoice.CustomerID).Error; err != nil {
 			return err
@@ -414,27 +487,40 @@ func (a *App) ProcessBulkPayment(data BulkPaymentData) error {
 
 // --- Settings ---
 
-func (a *App) GetSettings() *models.Settings {
+func (a *App) GetSettings() (*models.Settings, error) {
 	var appSettings models.AppSettings
 	result := database.DB.First(&appSettings)
 	if result.Error != nil {
-		return nil
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			// Return default settings if not found
+			return &models.Settings{}, nil
+		}
+		return nil, result.Error
 	}
+
 	var settings models.Settings
-	json.Unmarshal([]byte(appSettings.Settings), &settings)
-	return &settings
+	if err := json.Unmarshal([]byte(appSettings.Settings), &settings); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal settings: %w", err)
+	}
+	return &settings, nil
 }
 
 func (a *App) UpdateSettings(settings models.Settings) error {
-	bytes, _ := json.Marshal(settings)
+	bytes, err := json.Marshal(settings)
+	if err != nil {
+		return fmt.Errorf("failed to marshal settings: %w", err)
+	}
 
 	var appSettings models.AppSettings
 	result := database.DB.First(&appSettings)
 	if result.Error != nil {
-		appSettings = models.AppSettings{
-			Settings: string(bytes),
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			appSettings = models.AppSettings{
+				Settings: string(bytes),
+			}
+			return database.DB.Create(&appSettings).Error
 		}
-		return database.DB.Create(&appSettings).Error
+		return result.Error
 	}
 
 	appSettings.Settings = string(bytes)
@@ -443,101 +529,129 @@ func (a *App) UpdateSettings(settings models.Settings) error {
 
 // --- Dashboard ---
 
-func (a *App) GetDashboardMetrics() models.DashboardMetrics {
+func (a *App) GetDashboardMetrics() (models.DashboardMetrics, error) {
 	var metrics models.DashboardMetrics
 
 	startOfDay := time.Now().Truncate(24 * time.Hour)
 	var payments []models.Payment
-	database.DB.Where("created_at >= ?", startOfDay).Find(&payments)
+	if err := database.DB.Where("created_at >= ?", startOfDay).Find(&payments).Error; err != nil {
+		return metrics, fmt.Errorf("failed to fetch today payments: %w", err)
+	}
 	for _, p := range payments {
 		metrics.TodayRevenue += p.Amount
 	}
 
 	var count int64
-	database.DB.Model(&models.Session{}).Where("status = ?", "active").Count(&count)
+	if err := database.DB.Model(&models.Session{}).Where("status = ?", "active").Count(&count).Error; err != nil {
+		return metrics, fmt.Errorf("failed to count active sessions: %w", err)
+	}
 	metrics.ActiveSessions = int(count)
 
-	database.DB.Model(&models.Customer{}).Where("created_at >= ?", startOfDay).Count(&count)
+	if err := database.DB.Model(&models.Customer{}).Where("created_at >= ?", startOfDay).Count(&count).Error; err != nil {
+		return metrics, fmt.Errorf("failed to count new customers: %w", err)
+	}
 	metrics.NewCustomersToday = int(count)
 
-	database.DB.Model(&models.Subscription{}).Where("status = ?", "active").Count(&count)
+	if err := database.DB.Model(&models.Subscription{}).Where("status = ?", "active").Count(&count).Error; err != nil {
+		return metrics, fmt.Errorf("failed to count active subscriptions: %w", err)
+	}
 	metrics.ActiveSubscriptions = int(count)
 
-	return metrics
+	return metrics, nil
 }
 
 // ResetAndSeedDatabase clears all data and creates fresh seed data
-func (a *App) ResetAndSeedDatabase() string {
+func (a *App) ResetAndSeedDatabase() (string, error) {
 	// Delete all data in correct order to respect foreign keys
-	database.DB.Exec("DELETE FROM payments")
-	database.DB.Exec("DELETE FROM line_items")
-	database.DB.Exec("DELETE FROM invoices")
-	database.DB.Exec("DELETE FROM inventory_consumptions")
-	database.DB.Exec("DELETE FROM sessions")
-	database.DB.Exec("DELETE FROM subscriptions")
-	database.DB.Exec("DELETE FROM inventory_items")
-	database.DB.Exec("DELETE FROM resources")
-	database.DB.Exec("DELETE FROM customers")
+	if err := database.DB.Exec("DELETE FROM payments").Error; err != nil {
+		return "", fmt.Errorf("failed to delete payments: %w", err)
+	}
+	if err := database.DB.Exec("DELETE FROM line_items").Error; err != nil {
+		return "", fmt.Errorf("failed to delete line_items: %w", err)
+	}
+	if err := database.DB.Exec("DELETE FROM invoices").Error; err != nil {
+		return "", fmt.Errorf("failed to delete invoices: %w", err)
+	}
+	if err := database.DB.Exec("DELETE FROM inventory_consumptions").Error; err != nil {
+		return "", fmt.Errorf("failed to delete inventory_consumptions: %w", err)
+	}
+	if err := database.DB.Exec("DELETE FROM sessions").Error; err != nil {
+		return "", fmt.Errorf("failed to delete sessions: %w", err)
+	}
+	if err := database.DB.Exec("DELETE FROM subscriptions").Error; err != nil {
+		return "", fmt.Errorf("failed to delete subscriptions: %w", err)
+	}
+	if err := database.DB.Exec("DELETE FROM inventory_items").Error; err != nil {
+		return "", fmt.Errorf("failed to delete inventory_items: %w", err)
+	}
+	if err := database.DB.Exec("DELETE FROM resources").Error; err != nil {
+		return "", fmt.Errorf("failed to delete resources: %w", err)
+	}
+	if err := database.DB.Exec("DELETE FROM customers").Error; err != nil {
+		return "", fmt.Errorf("failed to delete customers: %w", err)
+	}
 
 	return a.SeedDatabase()
 }
 
-func (a *App) SeedDatabase() string {
+func (a *App) SeedDatabase() (string, error) {
 	// 1. Create 50 Customers
 	customers := []models.Customer{
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Ali", Phone: "01012345678", HumanID: "C001", CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sara Mohamed", Phone: "01123456789", HumanID: "C002", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Zeyad Sleem", Phone: "01234567890", HumanID: "C003", CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Omar Khaled", Phone: "01512345678", HumanID: "C004", CustomerType: "visitor", Balance: 5000},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nour Hassan", Phone: "01098765432", HumanID: "C005", CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mohamed Ibrahim", Phone: "01011111111", HumanID: "C006", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Fatima Ahmed", Phone: "01022222222", HumanID: "C007", CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ali Hassan", Phone: "01033333333", HumanID: "C008", CustomerType: "visitor", Balance: 2500},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mariam Khaled", Phone: "01044444444", HumanID: "C009", CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Youssef Omar", Phone: "01055555555", HumanID: "C010", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Aya Mahmoud", Phone: "01066666666", HumanID: "C011", CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Karim Mostafa", Phone: "01077777777", HumanID: "C012", CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nada Sayed", Phone: "01088888888", HumanID: "C013", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Hassan Ali", Phone: "01099999999", HumanID: "C014", CustomerType: "half-monthly", Balance: 1000},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Reem Khaled", Phone: "01100000000", HumanID: "C015", CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Tamer Hosny", Phone: "01111111111", HumanID: "C016", CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Dina Fouad", Phone: "01122222222", HumanID: "C017", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Samir Ghanem", Phone: "01133333333", HumanID: "C018", CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Laila Taher", Phone: "01144444444", HumanID: "C019", CustomerType: "weekly", Balance: 7500},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ramy Emam", Phone: "01155555555", HumanID: "C020", CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sherihan Adel", Phone: "01166666666", HumanID: "C021", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Adel Emam", Phone: "01177777777", HumanID: "C022", CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Yasmin Abdulaziz", Phone: "01188888888", HumanID: "C023", CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Ezz", Phone: "01199999999", HumanID: "C024", CustomerType: "visitor", Balance: 3200},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mona Zaki", Phone: "01200000000", HumanID: "C025", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Karim Abdelaziz", Phone: "01211111111", HumanID: "C026", CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Hend Sabry", Phone: "01222222222", HumanID: "C027", CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Helmy", Phone: "01233333333", HumanID: "C028", CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Menna Shalaby", Phone: "01244444444", HumanID: "C029", CustomerType: "monthly", Balance: 1500},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Asser Yassin", Phone: "01255555555", HumanID: "C030", CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ghada Adel", Phone: "01266666666", HumanID: "C031", CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Khaled ElNabawy", Phone: "01277777777", HumanID: "C032", CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nelly Karim", Phone: "01288888888", HumanID: "C033", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Amr Waked", Phone: "01299999999", HumanID: "C034", CustomerType: "half-monthly", Balance: 2000},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sawsan Badr", Phone: "01300000000", HumanID: "C035", CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mahmoud Hemida", Phone: "01311111111", HumanID: "C036", CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Elham Shahin", Phone: "01322222222", HumanID: "C037", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Maged ElKedwany", Phone: "01333333333", HumanID: "C038", CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Donia Samir", Phone: "01344444444", HumanID: "C039", CustomerType: "weekly", Balance: 5000},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Hussein Fahmy", Phone: "01355555555", HumanID: "C040", CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mervat Amin", Phone: "01366666666", HumanID: "C041", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nour ElSherif", Phone: "01377777777", HumanID: "C042", CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Poussy Naguib", Phone: "01388888888", HumanID: "C043", CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Zaki", Phone: "01399999999", HumanID: "C044", CustomerType: "visitor", Balance: 1800},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Souad Hosny", Phone: "01400000000", HumanID: "C045", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Rushdy Abaza", Phone: "01411111111", HumanID: "C046", CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Faten Hamama", Phone: "01422222222", HumanID: "C047", CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Omar Sharif", Phone: "01433333333", HumanID: "C048", CustomerType: "visitor", Balance: 1200},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Anwar Wagdy", Phone: "01444444444", HumanID: "C049", CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Leila Fawzi", Phone: "01455555555", HumanID: "C050", CustomerType: "half-monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Ali", Phone: "01012345678", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sara Mohamed", Phone: "01123456789", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Zeyad Sleem", Phone: "01234567890", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Omar Khaled", Phone: "01512345678", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 5000},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nour Hassan", Phone: "01098765432", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mohamed Ibrahim", Phone: "01011111111", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Fatima Ahmed", Phone: "01022222222", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ali Hassan", Phone: "01033333333", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 2500},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mariam Khaled", Phone: "01044444444", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Youssef Omar", Phone: "01055555555", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Aya Mahmoud", Phone: "01066666666", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Karim Mostafa", Phone: "01077777777", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nada Sayed", Phone: "01088888888", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Hassan Ali", Phone: "01099999999", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 1000},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Reem Khaled", Phone: "01100000000", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Tamer Hosny", Phone: "01111111111", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Dina Fouad", Phone: "01122222222", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Samir Ghanem", Phone: "01133333333", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Laila Taher", Phone: "01144444444", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 7500},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ramy Emam", Phone: "01155555555", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sherihan Adel", Phone: "01166666666", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Adel Emam", Phone: "01177777777", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Yasmin Abdulaziz", Phone: "01188888888", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Ezz", Phone: "01199999999", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 3200},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mona Zaki", Phone: "01200000000", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Karim Abdelaziz", Phone: "01211111111", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Hend Sabry", Phone: "01222222222", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Helmy", Phone: "01233333333", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Menna Shalaby", Phone: "01244444444", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 1500},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Asser Yassin", Phone: "01255555555", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ghada Adel", Phone: "01266666666", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Khaled ElNabawy", Phone: "01277777777", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nelly Karim", Phone: "01288888888", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Amr Waked", Phone: "01299999999", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 2000},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sawsan Badr", Phone: "01300000000", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mahmoud Hemida", Phone: "01311111111", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Elham Shahin", Phone: "01322222222", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Maged ElKedwany", Phone: "01333333333", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Donia Samir", Phone: "01344444444", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 5000},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Hussein Fahmy", Phone: "01355555555", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mervat Amin", Phone: "01366666666", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nour ElSherif", Phone: "01377777777", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Poussy Naguib", Phone: "01388888888", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Zaki", Phone: "01399999999", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 1800},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Souad Hosny", Phone: "01400000000", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Rushdy Abaza", Phone: "01411111111", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Faten Hamama", Phone: "01422222222", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Omar Sharif", Phone: "01433333333", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 1200},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Anwar Wagdy", Phone: "01444444444", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
+		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Leila Fawzi", Phone: "01455555555", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
 	}
 	for _, c := range customers {
-		database.DB.Create(&c)
+		if err := database.DB.Create(&c).Error; err != nil {
+			return "", fmt.Errorf("failed to seed customer %s: %w", c.Name, err)
+		}
 	}
 
 	// 2. Create 20 Resources
@@ -564,7 +678,9 @@ func (a *App) SeedDatabase() string {
 		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Shared Seat 6", ResourceType: "seat", RatePerHour: 3500, IsAvailable: true},
 	}
 	for _, r := range resources {
-		database.DB.Create(&r)
+		if err := database.DB.Create(&r).Error; err != nil {
+			return "", fmt.Errorf("failed to seed resource %s: %w", r.Name, err)
+		}
 	}
 
 	// 3. Create 25 Inventory Items
@@ -596,12 +712,16 @@ func (a *App) SeedDatabase() string {
 		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mouse Pad", Category: "supplies", Price: 3000, Quantity: 25, MinStock: 5},
 	}
 	for _, i := range inventory {
-		database.DB.Create(&i)
+		if err := database.DB.Create(&i).Error; err != nil {
+			return "", fmt.Errorf("failed to seed inventory item %s: %w", i.Name, err)
+		}
 	}
 
 	// 4. Create Subscriptions for 20 customers
 	var savedCustomers []models.Customer
-	database.DB.Order("created_at asc").Find(&savedCustomers)
+	if err := database.DB.Order("created_at asc").Find(&savedCustomers).Error; err != nil {
+		return "", fmt.Errorf("failed to fetch seeded customers: %w", err)
+	}
 
 	// Create various subscriptions
 	subscriptions := []struct {
@@ -645,21 +765,27 @@ func (a *App) SeedDatabase() string {
 				IsActive:   true,
 				Status:     "active",
 			}
-			database.DB.Create(&subscription)
+			if err := database.DB.Create(&subscription).Error; err != nil {
+				return "", fmt.Errorf("failed to seed subscription: %w", err)
+			}
 		}
 	}
 
 	// 5. Create 5 Active Sessions
 	var savedResources []models.Resource
-	database.DB.Find(&savedResources)
+	if err := database.DB.Find(&savedResources).Error; err != nil {
+		return "", fmt.Errorf("failed to fetch seeded resources: %w", err)
+	}
 
 	activeSessionIndices := []int{0, 3, 6, 12, 15}
 	for i, sessionIdx := range activeSessionIndices {
 		if i < len(savedCustomers) && sessionIdx < len(savedResources) {
-			a.StartSession(savedCustomers[i].ID, savedResources[sessionIdx].ID)
+			if err := a.StartSession(savedCustomers[i].ID, savedResources[sessionIdx].ID); err != nil {
+				return "", fmt.Errorf("failed to seed session: %w", err)
+			}
 		}
 	}
 
 	return fmt.Sprintf("Seeded successfully with %d customers, %d resources, %d inventory items, 20 subscriptions, 5 active sessions",
-		len(customers), len(resources), len(inventory))
+		len(customers), len(resources), len(inventory)), nil
 }

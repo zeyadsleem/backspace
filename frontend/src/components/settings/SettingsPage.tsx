@@ -76,14 +76,21 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                       >
                         {isRTL ? plan.labelAr : plan.labelEn}
                       </label>
-                      <div className="relative">
+                        <div className="relative">
                         <input
                           className={`w-full rounded-lg border border-stone-200 bg-stone-50 px-3 3xl:py-3 py-2 3xl:text-base text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 ${isRTL ? "pl-10" : "pr-10"}`}
                           defaultValue={plan.price}
                           id={`plan-${plan.id}`}
-                          onBlur={(e) =>
-                            updatePlanPrice(plan.id, Number.parseFloat(e.target.value))
-                          }
+                          min={0}
+                          onBlur={(e) => {
+                            const value = Number.parseFloat(e.target.value);
+                            if (value < 0) {
+                              e.target.value = "0";
+                              updatePlanPrice(plan.id, 0);
+                            } else {
+                              updatePlanPrice(plan.id, value);
+                            }
+                          }}
                           type="number"
                         />
                         <div
@@ -118,9 +125,16 @@ export function SettingsPage({ settings, onUpdateAppearance }: SettingsPageProps
                             className={`w-full rounded-lg border border-stone-200 bg-stone-50 px-3 3xl:py-3 py-2 3xl:text-base text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-800 ${isRTL ? "pl-10" : "pr-10"}`}
                             defaultValue={firstOfKind?.ratePerHour ?? 0}
                             id={`rate-${cat.id}`}
-                            onBlur={(e) =>
-                              updateResourceTypePrice(cat.id, Number.parseFloat(e.target.value))
-                            }
+                            min={0}
+                            onBlur={(e) => {
+                              const value = Number.parseFloat(e.target.value);
+                              if (value < 0) {
+                                e.target.value = "0";
+                                updateResourceTypePrice(cat.id, 0);
+                              } else {
+                                updateResourceTypePrice(cat.id, value);
+                              }
+                            }}
                             type="number"
                           />
                           <div

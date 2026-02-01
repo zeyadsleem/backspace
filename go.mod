@@ -4,6 +4,7 @@ go 1.24.0
 
 require (
 	github.com/google/uuid v1.6.0
+	github.com/stretchr/testify v1.11.1
 	github.com/wailsapp/wails/v2 v2.11.0
 	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.31.1
@@ -11,6 +12,7 @@ require (
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
@@ -28,6 +30,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.33 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/samber/lo v1.49.1 // indirect
 	github.com/tkrajina/go-reflector v0.5.8 // indirect
@@ -39,6 +42,7 @@ require (
 	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/sys v0.30.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 // replace github.com/wailsapp/wails/v2 v2.11.0 => /home/zeyad/go/pkg/mod
