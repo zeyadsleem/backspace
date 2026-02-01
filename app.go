@@ -883,18 +883,21 @@ func (a *App) SeedLargeDataset() (string, error) {
 			continue
 		}
 
-		// Add payment for 80% of invoices
+		// Add payment for 80% of invoices (only if amount > 0)
 		if i%5 != 0 {
 			// Get the invoice to know the total
 			var invoice models.Invoice
 			if err := database.DB.First(&invoice, "id = ?", invoiceID).Error; err == nil {
-				data := ProcessPaymentData{
-					InvoiceID:     invoiceID,
-					Amount:        invoice.Total,
-					PaymentMethod: "cash",
-					Notes:         "Auto payment from seed",
+				// Only pay if there's an amount to pay (skip free sessions for subscribed customers)
+				if invoice.Total > 0 {
+					data := ProcessPaymentData{
+						InvoiceID:     invoiceID,
+						Amount:        invoice.Total,
+						PaymentMethod: "cash",
+						Notes:         "Auto payment from seed",
+					}
+					a.ProcessPayment(data)
 				}
-				a.ProcessPayment(data)
 			}
 		}
 	}
