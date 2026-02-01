@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
-import { useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { useState, useMemo } from "react";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/useAppStore";
@@ -38,16 +38,26 @@ export function ActiveSessions({
   onStartSession,
 }: ActiveSessionsProps) {
   const t = useAppStore((state) => state.t);
+  const isRTL = useAppStore((state) => state.isRTL);
   const [inventoryModalSession, setInventoryModalSession] = useState<string | null>(null);
   const [editInventorySessionId, setEditInventorySessionId] = useState<string | null>(null);
   const [endSessionModalId, setEndSessionModalId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredSessions = useMemo(() => {
+    if (!searchQuery) return activeSessions;
+    return activeSessions.filter((session) =>
+      session.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      session.resourceName?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [activeSessions, searchQuery]);
 
   const selectedSession = activeSessions.find((s) => s.id === inventoryModalSession);
   const sessionToEditInventory = activeSessions.find((s) => s.id === editInventorySessionId);
   const sessionToEnd = activeSessions.find((s) => s.id === endSessionModalId);
 
   return (
-    <div className="flex flex-col space-y-6 p-6">
+    <div className="flex flex-col h-full space-y-6 p-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h1 className="font-bold text-2xl text-stone-900 dark:text-stone-100">
@@ -63,24 +73,37 @@ export function ActiveSessions({
         </Button>
       </div>
 
-      {activeSessions.length === 0 ? (
-        <EmptyState
-          description={t("startNewSessionPrompt")}
-          icon="sessions"
-          title={t("noActiveSessions")}
+      <div className="relative">
+        <Search className={`absolute ${isRTL ? "end-3" : "start-3"} top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400`} />
+        <input
+          className="w-full rounded-lg border border-stone-200 bg-white py-2 ps-10 pe-4 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 dark:border-stone-700 dark:bg-stone-900"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={t("searchSessions")}
+          type="text"
+          value={searchQuery}
         />
-      ) : (
-        <div className="grid 3xl:grid-cols-6 4xl:grid-cols-8 grid-cols-1 items-stretch gap-4 pb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-          {activeSessions.map((session) => (
-            <ActiveSessionCard
-              key={session.id}
-              onAddInventory={() => setInventoryModalSession(session.id)}
-              onEndSession={() => setEndSessionModalId(session.id)}
-              session={session}
-            />
-          ))}
-        </div>
-      )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto min-h-0 max-h-[calc(100vh-250px)]">
+        {filteredSessions.length === 0 ? (
+          <EmptyState
+            description={searchQuery ? t("noSearchResults") : t("startNewSessionPrompt")}
+            icon="sessions"
+            title={searchQuery ? t("noResultsFound") : t("noActiveSessions")}
+          />
+        ) : (
+          <div className="grid 3xl:grid-cols-6 4xl:grid-cols-8 grid-cols-1 items-stretch gap-4 pb-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {filteredSessions.map((session) => (
+              <ActiveSessionCard
+                key={session.id}
+                onAddInventory={() => setInventoryModalSession(session.id)}
+                onEndSession={() => setEndSessionModalId(session.id)}
+                session={session}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       {selectedSession && (
         <InventoryAddModal
