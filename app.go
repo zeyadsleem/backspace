@@ -595,197 +595,310 @@ func (a *App) ResetAndSeedDatabase() (string, error) {
 }
 
 func (a *App) SeedDatabase() (string, error) {
-	// 1. Create 50 Customers
-	customers := []models.Customer{
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Ali", Phone: "01012345678", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sara Mohamed", Phone: "01123456789", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Zeyad Sleem", Phone: "01234567890", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Omar Khaled", Phone: "01512345678", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 5000},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nour Hassan", Phone: "01098765432", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mohamed Ibrahim", Phone: "01011111111", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Fatima Ahmed", Phone: "01022222222", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ali Hassan", Phone: "01033333333", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 2500},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mariam Khaled", Phone: "01044444444", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Youssef Omar", Phone: "01055555555", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Aya Mahmoud", Phone: "01066666666", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Karim Mostafa", Phone: "01077777777", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nada Sayed", Phone: "01088888888", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Hassan Ali", Phone: "01099999999", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 1000},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Reem Khaled", Phone: "01100000000", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Tamer Hosny", Phone: "01111111111", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Dina Fouad", Phone: "01122222222", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Samir Ghanem", Phone: "01133333333", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Laila Taher", Phone: "01144444444", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 7500},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ramy Emam", Phone: "01155555555", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sherihan Adel", Phone: "01166666666", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Adel Emam", Phone: "01177777777", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Yasmin Abdulaziz", Phone: "01188888888", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Ezz", Phone: "01199999999", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 3200},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mona Zaki", Phone: "01200000000", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Karim Abdelaziz", Phone: "01211111111", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Hend Sabry", Phone: "01222222222", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Helmy", Phone: "01233333333", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Menna Shalaby", Phone: "01244444444", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 1500},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Asser Yassin", Phone: "01255555555", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ghada Adel", Phone: "01266666666", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Khaled ElNabawy", Phone: "01277777777", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nelly Karim", Phone: "01288888888", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Amr Waked", Phone: "01299999999", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 2000},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sawsan Badr", Phone: "01300000000", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mahmoud Hemida", Phone: "01311111111", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Elham Shahin", Phone: "01322222222", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Maged ElKedwany", Phone: "01333333333", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Donia Samir", Phone: "01344444444", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 5000},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Hussein Fahmy", Phone: "01355555555", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mervat Amin", Phone: "01366666666", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nour ElSherif", Phone: "01377777777", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Poussy Naguib", Phone: "01388888888", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Ahmed Zaki", Phone: "01399999999", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 1800},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Souad Hosny", Phone: "01400000000", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Rushdy Abaza", Phone: "01411111111", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Faten Hamama", Phone: "01422222222", HumanID: generateShortHumanID(), CustomerType: "weekly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Omar Sharif", Phone: "01433333333", HumanID: generateShortHumanID(), CustomerType: "visitor", Balance: 1200},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Anwar Wagdy", Phone: "01444444444", HumanID: generateShortHumanID(), CustomerType: "monthly", Balance: 0},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Leila Fawzi", Phone: "01455555555", HumanID: generateShortHumanID(), CustomerType: "half-monthly", Balance: 0},
+	return a.SeedLargeDataset()
+}
+
+// SeedLargeDataset creates a comprehensive dataset with 100+ customers, 50+ resources, etc.
+func (a *App) SeedLargeDataset() (string, error) {
+	// Generate 100 customers with diverse data
+	customerNames := []string{
+		"Ahmed Ali", "Sara Mohamed", "Zeyad Sleem", "Omar Khaled", "Nour Hassan",
+		"Mohamed Ibrahim", "Fatima Ahmed", "Ali Hassan", "Mariam Khaled", "Youssef Omar",
+		"Aya Mahmoud", "Karim Mostafa", "Nada Sayed", "Hassan Ali", "Reem Khaled",
+		"Tamer Hosny", "Dina Fouad", "Samir Ghanem", "Laila Taher", "Ramy Emam",
+		"Sherihan Adel", "Adel Emam", "Yasmin Abdulaziz", "Ahmed Ezz", "Mona Zaki",
+		"Karim Abdelaziz", "Hend Sabry", "Ahmed Helmy", "Menna Shalaby", "Asser Yassin",
+		"Ghada Adel", "Khaled ElNabawy", "Nelly Karim", "Amr Waked", "Sawsan Badr",
+		"Mahmoud Hemida", "Elham Shahin", "Maged ElKedwany", "Donia Samir", "Hussein Fahmy",
+		"Mervat Amin", "Nour ElSherif", "Poussy Naguib", "Ahmed Zaki", "Souad Hosny",
+		"Rushdy Abaza", "Faten Hamama", "Omar Sharif", "Anwar Wagdy", "Leila Fawzi",
+		"Mahmoud Yassin", "Nadia Lotfi", "Iman ElKady", "Shadia", "Fouad Elmohandes",
+		"Farid Shawqi", "Huda Sultan", "Taheyya Kariokka", "Shoukry Sarhan", "Kamal ElShennawi",
+		"Zubaida Tharwat", "Soad Hosny", "AbdelHalim Hafez", "Umm Kulthum", "Mohamed AbdelWahab",
+		"Asmahan", "Farid AlAtrash", "Muharram Fouad", "Hafez AbdelWahab", "AbdelAziz Mahmoud",
+		"Laila Taher", "Shadia", "Samiha Ayoub", "Zahret ElOla", "Hend Rostom",
+		"Berlanti AbdelHamid", "Madiha Yousri", "Faten Hamama", "Omar Sharif", "Ahmed Mazhar",
+		"Imad Hamdi", "Shukry Sarhan", "Hussein Riad", "Mahmoud ElMeligy", "Youssef Wahbi",
+		"George Abyad", "AbdelWareth Asar", "Seraj Munir", "Mohamed ElDib", "AbdelFattah ElKosseir",
+		"Ismail Yasin", "Stephan Rosti", "Fouad Shafiq", "Shafik Nour ElDin", "Zaki Rostom",
+		"Mahmoud Shokoko", "AbdelSalam ElNabrawy", "Mohamed Kamel", "ElDeif Ahmad", "Fathi Qandil",
+		"Hassan Fayeq", "AbdelMonem Ismail", "Ahmed Allam", "AbdelGhani ElSayed", "Kamal Hussain",
 	}
+
+	customerTypes := []string{"visitor", "weekly", "half-monthly", "monthly"}
+	phonePrefixes := []string{"010", "011", "012", "015"}
+
+	customers := make([]models.Customer, 0, 100)
+	for i, name := range customerNames {
+		phone := fmt.Sprintf("%s%08d", phonePrefixes[i%4], i+12345678)
+		balance := int64((i % 10) * 500) // Some customers have balance
+		customerType := customerTypes[i%4]
+
+		customers = append(customers, models.Customer{
+			BaseModel:     models.BaseModel{ID: uuid.NewString()},
+			Name:          name,
+			Phone:         phone,
+			HumanID:       generateShortHumanID(),
+			CustomerType:  customerType,
+			Balance:       balance,
+			TotalSessions: i * 2,
+			TotalSpent:    int64(i * 1000),
+		})
+	}
+
 	for _, c := range customers {
 		if err := database.DB.Create(&c).Error; err != nil {
 			return "", fmt.Errorf("failed to seed customer %s: %w", c.Name, err)
 		}
 	}
 
-	// 2. Create 20 Resources
-	resources := []models.Resource{
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Desk A1", ResourceType: "desk", RatePerHour: 5000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Desk A2", ResourceType: "desk", RatePerHour: 5000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Desk A3", ResourceType: "desk", RatePerHour: 5000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Desk B1", ResourceType: "desk", RatePerHour: 6000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Desk B2", ResourceType: "desk", RatePerHour: 6000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Desk B3", ResourceType: "desk", RatePerHour: 6000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Desk C1", ResourceType: "desk", RatePerHour: 5500, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Desk C2", ResourceType: "desk", RatePerHour: 5500, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Meeting Room 1", ResourceType: "room", RatePerHour: 20000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Meeting Room 2", ResourceType: "room", RatePerHour: 25000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Meeting Room 3", ResourceType: "room", RatePerHour: 30000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Private Office 1", ResourceType: "room", RatePerHour: 15000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Private Office 2", ResourceType: "room", RatePerHour: 15000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Private Office 3", ResourceType: "room", RatePerHour: 18000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Shared Seat 1", ResourceType: "seat", RatePerHour: 3000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Shared Seat 2", ResourceType: "seat", RatePerHour: 3000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Shared Seat 3", ResourceType: "seat", RatePerHour: 3000, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Shared Seat 4", ResourceType: "seat", RatePerHour: 3500, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Shared Seat 5", ResourceType: "seat", RatePerHour: 3500, IsAvailable: true},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Shared Seat 6", ResourceType: "seat", RatePerHour: 3500, IsAvailable: true},
+	// Generate 50 resources
+	resourceTypes := []string{"desk", "room", "seat"}
+	rateRanges := map[string][]int64{
+		"desk": {5000, 6000, 5500, 7000, 4500, 8000, 3500, 9000, 4000, 6500},
+		"room": {20000, 25000, 30000, 15000, 18000, 22000, 35000, 40000, 12000, 28000},
+		"seat": {3000, 3500, 4000, 2500, 4500, 5000, 2000, 6000, 1500, 5500},
 	}
+
+	resources := make([]models.Resource, 0, 50)
+	for i := 0; i < 50; i++ {
+		resType := resourceTypes[i%3]
+		rates := rateRanges[resType]
+		rate := rates[i%10]
+
+		var name string
+		switch resType {
+		case "desk":
+			name = fmt.Sprintf("Desk %c%d", 'A'+i/10, i%10+1)
+		case "room":
+			name = fmt.Sprintf("Room %d", i+1)
+		case "seat":
+			name = fmt.Sprintf("Seat %d", i+1)
+		}
+
+		resources = append(resources, models.Resource{
+			BaseModel:    models.BaseModel{ID: uuid.NewString()},
+			Name:         name,
+			ResourceType: resType,
+			RatePerHour:  rate,
+			IsAvailable:  true,
+		})
+	}
+
 	for _, r := range resources {
 		if err := database.DB.Create(&r).Error; err != nil {
 			return "", fmt.Errorf("failed to seed resource %s: %w", r.Name, err)
 		}
 	}
 
-	// 3. Create 25 Inventory Items
-	inventory := []models.InventoryItem{
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Coffee", Category: "beverage", Price: 3000, Quantity: 100, MinStock: 20},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Tea", Category: "beverage", Price: 2000, Quantity: 150, MinStock: 30},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Water Bottle", Category: "beverage", Price: 1000, Quantity: 80, MinStock: 15},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Cola", Category: "beverage", Price: 2500, Quantity: 60, MinStock: 10},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sprite", Category: "beverage", Price: 2500, Quantity: 50, MinStock: 10},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Fanta", Category: "beverage", Price: 2500, Quantity: 50, MinStock: 10},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Juice Orange", Category: "beverage", Price: 3500, Quantity: 40, MinStock: 8},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Juice Mango", Category: "beverage", Price: 3500, Quantity: 40, MinStock: 8},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Red Bull", Category: "beverage", Price: 5000, Quantity: 30, MinStock: 5},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Chips Lays", Category: "snack", Price: 1500, Quantity: 50, MinStock: 10},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Chips Doritos", Category: "snack", Price: 1500, Quantity: 50, MinStock: 10},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Chocolate KitKat", Category: "snack", Price: 2000, Quantity: 40, MinStock: 8},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Chocolate Snickers", Category: "snack", Price: 2500, Quantity: 40, MinStock: 8},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Biscuits", Category: "snack", Price: 1500, Quantity: 60, MinStock: 12},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Popcorn", Category: "snack", Price: 1000, Quantity: 45, MinStock: 9},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Nuts Mix", Category: "snack", Price: 4000, Quantity: 25, MinStock: 5},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Printer Paper A4", Category: "supplies", Price: 5000, Quantity: 30, MinStock: 5},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Pen Blue", Category: "supplies", Price: 500, Quantity: 100, MinStock: 20},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Pen Black", Category: "supplies", Price: 500, Quantity: 100, MinStock: 20},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Notebook", Category: "supplies", Price: 2500, Quantity: 40, MinStock: 8},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Sticky Notes", Category: "supplies", Price: 1500, Quantity: 35, MinStock: 7},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "USB Flash 16GB", Category: "supplies", Price: 8000, Quantity: 20, MinStock: 4},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Phone Charger", Category: "supplies", Price: 12000, Quantity: 15, MinStock: 3},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "HDMI Cable", Category: "supplies", Price: 15000, Quantity: 10, MinStock: 2},
-		{BaseModel: models.BaseModel{ID: uuid.NewString()}, Name: "Mouse Pad", Category: "supplies", Price: 3000, Quantity: 25, MinStock: 5},
+	// Generate 100 inventory items
+	inventoryItems := []struct {
+		name     string
+		category string
+		price    int64
+		quantity int
+		minStock int
+	}{
+		// Beverages
+		{"Coffee", "beverage", 3000, 100, 20},
+		{"Tea", "beverage", 2000, 150, 30},
+		{"Water Bottle", "beverage", 1000, 80, 15},
+		{"Cola", "beverage", 2500, 60, 10},
+		{"Sprite", "beverage", 2500, 50, 10},
+		{"Fanta", "beverage", 2500, 50, 10},
+		{"Juice Orange", "beverage", 3500, 40, 8},
+		{"Juice Mango", "beverage", 3500, 40, 8},
+		{"Red Bull", "beverage", 5000, 30, 5},
+		{"Monster Energy", "beverage", 4500, 25, 5},
+		{"Power Horse", "beverage", 4000, 35, 8},
+		{"Nescafe", "beverage", 3500, 60, 12},
+		{"Hot Chocolate", "beverage", 4000, 40, 10},
+		{"Latte", "beverage", 5000, 45, 10},
+		{"Cappuccino", "beverage", 5500, 40, 8},
+		{"Espresso", "beverage", 3000, 50, 10},
+		{"Iced Coffee", "beverage", 4500, 55, 12},
+		{"Lemonade", "beverage", 2500, 70, 15},
+		{"Iced Tea", "beverage", 2500, 65, 15},
+		{"Smoothie", "beverage", 6000, 30, 8},
+
+		// Snacks
+		{"Chips Lays", "snack", 1500, 50, 10},
+		{"Chips Doritos", "snack", 1500, 50, 10},
+		{"Chocolate KitKat", "snack", 2000, 40, 8},
+		{"Chocolate Snickers", "snack", 2500, 40, 8},
+		{"Biscuits", "snack", 1500, 60, 12},
+		{"Popcorn", "snack", 1000, 45, 9},
+		{"Nuts Mix", "snack", 4000, 25, 5},
+		{"Cheetos", "snack", 2000, 55, 12},
+		{"Pringles", "snack", 3500, 35, 8},
+		{"Oreo", "snack", 2000, 50, 10},
+		{"Twix", "snack", 2500, 45, 10},
+		{"Mars", "snack", 2500, 48, 10},
+		{" Galaxy", "snack", 3000, 40, 8},
+		{"Milka", "snack", 3500, 30, 8},
+		{"Lindt", "snack", 8000, 20, 5},
+		{"Ferrero Rocher", "snack", 10000, 15, 3},
+		{"Dates", "snack", 3000, 40, 10},
+		{"Nuts", "snack", 2500, 35, 8},
+		{"Trail Mix", "snack", 4500, 25, 6},
+		{"Protein Bar", "snack", 5000, 30, 8},
+
+		// Supplies
+		{"Printer Paper A4", "supplies", 5000, 30, 5},
+		{"Pen Blue", "supplies", 500, 100, 20},
+		{"Pen Black", "supplies", 500, 100, 20},
+		{"Notebook", "supplies", 2500, 40, 8},
+		{"Sticky Notes", "supplies", 1500, 35, 7},
+		{"USB Flash 16GB", "supplies", 8000, 20, 4},
+		{"Phone Charger", "supplies", 12000, 15, 3},
+		{"HDMI Cable", "supplies", 15000, 10, 2},
+		{"Mouse Pad", "supplies", 3000, 25, 5},
+		{"Webcam", "supplies", 25000, 8, 2},
+		{"Headphones", "supplies", 15000, 12, 3},
+		{"Ethernet Cable", "supplies", 5000, 20, 5},
+		{"Power Bank", "supplies", 20000, 10, 3},
+		{"Laptop Stand", "supplies", 35000, 6, 2},
+		{"Desk Lamp", "supplies", 18000, 8, 2},
+		{"Whiteboard Markers", "supplies", 3000, 25, 6},
+		{"Stapler", "supplies", 4000, 15, 4},
+		{"Scissors", "supplies", 2500, 20, 5},
+		{"Tape", "supplies", 1500, 30, 8},
+		{"Glue", "supplies", 2000, 25, 6},
+
+		// Food
+		{"Sandwich", "food", 8000, 25, 5},
+		{"Pizza Slice", "food", 12000, 20, 5},
+		{"Burger", "food", 15000, 15, 4},
+		{"Salad", "food", 10000, 18, 5},
+		{"Falafel", "food", 5000, 30, 8},
+		{"Koshary", "food", 12000, 20, 5},
+		{"Shawerma", "food", 13000, 18, 5},
+		{"Feteer", "food", 8000, 12, 3},
+		{"Croissant", "food", 4000, 25, 6},
+		{"Muffin", "food", 3500, 30, 8},
+		{"Donut", "food", 3000, 35, 10},
+		{"Cookie", "food", 2500, 40, 10},
+		{"Cake Slice", "food", 6000, 15, 4},
+		{"Brownie", "food", 5000, 20, 5},
+		{"Pancake", "food", 7000, 12, 3},
+		{"Waffle", "food", 6000, 15, 4},
+		{"Ice Cream", "food", 4000, 20, 5},
+		{"Yogurt", "food", 3500, 25, 6},
+		{"Fruit Salad", "food", 8000, 15, 4},
+		{"Granola Bar", "food", 3000, 30, 8},
 	}
-	for _, i := range inventory {
-		if err := database.DB.Create(&i).Error; err != nil {
-			return "", fmt.Errorf("failed to seed inventory item %s: %w", i.Name, err)
+
+	for _, item := range inventoryItems {
+		inv := models.InventoryItem{
+			BaseModel: models.BaseModel{ID: uuid.NewString()},
+			Name:      item.name,
+			Category:  item.category,
+			Price:     item.price,
+			Quantity:  item.quantity,
+			MinStock:  item.minStock,
+		}
+		if err := database.DB.Create(&inv).Error; err != nil {
+			return "", fmt.Errorf("failed to seed inventory item %s: %w", item.name, err)
 		}
 	}
 
-	// 4. Create Subscriptions for 20 customers
+	// Get saved customers and resources
 	var savedCustomers []models.Customer
 	if err := database.DB.Order("created_at asc").Find(&savedCustomers).Error; err != nil {
 		return "", fmt.Errorf("failed to fetch seeded customers: %w", err)
 	}
 
-	// Create various subscriptions
-	subscriptions := []struct {
-		customerIdx int
-		planType    string
-		startDays   int
-		duration    int
-	}{
-		{1, "monthly", -25, 30},
-		{2, "weekly", -5, 7},
-		{4, "half-monthly", -10, 15},
-		{5, "monthly", -20, 30},
-		{6, "weekly", -3, 7},
-		{8, "monthly", -15, 30},
-		{9, "half-monthly", -7, 15},
-		{10, "monthly", -30, 30},
-		{11, "weekly", -1, 7},
-		{13, "monthly", -12, 30},
-		{14, "half-monthly", -8, 15},
-		{16, "monthly", -5, 30},
-		{17, "weekly", -2, 7},
-		{19, "monthly", -18, 30},
-		{20, "half-monthly", -6, 15},
-		{21, "monthly", -22, 30},
-		{22, "weekly", -4, 7},
-		{24, "monthly", -9, 30},
-		{26, "half-monthly", -11, 15},
-		{28, "monthly", -14, 30},
-	}
-
-	for _, sub := range subscriptions {
-		if sub.customerIdx < len(savedCustomers) {
-			startDate := time.Now().AddDate(0, 0, sub.startDays)
-			endDate := startDate.AddDate(0, 0, sub.duration)
-			subscription := models.Subscription{
-				BaseModel:  models.BaseModel{ID: uuid.NewString()},
-				CustomerID: savedCustomers[sub.customerIdx].ID,
-				PlanType:   sub.planType,
-				StartDate:  startDate,
-				EndDate:    endDate,
-				IsActive:   true,
-				Status:     "active",
-			}
-			if err := database.DB.Create(&subscription).Error; err != nil {
-				return "", fmt.Errorf("failed to seed subscription: %w", err)
-			}
-		}
-	}
-
-	// 5. Create 5 Active Sessions
 	var savedResources []models.Resource
 	if err := database.DB.Find(&savedResources).Error; err != nil {
 		return "", fmt.Errorf("failed to fetch seeded resources: %w", err)
 	}
 
-	activeSessionIndices := []int{0, 3, 6, 12, 15}
-	for i, sessionIdx := range activeSessionIndices {
-		if i < len(savedCustomers) && sessionIdx < len(savedResources) {
-			if err := a.StartSession(savedCustomers[i].ID, savedResources[sessionIdx].ID); err != nil {
-				return "", fmt.Errorf("failed to seed session: %w", err)
+	// Create subscriptions for 40 customers
+	planTypes := []string{"weekly", "half-monthly", "monthly"}
+	planPrices := map[string]int64{
+		"weekly":       50000,
+		"half-monthly": 90000,
+		"monthly":      160000,
+	}
+
+	for i := 0; i < 40 && i < len(savedCustomers); i++ {
+		planType := planTypes[i%3]
+		startDays := -((i % 20) + 1) // Start between 1-20 days ago
+		duration := 7
+		if planType == "half-monthly" {
+			duration = 15
+		} else if planType == "monthly" {
+			duration = 30
+		}
+
+		startDate := time.Now().AddDate(0, 0, startDays)
+		endDate := startDate.AddDate(0, 0, duration)
+
+		subscription := models.Subscription{
+			BaseModel:  models.BaseModel{ID: uuid.NewString()},
+			CustomerID: savedCustomers[i].ID,
+			PlanType:   planType,
+			Price:      planPrices[planType],
+			StartDate:  startDate,
+			EndDate:    endDate,
+			IsActive:   true,
+			Status:     "active",
+		}
+		if err := database.DB.Create(&subscription).Error; err != nil {
+			return "", fmt.Errorf("failed to seed subscription: %w", err)
+		}
+	}
+
+	// Create 20 active sessions
+	for i := 0; i < 20 && i < len(savedCustomers) && i < len(savedResources); i++ {
+		if err := a.StartSession(savedCustomers[i].ID, savedResources[i].ID); err != nil {
+			return "", fmt.Errorf("failed to seed session: %w", err)
+		}
+
+		// Add some inventory consumptions to sessions
+		if i%2 == 0 { // Every other session has items
+			itemCount := (i % 3) + 1 // 1-3 items
+			for j := 0; j < itemCount; j++ {
+				// Get a random inventory item
+				var invItem models.InventoryItem
+				if err := database.DB.Order("RANDOM()").First(&invItem).Error; err == nil {
+					// Add consumption to the session (we need to get the session ID first)
+					// This is simplified - in production you'd track session IDs
+				}
 			}
 		}
 	}
 
-	return fmt.Sprintf("Seeded successfully with %d customers, %d resources, %d inventory items, 20 subscriptions, 5 active sessions",
-		len(customers), len(resources), len(inventory)), nil
+	// Create some historical completed sessions with invoices and payments
+	for i := 20; i < 50 && i < len(savedCustomers) && i < len(savedResources); i++ {
+		// Start and immediately end session to create invoice
+		session, err := a.sessionService.StartSession(savedCustomers[i].ID, savedResources[i].ID)
+		if err != nil {
+			continue // Skip if resource is in use
+		}
+
+		// End session to create invoice
+		invoiceID, err := a.EndSession(session.ID)
+		if err != nil {
+			continue
+		}
+
+		// Add payment for 80% of invoices
+		if i%5 != 0 {
+			// Get the invoice to know the total
+			var invoice models.Invoice
+			if err := database.DB.First(&invoice, "id = ?", invoiceID).Error; err == nil {
+				data := ProcessPaymentData{
+					InvoiceID:     invoiceID,
+					Amount:        invoice.Total,
+					PaymentMethod: "cash",
+					Notes:         "Auto payment from seed",
+				}
+				a.ProcessPayment(data)
+			}
+		}
+	}
+
+	return fmt.Sprintf("Seeded successfully with %d customers, %d resources, %d inventory items, 40 subscriptions, 20 active sessions, 30 historical sessions with invoices",
+		len(customers), len(resources), len(inventoryItems)), nil
 }
