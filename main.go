@@ -12,11 +12,33 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
+// autoSeedDatabase checks if database is empty and seeds it with sample data
+func autoSeedDatabase() {
+	// Check if we have any customers
+	var count int64
+	database.DB.Raw("SELECT COUNT(*) FROM customers").Scan(&count)
+
+	// If database is empty, seed it
+	if count == 0 {
+		println("🌱 Database is empty. Seeding with sample data...")
+		app := NewApp()
+		result, err := app.SeedDatabase()
+		if err != nil {
+			println("❌ Error seeding database:", err.Error())
+		} else {
+			println("✅", result)
+		}
+	}
+}
+
 func main() {
 	// Initialize Database
 	database.InitDB()
 	// Ensure database is closed when application exits
 	defer database.CloseDB()
+
+	// Auto-seed database if empty
+	autoSeedDatabase()
 
 	// Create an instance of the app structure
 	app := NewApp()
