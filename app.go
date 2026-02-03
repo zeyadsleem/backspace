@@ -860,7 +860,7 @@ func (a *App) SeedLargeDataset() (string, error) {
 	customers := make([]models.Customer, 0, 100)
 	for i, name := range customerNames {
 		phone := fmt.Sprintf("%s%08d", phonePrefixes[i%4], i+12345678)
-		balance := int64((i % 10) * 500) // Some customers have balance
+		balance := int64(0) // Start with zero balance
 		customerType := customerTypes[i%4]
 
 		customers = append(customers, models.Customer{
@@ -871,7 +871,7 @@ func (a *App) SeedLargeDataset() (string, error) {
 			CustomerType:  customerType,
 			Balance:       balance,
 			TotalSessions: i * 2,
-			TotalSpent:    int64(i * 1000),
+			TotalSpent:    0,
 		})
 	}
 
