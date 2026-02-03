@@ -37,11 +37,15 @@ export function GetActiveSessions():Promise<Array<models.Session>>;
 
 export function GetCustomers():Promise<Array<models.Customer>>;
 
+export function GetCustomersPaginated(arg1:models.PaginationParams):Promise<models.PaginatedResult_myproject_backend_models_Customer_>;
+
 export function GetDashboardMetrics():Promise<models.DashboardMetrics>;
 
 export function GetInventory():Promise<Array<models.InventoryItem>>;
 
 export function GetInvoices():Promise<Array<models.Invoice>>;
+
+export function GetInvoicesPaginated(arg1:models.PaginationParams,arg2:string):Promise<models.PaginatedResult_myproject_backend_models_Invoice_>;
 
 export function GetResources():Promise<Array<models.Resource>>;
 
@@ -60,6 +64,8 @@ export function RemoveSessionInventory(arg1:string,arg2:string):Promise<void>;
 export function ResetAndSeedDatabase():Promise<string>;
 
 export function SeedDatabase():Promise<string>;
+
+export function SeedLargeDataset():Promise<string>;
 
 export function StartSession(arg1:string,arg2:string):Promise<void>;
 

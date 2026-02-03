@@ -13,8 +13,8 @@ import (
 
 // TestProcessPayment_ValidPayment tests normal payment processing
 func TestProcessPayment_ValidPayment(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -57,8 +57,8 @@ func TestProcessPayment_ValidPayment(t *testing.T) {
 
 // TestProcessPayment_PartialPayment tests partial payment
 func TestProcessPayment_PartialPayment(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -100,8 +100,8 @@ func TestProcessPayment_PartialPayment(t *testing.T) {
 
 // TestProcessPayment_Overpayment tests that overpayment is rejected
 func TestProcessPayment_Overpayment(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -145,8 +145,8 @@ func TestProcessPayment_Overpayment(t *testing.T) {
 
 // TestProcessPayment_NegativeAmount tests that negative payment is rejected
 func TestProcessPayment_NegativeAmount(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -163,8 +163,8 @@ func TestProcessPayment_NegativeAmount(t *testing.T) {
 
 // TestProcessPayment_ZeroAmount tests that zero payment is rejected
 func TestProcessPayment_ZeroAmount(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -181,8 +181,8 @@ func TestProcessPayment_ZeroAmount(t *testing.T) {
 
 // TestProcessPayment_AlreadyPaidInvoice tests paying an already paid invoice
 func TestProcessPayment_AlreadyPaidInvoice(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -219,8 +219,8 @@ func TestProcessPayment_AlreadyPaidInvoice(t *testing.T) {
 
 // TestProcessPayment_MultiplePartialPayments tests multiple partial payments
 func TestProcessPayment_MultiplePartialPayments(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -285,8 +285,8 @@ func TestProcessPayment_MultiplePartialPayments(t *testing.T) {
 
 // TestProcessPayment_NonExistentInvoice tests payment for non-existent invoice
 func TestProcessPayment_NonExistentInvoice(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 

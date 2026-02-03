@@ -1,22 +1,22 @@
 {
-  "rules": {
-    "accessibility/noAccessKey": "error",
-    "accessibility/noAriaHiddenOnFocusable": "error",
-    "accessibility/noTargetBlankWithoutRel": "error",
-    "accessibility/altText": "warn",
-    "complexity/noEmptyBlock": "error",
-    "complexity/preferForOf": "warn",
-    "complexity/maxFunctionComplexity": ["error", 10],
-    "style/useFilenamingConvention": {
-      "level": "error",
-      "options": {
-        "requireAscii": true,
-        "filenameCases": ["kebab-case", "PascalCase"]
-      }
-    }
-  },
-  "formatter": {
-    "indentWidth": 4,
-    "lineWidth": 80
-  }
+	"rules": {
+		"accessibility/noAccessKey": "error",
+		"accessibility/noAriaHiddenOnFocusable": "error",
+		"accessibility/noTargetBlankWithoutRel": "error",
+		"accessibility/altText": "warn",
+		"complexity/noEmptyBlock": "error",
+		"complexity/preferForOf": "warn",
+		"complexity/maxFunctionComplexity": ["error", 10],
+		"style/useFilenamingConvention": {
+			"level": "error",
+			"options": {
+				"requireAscii": true,
+				"filenameCases": ["kebab-case", "PascalCase"]
+			}
+		}
+	},
+	"formatter": {
+		"indentWidth": 4,
+		"lineWidth": 80
+	}
 }

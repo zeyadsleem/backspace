@@ -1,228 +1,147 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DollarSign, Monitor } from "lucide-react";
+import { Monitor } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { FormActions, SelectField, TextField } from "@/components/ui/form";
 import { type ResourceFormData, resourceSchema } from "@/lib/validations";
-import { useAppStore } from "@/stores/useAppStore";
+import { useAppStore } from "@/stores/use-app-store";
 import type { ResourceType } from "@/types";
 
 interface ResourceFormProps {
+	initialData?: {
+		name: string;
 
-  initialData?: {
+		resourceType: ResourceType;
+	};
 
-    name: string;
+	onSubmit?: (data: { name: string; resourceType: ResourceType; ratePerHour: number }) => void;
 
-    resourceType: ResourceType;
+	onCancel?: () => void;
 
-  };
-
-  onSubmit?: (data: { name: string; resourceType: ResourceType; ratePerHour: number }) => void;
-
-  onCancel?: () => void;
-
-  isLoading?: boolean;
-
+	isLoading?: boolean;
 }
 
-
-
 export function ResourceForm({
+	initialData,
 
-  initialData,
+	onSubmit,
 
-  onSubmit,
+	onCancel,
 
-  onCancel,
-
-  isLoading = false,
-
+	isLoading = false,
 }: ResourceFormProps) {
+	const t = useAppStore((state) => state.t);
 
-  const t = useAppStore((state) => state.t);
+	const resources = useAppStore((state) => state.resources);
 
-  const resources = useAppStore((state) => state.resources);
+	const {
+		register,
 
+		handleSubmit,
 
+		formState: { errors, isValid, isDirty },
 
-  const {
+		reset,
+	} = useForm<ResourceFormData>({
+		resolver: zodResolver(resourceSchema),
 
-    register,
+		defaultValues: {
+			name: initialData?.name ?? "",
 
-    handleSubmit,
+			resourceType: initialData?.resourceType ?? "seat",
 
-    formState: { errors, isValid, isDirty },
+			ratePerHour: 0,
+		},
 
-    reset,
+		mode: "onChange",
+	});
 
-  } = useForm<ResourceFormData>({
+	const resourceTypeLabels: Record<ResourceType, string> = {
+		seat: t("seatType"),
 
-    resolver: zodResolver(resourceSchema),
+		room: t("roomType"),
 
-    defaultValues: {
+		desk: t("deskType"),
+	};
 
-      name: initialData?.name ?? "",
+	const onFormSubmit = (data: ResourceFormData) => {
+		// Get the current rate for this resource type from existing resources
 
-      resourceType: initialData?.resourceType ?? "seat",
+		// since settings is the source of truth and updates all resources of the same type.
 
-      ratePerHour: 0,
+		const existingResource = resources.find((r) => r.resourceType === data.resourceType);
 
-    },
+		const currentRate = existingResource ? existingResource.ratePerHour / 100 : data.ratePerHour;
 
-    mode: "onChange",
+		onSubmit?.({
+			name: data.name,
 
-  });
+			resourceType: data.resourceType,
 
+			ratePerHour: currentRate,
+		});
+	};
 
+	const handleReset = () => {
+		reset();
 
-  const resourceTypeLabels: Record<ResourceType, string> = {
+		onCancel?.();
+	};
 
-    seat: t("seatType"),
+	const isEditing = !!initialData;
 
-    room: t("roomType"),
+	const resourceTypeOptions = Object.entries(resourceTypeLabels).map(([type, label]) => ({
+		value: type,
 
-    desk: t("deskType"),
+		label,
+	}));
 
-  };
+	return (
+		<form className="space-y-6" onSubmit={handleSubmit(onFormSubmit)}>
+			<div className="space-y-6">
+				{/* Name Field */}
 
+				<TextField
+					disabled={isLoading}
+					error={errors.name?.message}
+					icon={<Monitor className="h-4 w-4" />}
+					id="name"
+					label={t("resourceName")}
+					placeholder={t("resourceExample")}
+					required
+					{...register("name", { required: true })}
+				/>
 
+				{/* Resource Type Field */}
 
-  const onFormSubmit = (data: ResourceFormData) => {
+				<SelectField
+					disabled={isLoading}
+					error={errors.resourceType?.message}
+					id="resourceType"
+					label={t("resourceType")}
+					options={resourceTypeOptions}
+					required
+					{...register("resourceType")}
+				/>
+			</div>
 
-    // Get the current rate for this resource type from existing resources
+			{/* Action Buttons */}
 
-    // since settings is the source of truth and updates all resources of the same type.
-
-    const existingResource = resources.find(r => r.resourceType === data.resourceType);
-
-    const currentRate = existingResource ? existingResource.ratePerHour / 100 : data.ratePerHour;
-
-
-
-    onSubmit?.({
-
-      name: data.name,
-
-      resourceType: data.resourceType,
-
-      ratePerHour: currentRate,
-
-    });
-
-  };
-
-
-
-  const handleReset = () => {
-
-    reset();
-
-    onCancel?.();
-
-  };
-
-
-
-  const isEditing = !!initialData;
-
-
-
-  const resourceTypeOptions = Object.entries(resourceTypeLabels).map(([type, label]) => ({
-
-    value: type,
-
-    label,
-
-  }));
-
-
-
-  return (
-
-    <form className="space-y-6" onSubmit={handleSubmit(onFormSubmit)}>
-
-      <div className="space-y-6">
-
-        {/* Name Field */}
-
-        <TextField
-
-          disabled={isLoading}
-
-          error={errors.name?.message}
-
-          icon={<Monitor className="h-4 w-4" />}
-
-          id="name"
-
-          label={t("resourceName")}
-
-          placeholder={t("resourceExample")}
-
-          required
-
-          {...register("name", { required: true })}
-
-        />
-
-
-
-        {/* Resource Type Field */}
-
-        <SelectField
-
-          disabled={isLoading}
-
-          error={errors.resourceType?.message}
-
-          id="resourceType"
-
-          label={t("resourceType")}
-
-          options={resourceTypeOptions}
-
-          required
-
-          {...register("resourceType")}
-
-        />
-
-      </div>
-
-
-
-      {/* Action Buttons */}
-
-      <FormActions className="mt-8">
-
-        <Button disabled={isLoading} onClick={handleReset} type="button" variant="outline">
-
-          {t("cancel")}
-
-        </Button>
-
-        <Button
-
-          className="flex-1"
-
-          disabled={isLoading || !isValid || !(isDirty || isEditing)}
-
-          isLoading={isLoading}
-
-          type="submit"
-
-          variant="primary"
-
-        >
-
-          {isEditing ? t("updateResource") : t("createResource")}
-
-        </Button>
-
-      </FormActions>
-
-    </form>
-
-  );
-
+			<FormActions className="mt-8">
+				<Button disabled={isLoading} onClick={handleReset} type="button" variant="outline">
+					{t("cancel")}
+				</Button>
+
+				<Button
+					className="flex-1"
+					disabled={isLoading || !isValid || !(isDirty || isEditing)}
+					isLoading={isLoading}
+					type="submit"
+					variant="primary"
+				>
+					{isEditing ? t("updateResource") : t("createResource")}
+				</Button>
+			</FormActions>
+		</form>
+	);
 }

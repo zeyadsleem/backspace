@@ -44,13 +44,14 @@ type Resource struct {
 type Subscription struct {
 	BaseModel
 	CustomerID    string    `json:"customerId" gorm:"not null;index"`
+	Customer      Customer  `json:"-"`                                                                                 // For Preload
 	CustomerName  string    `json:"customerName" gorm:"-"`                                                             // Populated manually
 	PlanType      string    `json:"planType" gorm:"not null;check:plan_type IN ('weekly', 'half-monthly', 'monthly')"` // weekly, half-monthly, monthly
 	Price         int64     `json:"price" gorm:"not null;check:price >= 0"`                                            // Price at the time of subscription (in piasters)
 	StartDate     time.Time `json:"startDate" ts_type:"string" gorm:"not null"`
 	EndDate       time.Time `json:"endDate" ts_type:"string" gorm:"not null"`
 	IsActive      bool      `json:"isActive" gorm:"not null;default:false"`
-	Status        string    `json:"status" gorm:"not null;default:'inactive';check:status IN ('active', 'expired', 'inactive')"` // active, expired, inactive
+	Status        string    `json:"status" gorm:"not null;default:'inactive';index;check:status IN ('active', 'expired', 'inactive')"` // active, expired, inactive
 	InvoiceID     *string   `json:"invoiceId"`
 	DaysRemaining int       `json:"daysRemaining" gorm:"-"`
 }
@@ -83,7 +84,7 @@ type Session struct {
 	SessionCost           int64                  `json:"sessionCost" gorm:"not null;default:0;check:session_cost >= 0"`       // In piasters
 	TotalAmount           int64                  `json:"totalAmount" gorm:"not null;default:0;check:total_amount >= 0"`       // In piasters
 	DurationMinutes       int                    `json:"durationMinutes" gorm:"-"`
-	Status                string                 `json:"status" gorm:"not null;default:'active';check:status IN ('active', 'completed')"` // active, completed
+	Status                string                 `json:"status" gorm:"not null;default:'active';index;check:status IN ('active', 'completed')"` // active, completed
 }
 
 // InventoryConsumption model (Join table with extras)
@@ -106,11 +107,11 @@ type Invoice struct {
 	CustomerName  string     `json:"customerName" gorm:"-"`
 	CustomerPhone string     `json:"customerPhone" gorm:"-"`
 	SessionID     *string    `json:"sessionId"`
-	Amount        int64      `json:"amount" gorm:"not null;default:0;check:amount >= 0"`                                                 // In piasters
-	Discount      int64      `json:"discount" gorm:"not null;default:0;check:discount >= 0"`                                             // In piasters
-	Total         int64      `json:"total" gorm:"not null;default:0;check:total >= 0"`                                                   // In piasters
-	PaidAmount    int64      `json:"paidAmount" gorm:"not null;default:0;check:paid_amount >= 0"`                                        // In piasters
-	Status        string     `json:"status" gorm:"not null;default:'unpaid';check:status IN ('paid', 'unpaid', 'pending', 'cancelled')"` // paid, unpaid, pending, cancelled
+	Amount        int64      `json:"amount" gorm:"not null;default:0;check:amount >= 0"`                                                                         // In piasters
+	Discount      int64      `json:"discount" gorm:"not null;default:0;check:discount >= 0"`                                                                     // In piasters
+	Total         int64      `json:"total" gorm:"not null;default:0;check:total >= 0"`                                                                           // In piasters
+	PaidAmount    int64      `json:"paidAmount" gorm:"not null;default:0;check:paid_amount >= 0"`                                                                // In piasters
+	Status        string     `json:"status" gorm:"not null;default:'unpaid';index;check:status IN ('paid', 'unpaid', 'pending', 'partially_paid', 'cancelled')"` // paid, unpaid, pending, partially_paid, cancelled
 	DueDate       time.Time  `json:"dueDate" ts_type:"string" gorm:"not null"`
 	PaidDate      *time.Time `json:"paidDate" ts_type:"string"`
 	LineItems     []LineItem `json:"lineItems" gorm:"foreignKey:InvoiceID"`
@@ -195,4 +196,22 @@ type DashboardMetrics struct {
 	ActiveSessions      int   `json:"activeSessions"`
 	NewCustomersToday   int   `json:"newCustomersToday"`
 	ActiveSubscriptions int   `json:"activeSubscriptions"`
+}
+
+// PaginatedResult is a generic pagination wrapper
+type PaginatedResult[T any] struct {
+	Items      []T   `json:"items"`
+	Total      int64 `json:"total"`
+	Page       int   `json:"page"`
+	PageSize   int   `json:"pageSize"`
+	TotalPages int   `json:"totalPages"`
+}
+
+// PaginationParams for query parameters
+type PaginationParams struct {
+	Page     int    `json:"page"`
+	PageSize int    `json:"pageSize"`
+	Search   string `json:"search"`
+	SortBy   string `json:"sortBy"`
+	SortDesc bool   `json:"sortDesc"`
 }

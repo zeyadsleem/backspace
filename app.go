@@ -56,6 +56,67 @@ func (a *App) GetCustomers() ([]models.Customer, error) {
 	return customers, nil
 }
 
+// GetCustomersPaginated returns paginated customers with search support
+func (a *App) GetCustomersPaginated(params models.PaginationParams) (*models.PaginatedResult[models.Customer], error) {
+	var customers []models.Customer
+	var total int64
+
+	// Default values
+	if params.Page < 1 {
+		params.Page = 1
+	}
+	if params.PageSize < 1 || params.PageSize > 100 {
+		params.PageSize = 20
+	}
+
+	query := database.DB.Model(&models.Customer{})
+
+	// Search filter
+	if params.Search != "" {
+		searchPattern := "%" + params.Search + "%"
+		query = query.Where("name LIKE ? OR phone LIKE ? OR human_id LIKE ?", searchPattern, searchPattern, searchPattern)
+	}
+
+	// Count total
+	if err := query.Count(&total).Error; err != nil {
+		return nil, fmt.Errorf("failed to count customers: %w", err)
+	}
+
+	// Sorting
+	orderClause := "created_at desc"
+	if params.SortBy != "" {
+		direction := "asc"
+		if params.SortDesc {
+			direction = "desc"
+		}
+		orderClause = params.SortBy + " " + direction
+	}
+
+	// Fetch paginated results
+	offset := (params.Page - 1) * params.PageSize
+	if err := database.DB.Preload("Subscriptions").Preload("Invoices").
+		Where(query).
+		Order(orderClause).
+		Offset(offset).
+		Limit(params.PageSize).
+		Find(&customers).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch customers: %w", err)
+	}
+
+	totalPages := int(total) / params.PageSize
+	if int(total)%params.PageSize > 0 {
+		totalPages++
+	}
+
+	return &models.PaginatedResult[models.Customer]{
+		Items:      customers,
+		Total:      total,
+		Page:       params.Page,
+		PageSize:   params.PageSize,
+		TotalPages: totalPages,
+	}, nil
+}
+
 func (a *App) AddCustomer(data models.Customer) error {
 	data.ID = uuid.NewString()
 
@@ -174,24 +235,19 @@ func (a *App) AdjustInventoryQuantity(id string, delta int) error {
 
 func (a *App) GetActiveSessions() ([]models.Session, error) {
 	var sessions []models.Session
-	// Load related data
+	// Load related data with Preload to avoid N+1 queries
 	if err := database.DB.Where("status = ?", "active").
+		Preload("Customer").
+		Preload("Resource").
 		Preload("InventoryConsumptions").
 		Find(&sessions).Error; err != nil {
 		return nil, fmt.Errorf("failed to fetch active sessions: %w", err)
 	}
 
+	// Populate computed fields from preloaded relationships
 	for i := range sessions {
-		var c models.Customer
-		var r models.Resource
-		if err := database.DB.First(&c, "id = ?", sessions[i].CustomerID).Error; err != nil {
-			return nil, fmt.Errorf("failed to fetch session customer: %w", err)
-		}
-		if err := database.DB.First(&r, "id = ?", sessions[i].ResourceID).Error; err != nil {
-			return nil, fmt.Errorf("failed to fetch session resource: %w", err)
-		}
-		sessions[i].CustomerName = c.Name
-		sessions[i].ResourceName = r.Name
+		sessions[i].CustomerName = sessions[i].Customer.Name
+		sessions[i].ResourceName = sessions[i].Resource.Name
 	}
 	return sessions, nil
 }
@@ -215,7 +271,9 @@ func (a *App) EndSession(sessionID string) (string, error) {
 		if err != nil {
 			return err
 		}
-		invoiceID = invoice.ID
+		if invoice != nil {
+			invoiceID = invoice.ID
+		}
 		return nil
 	})
 	return invoiceID, err
@@ -237,15 +295,12 @@ func (a *App) UpdateSessionInventory(sessionID string, inventoryID string, quant
 
 func (a *App) GetSubscriptions() ([]models.Subscription, error) {
 	var subs []models.Subscription
-	if err := database.DB.Find(&subs).Error; err != nil {
+	// Use Preload to avoid N+1 query problem
+	if err := database.DB.Preload("Customer").Find(&subs).Error; err != nil {
 		return nil, fmt.Errorf("failed to fetch subscriptions: %w", err)
 	}
 	for i := range subs {
-		var c models.Customer
-		if err := database.DB.First(&c, "id = ?", subs[i].CustomerID).Error; err != nil {
-			return nil, fmt.Errorf("failed to fetch subscription customer: %w", err)
-		}
-		subs[i].CustomerName = c.Name
+		subs[i].CustomerName = subs[i].Customer.Name
 
 		if subs[i].IsActive && subs[i].EndDate.After(time.Now()) {
 			subs[i].DaysRemaining = int(time.Until(subs[i].EndDate).Hours() / 24)
@@ -323,18 +378,96 @@ func (a *App) ReactivateSubscription(id string) error {
 
 func (a *App) GetInvoices() ([]models.Invoice, error) {
 	var invoices []models.Invoice
-	if err := database.DB.Preload("LineItems").Preload("Payments").Order("created_at desc").Find(&invoices).Error; err != nil {
+	// Use Preload for Customer to avoid N+1 query problem
+	if err := database.DB.Preload("Customer").Preload("LineItems").Preload("Payments").Order("created_at desc").Find(&invoices).Error; err != nil {
 		return nil, fmt.Errorf("failed to fetch invoices: %w", err)
 	}
+	// Populate computed fields from preloaded Customer
 	for i := range invoices {
-		var c models.Customer
-		if err := database.DB.First(&c, "id = ?", invoices[i].CustomerID).Error; err != nil {
-			return nil, fmt.Errorf("failed to fetch invoice customer: %w", err)
-		}
-		invoices[i].CustomerName = c.Name
-		invoices[i].CustomerPhone = c.Phone
+		invoices[i].CustomerName = invoices[i].Customer.Name
+		invoices[i].CustomerPhone = invoices[i].Customer.Phone
 	}
 	return invoices, nil
+}
+
+// GetInvoicesPaginated returns paginated invoices with filters
+func (a *App) GetInvoicesPaginated(params models.PaginationParams, status string) (*models.PaginatedResult[models.Invoice], error) {
+	var invoices []models.Invoice
+	var total int64
+
+	// Default values
+	if params.Page < 1 {
+		params.Page = 1
+	}
+	if params.PageSize < 1 || params.PageSize > 100 {
+		params.PageSize = 20
+	}
+
+	query := database.DB.Model(&models.Invoice{})
+
+	// Status filter
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	// Search filter (by invoice number or customer)
+	if params.Search != "" {
+		searchPattern := "%" + params.Search + "%"
+		query = query.Where("invoice_number LIKE ?", searchPattern)
+	}
+
+	// Count total
+	if err := query.Count(&total).Error; err != nil {
+		return nil, fmt.Errorf("failed to count invoices: %w", err)
+	}
+
+	// Sorting
+	orderClause := "created_at desc"
+	if params.SortBy != "" {
+		direction := "asc"
+		if params.SortDesc {
+			direction = "desc"
+		}
+		orderClause = params.SortBy + " " + direction
+	}
+
+	// Fetch paginated results
+	offset := (params.Page - 1) * params.PageSize
+	baseQuery := database.DB.Preload("Customer").Preload("LineItems").Preload("Payments")
+
+	if status != "" {
+		baseQuery = baseQuery.Where("status = ?", status)
+	}
+	if params.Search != "" {
+		searchPattern := "%" + params.Search + "%"
+		baseQuery = baseQuery.Where("invoice_number LIKE ?", searchPattern)
+	}
+
+	if err := baseQuery.Order(orderClause).
+		Offset(offset).
+		Limit(params.PageSize).
+		Find(&invoices).Error; err != nil {
+		return nil, fmt.Errorf("failed to fetch invoices: %w", err)
+	}
+
+	// Populate computed fields
+	for i := range invoices {
+		invoices[i].CustomerName = invoices[i].Customer.Name
+		invoices[i].CustomerPhone = invoices[i].Customer.Phone
+	}
+
+	totalPages := int(total) / params.PageSize
+	if int(total)%params.PageSize > 0 {
+		totalPages++
+	}
+
+	return &models.PaginatedResult[models.Invoice]{
+		Items:      invoices,
+		Total:      total,
+		Page:       params.Page,
+		PageSize:   params.PageSize,
+		TotalPages: totalPages,
+	}, nil
 }
 
 type ProcessPaymentData struct {

@@ -70,6 +70,10 @@ export function GetCustomers() {
   return window['go']['main']['App']['GetCustomers']();
 }
 
+export function GetCustomersPaginated(arg1) {
+  return window['go']['main']['App']['GetCustomersPaginated'](arg1);
+}
+
 export function GetDashboardMetrics() {
   return window['go']['main']['App']['GetDashboardMetrics']();
 }
@@ -80,6 +84,10 @@ export function GetInventory() {
 
 export function GetInvoices() {
   return window['go']['main']['App']['GetInvoices']();
+}
+
+export function GetInvoicesPaginated(arg1, arg2) {
+  return window['go']['main']['App']['GetInvoicesPaginated'](arg1, arg2);
 }
 
 export function GetResources() {
@@ -116,6 +124,10 @@ export function ResetAndSeedDatabase() {
 
 export function SeedDatabase() {
   return window['go']['main']['App']['SeedDatabase']();
+}
+
+export function SeedLargeDataset() {
+  return window['go']['main']['App']['SeedLargeDataset']();
 }
 
 export function StartSession(arg1, arg2) {

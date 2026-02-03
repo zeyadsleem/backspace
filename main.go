@@ -18,6 +18,9 @@ func autoSeedDatabase() {
 
 	app := NewApp()
 
+	// Initialize the app (this sets up the services)
+	app.startup(nil)
+
 	// First reset the database
 	_, err := app.ResetAndSeedDatabase()
 	if err != nil {

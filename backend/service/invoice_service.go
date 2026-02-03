@@ -20,7 +20,13 @@ func NewInvoiceService() *InvoiceService {
 }
 
 // CreateInvoiceFromSession generates an invoice for a completed session
+// Returns nil, nil if the session has zero total amount (e.g., subscribed users with no inventory)
 func (s *InvoiceService) CreateInvoiceFromSession(tx *gorm.DB, session *models.Session) (*models.Invoice, error) {
+	// Don't create invoice for zero-amount sessions
+	if session.TotalAmount <= 0 {
+		return nil, nil
+	}
+
 	invoiceID := uuid.NewString()
 	invoiceNumber := fmt.Sprintf("INV-%d", time.Now().Unix())
 

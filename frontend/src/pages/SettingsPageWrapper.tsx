@@ -1,21 +1,21 @@
 import { SettingsPage } from "@/components/settings";
-import { useAppStore } from "@/stores/useAppStore";
+import { useAppStore } from "@/stores/use-app-store";
 
 export function SettingsPageWrapper() {
-  const settings = useAppStore((state) => state.settings);
-  const setTheme = useAppStore((state) => state.setTheme);
-  const setLanguage = useAppStore((state) => state.setLanguage);
+	const settings = useAppStore((state) => state.settings);
+	const setTheme = useAppStore((state) => state.setTheme);
+	const setLanguage = useAppStore((state) => state.setLanguage);
 
-  return (
-    <SettingsPage
-      onUpdateAppearance={(appearance: {
-        theme: "light" | "dark" | "system";
-        language: "en" | "ar";
-      }) => {
-        setTheme(appearance.theme);
-        setLanguage(appearance.language);
-      }}
-      settings={settings}
-    />
-  );
+	return (
+		<SettingsPage
+			onUpdateAppearance={(appearance: {
+				theme: "light" | "dark" | "system";
+				language: "en" | "ar";
+			}) => {
+				setTheme(appearance.theme);
+				setLanguage(appearance.language);
+			}}
+			settings={settings}
+		/>
+	);
 }

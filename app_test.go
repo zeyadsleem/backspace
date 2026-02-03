@@ -5,6 +5,7 @@ import (
 
 	"myproject/backend/database"
 	"myproject/backend/models"
+	"myproject/backend/service"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,8 +14,8 @@ import (
 // TestAddCustomer_ValidData tests creating a customer with valid data
 func TestAddCustomer_ValidData(t *testing.T) {
 	// Initialize test database
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -46,8 +47,8 @@ func TestAddCustomer_ValidData(t *testing.T) {
 
 // TestAddCustomer_EmptyName tests that empty name is rejected
 func TestAddCustomer_EmptyName(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -63,8 +64,8 @@ func TestAddCustomer_EmptyName(t *testing.T) {
 
 // TestAddCustomer_EmptyPhone tests that empty phone is rejected
 func TestAddCustomer_EmptyPhone(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -80,8 +81,8 @@ func TestAddCustomer_EmptyPhone(t *testing.T) {
 
 // TestAddResource_ValidData tests creating a resource with valid data
 func TestAddResource_ValidData(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -111,8 +112,8 @@ func TestAddResource_ValidData(t *testing.T) {
 
 // TestAddResource_NegativeRate tests that negative rate is rejected
 func TestAddResource_NegativeRate(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -129,8 +130,8 @@ func TestAddResource_NegativeRate(t *testing.T) {
 
 // TestAddResource_EmptyName tests that empty name is rejected
 func TestAddResource_EmptyName(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -147,8 +148,8 @@ func TestAddResource_EmptyName(t *testing.T) {
 
 // TestAddInventory_ValidData tests creating inventory with valid data
 func TestAddInventory_ValidData(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -181,8 +182,8 @@ func TestAddInventory_ValidData(t *testing.T) {
 
 // TestAddInventory_NegativePrice tests that negative price is rejected
 func TestAddInventory_NegativePrice(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -201,8 +202,8 @@ func TestAddInventory_NegativePrice(t *testing.T) {
 
 // TestAddInventory_NegativeQuantity tests that negative quantity is rejected
 func TestAddInventory_NegativeQuantity(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -221,10 +222,11 @@ func TestAddInventory_NegativeQuantity(t *testing.T) {
 
 // TestAddSubscription_ValidData tests creating subscription with valid data
 func TestAddSubscription_ValidData(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
+	app.subscriptionService = service.NewSubscriptionService()
 
 	// First create a customer
 	customer := models.Customer{
@@ -274,8 +276,8 @@ func TestAddSubscription_ValidData(t *testing.T) {
 
 // TestAddSubscription_InvalidPlanType tests that invalid plan type is rejected
 func TestAddSubscription_InvalidPlanType(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -293,8 +295,8 @@ func TestAddSubscription_InvalidPlanType(t *testing.T) {
 
 // TestAddSubscription_NegativePrice tests that negative price is rejected
 func TestAddSubscription_NegativePrice(t *testing.T) {
-	database.InitDB()
-	defer database.CloseDB()
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
 
 	app := NewApp()
 
@@ -324,4 +326,86 @@ func TestGenerateShortHumanID(t *testing.T) {
 
 	// Check format (should be uppercase hex)
 	assert.Regexp(t, "^[A-F0-9]{8}$", id1, "HumanID should be uppercase hex")
+}
+
+// TestEndSession_ZeroAmount_NoInvoice checks that ending a zero-cost session does NOT create an invoice
+func TestEndSession_ZeroAmount_NoInvoice(t *testing.T) {
+	database.SetupTestDB(t)
+	defer database.CleanupTestDB()
+	app := NewApp()
+
+	// Manually initialize services for testing since we're bypassing Wails startup
+	app.sessionService = service.NewSessionService()
+	app.invoiceService = service.NewInvoiceService()
+	app.subscriptionService = service.NewSubscriptionService()
+
+	// 1. Create Customer
+	customer := models.Customer{Name: "Free User", Phone: "01000000000"}
+	err := app.AddCustomer(customer)
+	require.NoError(t, err)
+
+	// Get Customer ID
+	customers, _ := app.GetCustomers()
+	var customerID string
+	for _, c := range customers {
+		if c.Name == "Free User" {
+			customerID = c.ID
+			break
+		}
+	}
+	require.NotEmpty(t, customerID)
+
+	// 2. Create Free Resource
+	resource := models.Resource{Name: "Free Desk", ResourceType: "desk", RatePerHour: 0}
+	err = app.AddResource(resource)
+	require.NoError(t, err)
+
+	// Get Resource ID
+	resources, _ := app.GetResources()
+	var resourceID string
+	for _, r := range resources {
+		if r.Name == "Free Desk" {
+			resourceID = r.ID
+			break
+		}
+	}
+	require.NotEmpty(t, resourceID)
+
+	// 3. Start Session
+	err = app.StartSession(customerID, resourceID)
+	require.NoError(t, err)
+
+	// 4. Get Session ID
+	sessions, err := app.GetActiveSessions()
+	require.NoError(t, err)
+
+	// Filter for our session
+	var sessionID string
+	for _, s := range sessions {
+		if s.CustomerID == customerID {
+			sessionID = s.ID
+			break
+		}
+	}
+	require.NotEmpty(t, sessionID, "Should find active session")
+
+	// 5. End Session
+	invoiceID, err := app.EndSession(sessionID)
+	require.NoError(t, err)
+
+	// 6. Verify NO Invoice ID returned
+	assert.Empty(t, invoiceID, "Should not return invoice ID for zero amount session")
+
+	// 7. Verify NO Invoice in DB
+	invoices, err := app.GetInvoices()
+	require.NoError(t, err)
+
+	found := false
+	for _, inv := range invoices {
+		if inv.SessionID != nil && *inv.SessionID == sessionID {
+			found = true
+			break
+		}
+	}
+	assert.False(t, found, "Should not create invoice for zero amount session")
 }
