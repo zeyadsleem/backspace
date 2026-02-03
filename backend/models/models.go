@@ -104,6 +104,7 @@ type InventoryConsumption struct {
 type Invoice struct {
 	BaseModel
 	InvoiceNumber string     `json:"invoiceNumber" gorm:"uniqueIndex"`
+	InvoiceType   string     `json:"invoiceType" gorm:"not null;default:'sale';index;check:invoice_type IN ('sale', 'withdrawal', 'refund')"` // sale, withdrawal, refund
 	CustomerID    string     `json:"customerId" gorm:"not null;index"`
 	Customer      Customer   `json:"-"`
 	CustomerName  string     `json:"customerName" gorm:"-"`
@@ -134,7 +135,7 @@ type LineItem struct {
 type Payment struct {
 	BaseModel
 	InvoiceID string    `json:"invoiceId" gorm:"not null;index"`
-	Amount    int64     `json:"amount" gorm:"not null"`                                                         // In piasters (can be negative for refunds)
+	Amount    int64     `json:"amount" gorm:"not null;check:amount >= 0"`                                       // In piasters (always positive, type determines direction)
 	Method    string    `json:"method" gorm:"not null;check:method IN ('cash', 'card', 'transfer', 'balance')"` // cash, card, transfer, balance
 	Date      time.Time `json:"date" ts_type:"string" gorm:"not null"`
 	Notes     string    `json:"notes"`

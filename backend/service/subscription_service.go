@@ -137,38 +137,37 @@ func (s *SubscriptionService) RefundSubscription(id string, refundMethod string)
 		// 2. Process Refund
 		if refundAmount > 0 {
 			if refundMethod == "cash" {
-				// Create a negative payment record (Refund)
-				// We need the original invoice ID
-				invoiceID := ""
-				if sub.InvoiceID != nil {
-					invoiceID = *sub.InvoiceID
-				} else {
-					// Fallback: try to find invoice
-					var inv models.Invoice
-					if err := tx.Where("customer_id = ? AND amount = ?", sub.CustomerID, sub.Price).Last(&inv).Error; err == nil {
-						invoiceID = inv.ID
-					}
+				// Create a Refund Invoice (Credit Note) instead of modifying old invoice
+				invoiceID := uuid.NewString()
+				now := time.Now()
+
+				refundInvoice := models.Invoice{
+					BaseModel:     models.BaseModel{ID: invoiceID},
+					InvoiceNumber: fmt.Sprintf("REF-%d", time.Now().Unix()),
+					InvoiceType:   "refund",
+					CustomerID:    sub.CustomerID,
+					Amount:        refundAmount, // Positive
+					Total:         refundAmount,
+					PaidAmount:    refundAmount,
+					Status:        "paid",
+					PaidDate:      &now,
+				}
+				if err := tx.Create(&refundInvoice).Error; err != nil {
+					return err
 				}
 
-				if invoiceID != "" {
-					refundPayment := models.Payment{
-						BaseModel: models.BaseModel{ID: uuid.NewString()},
-						InvoiceID: invoiceID,
-						Amount:    -refundAmount, // Negative amount for refund
-						Method:    "cash",
-						Type:      "refund",
-						Date:      time.Now(),
-						Notes:     fmt.Sprintf("Refund for cancelled subscription (%s)", sub.PlanType),
-					}
-					if err := tx.Create(&refundPayment).Error; err != nil {
-						return err
-					}
-					// Note: We typically don't update Invoice.PaidAmount with refunds to keep track of total paid,
-					// or we decrease it. Let's decrease it to reflect "net paid".
-					if err := tx.Model(&models.Invoice{}).Where("id = ?", invoiceID).
-						Update("paid_amount", gorm.Expr("paid_amount - ?", refundAmount)).Error; err != nil {
-						return err
-					}
+				// Create Payment Record
+				refundPayment := models.Payment{
+					BaseModel: models.BaseModel{ID: uuid.NewString()},
+					InvoiceID: invoiceID,
+					Amount:    refundAmount, // Positive
+					Method:    "cash",
+					Type:      "refund",
+					Date:      time.Now(),
+					Notes:     fmt.Sprintf("Refund for cancelled subscription (%s)", sub.PlanType),
+				}
+				if err := tx.Create(&refundPayment).Error; err != nil {
+					return err
 				}
 			} else {
 				// Default: Refund to Balance

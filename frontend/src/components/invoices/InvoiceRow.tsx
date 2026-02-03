@@ -39,13 +39,36 @@ export function InvoiceRow({ invoice, onView, onRecordPayment }: InvoiceRowProps
 			day: "numeric",
 		});
 
+	const getTypeLabel = (type?: string) => {
+		switch (type) {
+			case "withdrawal":
+				return t("withdrawal");
+			case "refund":
+				return t("refund");
+			default:
+				return t("invoice"); // Or just leave empty for sales
+		}
+	};
+
 	return (
 		<div className="flex flex-col gap-3 px-4 py-4 transition-colors hover:bg-stone-50 md:grid md:grid-cols-12 md:gap-4 dark:hover:bg-stone-800/50">
 			{/* Invoice info */}
-			<div className="flex items-center md:col-span-2">
+			<div className="flex items-center gap-2 md:col-span-2">
 				<span className="font-bold font-mono text-stone-500 text-xs uppercase tracking-tight dark:text-stone-400">
 					{invoice.invoiceNumber}
 				</span>
+				{(invoice.invoiceType === "withdrawal" || invoice.invoiceType === "refund") && (
+					<span
+						className={cn(
+							"rounded-md px-1.5 py-0.5 font-bold text-[9px] uppercase tracking-wider",
+							invoice.invoiceType === "withdrawal"
+								? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+								: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+						)}
+					>
+						{getTypeLabel(invoice.invoiceType)}
+					</span>
+				)}
 			</div>
 
 			{/* Customer section */}

@@ -377,28 +377,31 @@ func (a *App) WithdrawBalance(customerID string, amount int64) error {
 			return fmt.Errorf("insufficient balance: has %d, requested %d", customer.Balance, amount)
 		}
 
-		// 1. Create a Settlement/Withdrawal Invoice for documentation
+		// 1. Create a Withdrawal Invoice
 		invoiceID := uuid.NewString()
+		now := time.Now()
 		invoice := models.Invoice{
 			BaseModel:     models.BaseModel{ID: invoiceID},
 			InvoiceNumber: fmt.Sprintf("WDR-%d", time.Now().Unix()),
+			InvoiceType:   "withdrawal", // New field
 			CustomerID:    customerID,
-			Amount:        0, // It's a withdrawal, not a sale
-			Total:         0,
-			Status:        "paid", // Settled immediately
-			PaidDate:      nil,    // Or now
+			Amount:        amount, // Positive amount reflecting the withdrawal value
+			Total:         amount,
+			PaidAmount:    amount, // Fully paid
+			Status:        "paid",
+			PaidDate:      &now,
 		}
 		if err := tx.Create(&invoice).Error; err != nil {
 			return err
 		}
 
-		// 2. Create Negative Payment (Money Out)
+		// 2. Create Payment Record (Money Out)
 		payment := models.Payment{
 			BaseModel: models.BaseModel{ID: uuid.NewString()},
 			InvoiceID: invoiceID,
-			Amount:    -amount,
+			Amount:    amount, // Positive amount
 			Method:    "cash",
-			Type:      "refund",
+			Type:      "refund", // Type indicates direction (refund/out)
 			Date:      time.Now(),
 			Notes:     "Balance Withdrawal",
 		}
@@ -758,7 +761,13 @@ func (a *App) GetDashboardMetrics() (models.DashboardMetrics, error) {
 		return metrics, fmt.Errorf("failed to fetch today payments: %w", err)
 	}
 	for _, p := range payments {
-		metrics.TodayRevenue += p.Amount
+		if p.Type == "refund" {
+			// Deduct refunds and withdrawals
+			metrics.TodayRevenue -= p.Amount
+		} else {
+			// Add payments
+			metrics.TodayRevenue += p.Amount
+		}
 	}
 
 	var count int64

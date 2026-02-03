@@ -54,6 +54,24 @@ export namespace main {
 	        this.notes = source["notes"];
 	    }
 	}
+	export class UpgradeSubscriptionData {
+	    customer_id: string;
+	    new_plan: string;
+	    new_price: number;
+	    start_date: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new UpgradeSubscriptionData(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.customer_id = source["customer_id"];
+	        this.new_plan = source["new_plan"];
+	        this.new_price = source["new_price"];
+	        this.start_date = source["start_date"];
+	    }
+	}
 
 }
 
@@ -100,6 +118,7 @@ export namespace models {
 	    method: string;
 	    date: string;
 	    notes: string;
+	    type: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Payment(source);
@@ -115,6 +134,7 @@ export namespace models {
 	        this.method = source["method"];
 	        this.date = source["date"];
 	        this.notes = source["notes"];
+	        this.type = source["type"];
 	    }
 	}
 	export class LineItem {
@@ -148,6 +168,7 @@ export namespace models {
 	    createdAt: string;
 	    updatedAt: string;
 	    invoiceNumber: string;
+	    invoiceType: string;
 	    customerId: string;
 	    customerName: string;
 	    customerPhone: string;
@@ -172,6 +193,7 @@ export namespace models {
 	        this.createdAt = source["createdAt"];
 	        this.updatedAt = source["updatedAt"];
 	        this.invoiceNumber = source["invoiceNumber"];
+	        this.invoiceType = source["invoiceType"];
 	        this.customerId = source["customerId"];
 	        this.customerName = source["customerName"];
 	        this.customerPhone = source["customerPhone"];
@@ -509,6 +531,7 @@ export namespace models {
 	    name: string;
 	    resourceType: string;
 	    ratePerHour: number;
+	    maxPrice: number;
 	    isAvailable: boolean;
 	    utilizationRate: number;
 	
@@ -524,6 +547,7 @@ export namespace models {
 	        this.name = source["name"];
 	        this.resourceType = source["resourceType"];
 	        this.ratePerHour = source["ratePerHour"];
+	        this.maxPrice = source["maxPrice"];
 	        this.isAvailable = source["isAvailable"];
 	        this.utilizationRate = source["utilizationRate"];
 	    }
@@ -537,6 +561,7 @@ export namespace models {
 	    resourceId: string;
 	    resourceName: string;
 	    resourceRate: number;
+	    resourceMaxPrice: number;
 	    startedAt: string;
 	    endedAt?: string;
 	    isSubscribed: boolean;
@@ -561,6 +586,7 @@ export namespace models {
 	        this.resourceId = source["resourceId"];
 	        this.resourceName = source["resourceName"];
 	        this.resourceRate = source["resourceRate"];
+	        this.resourceMaxPrice = source["resourceMaxPrice"];
 	        this.startedAt = source["startedAt"];
 	        this.endedAt = source["endedAt"];
 	        this.isSubscribed = source["isSubscribed"];

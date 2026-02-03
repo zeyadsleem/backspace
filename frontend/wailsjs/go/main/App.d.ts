@@ -59,6 +59,8 @@ export function ProcessPayment(arg1:main.ProcessPaymentData):Promise<void>;
 
 export function ReactivateSubscription(arg1:string):Promise<void>;
 
+export function RefundSubscription(arg1:string,arg2:string):Promise<void>;
+
 export function RemoveSessionInventory(arg1:string,arg2:string):Promise<void>;
 
 export function ResetAndSeedDatabase():Promise<string>;
@@ -80,3 +82,7 @@ export function UpdateSessionInventory(arg1:string,arg2:string,arg3:number):Prom
 export function UpdateSettings(arg1:models.Settings):Promise<void>;
 
 export function UpdateSubscription(arg1:string,arg2:models.Subscription):Promise<void>;
+
+export function UpgradeSubscription(arg1:main.UpgradeSubscriptionData):Promise<void>;
+
+export function WithdrawBalance(arg1:string,arg2:number):Promise<void>;

@@ -250,16 +250,11 @@ export function SubscriptionDetailsDialog({
 							</button>
 						</div>
 						<p className="text-red-600/80 text-xs leading-relaxed">{t("refundWarning")}</p>
-						<div className="grid grid-cols-2 gap-3">
-							<button
-								className="h-10 w-full rounded-lg border border-red-200 bg-white font-bold text-red-600 text-sm hover:bg-red-50 dark:border-red-900/30 dark:bg-stone-800 dark:hover:bg-red-900/20"
-								onClick={() => handleRefund("balance")}
-							>
-								{t("refundToBalance")}
-							</button>
+						<div className="flex flex-col gap-3">
 							<button
 								className="h-10 w-full rounded-lg bg-red-600 font-bold text-sm text-white shadow-lg shadow-red-600/10 hover:bg-red-700"
 								onClick={() => handleRefund("cash")}
+								type="button"
 							>
 								{t("refundCash")}
 							</button>

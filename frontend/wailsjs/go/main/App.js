@@ -114,6 +114,10 @@ export function ReactivateSubscription(arg1) {
   return window['go']['main']['App']['ReactivateSubscription'](arg1);
 }
 
+export function RefundSubscription(arg1, arg2) {
+  return window['go']['main']['App']['RefundSubscription'](arg1, arg2);
+}
+
 export function RemoveSessionInventory(arg1, arg2) {
   return window['go']['main']['App']['RemoveSessionInventory'](arg1, arg2);
 }
@@ -156,4 +160,12 @@ export function UpdateSettings(arg1) {
 
 export function UpdateSubscription(arg1, arg2) {
   return window['go']['main']['App']['UpdateSubscription'](arg1, arg2);
+}
+
+export function UpgradeSubscription(arg1) {
+  return window['go']['main']['App']['UpgradeSubscription'](arg1);
+}
+
+export function WithdrawBalance(arg1, arg2) {
+  return window['go']['main']['App']['WithdrawBalance'](arg1, arg2);
 }
