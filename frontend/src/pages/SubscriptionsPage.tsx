@@ -13,8 +13,8 @@ export function SubscriptionsPage() {
 	const planTypes = useAppStore((state) => state.planTypes);
 	const addSubscription = useAppStore((state) => state.addSubscription);
 	const deactivateSubscription = useAppStore((state) => state.deactivateSubscription);
-	const changeSubscription = useAppStore((state) => state.changeSubscription);
-	const cancelSubscription = useAppStore((state) => state.cancelSubscription);
+	const upgradeSubscription = useAppStore((state) => state.upgradeSubscription);
+	const refundSubscription = useAppStore((state) => state.refundSubscription);
 	const deleteSubscription = useAppStore((state) => state.deleteSubscription);
 	const t = useAppStore((state) => state.t);
 
@@ -59,13 +59,13 @@ export function SubscriptionsPage() {
 			{selectedSubscription && selectedPlan && selectedCustomer && (
 				<SubscriptionDetailsDialog
 					isOpen={!!selectedSubscriptionId}
-					onCancelSubscription={cancelSubscription}
-					onChangePlan={changeSubscription}
 					onClose={() => setSelectedSubscriptionId(null)}
 					onDeleteSubscription={(id) => {
 						setSelectedSubscriptionId(null);
 						setDeleteId(id);
 					}}
+					onRefund={refundSubscription}
+					onUpgrade={upgradeSubscription}
 					plan={selectedPlan}
 					planTypes={planTypes}
 					subscription={selectedSubscription}

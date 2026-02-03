@@ -11,8 +11,13 @@ interface SubscriptionDetailsDialogProps {
 	plan?: PlanTypeOption;
 	planTypes: PlanTypeOption[];
 	onClose: () => void;
-	onChangePlan?: (id: string, newPlanType: string) => void;
-	onCancelSubscription?: (id: string, refundAmount: number) => void;
+	onUpgrade?: (data: {
+		customer_id: string;
+		new_plan: string;
+		new_price: number;
+		start_date: string;
+	}) => void;
+	onRefund?: (id: string, method: string) => void;
 	onDeleteSubscription?: (id: string) => void;
 }
 
@@ -22,8 +27,8 @@ export function SubscriptionDetailsDialog({
 	plan,
 	planTypes,
 	onClose,
-	onChangePlan,
-	onCancelSubscription,
+	onUpgrade,
+	onRefund,
 	onDeleteSubscription,
 }: SubscriptionDetailsDialogProps) {
 	const t = useAppStore((state) => state.t);
@@ -31,7 +36,6 @@ export function SubscriptionDetailsDialog({
 	const reactivateSubscription = useAppStore((state) => state.reactivateSubscription);
 	const [showChangePlan, setShowChangePlan] = useState(false);
 	const [showCancelConfirm, setShowCancelConfirm] = useState(false);
-	const [refundAmount, setRefundAmount] = useState(0);
 
 	if (!(isOpen && subscription && plan)) {
 		return null;
@@ -41,15 +45,21 @@ export function SubscriptionDetailsDialog({
 		reactivateSubscription(subscription.id);
 	};
 
-	const handleCancel = () => {
-		onCancelSubscription?.(subscription.id, refundAmount);
+	const handleRefund = (method: "cash" | "balance") => {
+		onRefund?.(subscription.id, method);
 		setShowCancelConfirm(false);
 		onClose();
 	};
 
-	const handleChangePlan = (newPlanId: string) => {
-		onChangePlan?.(subscription.id, newPlanId);
+	const handleChangePlan = (newPlanId: string, newPrice: number) => {
+		onUpgrade?.({
+			customer_id: subscription.customerId,
+			new_plan: newPlanId,
+			new_price: newPrice,
+			start_date: new Date().toISOString(),
+		});
 		setShowChangePlan(false);
+		onClose();
 	};
 
 	const handleDelete = () => {
@@ -176,7 +186,7 @@ export function SubscriptionDetailsDialog({
 						>
 							<RefreshCw className="h-5 w-5 text-amber-500 transition-transform duration-500 group-hover:rotate-180" />
 							<span className="font-bold text-stone-600 text-xs dark:text-stone-400">
-								{t("changePlan")}
+								{t("upgradePlan")}
 							</span>
 						</button>
 						<button
@@ -185,7 +195,7 @@ export function SubscriptionDetailsDialog({
 						>
 							<Power className="h-5 w-5 text-red-500" />
 							<span className="font-bold text-stone-600 text-xs dark:text-stone-400">
-								{t("cancelSubscription")}
+								{t("cancelAndRefund")}
 							</span>
 						</button>
 					</div>
@@ -210,7 +220,7 @@ export function SubscriptionDetailsDialog({
 								<button
 									className="flex w-full items-center justify-between rounded-lg border border-stone-200 bg-white p-3 transition-all hover:border-amber-500 dark:border-stone-700 dark:bg-stone-800"
 									key={p.id}
-									onClick={() => handleChangePlan(p.id)}
+									onClick={() => handleChangePlan(p.id, p.price)}
 								>
 									<span className="font-bold text-sm text-stone-800 dark:text-stone-200">
 										{isRTL ? p.labelAr : p.labelEn}
@@ -221,7 +231,7 @@ export function SubscriptionDetailsDialog({
 								</button>
 							))}
 						</div>
-						<p className="text-center text-stone-500 text-xs italic">{t("changePlanNote")}</p>
+						<p className="text-center text-stone-500 text-xs italic">{t("upgradeNote")}</p>
 					</div>
 				)}
 
@@ -230,7 +240,7 @@ export function SubscriptionDetailsDialog({
 					<div className="animate-fade-in space-y-4 rounded-xl border-2 border-red-100 bg-red-50/10 p-4 dark:border-red-900/20">
 						<div className="flex items-center justify-between">
 							<h3 className="font-bold text-red-700 text-sm dark:text-red-400">
-								{t("confirmCancellation")}
+								{t("howToRefund")}
 							</h3>
 							<button
 								className="text-stone-400 hover:text-stone-600"
@@ -239,30 +249,21 @@ export function SubscriptionDetailsDialog({
 								<X className="h-4 w-4" />
 							</button>
 						</div>
-						<p className="text-red-600/80 text-xs leading-relaxed">{t("cancelWarning")}</p>
-						<div className="space-y-2">
-							<label className="font-bold text-stone-500 text-xs uppercase">
-								{t("refundAmount")} ({t("optional")})
-							</label>
-							<div className="relative">
-								<input
-									className="h-10 w-full rounded-lg border border-red-200 bg-white px-3 font-bold text-sm outline-none focus:ring-2 focus:ring-red-500/20 dark:border-red-900/30 dark:bg-stone-800"
-									onChange={(e) => setRefundAmount(Number(e.target.value))}
-									step="any"
-									type="number"
-									value={refundAmount}
-								/>
-								<span className="absolute end-3 top-1/2 -translate-y-1/2 font-bold text-stone-400 text-xs">
-									{t("egp")}
-								</span>
-							</div>
+						<p className="text-red-600/80 text-xs leading-relaxed">{t("refundWarning")}</p>
+						<div className="grid grid-cols-2 gap-3">
+							<button
+								className="h-10 w-full rounded-lg border border-red-200 bg-white font-bold text-red-600 text-sm hover:bg-red-50 dark:border-red-900/30 dark:bg-stone-800 dark:hover:bg-red-900/20"
+								onClick={() => handleRefund("balance")}
+							>
+								{t("refundToBalance")}
+							</button>
+							<button
+								className="h-10 w-full rounded-lg bg-red-600 font-bold text-sm text-white shadow-lg shadow-red-600/10 hover:bg-red-700"
+								onClick={() => handleRefund("cash")}
+							>
+								{t("refundCash")}
+							</button>
 						</div>
-						<button
-							className="h-10 w-full rounded-lg bg-red-600 font-bold text-sm text-white shadow-lg shadow-red-600/10 hover:bg-red-700"
-							onClick={handleCancel}
-						>
-							{t("confirmCancelAndRefund")}
-						</button>
 					</div>
 				)}
 			</div>

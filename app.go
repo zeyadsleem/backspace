@@ -351,8 +351,95 @@ func (a *App) DeactivateSubscription(id string) error {
 	return a.subscriptionService.CancelSubscription(id)
 }
 
+type UpgradeSubscriptionData struct {
+	CustomerID string `json:"customer_id"`
+	NewPlan    string `json:"new_plan"`
+	NewPrice   int64  `json:"new_price"`
+	StartDate  string `json:"start_date"`
+}
+
+func (a *App) RefundSubscription(id string, refundMethod string) error {
+	return a.subscriptionService.RefundSubscription(id, refundMethod)
+}
+
+func (a *App) WithdrawBalance(customerID string, amount int64) error {
+	if amount <= 0 {
+		return errors.New("amount must be positive")
+	}
+
+	return database.DB.Transaction(func(tx *gorm.DB) error {
+		var customer models.Customer
+		if err := tx.First(&customer, "id = ?", customerID).Error; err != nil {
+			return err
+		}
+
+		if customer.Balance < amount {
+			return fmt.Errorf("insufficient balance: has %d, requested %d", customer.Balance, amount)
+		}
+
+		// 1. Create a Settlement/Withdrawal Invoice for documentation
+		invoiceID := uuid.NewString()
+		invoice := models.Invoice{
+			BaseModel:     models.BaseModel{ID: invoiceID},
+			InvoiceNumber: fmt.Sprintf("WDR-%d", time.Now().Unix()),
+			CustomerID:    customerID,
+			Amount:        0, // It's a withdrawal, not a sale
+			Total:         0,
+			Status:        "paid", // Settled immediately
+			PaidDate:      nil,    // Or now
+		}
+		if err := tx.Create(&invoice).Error; err != nil {
+			return err
+		}
+
+		// 2. Create Negative Payment (Money Out)
+		payment := models.Payment{
+			BaseModel: models.BaseModel{ID: uuid.NewString()},
+			InvoiceID: invoiceID,
+			Amount:    -amount,
+			Method:    "cash",
+			Type:      "refund",
+			Date:      time.Now(),
+			Notes:     "Balance Withdrawal",
+		}
+		if err := tx.Create(&payment).Error; err != nil {
+			return err
+		}
+
+		// 3. Deduct from Balance
+		if err := tx.Model(&customer).Update("balance", customer.Balance-amount).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (a *App) UpgradeSubscription(data UpgradeSubscriptionData) error {
+	// Validate plan type
+	validPlanTypes := map[string]bool{"weekly": true, "half-monthly": true, "monthly": true}
+	if !validPlanTypes[data.NewPlan] {
+		return fmt.Errorf("invalid plan type: %s (must be weekly, half-monthly, or monthly)", data.NewPlan)
+	}
+
+	// Validate price
+	if data.NewPrice <= 0 {
+		return errors.New("subscription price must be positive")
+	}
+
+	startDate, err := time.Parse(time.RFC3339, data.StartDate)
+	if err != nil {
+		startDate = time.Now()
+	}
+
+	return a.subscriptionService.UpgradeSubscription(data.CustomerID, data.NewPlan, data.NewPrice, startDate)
+}
+
 func (a *App) ChangeSubscriptionPlan(id string, newPlanType string) error {
-	return database.DB.Model(&models.Subscription{}).Where("id = ?", id).Update("plan_type", newPlanType).Error
+	// Deprecated: Use UpgradeSubscription instead
+	// Keeping it for now to avoid breaking existing frontend calls until updated
+	// But it should return an error or redirect
+	return errors.New("this method is deprecated, please use UpgradeSubscription")
 }
 
 func (a *App) CancelSubscription(id string) error {

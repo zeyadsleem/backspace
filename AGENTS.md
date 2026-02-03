@@ -56,6 +56,22 @@ cd frontend && npm run format  # Auto-fix
 go fmt ./...                   # Format Go code
 ```
 
+## Subscription & Pricing Logic (New)
+
+### Daily Cap Pricing
+Resources now support a `maxPrice` (Daily Cap). The calculation logic in `backend/finance` ensures session cost never exceeds this cap per session.
+- **Resource Model:** Added `MaxPrice int64`.
+- **Session Model:** Added `ResourceMaxPrice int64` (snapshot at start).
+
+### Subscription Operations
+We have refactored subscription management to be transactional and accounting-friendly:
+- **Upgrade:** `UpgradeSubscription` refunds the remaining days of the old plan to the customer's balance, then creates a new subscription.
+- **Refund:** `RefundSubscription` supports both `cash` (creates a negative payment/refund record) and `balance` (adds to customer wallet).
+- **Withdrawal:** `WithdrawBalance` allows customers to cash out their wallet balance, creating a negative payment record for tracking.
+
+### Negative Payments
+The `Payment` model and database constraints have been updated to allow negative amounts (`amount < 0`) to support refunds and withdrawals.
+
 ## Go Code Style
 
 ### Imports (grouped by: stdlib, external, internal)

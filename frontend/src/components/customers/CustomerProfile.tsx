@@ -10,6 +10,7 @@ import {
 	Phone,
 	Receipt,
 	Trash2,
+	Wallet,
 } from "lucide-react";
 import { useAppStore, useLanguage, useTranslation } from "@/stores/hooks";
 import type { Customer, CustomerType, Invoice, OperationRecord } from "@/types";
@@ -23,6 +24,7 @@ interface CustomerProfileProps {
 	onDelete?: () => void;
 	onBack?: () => void;
 	onViewInvoice?: (id: string) => void;
+	onWithdraw?: (amount: number) => void;
 }
 
 export function CustomerProfile({
@@ -33,10 +35,23 @@ export function CustomerProfile({
 	onDelete,
 	onBack,
 	onViewInvoice,
+	onWithdraw,
 }: CustomerProfileProps) {
 	const t = useTranslation();
 	const language = useLanguage();
 	const isRTL = useAppStore((state) => state.isRTL);
+
+	const handleWithdraw = () => {
+		const amountStr = window.prompt(t("enterWithdrawAmount"), String(customer.balance / 100));
+		if (amountStr) {
+			const amount = Number.parseFloat(amountStr);
+			if (amount > 0 && amount <= customer.balance / 100) {
+				onWithdraw?.(amount);
+			} else {
+				alert(t("invalidAmount"));
+			}
+		}
+	};
 
 	const customerTypeLabels: Record<CustomerType, { label: string; color: string }> = {
 		visitor: {
@@ -165,14 +180,27 @@ export function CustomerProfile({
 							</div>
 
 							<div className="flex items-center justify-between border-stone-100 border-t pt-3 dark:border-stone-800">
-								<span className="font-bold text-stone-500 text-xs uppercase tracking-wider">
-									{t("balance")}
-								</span>
-								<span
-									className={`font-black text-lg ${customer.balance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
-								>
-									{formatCurrency(customer.balance)}
-								</span>
+								<div className="flex flex-col">
+									<span className="font-bold text-stone-500 text-xs uppercase tracking-wider">
+										{t("balance")}
+									</span>
+									<span
+										className={`font-black text-lg ${customer.balance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}
+									>
+										{formatCurrency(customer.balance)}
+									</span>
+								</div>
+								{customer.balance > 0 && (
+									<button
+										className="flex h-8 items-center gap-1.5 rounded-lg bg-stone-100 px-3 font-bold text-stone-600 text-xs hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700"
+										onClick={handleWithdraw}
+										title={t("withdrawBalance")}
+										type="button"
+									>
+										<Wallet className="h-3.5 w-3.5" />
+										{t("withdraw")}
+									</button>
+								)}
 							</div>
 						</div>
 

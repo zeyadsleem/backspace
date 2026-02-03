@@ -42,13 +42,14 @@ func (s *SessionService) StartSession(customerID, resourceID string) (*models.Se
 
 		// 3. Create the session
 		session = &models.Session{
-			BaseModel:    models.BaseModel{ID: uuid.NewString()},
-			CustomerID:   customerID,
-			ResourceID:   resourceID,
-			ResourceRate: resource.RatePerHour,
-			StartedAt:    time.Now(),
-			Status:       "active",
-			IsSubscribed: isSubscribed,
+			BaseModel:        models.BaseModel{ID: uuid.NewString()},
+			CustomerID:       customerID,
+			ResourceID:       resourceID,
+			ResourceRate:     resource.RatePerHour,
+			ResourceMaxPrice: resource.MaxPrice, // Store snapshot of daily cap
+			StartedAt:        time.Now(),
+			Status:           "active",
+			IsSubscribed:     isSubscribed,
 		}
 
 		if err := tx.Create(session).Error; err != nil {
@@ -155,7 +156,7 @@ func (s *SessionService) EndSessionWithTx(tx *gorm.DB, sessionID string) (*model
 
 	sessionCost := int64(0)
 	if !session.IsSubscribed {
-		sessionCost = finance.CalculateSessionCost(duration, session.ResourceRate)
+		sessionCost = finance.CalculateSessionCost(duration, session.ResourceRate, session.ResourceMaxPrice)
 	}
 
 	totalAmount := sessionCost + session.InventoryTotal

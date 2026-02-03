@@ -36,6 +36,7 @@ type Resource struct {
 	Name            string  `json:"name" gorm:"not null"`
 	ResourceType    string  `json:"resourceType" gorm:"not null"`                         // seat, room, desk
 	RatePerHour     int64   `json:"ratePerHour" gorm:"not null;check:rate_per_hour >= 0"` // In piasters
+	MaxPrice        int64   `json:"maxPrice" gorm:"default:0;check:max_price >= 0"`       // Daily cap in piasters (0 = no cap)
 	IsAvailable     bool    `json:"isAvailable" gorm:"not null;default:true"`
 	UtilizationRate float64 `json:"utilizationRate" gorm:"-"` // This remains float as it's a percentage
 }
@@ -76,6 +77,7 @@ type Session struct {
 	Resource              Resource               `json:"-"`
 	ResourceName          string                 `json:"resourceName" gorm:"-"`
 	ResourceRate          int64                  `json:"resourceRate" gorm:"not null;default:0;check:resource_rate >= 0"` // In piasters
+	ResourceMaxPrice      int64                  `json:"resourceMaxPrice" gorm:"default:0;check:resource_max_price >= 0"` // Snapshot of daily cap
 	StartedAt             time.Time              `json:"startedAt" ts_type:"string" gorm:"not null"`
 	EndedAt               *time.Time             `json:"endedAt" ts_type:"string"`
 	IsSubscribed          bool                   `json:"isSubscribed" gorm:"not null;default:false"`
@@ -132,10 +134,11 @@ type LineItem struct {
 type Payment struct {
 	BaseModel
 	InvoiceID string    `json:"invoiceId" gorm:"not null;index"`
-	Amount    int64     `json:"amount" gorm:"not null;check:amount > 0"`                             // In piasters
-	Method    string    `json:"method" gorm:"not null;check:method IN ('cash', 'card', 'transfer')"` // cash, card, transfer
+	Amount    int64     `json:"amount" gorm:"not null"`                                                         // In piasters (can be negative for refunds)
+	Method    string    `json:"method" gorm:"not null;check:method IN ('cash', 'card', 'transfer', 'balance')"` // cash, card, transfer, balance
 	Date      time.Time `json:"date" ts_type:"string" gorm:"not null"`
 	Notes     string    `json:"notes"`
+	Type      string    `json:"type" gorm:"not null;default:'payment';check:type IN ('payment', 'refund')"` // payment, refund
 }
 
 // AppSettings stores the entire settings JSON blob

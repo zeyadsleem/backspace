@@ -19,13 +19,21 @@ func ToPiasters(egp float64) int64 {
 }
 
 // CalculateSessionCost calculates the cost based on duration in minutes and hourly rate in piasters
-func CalculateSessionCost(minutes int, hourlyRatePiasters int64) int64 {
+// It applies a daily cap if dailyCapPiasters > 0
+func CalculateSessionCost(minutes int, hourlyRatePiasters int64, dailyCapPiasters int64) int64 {
 	if minutes <= 0 {
 		return 0
 	}
 	// (minutes / 60) * hourlyRate
 	// To maintain precision in integer math: (minutes * hourlyRate) / 60
-	return (int64(minutes) * hourlyRatePiasters) / 60
+	cost := (int64(minutes) * hourlyRatePiasters) / 60
+
+	// Apply daily cap if set
+	if dailyCapPiasters > 0 && cost > dailyCapPiasters {
+		return dailyCapPiasters
+	}
+
+	return cost
 }
 
 // CalculateTotal sums a list of piaster amounts

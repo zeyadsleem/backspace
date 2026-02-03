@@ -18,6 +18,7 @@ export function CustomerProfilePage() {
 	const operationHistory = useAppStore((state) => state.operationHistory);
 	const updateCustomer = useAppStore((state) => state.updateCustomer);
 	const deleteCustomer = useAppStore((state) => state.deleteCustomer);
+	const withdrawBalance = useAppStore((state) => state.withdrawBalance);
 
 	const [showEditDialog, setShowEditDialog] = useState(false);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -79,6 +80,7 @@ export function CustomerProfilePage() {
 					onDelete={handleDelete}
 					onEdit={handleEdit}
 					onViewInvoice={(id) => setSelectedInvoiceId(id)}
+					onWithdraw={(amount) => withdrawBalance(customer.id, amount)}
 				/>
 			</div>
 

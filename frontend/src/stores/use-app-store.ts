@@ -80,10 +80,18 @@ interface AppActions {
 	addSubscription: (customerId: string, planType: string, startDate: string) => Promise<void>;
 	deactivateSubscription: (id: string) => Promise<void>;
 	changeSubscription: (id: string, newPlanType: string) => Promise<void>;
+	refundSubscription: (id: string, method: string) => Promise<void>;
+	upgradeSubscription: (data: {
+		customer_id: string;
+		new_plan: string;
+		new_price: number;
+		start_date: string;
+	}) => Promise<void>;
 	cancelSubscription: (id: string) => Promise<void>;
 	reactivateSubscription: (id: string) => Promise<void>;
 	updateSubscription: (id: string, data: Partial<Subscription>) => Promise<void>;
 	deleteSubscription: (id: string) => Promise<void>;
+	withdrawBalance: (customerId: string, amount: number) => Promise<void>;
 	fetchResources: () => Promise<void>;
 	addResource: (data: Partial<Resource>) => Promise<void>;
 	updateResource: (id: string, data: Partial<Resource>) => Promise<void>;
@@ -683,6 +691,35 @@ export const useAppStore = create<AppStore>()(
 				}
 			},
 
+			refundSubscription: async (id, method) => {
+				if (!isWailsAvailable()) return;
+				try {
+					await App.RefundSubscription(id, method);
+					toast.success(get().t("success"));
+					get().fetchSubscriptions();
+					get().fetchCustomers();
+					get().fetchDashboardData();
+				} catch (err) {
+					toast.error(String(err));
+				}
+			},
+
+			upgradeSubscription: async (data) => {
+				if (!isWailsAvailable()) return;
+				try {
+					await App.UpgradeSubscription({
+						...data,
+						new_price: toPiasters(data.new_price),
+					});
+					toast.success(get().t("success"));
+					get().fetchSubscriptions();
+					get().fetchCustomers();
+					get().fetchDashboardData();
+				} catch (err) {
+					toast.error(String(err));
+				}
+			},
+
 			cancelSubscription: async (id) => {
 				if (!isWailsAvailable()) return;
 				try {
@@ -725,6 +762,19 @@ export const useAppStore = create<AppStore>()(
 					toast.success(get().t("success"));
 					get().fetchSubscriptions();
 					get().fetchCustomers();
+				} catch (err) {
+					toast.error(String(err));
+				}
+			},
+
+			withdrawBalance: async (customerId, amount) => {
+				if (!isWailsAvailable()) return;
+				try {
+					await App.WithdrawBalance(customerId, toPiasters(amount));
+					toast.success(get().t("success"));
+					get().fetchCustomers();
+					get().fetchInvoices();
+					get().fetchDashboardData();
 				} catch (err) {
 					toast.error(String(err));
 				}
