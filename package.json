@@ -1,0 +1,46 @@
+{
+  "name": "backspace",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "vp run -r dev",
+    "build": "vp run -r build",
+    "check-types": "vp run -r check-types",
+    "check": "vp check && vp run -r check-types",
+    "lint": "vp lint",
+    "format": "vp fmt",
+    "staged": "vp staged",
+    "dev:web": "vp run --filter web dev",
+    "dev:server": "vp run --filter server dev",
+    "db:push": "vp run --filter @backspace/db db:push",
+    "db:studio": "vp run --filter @backspace/db db:studio",
+    "db:generate": "vp run --filter @backspace/db db:generate",
+    "db:migrate": "vp run --filter @backspace/db db:migrate",
+    "db:start": "vp run --filter @backspace/db db:start",
+    "db:watch": "vp run --filter @backspace/db db:watch",
+    "db:stop": "vp run --filter @backspace/db db:stop",
+    "db:down": "vp run --filter @backspace/db db:down"
+  },
+  "dependencies": {
+    "@backspace/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@backspace/config": "workspace:*",
+    "@types/node": "catalog:",
+    "lefthook": "^2.1.9",
+    "rolldown": "1.1.0",
+    "typescript": "catalog:",
+    "vite-plus": "0.1.24"
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@0.1.24",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@0.1.24"
+  },
+  "packageManager": "pnpm@10.33.0"
+}
