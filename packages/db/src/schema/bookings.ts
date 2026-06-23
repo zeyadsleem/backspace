@@ -1,4 +1,5 @@
-import { index, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { check, index, integer, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 import { person } from "./people";
 import { space } from "./workspace";
@@ -23,7 +24,7 @@ export const booking = pgTable(
     status: bookingStatusEnum("status").default("confirmed").notNull(),
     startsAt: timestamp("starts_at").notNull(),
     endsAt: timestamp("ends_at").notNull(),
-    depositCents: text("deposit_cents").default("0").notNull(),
+    depositCents: integer("deposit_cents").default(0).notNull(),
     currency: text("currency").default("EGP").notNull(),
     notes: text("notes"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -36,5 +37,6 @@ export const booking = pgTable(
     index("booking_person_id_idx").on(table.personId),
     index("booking_space_id_idx").on(table.spaceId),
     index("booking_time_range_idx").on(table.startsAt, table.endsAt),
+    check("booking_non_negative_deposit_check", sql`${table.depositCents} >= 0`),
   ],
 );

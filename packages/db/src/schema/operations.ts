@@ -1,4 +1,5 @@
-import { index, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { check, index, integer, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 import { user } from "./auth";
 import { branch, space } from "./workspace";
@@ -28,12 +29,18 @@ export const shift = pgTable(
     status: shiftStatusEnum("status").default("open").notNull(),
     openedAt: timestamp("opened_at").defaultNow().notNull(),
     closedAt: timestamp("closed_at"),
-    expectedCashCents: text("expected_cash_cents").default("0").notNull(),
-    actualCashCents: text("actual_cash_cents"),
+    expectedCashCents: integer("expected_cash_cents").default(0).notNull(),
+    actualCashCents: integer("actual_cash_cents"),
     currency: text("currency").default("EGP").notNull(),
     notes: text("notes"),
   },
-  (table) => [index("shift_branch_status_idx").on(table.branchId, table.status)],
+  (table) => [
+    index("shift_branch_status_idx").on(table.branchId, table.status),
+    check(
+      "shift_non_negative_cash_check",
+      sql`${table.expectedCashCents} >= 0 and (${table.actualCashCents} is null or ${table.actualCashCents} >= 0)`,
+    ),
+  ],
 );
 
 export const cleaningTask = pgTable(

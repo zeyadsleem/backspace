@@ -1,4 +1,14 @@
-import { index, pgEnum, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import {
+  check,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 export const spaceStatusEnum = pgEnum("space_status", [
   "available",
@@ -34,14 +44,17 @@ export const floor = pgTable(
       .notNull()
       .references(() => branch.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
-    sortOrder: text("sort_order").default("0").notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index("floor_branch_id_idx").on(table.branchId)],
+  (table) => [
+    index("floor_branch_id_idx").on(table.branchId),
+    check("floor_non_negative_sort_order_check", sql`${table.sortOrder} >= 0`),
+  ],
 );
 
 export const space = pgTable(
@@ -54,7 +67,7 @@ export const space = pgTable(
     floorId: text("floor_id").references(() => floor.id, { onDelete: "set null" }),
     name: text("name").notNull(),
     kind: text("kind").notNull(),
-    capacity: text("capacity").default("1").notNull(),
+    capacity: integer("capacity").default(1).notNull(),
     status: spaceStatusEnum("status").default("available").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
@@ -66,6 +79,7 @@ export const space = pgTable(
     index("space_branch_id_idx").on(table.branchId),
     index("space_floor_id_idx").on(table.floorId),
     index("space_status_idx").on(table.status),
+    check("space_positive_capacity_check", sql`${table.capacity} > 0`),
   ],
 );
 

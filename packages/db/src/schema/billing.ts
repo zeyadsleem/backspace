@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { check, index, integer, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 import { workspaceEvent } from "./events";
 import { shift } from "./operations";
@@ -52,10 +52,10 @@ export const invoice = pgTable(
       onDelete: "set null",
     }),
     status: invoiceStatusEnum("status").default("draft").notNull(),
-    subtotalCents: text("subtotal_cents").default("0").notNull(),
-    discountCents: text("discount_cents").default("0").notNull(),
-    taxCents: text("tax_cents").default("0").notNull(),
-    totalCents: text("total_cents").default("0").notNull(),
+    subtotalCents: integer("subtotal_cents").default(0).notNull(),
+    discountCents: integer("discount_cents").default(0).notNull(),
+    taxCents: integer("tax_cents").default(0).notNull(),
+    totalCents: integer("total_cents").default(0).notNull(),
     currency: text("currency").default("EGP").notNull(),
     finalizedAt: timestamp("finalized_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -67,6 +67,10 @@ export const invoice = pgTable(
   (table) => [
     index("invoice_status_idx").on(table.status),
     index("invoice_bill_to_account_idx").on(table.billToAccountId),
+    check(
+      "invoice_non_negative_totals_check",
+      sql`${table.subtotalCents} >= 0 and ${table.discountCents} >= 0 and ${table.taxCents} >= 0 and ${table.totalCents} >= 0`,
+    ),
   ],
 );
 
@@ -85,8 +89,8 @@ export const charge = pgTable(
     invoiceId: text("invoice_id").references(() => invoice.id, { onDelete: "set null" }),
     type: chargeTypeEnum("type").notNull(),
     label: text("label").notNull(),
-    quantity: text("quantity").default("1").notNull(),
-    amountCents: text("amount_cents").notNull(),
+    quantity: integer("quantity").default(1).notNull(),
+    amountCents: integer("amount_cents").notNull(),
     currency: text("currency").default("EGP").notNull(),
     billingResponsibility: billingResponsibilityEnum("billing_responsibility").notNull(),
     reason: text("reason"),
@@ -109,6 +113,8 @@ export const charge = pgTable(
         case when ${table.invoiceId} is not null then 1 else 0 end
       ) = 1`,
     ),
+    check("charge_positive_quantity_check", sql`${table.quantity} > 0`),
+    check("charge_non_negative_amount_check", sql`${table.amountCents} >= 0`),
   ],
 );
 
@@ -121,10 +127,13 @@ export const invoiceItem = pgTable(
       .references(() => invoice.id, { onDelete: "cascade" }),
     chargeId: text("charge_id").references(() => charge.id, { onDelete: "set null" }),
     label: text("label").notNull(),
-    amountCents: text("amount_cents").notNull(),
+    amountCents: integer("amount_cents").notNull(),
     currency: text("currency").default("EGP").notNull(),
   },
-  (table) => [index("invoice_item_invoice_id_idx").on(table.invoiceId)],
+  (table) => [
+    index("invoice_item_invoice_id_idx").on(table.invoiceId),
+    check("invoice_item_non_negative_amount_check", sql`${table.amountCents} >= 0`),
+  ],
 );
 
 export const payment = pgTable(
@@ -137,7 +146,7 @@ export const payment = pgTable(
     shiftId: text("shift_id").references(() => shift.id, { onDelete: "set null" }),
     method: paymentMethodEnum("method").notNull(),
     status: paymentStatusEnum("status").default("recorded").notNull(),
-    amountCents: text("amount_cents").notNull(),
+    amountCents: integer("amount_cents").notNull(),
     currency: text("currency").default("EGP").notNull(),
     reference: text("reference"),
     recordedAt: timestamp("recorded_at").defaultNow().notNull(),
@@ -145,6 +154,7 @@ export const payment = pgTable(
   (table) => [
     index("payment_invoice_id_idx").on(table.invoiceId),
     index("payment_shift_id_idx").on(table.shiftId),
+    check("payment_non_negative_amount_check", sql`${table.amountCents} >= 0`),
   ],
 );
 
@@ -156,10 +166,13 @@ export const refundOrAdjustment = pgTable(
       .notNull()
       .references(() => invoice.id, { onDelete: "restrict" }),
     paymentId: text("payment_id").references(() => payment.id, { onDelete: "set null" }),
-    amountCents: text("amount_cents").notNull(),
+    amountCents: integer("amount_cents").notNull(),
     currency: text("currency").default("EGP").notNull(),
     reason: text("reason").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (table) => [index("refund_or_adjustment_invoice_id_idx").on(table.invoiceId)],
+  (table) => [
+    index("refund_or_adjustment_invoice_id_idx").on(table.invoiceId),
+    check("refund_or_adjustment_positive_amount_check", sql`${table.amountCents} > 0`),
+  ],
 );
