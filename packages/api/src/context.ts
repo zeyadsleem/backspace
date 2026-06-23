@@ -15,4 +15,12 @@ export async function createContext({ context }: CreateContextOptions) {
   };
 }
 
-export type Context = Awaited<ReturnType<typeof createContext>>;
+export type Context = Awaited<ReturnType<typeof createContext>> & {
+  staff?: {
+    id: string;
+    userId: string;
+    roleId: string;
+    displayName: string;
+    roleName: string;
+  };
+};
