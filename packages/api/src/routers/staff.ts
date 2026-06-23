@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { and, db, eq, role, staffBranchAccess, staffProfile } from "@backspace/db";
@@ -39,7 +40,7 @@ export const staffRouter = {
         .limit(1);
 
       if (!profile) {
-        throw new Error("NOT_FOUND:Staff profile not found");
+        throw new TRPCError({ code: "NOT_FOUND", message: "Staff profile not found" });
       }
 
       return profile;
@@ -80,7 +81,7 @@ export const staffRouter = {
       }),
     )
     .mutation(async ({ input }) => {
-      const updates: Record<string, string> = {};
+      const updates: Partial<typeof staffProfile.$inferInsert> = {};
       if (input.displayName) updates.displayName = input.displayName;
       if (input.roleId) updates.roleId = input.roleId;
       if (input.status) updates.status = input.status;
