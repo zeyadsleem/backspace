@@ -1,8 +1,9 @@
-import { initTRPC, TRPCError } from "@trpc/server";
+import { TRPCError } from "@trpc/server";
 
-import type { Context } from "./context";
+import { t } from "./lib/init";
+import { requireStaff } from "./permissions/middleware";
 
-export const t = initTRPC.context<Context>().create();
+export { t };
 
 export const router = t.router;
 
@@ -23,3 +24,14 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     },
   });
 });
+
+export const staffProcedure = protectedProcedure.use(requireStaff);
+
+export {
+  checkPermission,
+  checkRole,
+  requireBranchAccess,
+  requirePermission,
+  requireRole,
+  resolveStaffProfile,
+} from "./permissions/middleware";
