@@ -1,5 +1,6 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
+import { StaffShell } from "@/features/staff-shell/staff-shell";
 import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/_auth")({
@@ -16,5 +17,11 @@ export const Route = createFileRoute("/_auth")({
 });
 
 function AuthLayout() {
-  return <Outlet />;
+  const { session } = Route.useRouteContext();
+
+  return (
+    <StaffShell userName={session.data?.user.name}>
+      <Outlet />
+    </StaffShell>
+  );
 }

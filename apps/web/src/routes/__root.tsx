@@ -1,7 +1,12 @@
 import { Toaster } from "@backspace/ui/components/sonner";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { HeadContent, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import {
+  HeadContent,
+  Outlet,
+  createRootRouteWithContext,
+  useLocation,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import Header from "@/components/header";
@@ -37,6 +42,9 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 });
 
 function RootComponent() {
+  const location = useLocation();
+  const showPublicHeader = location.pathname !== "/dashboard";
+
   return (
     <>
       <HeadContent />
@@ -46,8 +54,8 @@ function RootComponent() {
         disableTransitionOnChange
         storageKey="vite-ui-theme"
       >
-        <div className="grid grid-rows-[auto_1fr] h-svh">
-          <Header />
+        <div className={showPublicHeader ? "grid h-svh grid-rows-[auto_1fr]" : "min-h-svh"}>
+          {showPublicHeader ? <Header /> : null}
           <Outlet />
         </div>
         <Toaster richColors />
