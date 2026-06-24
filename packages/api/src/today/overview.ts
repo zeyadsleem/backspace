@@ -113,6 +113,22 @@ function endOfTomorrow(date: Date): Date {
   return new Date(start.getTime() + 2 * 86_400_000 - 1);
 }
 
+function personHasBranchActivity(personId: string | null, branchId: string): boolean {
+  if (!personId) {
+    return false;
+  }
+
+  const hasBranchVisit = VISITS.some(
+    (visit) => visit.personId === personId && visit.branchId === branchId,
+  );
+  const hasBranchBooking = BOOKINGS.some((booking) => {
+    const space = booking.spaceId ? SPACES.find((item) => item.id === booking.spaceId) : null;
+    return booking.personId === personId && space?.branchId === branchId;
+  });
+
+  return hasBranchVisit || hasBranchBooking;
+}
+
 export function getTodayOverview({
   branchId,
   permissions,
@@ -134,14 +150,19 @@ export function getTodayOverview({
   const occupiedSpaces = branchSpaces.filter((space) => space.status === "occupied");
   const visibleBookings = BOOKINGS.filter((booking) => {
     const space = booking.spaceId ? SPACES.find((item) => item.id === booking.spaceId) : null;
+    const todayStart = startOfDay(now);
     return (
       booking.status !== "cancelled" &&
       booking.status !== "no_show" &&
       space?.branchId === branch.id &&
+      booking.startsAt >= todayStart &&
       booking.startsAt <= endOfTomorrow(now)
     );
   });
-  const openInvoices = INVOICES.filter((invoice) => invoice.status !== "paid");
+  const openInvoices = INVOICES.filter(
+    (invoice) =>
+      invoice.status !== "paid" && personHasBranchActivity(invoice.billToPersonId, branch.id),
+  );
   const openBillCurrency = openInvoices[0]?.currency ?? branch.currency;
   const openBillTotalMinor = openInvoices.reduce((total, invoice) => total + invoice.totalCents, 0);
   const branchCleaningTasks = CLEANING_TASKS.filter((task) => {
@@ -158,6 +179,9 @@ export function getTodayOverview({
   const expiringMemberships = MEMBERSHIPS.filter(
     (membership) =>
       membership.status === "active" &&
+      VISITS.some(
+        (visit) => visit.membershipId === membership.id && visit.branchId === branch.id,
+      ) &&
       membership.endsAt <= new Date(now.getTime() + 30 * 86_400_000),
   );
   const shift = SHIFTS.find((item) => item.branchId === branch.id && item.status === "open");

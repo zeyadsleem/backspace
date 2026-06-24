@@ -42,6 +42,19 @@ describe("getTodayOverview", () => {
     ]);
     expect(secondary.summary.activeVisits.value).toBe(0);
     expect(secondary.summary.occupancy.value).toBe("0/1");
+    expect(secondary.summary.openBills.amountMinor).toBe(0);
+    expect(secondary.summary.expiringMemberships.value).toBe(0);
+  });
+
+  it("does not include stale bookings before the requested operations day", () => {
+    const overview = getTodayOverview({
+      branchId: "seed-branch-main",
+      permissions: allPermissions,
+      now: new Date(Date.now() + 7 * 86_400_000),
+    });
+
+    expect(overview.summary.upcomingBookings.value).toBe(0);
+    expect(overview.queues.bookings.items).toEqual([]);
   });
 
   it("marks restricted sections unavailable without leaking protected data", () => {
