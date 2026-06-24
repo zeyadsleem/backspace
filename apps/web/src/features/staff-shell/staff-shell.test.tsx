@@ -60,7 +60,7 @@ describe("staff operations shell registries", () => {
       "Downtown Hub",
       "Maadi Workspace",
     ]);
-    expect(staffShellContext.currentBranchId).toBe("seed-branch-downtown");
+    expect(staffShellContext.currentBranchId).toBe("seed-branch-main");
     expect(getActiveShiftLabel(staffShellContext.activeShift)).toBe("Open shift - Front desk");
   });
 
