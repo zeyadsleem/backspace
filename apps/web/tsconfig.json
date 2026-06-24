@@ -13,5 +13,6 @@
       "@/*": ["./src/*"],
       "@backspace/ui/*": ["../../packages/ui/src/*"]
     }
-  }
+  },
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
 }
