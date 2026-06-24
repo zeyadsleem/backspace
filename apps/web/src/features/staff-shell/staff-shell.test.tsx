@@ -4,8 +4,13 @@ import { describe, expect, it } from "vitest";
 import { PERMISSIONS } from "@backspace/api/permissions/constants";
 
 import { PermissionGate, hasPermission } from "./permissions";
-import { getActiveShiftLabel, staffShellBranches, staffShellContext } from "./shell-context";
-import { staffNavigationGroups } from "./staff-navigation";
+import {
+  getActiveShiftLabel,
+  resolveStaffShellContext,
+  staffShellBranches,
+  staffShellContext,
+} from "./shell-context";
+import { getVisibleNavigationGroups, staffNavigationGroups } from "./staff-navigation";
 import { staffQuickActions } from "./staff-quick-actions";
 
 describe("staff operations shell registries", () => {
@@ -57,6 +62,28 @@ describe("staff operations shell registries", () => {
     ]);
     expect(staffShellContext.currentBranchId).toBe("seed-branch-downtown");
     expect(getActiveShiftLabel(staffShellContext.activeShift)).toBe("Open shift - Front desk");
+  });
+
+  it("filters sidebar items by granted permissions", () => {
+    const visibleLabels = getVisibleNavigationGroups([PERMISSIONS.WORKSPACE_READ]).flatMap(
+      (group) => group.items.map((item) => item.label),
+    );
+
+    expect(visibleLabels).toContain("Space map");
+    expect(visibleLabels).toContain("Workspace");
+    expect(visibleLabels).not.toContain("Billing");
+    expect(visibleLabels).not.toContain("Admin");
+  });
+
+  it("derives shell permissions from a staff role instead of a fixed role", () => {
+    const cashierContext = resolveStaffShellContext({
+      displayName: "Cashier A",
+      roleName: "cashier",
+    });
+
+    expect(cashierContext.role).toBe("cashier");
+    expect(cashierContext.permissions).toContain(PERMISSIONS.CHARGE_ADD);
+    expect(cashierContext.permissions).not.toContain(PERMISSIONS.STAFF_MANAGE);
   });
 });
 

@@ -7,6 +7,10 @@ import { requirePermission } from "../permissions/middleware";
 import { staffProcedure } from "../index";
 
 export const staffRouter = {
+  me: staffProcedure.query(({ ctx }) => {
+    return ctx.staff;
+  }),
+
   list: staffProcedure.use(requirePermission("staff:manage")).query(async () => {
     return db
       .select({

@@ -14,6 +14,8 @@ import type { LucideIcon } from "lucide-react";
 import { PERMISSIONS } from "@backspace/api/permissions/constants";
 import type { PermissionKey } from "@backspace/api/permissions/constants";
 
+import { hasPermission } from "./permissions";
+
 export type StaffNavigationItem = {
   disabled?: boolean;
   href: string;
@@ -125,3 +127,14 @@ export const staffNavigationGroups: StaffNavigationGroup[] = [
     ],
   },
 ];
+
+export function getVisibleNavigationGroups(permissions: PermissionKey[]): StaffNavigationGroup[] {
+  return staffNavigationGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) => !item.requiredPermission || hasPermission(permissions, item.requiredPermission),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
+}

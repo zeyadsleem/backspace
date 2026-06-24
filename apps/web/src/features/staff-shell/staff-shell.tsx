@@ -18,31 +18,39 @@ import { PermissionGate } from "./permissions";
 import {
   getActiveShiftLabel,
   getCurrentBranch,
+  resolveStaffShellContext,
   staffShellBranches,
   staffShellContext,
 } from "./shell-context";
-import { staffNavigationGroups } from "./staff-navigation";
+import type { StaffShellContext, StaffShellProfile } from "./shell-context";
+import { getVisibleNavigationGroups } from "./staff-navigation";
 import { staffQuickActions } from "./staff-quick-actions";
 
 export function StaffShell({
   children,
+  staffProfile,
   userName,
 }: {
   children: ReactNode;
+  staffProfile?: StaffShellProfile | null;
   userName?: string | null;
 }) {
+  const context = resolveStaffShellContext(staffProfile);
+
   return (
     <div className="grid min-h-svh bg-background text-foreground md:grid-cols-[17rem_1fr]">
-      <StaffSidebar />
+      <StaffSidebar permissions={context.permissions} />
       <div className="grid min-w-0 grid-rows-[auto_1fr]">
-        <StaffTopbar userName={userName} />
+        <StaffTopbar context={context} userName={userName} />
         <main className="min-w-0 bg-muted/20 p-4 md:p-6">{children}</main>
       </div>
     </div>
   );
 }
 
-function StaffSidebar() {
+function StaffSidebar({ permissions }: { permissions: StaffShellContext["permissions"] }) {
+  const visibleGroups = getVisibleNavigationGroups(permissions);
+
   return (
     <aside className="hidden border-r bg-card/60 md:flex md:flex-col">
       <div className="border-b px-5 py-4">
@@ -57,7 +65,7 @@ function StaffSidebar() {
         </div>
       </div>
       <nav className="flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4">
-        {staffNavigationGroups.map((group) => (
+        {visibleGroups.map((group) => (
           <div className="flex flex-col gap-2" key={group.label}>
             <p className="px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {group.label}
@@ -102,13 +110,19 @@ function StaffSidebar() {
   );
 }
 
-function StaffTopbar({ userName }: { userName?: string | null }) {
+function StaffTopbar({
+  context,
+  userName,
+}: {
+  context: StaffShellContext;
+  userName?: string | null;
+}) {
   return (
     <header className="sticky top-0 z-10 border-b bg-background/95 px-4 py-3 backdrop-blur md:px-6">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-          <BranchSelector />
-          <ShiftStatusBadge />
+          <BranchSelector context={context} />
+          <ShiftStatusBadge context={context} />
           <div className="hidden items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground md:flex md:min-w-64 lg:min-w-80">
             <Search aria-hidden="true" />
             <Input
@@ -123,13 +137,15 @@ function StaffTopbar({ userName }: { userName?: string | null }) {
           </div>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto">
-          <QuickActions />
+          <QuickActions permissions={context.permissions} />
           <Button aria-label="Notifications" size="icon" variant="outline">
             <Bell aria-hidden="true" />
           </Button>
           <div className="hidden min-w-0 text-right text-xs md:block">
-            <p className="truncate font-medium text-foreground">{userName ?? "Staff user"}</p>
-            <p className="text-muted-foreground">{staffShellContext.role}</p>
+            <p className="truncate font-medium text-foreground">
+              {context.displayName ?? userName ?? "Staff user"}
+            </p>
+            <p className="text-muted-foreground">{context.role}</p>
           </div>
           <UserMenu />
         </div>
@@ -138,8 +154,8 @@ function StaffTopbar({ userName }: { userName?: string | null }) {
   );
 }
 
-function BranchSelector() {
-  const currentBranch = getCurrentBranch(staffShellContext.currentBranchId);
+function BranchSelector({ context }: { context: StaffShellContext }) {
+  const currentBranch = getCurrentBranch(context.currentBranchId);
 
   return (
     <Button className="justify-between gap-3" variant="outline">
@@ -155,16 +171,16 @@ function BranchSelector() {
   );
 }
 
-function ShiftStatusBadge() {
+function ShiftStatusBadge({ context }: { context: StaffShellContext }) {
   return (
     <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm">
       <span className="size-2 rounded-full bg-primary" />
-      <span>{getActiveShiftLabel(staffShellContext.activeShift)}</span>
+      <span>{getActiveShiftLabel(context.activeShift)}</span>
     </div>
   );
 }
 
-function QuickActions() {
+function QuickActions({ permissions }: { permissions: StaffShellContext["permissions"] }) {
   return (
     <div className="flex items-center gap-2">
       <Button className="md:hidden" size="icon" variant="outline">
@@ -176,7 +192,7 @@ function QuickActions() {
           <PermissionGate
             fallback={null}
             key={action.label}
-            permissions={staffShellContext.permissions}
+            permissions={permissions}
             required={action.requiredPermission}
           >
             <Button
