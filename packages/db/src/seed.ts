@@ -209,6 +209,37 @@ export const PEOPLE = [
   },
 ];
 
+export const STAFF_USERS = [
+  {
+    id: "seed-user-cashier",
+    name: "Omar El-Sayed",
+    email: "omar.elsayed@backspace.example.com",
+    emailVerified: true,
+    image: null,
+  },
+  {
+    id: "seed-user-manager",
+    name: "Heba Ahmed",
+    email: "heba.ahmed@backspace.example.com",
+    emailVerified: true,
+    image: null,
+  },
+  {
+    id: "seed-user-cleaner",
+    name: "Mina Nabil",
+    email: "mina.nabil@backspace.example.com",
+    emailVerified: true,
+    image: null,
+  },
+  {
+    id: "seed-user-maintenance",
+    name: "Youssef Samir",
+    email: "youssef.samir@backspace.example.com",
+    emailVerified: true,
+    image: null,
+  },
+];
+
 export const CUSTOMER_ACCOUNTS = [
   {
     id: "seed-account-host",

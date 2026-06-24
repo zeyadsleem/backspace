@@ -5,6 +5,7 @@ import {
   FLOORS,
   SPACES,
   PEOPLE,
+  STAFF_USERS,
   CUSTOMER_ACCOUNTS,
   PLANS,
   MEMBERSHIPS,
@@ -92,6 +93,14 @@ describe("seed data coverage", () => {
     expect(personIds).toContain("seed-person-host");
     expect(personIds).toContain("seed-person-guest");
     expect(personIds).toContain("seed-person-attendee");
+  });
+
+  it("includes staff users for operations and audit actors", () => {
+    const userIds = new Set(STAFF_USERS.map((user) => user.id));
+    expect(userIds).toContain("seed-user-cashier");
+    expect(userIds).toContain("seed-user-manager");
+    expect(userIds).toContain("seed-user-cleaner");
+    expect(userIds).toContain("seed-user-maintenance");
   });
 
   it("includes at least one membership plan and active membership", () => {
@@ -300,6 +309,32 @@ describe("seed data integrity", () => {
       if (charge.eventId) expect(eventIds).toContain(charge.eventId);
       if (charge.hostAccountId) expect(accountIds).toContain(charge.hostAccountId);
       if (charge.invoiceId) expect(invoiceIds).toContain(charge.invoiceId);
+    }
+  });
+
+  it("keeps operations and audit user references attached to seeded staff users", () => {
+    const userIds = new Set(STAFF_USERS.map((user) => user.id));
+
+    for (const shift of SHIFTS) {
+      expect(userIds).toContain(shift.openedByUserId);
+      if (shift.closedByUserId) expect(userIds).toContain(shift.closedByUserId);
+    }
+
+    for (const task of CLEANING_TASKS) {
+      if (task.assignedToUserId) expect(userIds).toContain(task.assignedToUserId);
+    }
+
+    for (const ticket of MAINTENANCE_TICKETS) {
+      if (ticket.assignedToUserId) expect(userIds).toContain(ticket.assignedToUserId);
+    }
+
+    for (const request of APPROVAL_REQUESTS) {
+      expect(userIds).toContain(request.requestedByUserId);
+      if (request.reviewedByUserId) expect(userIds).toContain(request.reviewedByUserId);
+    }
+
+    for (const log of AUDIT_LOGS) {
+      if (log.actorUserId) expect(userIds).toContain(log.actorUserId);
     }
   });
 
