@@ -141,7 +141,7 @@ export const SPACES = [
   },
   {
     id: "seed-space-maintenance-room",
-    branchId: "seed-branch-main",
+    branchId: "seed-branch-secondary",
     floorId: "seed-floor-second",
     name: "Storage Room",
     kind: "private_office",
@@ -644,7 +644,7 @@ export const CHARGES = [
     type: "discount" as const,
     label: "Early Bird Discount",
     quantity: 1,
-    amountCents: -5000,
+    amountCents: 5000,
     currency: "EGP",
     billingResponsibility: "visitor" as const,
     reason: "10% early booking discount",
@@ -739,7 +739,7 @@ export const INVOICE_ITEMS = [
     invoiceId: "seed-invoice-booking",
     chargeId: "seed-charge-discount",
     label: "Early Bird Discount",
-    amountCents: -5000,
+    amountCents: 5000,
   },
 ];
 

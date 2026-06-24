@@ -5,13 +5,16 @@ import {
   FLOORS,
   SPACES,
   PEOPLE,
+  CUSTOMER_ACCOUNTS,
   PLANS,
   MEMBERSHIPS,
   BOOKINGS,
   VISITS,
   USAGE_SESSIONS,
+  EVENTS,
   CHARGES,
   INVOICES,
+  INVOICE_ITEMS,
   PAYMENTS,
   CATALOG_ITEMS,
   INVENTORY_MOVEMENTS,
@@ -71,11 +74,12 @@ describe("seed data coverage", () => {
     expect(new Set(kinds)).toContain("event_area");
   });
 
-  it("includes spaces with statuses covering available, occupied, reserved, cleaning, and maintenance", () => {
+  it("includes spaces with statuses covering available, occupied, reserved, blocked, cleaning, and maintenance", () => {
     const statuses = new Set(SPACES.map((s) => s.status));
     expect(statuses).toContain("available");
     expect(statuses).toContain("occupied");
     expect(statuses).toContain("reserved");
+    expect(statuses).toContain("blocked");
     expect(statuses).toContain("cleaning");
     expect(statuses).toContain("maintenance");
   });
@@ -126,6 +130,15 @@ describe("seed data coverage", () => {
     expect(statuses).toContain("ended");
   });
 
+  it("includes an overdue active usage session scenario", () => {
+    const overdueSession = USAGE_SESSIONS.find(
+      (session) =>
+        session.status === "active" && session.startedAt < new Date(Date.now() - 2 * 3_600_000),
+    );
+
+    expect(overdueSession).toBeDefined();
+  });
+
   it("includes charges of every type", () => {
     const types = new Set(CHARGES.map((c) => c.type));
     expect(types).toContain("product");
@@ -147,6 +160,14 @@ describe("seed data coverage", () => {
     const statuses = new Set(INVOICES.map((i) => i.status));
     expect(statuses).toContain("paid");
     expect(statuses).toContain("draft");
+  });
+
+  it("includes realistic pay-later and complimentary operational states", () => {
+    expect(VISITS.some((visit) => visit.billingResponsibility === "pay_later")).toBe(true);
+    expect(CHARGES.some((charge) => charge.billingResponsibility === "pay_later")).toBe(true);
+    expect(
+      CHARGES.some((charge) => charge.type === "complimentary" && charge.amountCents === 0),
+    ).toBe(true);
   });
 
   it("includes at least one payment record", () => {
@@ -176,8 +197,23 @@ describe("seed data coverage", () => {
     expect(SHIFTS.length).toBeGreaterThanOrEqual(1);
   });
 
+  it("includes a shift discrepancy scenario when cash counts are closed", () => {
+    const discrepantShift = SHIFTS.find(
+      (shift) =>
+        shift.status === "closed" &&
+        shift.actualCashCents !== null &&
+        shift.actualCashCents !== shift.expectedCashCents,
+    );
+
+    expect(discrepantShift).toBeDefined();
+  });
+
   it("includes at least one approval request", () => {
     expect(APPROVAL_REQUESTS.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("includes an approval-required pending request", () => {
+    expect(APPROVAL_REQUESTS.some((request) => request.status === "pending")).toBe(true);
   });
 
   it("includes at least one audit log", () => {
@@ -218,6 +254,7 @@ describe("seed data integrity", () => {
   it("uses integer minor units for all money amounts in charges", () => {
     for (const charge of CHARGES) {
       expect(Number.isInteger(charge.amountCents)).toBe(true);
+      expect(charge.amountCents).toBeGreaterThanOrEqual(0);
     }
   });
 
@@ -228,9 +265,41 @@ describe("seed data integrity", () => {
     }
   });
 
+  it("uses non-negative integer minor units for invoice items", () => {
+    for (const item of INVOICE_ITEMS) {
+      expect(Number.isInteger(item.amountCents)).toBe(true);
+      expect(item.amountCents).toBeGreaterThanOrEqual(0);
+    }
+  });
+
   it("uses integer minor units for all money amounts in payments", () => {
     for (const payment of PAYMENTS) {
       expect(Number.isInteger(payment.amountCents)).toBe(true);
+      expect(payment.amountCents).toBeGreaterThanOrEqual(0);
+    }
+  });
+
+  it("keeps each space in the same branch as its floor", () => {
+    const floorBranchById = new Map(FLOORS.map((floor) => [floor.id, floor.branchId]));
+
+    for (const space of SPACES) {
+      expect(floorBranchById.get(space.floorId)).toBe(space.branchId);
+    }
+  });
+
+  it("keeps charges attached to existing operational context records", () => {
+    const visitIds = new Set(VISITS.map((visit) => visit.id));
+    const sessionIds = new Set(USAGE_SESSIONS.map((session) => session.id));
+    const eventIds = new Set(EVENTS.map((event) => event.id));
+    const accountIds = new Set(CUSTOMER_ACCOUNTS.map((account) => account.id));
+    const invoiceIds = new Set(INVOICES.map((invoice) => invoice.id));
+
+    for (const charge of CHARGES) {
+      if (charge.visitId) expect(visitIds).toContain(charge.visitId);
+      if (charge.usageSessionId) expect(sessionIds).toContain(charge.usageSessionId);
+      if (charge.eventId) expect(eventIds).toContain(charge.eventId);
+      if (charge.hostAccountId) expect(accountIds).toContain(charge.hostAccountId);
+      if (charge.invoiceId) expect(invoiceIds).toContain(charge.invoiceId);
     }
   });
 
