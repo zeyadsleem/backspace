@@ -2,11 +2,16 @@ import {
   APPROVAL_REQUESTS,
   BOOKINGS,
   BRANCHES,
+  CHARGES,
   CLEANING_TASKS,
+  CUSTOMER_ACCOUNTS,
+  EVENTS,
+  INVOICE_ITEMS,
   INVOICES,
   MAINTENANCE_TICKETS,
   MEMBERSHIPS,
   PEOPLE,
+  PLANS,
   SHIFTS,
   SPACES,
   USAGE_SESSIONS,
@@ -113,20 +118,46 @@ function endOfTomorrow(date: Date): Date {
   return new Date(start.getTime() + 2 * 86_400_000 - 1);
 }
 
-function personHasBranchActivity(personId: string | null, branchId: string): boolean {
-  if (!personId) {
+function chargeBelongsToBranch(chargeId: string | null, branchId: string): boolean {
+  if (!chargeId) {
     return false;
   }
 
-  const hasBranchVisit = VISITS.some(
-    (visit) => visit.personId === personId && visit.branchId === branchId,
-  );
-  const hasBranchBooking = BOOKINGS.some((booking) => {
-    const space = booking.spaceId ? SPACES.find((item) => item.id === booking.spaceId) : null;
-    return booking.personId === personId && space?.branchId === branchId;
-  });
+  const charge = CHARGES.find((item) => item.id === chargeId);
+  if (!charge) {
+    return false;
+  }
 
-  return hasBranchVisit || hasBranchBooking;
+  if (charge.visitId) {
+    return VISITS.some((visit) => visit.id === charge.visitId && visit.branchId === branchId);
+  }
+
+  if (charge.usageSessionId) {
+    const session = USAGE_SESSIONS.find((item) => item.id === charge.usageSessionId);
+    return VISITS.some((visit) => visit.id === session?.visitId && visit.branchId === branchId);
+  }
+
+  if (charge.eventId) {
+    return EVENTS.some((event) => event.id === charge.eventId && event.branchId === branchId);
+  }
+
+  if (charge.hostAccountId) {
+    return CUSTOMER_ACCOUNTS.some(
+      (account) => account.id === charge.hostAccountId && account.branchId === branchId,
+    );
+  }
+
+  return false;
+}
+
+function invoiceBelongsToBranch(invoiceId: string, branchId: string): boolean {
+  return INVOICE_ITEMS.some(
+    (item) => item.invoiceId === invoiceId && chargeBelongsToBranch(item.chargeId, branchId),
+  );
+}
+
+function membershipBelongsToBranch(planId: string, branchId: string): boolean {
+  return PLANS.some((plan) => plan.id === planId && plan.branchId === branchId);
 }
 
 export function getTodayOverview({
@@ -160,8 +191,7 @@ export function getTodayOverview({
     );
   });
   const openInvoices = INVOICES.filter(
-    (invoice) =>
-      invoice.status !== "paid" && personHasBranchActivity(invoice.billToPersonId, branch.id),
+    (invoice) => invoice.status !== "paid" && invoiceBelongsToBranch(invoice.id, branch.id),
   );
   const openBillCurrency = openInvoices[0]?.currency ?? branch.currency;
   const openBillTotalMinor = openInvoices.reduce((total, invoice) => total + invoice.totalCents, 0);
@@ -179,9 +209,7 @@ export function getTodayOverview({
   const expiringMemberships = MEMBERSHIPS.filter(
     (membership) =>
       membership.status === "active" &&
-      VISITS.some(
-        (visit) => visit.membershipId === membership.id && visit.branchId === branch.id,
-      ) &&
+      membershipBelongsToBranch(membership.planId, branch.id) &&
       membership.endsAt <= new Date(now.getTime() + 30 * 86_400_000),
   );
   const shift = SHIFTS.find((item) => item.branchId === branch.id && item.status === "open");
