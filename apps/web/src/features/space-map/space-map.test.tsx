@@ -160,6 +160,21 @@ describe("Space map UI", () => {
     expect(markup).toContain("Cannot mark available while an active session");
   });
 
+  it("wires rendered search and filter controls into visible spaces", () => {
+    const markup = renderToString(
+      <SpaceMap
+        initialFilters={{ query: "blocked", state: "blocked", type: "desk" }}
+        overview={overview}
+      />,
+    );
+
+    expect(markup).toContain("Filter by state");
+    expect(markup).toContain("Filter by floor");
+    expect(markup).toContain("Filter by type");
+    expect(markup).toContain("Desk C1 (Blocked)");
+    expect(markup).not.toContain("Desk A3");
+  });
+
   it("renders loading, empty, error, and restricted states", () => {
     expect(renderToString(<SpaceMapLoading />)).toContain("Loading space map");
     expect(renderToString(<SpaceMapEmpty branchName="Downtown Hub" />)).toContain(

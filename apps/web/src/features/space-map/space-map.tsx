@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { startTransition, useDeferredValue, useState } from "react";
 
 import type {
   SpaceAvailabilityState,
@@ -29,6 +30,15 @@ const states: SpaceAvailabilityState[] = [
   "blocked",
   "inactive",
 ];
+
+type SpaceMapFilters = {
+  query: string;
+  state: SpaceAvailabilityState | "all";
+  floor: string;
+  type: string;
+};
+
+const defaultFilters: SpaceMapFilters = { query: "", state: "all", floor: "all", type: "all" };
 
 export function getSpaceStateBadge(state: SpaceAvailabilityState): {
   label: string;
@@ -77,7 +87,7 @@ export function buildSpaceMapFilters(groups: SpaceMapGroup[]) {
 
 export function filterSpaceMapGroups(
   groups: SpaceMapGroup[],
-  filters: { query: string; state: SpaceAvailabilityState | "all"; floor: string; type: string },
+  filters: SpaceMapFilters,
 ): SpaceMapGroup[] {
   const query = filters.query.trim().toLowerCase();
   return groups
@@ -109,14 +119,32 @@ export function SpaceMap({
   overview,
   selectedSpaceId,
   selectedSpaceDetail,
+  initialFilters,
   onSelectSpace,
 }: {
   overview: SpaceMapOverview;
   selectedSpaceId?: string | null;
   selectedSpaceDetail?: SpaceDetail | null;
+  initialFilters?: Partial<SpaceMapFilters>;
   onSelectSpace?: (spaceId: string) => void;
 }) {
   const selected = selectedSpaceDetail ?? null;
+  const [filters, setFilters] = useState<SpaceMapFilters>({
+    ...defaultFilters,
+    ...initialFilters,
+  });
+  const deferredQuery = useDeferredValue(filters.query);
+  const filterOptions = buildSpaceMapFilters(overview.groups);
+  const visibleGroups = filterSpaceMapGroups(overview.groups, {
+    ...filters,
+    query: deferredQuery,
+  });
+
+  function updateFilter<Key extends keyof SpaceMapFilters>(key: Key, value: SpaceMapFilters[Key]) {
+    startTransition(() => {
+      setFilters((current) => ({ ...current, [key]: value }));
+    });
+  }
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-5">
@@ -143,22 +171,76 @@ export function SpaceMap({
             <Input
               aria-label="Search spaces"
               className="border-0 p-0 shadow-none focus-visible:ring-0"
+              onChange={(event) => updateFilter("query", event.target.value)}
               placeholder="Search spaces"
-              readOnly
+              value={filters.query}
             />
           </label>
-          <div className="flex flex-wrap gap-2">
-            {getSpaceStateLegend().map((item) => (
-              <Badge key={item.state} variant={item.tone}>
-                {item.label}
-              </Badge>
-            ))}
+          <div className="grid gap-2 sm:grid-cols-3">
+            <label className="text-xs font-medium text-muted-foreground">
+              State
+              <select
+                aria-label="Filter by state"
+                className="mt-1 h-9 w-full rounded-md border bg-background px-2 text-sm text-foreground"
+                onChange={(event) =>
+                  updateFilter("state", event.target.value as SpaceMapFilters["state"])
+                }
+                value={filters.state}
+              >
+                <option value="all">All states</option>
+                {filterOptions.states.map((state) => (
+                  <option key={state} value={state}>
+                    {getSpaceStateBadge(state).label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Floor
+              <select
+                aria-label="Filter by floor"
+                className="mt-1 h-9 w-full rounded-md border bg-background px-2 text-sm text-foreground"
+                onChange={(event) => updateFilter("floor", event.target.value)}
+                value={filters.floor}
+              >
+                <option value="all">All floors</option>
+                {filterOptions.floors.map((floor) => (
+                  <option key={floor} value={floor}>
+                    {floor}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs font-medium text-muted-foreground">
+              Type
+              <select
+                aria-label="Filter by type"
+                className="mt-1 h-9 w-full rounded-md border bg-background px-2 text-sm text-foreground"
+                onChange={(event) => updateFilter("type", event.target.value)}
+                value={filters.type}
+              >
+                <option value="all">All types</option>
+                {filterOptions.types.map((type) => (
+                  <option key={type} value={type.toLowerCase()}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
         </CardContent>
       </Card>
       <div className="grid gap-5 xl:grid-cols-[1fr_24rem]">
         <div className="flex flex-col gap-4">
-          {overview.groups.map((group) => (
+          {visibleGroups.length === 0 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>No spaces match these filters</CardTitle>
+                <CardDescription>Clear the search or choose broader filter values.</CardDescription>
+              </CardHeader>
+            </Card>
+          ) : null}
+          {visibleGroups.map((group) => (
             <Card key={group.id}>
               <CardHeader>
                 <CardTitle>{group.label}</CardTitle>

@@ -252,7 +252,7 @@ function buildSpaceMapItem(space: SeedSpace, permissions: string[], now: Date): 
     cleaningTask: visibleCleaningTask,
     maintenanceTicket: visibleMaintenanceTicket,
     blockedReason: state.state === "blocked" ? state.reason : null,
-    actions: buildActions(permissions, state.state, {
+    actions: buildActions(permissions, {
       activeSession: visibleSession,
       reservation: visibleReservation,
       cleaningTask: visibleCleaningTask,
@@ -263,7 +263,6 @@ function buildSpaceMapItem(space: SeedSpace, permissions: string[], now: Date): 
 
 function buildActions(
   permissions: string[],
-  state: SpaceAvailabilityState,
   context: {
     activeSession: SpaceContextSession | null;
     reservation: SpaceContextReservation | null;
