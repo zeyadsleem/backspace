@@ -28,12 +28,12 @@ export type StaffShellContext = {
 
 export const staffShellBranches: StaffShellBranch[] = [
   {
-    id: "seed-branch-downtown",
+    id: "seed-branch-main",
     name: "Downtown Hub",
     shortName: "Downtown",
   },
   {
-    id: "seed-branch-maadi",
+    id: "seed-branch-secondary",
     name: "Maadi Workspace",
     shortName: "Maadi",
   },
@@ -45,7 +45,7 @@ export const staffShellContext: StaffShellContext = {
     label: "Front desk",
     status: "open",
   },
-  currentBranchId: "seed-branch-downtown",
+  currentBranchId: "seed-branch-main",
   permissions: [],
   role: "unknown",
 };
