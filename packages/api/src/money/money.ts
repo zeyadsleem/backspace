@@ -54,7 +54,11 @@ export function sum(items: Money[]): Money {
   if (items.length === 0) {
     throw new Error("Cannot sum an empty list");
   }
-  const currency = items[0].currency;
+  const first = items[0];
+  if (!first) {
+    throw new Error("Cannot sum an empty list");
+  }
+  const currency = first.currency;
   const total = items.reduce((acc, m) => {
     if (m.currency !== currency) {
       throw new Error(`Currency mismatch: ${m.currency} !== ${currency}`);
