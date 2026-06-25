@@ -40,7 +40,6 @@ export const staffNavigationGroups: StaffNavigationGroup[] = [
         requiredPermission: PERMISSIONS.VISIT_READ,
       },
       {
-        disabled: true,
         href: "/live",
         icon: Layers,
         label: "Live visits",
