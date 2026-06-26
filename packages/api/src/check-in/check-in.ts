@@ -520,6 +520,12 @@ export async function checkInEventAttendee(
       message: `Event not found: ${input.eventId}`,
     });
   }
+  if (event.branchId !== input.branchId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Event ${input.eventId} does not belong to branch ${input.branchId}.`,
+    });
+  }
   if (event.status !== "in_progress") {
     throw new TRPCError({
       code: "BAD_REQUEST",

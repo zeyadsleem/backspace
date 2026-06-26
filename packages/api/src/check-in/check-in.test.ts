@@ -240,6 +240,19 @@ describe("checkInEventAttendee", () => {
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
+  it("rejects events from another branch", async () => {
+    await expect(
+      checkInEventAttendee(
+        {
+          branchId: "seed-branch-secondary",
+          eventId: "seed-event-workshop",
+          personId: "seed-person-host",
+        },
+        "seed-user-cashier",
+      ),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
   it("rejects duplicate active visit", async () => {
     await expect(
       checkInEventAttendee(
