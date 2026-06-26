@@ -23,6 +23,32 @@ type CheckInType = "walk-in" | "member" | "booking" | "hosted-guest" | "event-at
 
 type DrawerMode = { state: "form" } | { state: "success" };
 
+type CheckInResult = {
+  visit: {
+    id: string;
+    personId: string;
+    visitType: string;
+    status: string;
+    checkedInAt: string;
+    billingResponsibility: string;
+  };
+  usageSession: {
+    id: string;
+    visitId: string;
+    spaceId: string;
+    status: string;
+    startedAt: string;
+  } | null;
+};
+
+type SpacesData = {
+  branch: { id: string; name: string };
+  groups: Array<{
+    label: string;
+    spaces: Array<{ id: string; name: string; state: string }>;
+  }>;
+} | null;
+
 type CheckInOption = {
   type: CheckInType;
   icon: typeof DoorOpen;
@@ -76,7 +102,7 @@ const CHECK_IN_OPTIONS: CheckInOption[] = [
 export type CheckInMutationState<TResult> = {
   isPending: boolean;
   data: TResult | undefined;
-  error: Error | null;
+  error: { message: string } | null;
   reset: () => void;
 };
 
@@ -88,23 +114,7 @@ export type CheckInPageMutations = {
       spaceId?: string;
       billingResponsibility?: "visitor" | "pay_later" | "complimentary";
     }) => void;
-    state: CheckInMutationState<{
-      visit: {
-        id: string;
-        personId: string;
-        visitType: string;
-        status: string;
-        checkedInAt: Date;
-        billingResponsibility: string;
-      };
-      usageSession: {
-        id: string;
-        visitId: string;
-        spaceId: string;
-        status: string;
-        startedAt: Date;
-      } | null;
-    }>;
+    state: CheckInMutationState<CheckInResult>;
   };
   member: {
     mutate: (input: {
@@ -113,43 +123,11 @@ export type CheckInPageMutations = {
       membershipId: string;
       spaceId?: string;
     }) => void;
-    state: CheckInMutationState<{
-      visit: {
-        id: string;
-        personId: string;
-        visitType: string;
-        status: string;
-        checkedInAt: Date;
-        billingResponsibility: string;
-      };
-      usageSession: {
-        id: string;
-        visitId: string;
-        spaceId: string;
-        status: string;
-        startedAt: Date;
-      } | null;
-    }>;
+    state: CheckInMutationState<CheckInResult>;
   };
   booking: {
     mutate: (input: { branchId: string; bookingId: string }) => void;
-    state: CheckInMutationState<{
-      visit: {
-        id: string;
-        personId: string;
-        visitType: string;
-        status: string;
-        checkedInAt: Date;
-        billingResponsibility: string;
-      };
-      usageSession: {
-        id: string;
-        visitId: string;
-        spaceId: string;
-        status: string;
-        startedAt: Date;
-      } | null;
-    }>;
+    state: CheckInMutationState<CheckInResult>;
   };
   hostedGuest: {
     mutate: (input: {
@@ -158,43 +136,11 @@ export type CheckInPageMutations = {
       hostAccountId: string;
       spaceId?: string;
     }) => void;
-    state: CheckInMutationState<{
-      visit: {
-        id: string;
-        personId: string;
-        visitType: string;
-        status: string;
-        checkedInAt: Date;
-        billingResponsibility: string;
-      };
-      usageSession: {
-        id: string;
-        visitId: string;
-        spaceId: string;
-        status: string;
-        startedAt: Date;
-      } | null;
-    }>;
+    state: CheckInMutationState<CheckInResult>;
   };
   eventAttendee: {
     mutate: (input: { branchId: string; eventId: string; personId: string }) => void;
-    state: CheckInMutationState<{
-      visit: {
-        id: string;
-        personId: string;
-        visitType: string;
-        status: string;
-        checkedInAt: Date;
-        billingResponsibility: string;
-      };
-      usageSession: {
-        id: string;
-        visitId: string;
-        spaceId: string;
-        status: string;
-        startedAt: Date;
-      } | null;
-    }>;
+    state: CheckInMutationState<CheckInResult>;
   };
 };
 
@@ -206,13 +152,7 @@ export function CheckInPage({
 }: {
   branchId: string;
   permissions: PermissionKey[];
-  spacesData: {
-    branch: { id: string; name: string };
-    groups: Array<{
-      floor: { name: string };
-      spaces: Array<{ id: string; name: string; status: string }>;
-    }>;
-  } | null;
+  spacesData: SpacesData;
   mutations: CheckInPageMutations;
 }) {
   const [activeDrawer, setActiveDrawer] = useState<CheckInType | null>(null);
@@ -344,13 +284,7 @@ function WalkInDrawer({
   mutation,
 }: {
   branchId: string;
-  spaces: {
-    branch: { id: string; name: string };
-    groups: Array<{
-      floor: { name: string };
-      spaces: Array<{ id: string; name: string; status: string }>;
-    }>;
-  } | null;
+  spaces: SpacesData;
   onClose: () => void;
   onSuccess: () => void;
   mode: DrawerMode;
@@ -378,15 +312,15 @@ function WalkInDrawer({
     <CheckInDrawerShell
       title="Walk-in check-in"
       description="Create a new walk-in visit and assign an optional space."
-      result={mutation.data ?? null}
-      error={mutation.error?.message ?? null}
-      _isPending={mutation.isPending}
+      result={mutation.state.data ?? null}
+      error={mutation.state.error?.message ?? null}
+      _isPending={mutation.state.isPending}
       mode={mode}
       onClose={onClose}
-      onRetry={() => mutation.reset()}
+      onRetry={() => mutation.state.reset()}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <fieldset className="flex flex-col gap-3" disabled={mutation.isPending}>
+        <fieldset className="flex flex-col gap-3" disabled={mutation.state.isPending}>
           <div className="flex flex-col gap-2">
             <Label htmlFor="walkin-person-id">Person ID</Label>
             <Input
@@ -428,7 +362,7 @@ function WalkInDrawer({
               <div className="flex flex-wrap gap-1">
                 {spaces.groups.flatMap((group) =>
                   group.spaces
-                    .filter((s) => s.status === "available")
+                    .filter((s) => s.state === "available")
                     .map((s) => (
                       <button
                         key={s.id}
@@ -446,8 +380,8 @@ function WalkInDrawer({
         </fieldset>
 
         <div className="flex items-center gap-2">
-          <Button disabled={mutation.isPending || !personId.trim()} type="submit">
-            {mutation.isPending ? "Checking in..." : "Check in"}
+          <Button disabled={mutation.state.isPending || !personId.trim()} type="submit">
+            {mutation.state.isPending ? "Checking in..." : "Check in"}
           </Button>
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
@@ -467,13 +401,7 @@ function MemberDrawer({
   mutation,
 }: {
   branchId: string;
-  spaces: {
-    branch: { id: string; name: string };
-    groups: Array<{
-      floor: { name: string };
-      spaces: Array<{ id: string; name: string; status: string }>;
-    }>;
-  } | null;
+  spaces: SpacesData;
   onClose: () => void;
   onSuccess: () => void;
   mode: DrawerMode;
@@ -496,15 +424,15 @@ function MemberDrawer({
     <CheckInDrawerShell
       title="Member check-in"
       description="Check in a member with an active membership plan."
-      result={mutation.data ?? null}
-      error={mutation.error?.message ?? null}
-      _isPending={mutation.isPending}
+      result={mutation.state.data ?? null}
+      error={mutation.state.error?.message ?? null}
+      _isPending={mutation.state.isPending}
       mode={mode}
       onClose={onClose}
-      onRetry={() => mutation.reset()}
+      onRetry={() => mutation.state.reset()}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <fieldset className="flex flex-col gap-3" disabled={mutation.isPending}>
+        <fieldset className="flex flex-col gap-3" disabled={mutation.state.isPending}>
           <div className="flex flex-col gap-2">
             <Label htmlFor="member-person-id">Person ID</Label>
             <Input
@@ -545,7 +473,7 @@ function MemberDrawer({
               <div className="flex flex-wrap gap-1">
                 {spaces.groups.flatMap((group) =>
                   group.spaces
-                    .filter((s) => s.status === "available")
+                    .filter((s) => s.state === "available")
                     .map((s) => (
                       <button
                         key={s.id}
@@ -564,10 +492,10 @@ function MemberDrawer({
 
         <div className="flex items-center gap-2">
           <Button
-            disabled={mutation.isPending || !personId.trim() || !membershipId.trim()}
+            disabled={mutation.state.isPending || !personId.trim() || !membershipId.trim()}
             type="submit"
           >
-            {mutation.isPending ? "Checking in..." : "Check in"}
+            {mutation.state.isPending ? "Checking in..." : "Check in"}
           </Button>
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
@@ -606,15 +534,15 @@ function BookingDrawer({
     <CheckInDrawerShell
       title="Booking check-in"
       description="Check in a confirmed booking by providing the booking ID."
-      result={mutation.data ?? null}
-      error={mutation.error?.message ?? null}
-      _isPending={mutation.isPending}
+      result={mutation.state.data ?? null}
+      error={mutation.state.error?.message ?? null}
+      _isPending={mutation.state.isPending}
       mode={mode}
       onClose={onClose}
-      onRetry={() => mutation.reset()}
+      onRetry={() => mutation.state.reset()}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <fieldset className="flex flex-col gap-3" disabled={mutation.isPending}>
+        <fieldset className="flex flex-col gap-3" disabled={mutation.state.isPending}>
           <div className="flex flex-col gap-2">
             <Label htmlFor="booking-id">Booking ID</Label>
             <Input
@@ -632,8 +560,8 @@ function BookingDrawer({
         </fieldset>
 
         <div className="flex items-center gap-2">
-          <Button disabled={mutation.isPending || !bookingId.trim()} type="submit">
-            {mutation.isPending ? "Checking in..." : "Check in"}
+          <Button disabled={mutation.state.isPending || !bookingId.trim()} type="submit">
+            {mutation.state.isPending ? "Checking in..." : "Check in"}
           </Button>
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
@@ -653,13 +581,7 @@ function HostedGuestDrawer({
   mutation,
 }: {
   branchId: string;
-  spaces: {
-    branch: { id: string; name: string };
-    groups: Array<{
-      floor: { name: string };
-      spaces: Array<{ id: string; name: string; status: string }>;
-    }>;
-  } | null;
+  spaces: SpacesData;
   onClose: () => void;
   onSuccess: () => void;
   mode: DrawerMode;
@@ -682,15 +604,15 @@ function HostedGuestDrawer({
     <CheckInDrawerShell
       title="Hosted guest check-in"
       description="Register a guest under a host account. The host is billed for charges."
-      result={mutation.data ?? null}
-      error={mutation.error?.message ?? null}
-      _isPending={mutation.isPending}
+      result={mutation.state.data ?? null}
+      error={mutation.state.error?.message ?? null}
+      _isPending={mutation.state.isPending}
       mode={mode}
       onClose={onClose}
-      onRetry={() => mutation.reset()}
+      onRetry={() => mutation.state.reset()}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <fieldset className="flex flex-col gap-3" disabled={mutation.isPending}>
+        <fieldset className="flex flex-col gap-3" disabled={mutation.state.isPending}>
           <div className="flex flex-col gap-2">
             <Label htmlFor="guest-person-id">Guest person ID</Label>
             <Input
@@ -732,7 +654,7 @@ function HostedGuestDrawer({
               <div className="flex flex-wrap gap-1">
                 {spaces.groups.flatMap((group) =>
                   group.spaces
-                    .filter((s) => s.status === "available")
+                    .filter((s) => s.state === "available")
                     .map((s) => (
                       <button
                         key={s.id}
@@ -751,10 +673,10 @@ function HostedGuestDrawer({
 
         <div className="flex items-center gap-2">
           <Button
-            disabled={mutation.isPending || !personId.trim() || !hostAccountId.trim()}
+            disabled={mutation.state.isPending || !personId.trim() || !hostAccountId.trim()}
             type="submit"
           >
-            {mutation.isPending ? "Checking in..." : "Check in"}
+            {mutation.state.isPending ? "Checking in..." : "Check in"}
           </Button>
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
@@ -794,15 +716,15 @@ function EventAttendeeDrawer({
     <CheckInDrawerShell
       title="Event attendee check-in"
       description="Check in an attendee for an in-progress event."
-      result={mutation.data ?? null}
-      error={mutation.error?.message ?? null}
-      _isPending={mutation.isPending}
+      result={mutation.state.data ?? null}
+      error={mutation.state.error?.message ?? null}
+      _isPending={mutation.state.isPending}
       mode={mode}
       onClose={onClose}
-      onRetry={() => mutation.reset()}
+      onRetry={() => mutation.state.reset()}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        <fieldset className="flex flex-col gap-3" disabled={mutation.isPending}>
+        <fieldset className="flex flex-col gap-3" disabled={mutation.state.isPending}>
           <div className="flex flex-col gap-2">
             <Label htmlFor="event-id">Event ID</Label>
             <Input
@@ -835,10 +757,10 @@ function EventAttendeeDrawer({
 
         <div className="flex items-center gap-2">
           <Button
-            disabled={mutation.isPending || !eventId.trim() || !personId.trim()}
+            disabled={mutation.state.isPending || !eventId.trim() || !personId.trim()}
             type="submit"
           >
-            {mutation.isPending ? "Checking in..." : "Check in"}
+            {mutation.state.isPending ? "Checking in..." : "Check in"}
           </Button>
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
@@ -862,23 +784,7 @@ function CheckInDrawerShell({
 }: {
   title: string;
   description: string;
-  result: {
-    visit: {
-      id: string;
-      personId: string;
-      visitType: string;
-      status: string;
-      checkedInAt: Date;
-      billingResponsibility: string;
-    };
-    usageSession: {
-      id: string;
-      visitId: string;
-      spaceId: string;
-      status: string;
-      startedAt: Date;
-    } | null;
-  } | null;
+  result: CheckInResult | null;
   error: string | null;
   _isPending: boolean;
   mode: DrawerMode;

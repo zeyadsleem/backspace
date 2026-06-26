@@ -29,6 +29,8 @@ type SeedSpace = {
   capacity: number;
 };
 
+type EventAttendeeStatus = "invited" | "checked_in" | "no_show" | "cancelled";
+
 export type CheckInVisitResult = {
   id: string;
   personId: string;
@@ -542,10 +544,11 @@ export async function checkInEventAttendee(
       message: `Person ${input.personId} is not registered for event ${input.eventId}.`,
     });
   }
-  if (attendee.status !== "invited") {
+  const attendeeStatus = attendee.status as EventAttendeeStatus;
+  if (attendeeStatus !== "invited") {
     throw new TRPCError({
       code: "BAD_REQUEST",
-      message: `Event attendee ${attendee.id} cannot be checked in (status: ${attendee.status}).`,
+      message: `Event attendee ${attendee.id} cannot be checked in (status: ${attendeeStatus}).`,
     });
   }
 
