@@ -59,10 +59,9 @@ export const staffNavigationGroups: StaffNavigationGroup[] = [
         requiredPermission: PERMISSIONS.BOOKING_READ,
       },
       {
-        disabled: true,
         href: "/check-in",
         icon: ClipboardList,
-        label: "Check-in queue",
+        label: "Check-in",
         requiredPermission: PERMISSIONS.BOOKING_CHECK_IN,
       },
     ],
