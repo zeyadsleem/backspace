@@ -1,6 +1,7 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
 
 import { staffRouter } from "./staff";
+import { spacesRouter } from "./spaces";
 import { todayRouter } from "./today";
 import { visitsRouter } from "./visits";
 
@@ -14,6 +15,7 @@ export const appRouter = router({
       user: ctx.session.user,
     };
   }),
+  spaces: spacesRouter,
   staff: staffRouter,
   today: todayRouter,
   visits: visitsRouter,

@@ -46,7 +46,6 @@ export const staffNavigationGroups: StaffNavigationGroup[] = [
         requiredPermission: PERMISSIONS.VISIT_READ,
       },
       {
-        disabled: true,
         href: "/space-map",
         icon: Grid3X3,
         label: "Space map",
