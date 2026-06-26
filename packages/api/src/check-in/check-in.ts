@@ -4,7 +4,9 @@ import {
   BOOKINGS,
   BRANCHES,
   CLEANING_TASKS,
+  CUSTOMER_ACCOUNTS,
   EVENTS,
+  EVENT_ATTENDEES,
   MAINTENANCE_TICKETS,
   MEMBERSHIPS,
   PEOPLE,
@@ -12,7 +14,7 @@ import {
   USAGE_SESSIONS,
   VISITS,
 } from "@backspace/db/seed";
-import { db, usageSession, visit } from "@backspace/db";
+import { booking as bookingTable, db, eq, eventAttendee, usageSession, visit } from "@backspace/db";
 
 import { writeAuditLog } from "../audit/audit";
 import { visitStatusIsActive } from "../domain/domain";
@@ -252,6 +254,12 @@ export async function checkInMember(
       message: `Membership ${input.membershipId} is not active (status: ${membership.status}).`,
     });
   }
+  if (membership.personId !== input.personId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Membership ${input.membershipId} does not belong to person ${input.personId}.`,
+    });
+  }
 
   if (input.spaceId) {
     validateSpaceAvailable(input.branchId, input.spaceId);
@@ -372,6 +380,10 @@ export async function checkInBooking(
     status: "active",
     startedAt: new Date(),
   });
+  await db
+    .update(bookingTable)
+    .set({ status: "checked_in" })
+    .where(eq(bookingTable.id, input.bookingId));
 
   await writeAuditLog({
     id: crypto.randomUUID(),
@@ -416,6 +428,16 @@ export async function checkInHostedGuest(
   validateBranch(input.branchId);
   validatePersonExists(input.personId);
   validateNoActiveVisit(input.branchId, input.personId);
+
+  const hostAccount = CUSTOMER_ACCOUNTS.find(
+    (item) => item.id === input.hostAccountId && item.branchId === input.branchId,
+  );
+  if (!hostAccount) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Host account not found for branch: ${input.hostAccountId}`,
+    });
+  }
 
   if (input.spaceId) {
     validateSpaceAvailable(input.branchId, input.spaceId);
@@ -505,6 +527,22 @@ export async function checkInEventAttendee(
     });
   }
 
+  const attendee = EVENT_ATTENDEES.find(
+    (item) => item.eventId === input.eventId && item.personId === input.personId,
+  );
+  if (!attendee) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Person ${input.personId} is not registered for event ${input.eventId}.`,
+    });
+  }
+  if (attendee.status !== "invited") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Event attendee ${attendee.id} cannot be checked in (status: ${attendee.status}).`,
+    });
+  }
+
   const visitId = crypto.randomUUID();
 
   await db.insert(visit).values({
@@ -536,6 +574,11 @@ export async function checkInEventAttendee(
       startedAt: new Date(),
     };
   }
+
+  await db
+    .update(eventAttendee)
+    .set({ status: "checked_in", visitId, checkedInAt: new Date() })
+    .where(eq(eventAttendee.id, attendee.id));
 
   await writeAuditLog({
     id: crypto.randomUUID(),

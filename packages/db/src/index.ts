@@ -14,7 +14,9 @@ export const db = createDb();
 export { role, permission, rolePermission, staffProfile, staffBranchAccess } from "./schema/staff";
 export { branch } from "./schema/workspace";
 export { auditLog, approvalRequest } from "./schema/audit";
+export { booking } from "./schema/bookings";
 export { charge, invoice, payment, invoiceItem, chargeTypeEnum } from "./schema/billing";
+export { eventAttendee } from "./schema/events";
 export {
   visit,
   usageSession,

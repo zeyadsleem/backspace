@@ -22,6 +22,8 @@ vi.mock("@backspace/db", () => {
     eq: vi.fn((a: unknown, b: unknown) => ({ eq: true, a, b })),
     visit: { id: "visit" },
     usageSession: { id: "usage-session" },
+    booking: { id: "booking-id" },
+    eventAttendee: { id: "event-attendee-id" },
     visitTypeEnum: {},
     billingResponsibilityEnum: {},
     visitStatusEnum: {},
@@ -126,6 +128,19 @@ describe("checkInMember", () => {
       ),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
+
+  it("rejects membership that belongs to another person", async () => {
+    await expect(
+      checkInMember(
+        {
+          branchId: "seed-branch-main",
+          personId: "seed-person-host",
+          membershipId: "seed-membership-active",
+        },
+        "seed-user-cashier",
+      ),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
 });
 
 describe("checkInBooking", () => {
@@ -183,6 +198,19 @@ describe("checkInHostedGuest", () => {
       ),
     ).rejects.toMatchObject({ code: "CONFLICT" });
   });
+
+  it("rejects unknown host account", async () => {
+    await expect(
+      checkInHostedGuest(
+        {
+          branchId: "seed-branch-main",
+          personId: "seed-person-host",
+          hostAccountId: "seed-account-unknown",
+        },
+        "seed-user-cashier",
+      ),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
 });
 
 describe("checkInEventAttendee", () => {
@@ -223,6 +251,19 @@ describe("checkInEventAttendee", () => {
         "seed-user-cashier",
       ),
     ).rejects.toMatchObject({ code: "CONFLICT" });
+  });
+
+  it("rejects people who are not registered attendees", async () => {
+    await expect(
+      checkInEventAttendee(
+        {
+          branchId: "seed-branch-main",
+          eventId: "seed-event-workshop",
+          personId: "seed-person-host",
+        },
+        "seed-user-cashier",
+      ),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });
 
