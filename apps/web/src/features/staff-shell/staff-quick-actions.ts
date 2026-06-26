@@ -4,6 +4,7 @@ import type { PermissionKey } from "@backspace/api/permissions/constants";
 export type StaffQuickAction = {
   description: string;
   disabled: boolean;
+  href?: string;
   label: string;
   requiredPermission: PermissionKey;
 };
@@ -11,19 +12,22 @@ export type StaffQuickAction = {
 export const staffQuickActions: StaffQuickAction[] = [
   {
     description: "Create a walk-in visit from the live operations flow.",
-    disabled: true,
+    disabled: false,
+    href: "/check-in",
     label: "New walk-in",
     requiredPermission: PERMISSIONS.VISIT_CREATE,
   },
   {
     description: "Find an existing booking and start the check-in handoff.",
-    disabled: true,
+    disabled: false,
+    href: "/check-in",
     label: "Check in booking",
     requiredPermission: PERMISSIONS.BOOKING_CHECK_IN,
   },
   {
     description: "Register a hosted guest against a member or tenant.",
-    disabled: true,
+    disabled: false,
+    href: "/check-in",
     label: "Check in guest",
     requiredPermission: PERMISSIONS.VISIT_CREATE,
   },

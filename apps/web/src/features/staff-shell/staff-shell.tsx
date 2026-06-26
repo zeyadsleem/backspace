@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Bell, ChevronDown, Command, LogOut, Search, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -181,6 +181,8 @@ function ShiftStatusBadge({ context }: { context: StaffShellContext }) {
 }
 
 function QuickActions({ permissions }: { permissions: StaffShellContext["permissions"] }) {
+  const navigate = useNavigate();
+
   return (
     <div className="flex items-center gap-2">
       <Button className="md:hidden" size="icon" variant="outline">
@@ -200,6 +202,9 @@ function QuickActions({ permissions }: { permissions: StaffShellContext["permiss
               size="sm"
               title={action.description}
               variant="outline"
+              onClick={() => {
+                if (action.href) navigate({ to: action.href });
+              }}
             >
               {action.label}
             </Button>

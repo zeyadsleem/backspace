@@ -25,7 +25,7 @@ describe("staff operations shell registries", () => {
     expect(labels).toContain("Live visits");
     expect(labels).toContain("Space map");
     expect(labels).toContain("Calendar");
-    expect(labels).toContain("Check-in queue");
+    expect(labels).toContain("Check-in");
     expect(labels).toContain("People");
     expect(labels).toContain("Billing");
     expect(labels).toContain("Add-ons & inventory");
@@ -44,7 +44,21 @@ describe("staff operations shell registries", () => {
       "Close shift",
     ]);
 
-    expect(staffQuickActions.every((action) => action.disabled)).toBe(true);
+    expect(
+      staffQuickActions
+        .filter(
+          (action) =>
+            action.label.startsWith("Add") ||
+            action.label.startsWith("Open") ||
+            action.label.startsWith("Close"),
+        )
+        .every((action) => action.disabled),
+    ).toBe(true);
+    expect(
+      staffQuickActions
+        .filter((action) => action.label.startsWith("New") || action.label.startsWith("Check"))
+        .every((action) => !action.disabled),
+    ).toBe(true);
     expect(staffQuickActions.map((action) => action.requiredPermission)).toEqual([
       PERMISSIONS.VISIT_CREATE,
       PERMISSIONS.BOOKING_CHECK_IN,
