@@ -5,19 +5,28 @@ import {
   BRANCHES,
   CLEANING_TASKS,
   CUSTOMER_ACCOUNTS,
-  EVENTS,
-  EVENT_ATTENDEES,
   MAINTENANCE_TICKETS,
-  MEMBERSHIPS,
   PEOPLE,
   SPACES,
   USAGE_SESSIONS,
   VISITS,
 } from "@backspace/db/seed";
-import { booking as bookingTable, db, eq, eventAttendee, usageSession, visit } from "@backspace/db";
+import {
+  and,
+  booking as bookingTable,
+  db,
+  eq,
+  eventAttendee,
+  membership,
+  membershipPlan,
+  space,
+  usageSession,
+  visit,
+  workspaceEvent,
+} from "@backspace/db";
 
 import { writeAuditLog } from "../audit/audit";
-import { visitStatusIsActive } from "../domain/domain";
+import { VISIT_STATUS, visitStatusIsActive } from "../domain/domain";
 
 type SeedSpace = {
   id: string;
@@ -28,8 +37,6 @@ type SeedSpace = {
   kind: string;
   capacity: number;
 };
-
-type EventAttendeeStatus = "invited" | "checked_in" | "no_show" | "cancelled";
 
 export type CheckInVisitResult = {
   id: string;
@@ -162,6 +169,187 @@ export function deriveSpaceState(space: SeedSpace): string {
   return space.status;
 }
 
+async function validateNoActiveVisitDb(branchId: string, personId: string): Promise<void> {
+  const rows = await db
+    .select()
+    .from(visit)
+    .where(
+      and(
+        eq(visit.branchId, branchId),
+        eq(visit.personId, personId),
+        eq(visit.status, VISIT_STATUS.ACTIVE),
+      ),
+    )
+    .limit(1);
+  if (rows.length > 0) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: `Person ${personId} already has an active visit (${rows[0]!.id}). Check-out first before creating a new one.`,
+    });
+  }
+}
+
+async function validateSpaceAvailableDb(branchId: string, spaceId: string): Promise<void> {
+  const [spaceRow] = await db
+    .select()
+    .from(space)
+    .where(and(eq(space.id, spaceId), eq(space.branchId, branchId)))
+    .limit(1);
+  if (!spaceRow) {
+    return;
+  }
+  const activeSession = await db
+    .select({ id: usageSession.id })
+    .from(usageSession)
+    .where(and(eq(usageSession.spaceId, spaceId), eq(usageSession.status, "active")))
+    .limit(1);
+  if (activeSession.length > 0) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: `Space ${spaceRow.name} is occupied by an active usage session.`,
+    });
+  }
+}
+
+async function validateBookingBranchContext(branchId: string, bookingId: string) {
+  const [bookingRow] = await db
+    .select()
+    .from(bookingTable)
+    .where(eq(bookingTable.id, bookingId))
+    .limit(1);
+  if (!bookingRow) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Booking not found: ${bookingId}`,
+    });
+  }
+  if (bookingRow.status !== "confirmed") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Booking ${bookingId} cannot be checked in (status: ${bookingRow.status}). Only confirmed bookings can be checked in.`,
+    });
+  }
+  const spaceId = bookingRow.spaceId;
+  if (!spaceId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Booking ${bookingId} has no assigned space.`,
+    });
+  }
+  const [spaceRow] = await db
+    .select()
+    .from(space)
+    .where(eq(space.id, spaceId))
+    .limit(1);
+  if (!spaceRow || spaceRow.branchId !== branchId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Booking ${bookingId} space does not belong to branch ${branchId}.`,
+    });
+  }
+  return bookingRow;
+}
+
+async function validateMembershipBranch(
+  membershipId: string,
+  personId: string,
+  branchId: string,
+): Promise<void> {
+  const [membershipRow] = await db
+    .select()
+    .from(membership)
+    .where(eq(membership.id, membershipId))
+    .limit(1);
+  if (!membershipRow) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Membership not found: ${membershipId}`,
+    });
+  }
+  if (membershipRow.status !== "active") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Membership ${membershipId} is not active (status: ${membershipRow.status}).`,
+    });
+  }
+  if (membershipRow.personId !== personId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Membership ${membershipId} does not belong to person ${personId}.`,
+    });
+  }
+  const [planRow] = await db
+    .select()
+    .from(membershipPlan)
+    .where(eq(membershipPlan.id, membershipRow.planId))
+    .limit(1);
+  if (!planRow) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Membership plan not found for membership ${membershipId}.`,
+    });
+  }
+  if (planRow.branchId !== null && planRow.branchId !== branchId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Membership plan ${planRow.name} is not valid for branch ${branchId}.`,
+    });
+  }
+}
+
+async function validateEventContext(
+  eventId: string,
+  branchId: string,
+  personId: string,
+) {
+  const [eventRow] = await db
+    .select()
+    .from(workspaceEvent)
+    .where(eq(workspaceEvent.id, eventId))
+    .limit(1);
+  if (!eventRow) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Event not found: ${eventId}`,
+    });
+  }
+  if (eventRow.branchId !== branchId) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Event ${eventId} does not belong to branch ${branchId}.`,
+    });
+  }
+  if (eventRow.status !== "in_progress") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Event ${eventId} cannot accept check-ins (status: ${eventRow.status}). Only in-progress events can accept check-ins.`,
+    });
+  }
+  const [attendeeRow] = await db
+    .select()
+    .from(eventAttendee)
+    .where(
+      and(
+        eq(eventAttendee.eventId, eventId),
+        eq(eventAttendee.personId, personId),
+      ),
+    )
+    .limit(1);
+  if (!attendeeRow) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Person ${personId} is not registered for event ${eventId}.`,
+    });
+  }
+  if (attendeeRow.status !== "invited") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Event attendee ${attendeeRow.id} cannot be checked in (status: ${attendeeRow.status}).`,
+    });
+  }
+  return eventRow;
+}
+
 export async function checkInWalkIn(
   input: WalkInInput,
   staffUserId: string,
@@ -171,52 +359,64 @@ export async function checkInWalkIn(
 }> {
   validateBranch(input.branchId);
   validatePersonExists(input.personId);
+  await validateNoActiveVisitDb(input.branchId, input.personId);
   validateNoActiveVisit(input.branchId, input.personId);
 
   if (input.spaceId) {
+    await validateSpaceAvailableDb(input.branchId, input.spaceId);
     validateSpaceAvailable(input.branchId, input.spaceId);
   }
 
   const billingResponsibility = input.billingResponsibility ?? "visitor";
   const visitId = crypto.randomUUID();
-
-  await db.insert(visit).values({
-    id: visitId,
-    branchId: input.branchId,
-    personId: input.personId,
-    visitType: "walk_in",
-    billingResponsibility,
-    status: "active",
-    checkedInAt: new Date(),
-  });
-
   let usageSessionResult: CheckInSessionResult | null = null;
-  if (input.spaceId) {
-    const sessionId = crypto.randomUUID();
-    await db.insert(usageSession).values({
-      id: sessionId,
-      visitId,
-      spaceId: input.spaceId,
-      status: "active",
-      startedAt: new Date(),
-    });
-    usageSessionResult = {
-      id: sessionId,
-      visitId,
-      spaceId: input.spaceId,
-      status: "active",
-      startedAt: new Date(),
-    };
-  }
 
-  await writeAuditLog({
-    id: crypto.randomUUID(),
-    branchId: input.branchId,
-    actorUserId: staffUserId,
-    action: "visit.create",
-    entityType: "visit",
-    entityId: visitId,
-    metadata: JSON.stringify({ visitType: "walk_in", personId: input.personId }),
+  await db.transaction(async (tx) => {
+    await tx.insert(visit).values({
+      id: visitId,
+      branchId: input.branchId,
+      personId: input.personId,
+      visitType: "walk_in",
+      billingResponsibility,
+      status: "active",
+      checkedInAt: new Date(),
+    });
+
+    if (input.spaceId) {
+      const sessionId = crypto.randomUUID();
+      await tx.insert(usageSession).values({
+        id: sessionId,
+        visitId,
+        spaceId: input.spaceId,
+        status: "active",
+        startedAt: new Date(),
+      });
+      usageSessionResult = {
+        id: sessionId,
+        visitId,
+        spaceId: input.spaceId,
+        status: "active",
+        startedAt: new Date(),
+      };
+    }
+
+    await writeAuditLog(
+      {
+        id: crypto.randomUUID(),
+        branchId: input.branchId,
+        actorUserId: staffUserId,
+        action: "visit.create",
+        entityType: "visit",
+        entityId: visitId,
+        metadata: JSON.stringify({
+          visitType: "walk_in",
+          branchId: input.branchId,
+          personId: input.personId,
+          spaceId: input.spaceId ?? null,
+        }),
+      },
+      tx,
+    );
   });
 
   return {
@@ -241,76 +441,66 @@ export async function checkInMember(
 }> {
   validateBranch(input.branchId);
   validatePersonExists(input.personId);
+  await validateNoActiveVisitDb(input.branchId, input.personId);
   validateNoActiveVisit(input.branchId, input.personId);
-
-  const membership = MEMBERSHIPS.find((item) => item.id === input.membershipId);
-  if (!membership) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Membership not found: ${input.membershipId}`,
-    });
-  }
-  if (membership.status !== "active") {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Membership ${input.membershipId} is not active (status: ${membership.status}).`,
-    });
-  }
-  if (membership.personId !== input.personId) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Membership ${input.membershipId} does not belong to person ${input.personId}.`,
-    });
-  }
+  await validateMembershipBranch(input.membershipId, input.personId, input.branchId);
 
   if (input.spaceId) {
+    await validateSpaceAvailableDb(input.branchId, input.spaceId);
     validateSpaceAvailable(input.branchId, input.spaceId);
   }
 
   const visitId = crypto.randomUUID();
-
-  await db.insert(visit).values({
-    id: visitId,
-    branchId: input.branchId,
-    personId: input.personId,
-    visitType: "member",
-    billingResponsibility: "subscription",
-    status: "active",
-    membershipId: input.membershipId,
-    checkedInAt: new Date(),
-  });
-
   let usageSessionResult: CheckInSessionResult | null = null;
-  if (input.spaceId) {
-    const sessionId = crypto.randomUUID();
-    await db.insert(usageSession).values({
-      id: sessionId,
-      visitId,
-      spaceId: input.spaceId,
-      status: "active",
-      startedAt: new Date(),
-    });
-    usageSessionResult = {
-      id: sessionId,
-      visitId,
-      spaceId: input.spaceId,
-      status: "active",
-      startedAt: new Date(),
-    };
-  }
 
-  await writeAuditLog({
-    id: crypto.randomUUID(),
-    branchId: input.branchId,
-    actorUserId: staffUserId,
-    action: "visit.create",
-    entityType: "visit",
-    entityId: visitId,
-    metadata: JSON.stringify({
-      visitType: "member",
+  await db.transaction(async (tx) => {
+    await tx.insert(visit).values({
+      id: visitId,
+      branchId: input.branchId,
       personId: input.personId,
+      visitType: "member",
+      billingResponsibility: "subscription",
+      status: "active",
       membershipId: input.membershipId,
-    }),
+      checkedInAt: new Date(),
+    });
+
+    if (input.spaceId) {
+      const sessionId = crypto.randomUUID();
+      await tx.insert(usageSession).values({
+        id: sessionId,
+        visitId,
+        spaceId: input.spaceId,
+        status: "active",
+        startedAt: new Date(),
+      });
+      usageSessionResult = {
+        id: sessionId,
+        visitId,
+        spaceId: input.spaceId,
+        status: "active",
+        startedAt: new Date(),
+      };
+    }
+
+    await writeAuditLog(
+      {
+        id: crypto.randomUUID(),
+        branchId: input.branchId,
+        actorUserId: staffUserId,
+        action: "visit.create",
+        entityType: "visit",
+        entityId: visitId,
+        metadata: JSON.stringify({
+          visitType: "member",
+          branchId: input.branchId,
+          personId: input.personId,
+          membershipId: input.membershipId,
+          spaceId: input.spaceId ?? null,
+        }),
+      },
+      tx,
+    );
   });
 
   return {
@@ -335,76 +525,68 @@ export async function checkInBooking(
 }> {
   validateBranch(input.branchId);
 
-  const booking = BOOKINGS.find((item) => item.id === input.bookingId);
-  if (!booking) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Booking not found: ${input.bookingId}`,
-    });
-  }
-  if (booking.status !== "confirmed") {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Booking ${input.bookingId} cannot be checked in (status: ${booking.status}). Only confirmed bookings can be checked in.`,
-    });
-  }
+  const bookingRow = await validateBookingBranchContext(input.branchId, input.bookingId);
+  const personId = bookingRow.personId;
+  const spaceId = bookingRow.spaceId!;
 
-  validateNoActiveVisit(input.branchId, booking.personId);
-
-  const spaceId = booking.spaceId;
-  if (spaceId) {
-    validateSpaceAvailable(input.branchId, spaceId);
-  } else {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Booking ${input.bookingId} has no assigned space.`,
-    });
-  }
+  await validateNoActiveVisitDb(input.branchId, personId);
+  validateNoActiveVisit(input.branchId, personId);
+  await validateSpaceAvailableDb(input.branchId, spaceId);
+  validateSpaceAvailable(input.branchId, spaceId);
 
   const visitId = crypto.randomUUID();
-
-  await db.insert(visit).values({
-    id: visitId,
-    branchId: input.branchId,
-    personId: booking.personId,
-    visitType: "booking_customer",
-    billingResponsibility: "visitor",
-    status: "active",
-    bookingId: input.bookingId,
-    checkedInAt: new Date(),
-  });
-
   const sessionId = crypto.randomUUID();
-  await db.insert(usageSession).values({
-    id: sessionId,
-    visitId,
-    spaceId,
-    status: "active",
-    startedAt: new Date(),
-  });
-  await db
-    .update(bookingTable)
-    .set({ status: "checked_in" })
-    .where(eq(bookingTable.id, input.bookingId));
 
-  await writeAuditLog({
-    id: crypto.randomUUID(),
-    branchId: input.branchId,
-    actorUserId: staffUserId,
-    action: "visit.create",
-    entityType: "visit",
-    entityId: visitId,
-    metadata: JSON.stringify({
+  await db.transaction(async (tx) => {
+    await tx.insert(visit).values({
+      id: visitId,
+      branchId: input.branchId,
+      personId,
       visitType: "booking_customer",
+      billingResponsibility: "visitor",
+      status: "active",
       bookingId: input.bookingId,
-      personId: booking.personId,
-    }),
+      checkedInAt: new Date(),
+    });
+
+    await tx.insert(usageSession).values({
+      id: sessionId,
+      visitId,
+      spaceId,
+      status: "active",
+      startedAt: new Date(),
+    });
+
+    await tx
+      .update(bookingTable)
+      .set({ status: "checked_in" })
+      .where(eq(bookingTable.id, input.bookingId));
+
+    await writeAuditLog(
+      {
+        id: crypto.randomUUID(),
+        branchId: input.branchId,
+        actorUserId: staffUserId,
+        action: "visit.create",
+        entityType: "visit",
+        entityId: visitId,
+        metadata: JSON.stringify({
+          visitType: "booking_customer",
+          branchId: input.branchId,
+          bookingId: input.bookingId,
+          personId,
+          spaceId,
+          usageSessionId: sessionId,
+        }),
+      },
+      tx,
+    );
   });
 
   return {
     visit: {
       id: visitId,
-      personId: booking.personId,
+      personId,
       visitType: "booking_customer",
       status: "active",
       checkedInAt: new Date(),
@@ -429,6 +611,7 @@ export async function checkInHostedGuest(
 }> {
   validateBranch(input.branchId);
   validatePersonExists(input.personId);
+  await validateNoActiveVisitDb(input.branchId, input.personId);
   validateNoActiveVisit(input.branchId, input.personId);
 
   const hostAccount = CUSTOMER_ACCOUNTS.find(
@@ -442,53 +625,61 @@ export async function checkInHostedGuest(
   }
 
   if (input.spaceId) {
+    await validateSpaceAvailableDb(input.branchId, input.spaceId);
     validateSpaceAvailable(input.branchId, input.spaceId);
   }
 
   const visitId = crypto.randomUUID();
-
-  await db.insert(visit).values({
-    id: visitId,
-    branchId: input.branchId,
-    personId: input.personId,
-    visitType: "hosted_guest",
-    billingResponsibility: "host",
-    status: "active",
-    hostAccountId: input.hostAccountId,
-    checkedInAt: new Date(),
-  });
-
   let usageSessionResult: CheckInSessionResult | null = null;
-  if (input.spaceId) {
-    const sessionId = crypto.randomUUID();
-    await db.insert(usageSession).values({
-      id: sessionId,
-      visitId,
-      spaceId: input.spaceId,
-      status: "active",
-      startedAt: new Date(),
-    });
-    usageSessionResult = {
-      id: sessionId,
-      visitId,
-      spaceId: input.spaceId,
-      status: "active",
-      startedAt: new Date(),
-    };
-  }
 
-  await writeAuditLog({
-    id: crypto.randomUUID(),
-    branchId: input.branchId,
-    actorUserId: staffUserId,
-    action: "visit.create",
-    entityType: "visit",
-    entityId: visitId,
-    metadata: JSON.stringify({
-      visitType: "hosted_guest",
+  await db.transaction(async (tx) => {
+    await tx.insert(visit).values({
+      id: visitId,
+      branchId: input.branchId,
       personId: input.personId,
+      visitType: "hosted_guest",
+      billingResponsibility: "host",
+      status: "active",
       hostAccountId: input.hostAccountId,
-    }),
+      checkedInAt: new Date(),
+    });
+
+    if (input.spaceId) {
+      const sessionId = crypto.randomUUID();
+      await tx.insert(usageSession).values({
+        id: sessionId,
+        visitId,
+        spaceId: input.spaceId,
+        status: "active",
+        startedAt: new Date(),
+      });
+      usageSessionResult = {
+        id: sessionId,
+        visitId,
+        spaceId: input.spaceId,
+        status: "active",
+        startedAt: new Date(),
+      };
+    }
+
+    await writeAuditLog(
+      {
+        id: crypto.randomUUID(),
+        branchId: input.branchId,
+        actorUserId: staffUserId,
+        action: "visit.create",
+        entityType: "visit",
+        entityId: visitId,
+        metadata: JSON.stringify({
+          visitType: "hosted_guest",
+          branchId: input.branchId,
+          personId: input.personId,
+          hostAccountId: input.hostAccountId,
+          spaceId: input.spaceId ?? null,
+        }),
+      },
+      tx,
+    );
   });
 
   return {
@@ -513,94 +704,67 @@ export async function checkInEventAttendee(
 }> {
   validateBranch(input.branchId);
   validatePersonExists(input.personId);
+  await validateNoActiveVisitDb(input.branchId, input.personId);
   validateNoActiveVisit(input.branchId, input.personId);
 
-  const event = EVENTS.find((item) => item.id === input.eventId);
-  if (!event) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Event not found: ${input.eventId}`,
-    });
-  }
-  if (event.branchId !== input.branchId) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Event ${input.eventId} does not belong to branch ${input.branchId}.`,
-    });
-  }
-  if (event.status !== "in_progress") {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Event ${input.eventId} cannot accept check-ins (status: ${event.status}). Only in-progress events can accept check-ins.`,
-    });
-  }
-
-  const attendee = EVENT_ATTENDEES.find(
-    (item) => item.eventId === input.eventId && item.personId === input.personId,
-  );
-  if (!attendee) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Person ${input.personId} is not registered for event ${input.eventId}.`,
-    });
-  }
-  const attendeeStatus = attendee.status as EventAttendeeStatus;
-  if (attendeeStatus !== "invited") {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: `Event attendee ${attendee.id} cannot be checked in (status: ${attendeeStatus}).`,
-    });
-  }
+  const eventRow = await validateEventContext(input.eventId, input.branchId, input.personId);
 
   const visitId = crypto.randomUUID();
-
-  await db.insert(visit).values({
-    id: visitId,
-    branchId: input.branchId,
-    personId: input.personId,
-    visitType: "event_attendee",
-    billingResponsibility: "event",
-    status: "active",
-    checkedInAt: new Date(),
-  });
-
   let usageSessionResult: CheckInSessionResult | null = null;
-  if (event.spaceId) {
-    validateSpaceAvailable(input.branchId, event.spaceId);
-    const sessionId = crypto.randomUUID();
-    await db.insert(usageSession).values({
-      id: sessionId,
-      visitId,
-      spaceId: event.spaceId,
-      status: "active",
-      startedAt: new Date(),
-    });
-    usageSessionResult = {
-      id: sessionId,
-      visitId,
-      spaceId: event.spaceId,
-      status: "active",
-      startedAt: new Date(),
-    };
-  }
 
-  await db
-    .update(eventAttendee)
-    .set({ status: "checked_in", visitId, checkedInAt: new Date() })
-    .where(eq(eventAttendee.id, attendee.id));
-
-  await writeAuditLog({
-    id: crypto.randomUUID(),
-    branchId: input.branchId,
-    actorUserId: staffUserId,
-    action: "visit.create",
-    entityType: "visit",
-    entityId: visitId,
-    metadata: JSON.stringify({
-      visitType: "event_attendee",
+  await db.transaction(async (tx) => {
+    await tx.insert(visit).values({
+      id: visitId,
+      branchId: input.branchId,
       personId: input.personId,
-      eventId: input.eventId,
-    }),
+      visitType: "event_attendee",
+      billingResponsibility: "event",
+      status: "active",
+      checkedInAt: new Date(),
+    });
+
+    if (eventRow.spaceId) {
+      const sessionId = crypto.randomUUID();
+      await tx.insert(usageSession).values({
+        id: sessionId,
+        visitId,
+        spaceId: eventRow.spaceId,
+        status: "active",
+        startedAt: new Date(),
+      });
+      usageSessionResult = {
+        id: sessionId,
+        visitId,
+        spaceId: eventRow.spaceId,
+        status: "active",
+        startedAt: new Date(),
+      };
+    }
+
+    await tx
+      .update(eventAttendee)
+      .set({ status: "checked_in", visitId, checkedInAt: new Date() })
+      .where(eq(eventAttendee.id, (await tx.select().from(eventAttendee).where(and(eq(eventAttendee.eventId, input.eventId), eq(eventAttendee.personId, input.personId))).limit(1))[0]!.id));
+
+    await writeAuditLog(
+      {
+        id: crypto.randomUUID(),
+        branchId: input.branchId,
+        actorUserId: staffUserId,
+        action: "visit.create",
+        entityType: "visit",
+        entityId: visitId,
+        metadata: JSON.stringify({
+          visitType: "event_attendee",
+          branchId: input.branchId,
+          personId: input.personId,
+          eventId: input.eventId,
+          spaceId: eventRow.spaceId ?? null,
+          usageSessionId: usageSessionResult?.id ?? null,
+        }),
+      },
+      tx,
+    );
   });
 
   return {

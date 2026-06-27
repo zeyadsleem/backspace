@@ -1,3 +1,4 @@
+import type { PgDatabase } from "drizzle-orm/pg-core";
 import { TRPCError } from "@trpc/server";
 
 import { approvalRequest, auditLog, db, eq } from "@backspace/db";
@@ -6,16 +7,20 @@ type ApprovalStatus = "pending" | "approved" | "rejected" | "cancelled";
 
 export type { ApprovalStatus };
 
-export async function writeAuditLog(params: {
-  id: string;
-  branchId?: string;
-  actorUserId?: string;
-  action: string;
-  entityType: string;
-  entityId: string;
-  metadata?: string;
-}): Promise<void> {
-  await db.insert(auditLog).values({
+export async function writeAuditLog(
+  params: {
+    id: string;
+    branchId?: string;
+    actorUserId?: string;
+    action: string;
+    entityType: string;
+    entityId: string;
+    metadata?: string;
+  },
+  tx?: PgDatabase<any, any, any>,
+): Promise<void> {
+  const conn = tx ?? db;
+  await conn.insert(auditLog).values({
     id: params.id,
     branchId: params.branchId ?? null,
     actorUserId: params.actorUserId ?? null,
