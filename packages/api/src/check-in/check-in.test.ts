@@ -9,8 +9,8 @@ const { mockDbState } = vi.hoisted(() => {
 });
 
 vi.mock("@backspace/db", () => {
-  const chainableThen = vi.fn(
-    (resolve: (value: unknown) => void) => resolve(mockDbState.selectResult),
+  const chainableThen = vi.fn((resolve: (value: unknown) => void) =>
+    resolve(mockDbState.selectResult),
   );
   const chainable = {
     from: vi.fn().mockReturnThis(),
@@ -108,7 +108,14 @@ describe("checkInWalkIn", () => {
   });
 
   it("rejects duplicate active visit (DB-backed)", async () => {
-    mockDbSelect([{ id: "db-visit-1", branchId: "seed-branch-main", personId: "seed-person-host", status: "active" }]);
+    mockDbSelect([
+      {
+        id: "db-visit-1",
+        branchId: "seed-branch-main",
+        personId: "seed-person-host",
+        status: "active",
+      },
+    ]);
     await expect(
       checkInWalkIn(
         { branchId: "seed-branch-main", personId: "seed-person-host" },
@@ -372,7 +379,14 @@ describe("audit metadata", () => {
 
   it("does not write audit on DB-backed validation failure", async () => {
     const { writeAuditLog: mockedAudit } = await import("../audit/audit");
-    mockDbSelect([{ id: "db-visit", branchId: "seed-branch-main", personId: "seed-person-host", status: "active" }]);
+    mockDbSelect([
+      {
+        id: "db-visit",
+        branchId: "seed-branch-main",
+        personId: "seed-person-host",
+        status: "active",
+      },
+    ]);
     await expect(
       checkInWalkIn(
         { branchId: "seed-branch-main", personId: "seed-person-host" },
@@ -387,7 +401,14 @@ describe("no partial writes", () => {
   beforeEach(() => resetMockDb());
 
   it("does not call insert after DB-backed duplicate visit rejection", async () => {
-    mockDbSelect([{ id: "db-active", branchId: "seed-branch-main", personId: "seed-person-host", status: "active" }]);
+    mockDbSelect([
+      {
+        id: "db-active",
+        branchId: "seed-branch-main",
+        personId: "seed-person-host",
+        status: "active",
+      },
+    ]);
     await expect(
       checkInWalkIn(
         { branchId: "seed-branch-main", personId: "seed-person-host" },

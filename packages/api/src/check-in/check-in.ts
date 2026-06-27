@@ -236,11 +236,7 @@ async function validateBookingBranchContext(branchId: string, bookingId: string)
       message: `Booking ${bookingId} has no assigned space.`,
     });
   }
-  const [spaceRow] = await db
-    .select()
-    .from(space)
-    .where(eq(space.id, spaceId))
-    .limit(1);
+  const [spaceRow] = await db.select().from(space).where(eq(space.id, spaceId)).limit(1);
   if (!spaceRow || spaceRow.branchId !== branchId) {
     throw new TRPCError({
       code: "BAD_REQUEST",
@@ -297,11 +293,7 @@ async function validateMembershipBranch(
   }
 }
 
-async function validateEventContext(
-  eventId: string,
-  branchId: string,
-  personId: string,
-) {
+async function validateEventContext(eventId: string, branchId: string, personId: string) {
   const [eventRow] = await db
     .select()
     .from(workspaceEvent)
@@ -328,12 +320,7 @@ async function validateEventContext(
   const [attendeeRow] = await db
     .select()
     .from(eventAttendee)
-    .where(
-      and(
-        eq(eventAttendee.eventId, eventId),
-        eq(eventAttendee.personId, personId),
-      ),
-    )
+    .where(and(eq(eventAttendee.eventId, eventId), eq(eventAttendee.personId, personId)))
     .limit(1);
   if (!attendeeRow) {
     throw new TRPCError({
@@ -744,7 +731,23 @@ export async function checkInEventAttendee(
     await tx
       .update(eventAttendee)
       .set({ status: "checked_in", visitId, checkedInAt: new Date() })
-      .where(eq(eventAttendee.id, (await tx.select().from(eventAttendee).where(and(eq(eventAttendee.eventId, input.eventId), eq(eventAttendee.personId, input.personId))).limit(1))[0]!.id));
+      .where(
+        eq(
+          eventAttendee.id,
+          (
+            await tx
+              .select()
+              .from(eventAttendee)
+              .where(
+                and(
+                  eq(eventAttendee.eventId, input.eventId),
+                  eq(eventAttendee.personId, input.personId),
+                ),
+              )
+              .limit(1)
+          )[0]!.id,
+        ),
+      );
 
     await writeAuditLog(
       {
