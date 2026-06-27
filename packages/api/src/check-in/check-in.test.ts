@@ -1,7 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { mockDbState } = vi.hoisted(() => {
+  const mockDbState: { selectResult: unknown[]; selectCalls: number } = {
+    selectResult: [],
+    selectCalls: 0,
+  };
+  return { mockDbState };
+});
 
 vi.mock("@backspace/db", () => {
-  const chainableThen = vi.fn((resolve: (value: unknown) => void) => resolve([]));
+  const chainableThen = vi.fn((resolve: (value: unknown) => void) =>
+    resolve(mockDbState.selectResult),
+  );
   const chainable = {
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
@@ -11,11 +21,12 @@ vi.mock("@backspace/db", () => {
     // oxlint-disable-next-line unicorn/no-thenable -- Drizzle query builders are awaitable.
     then: chainableThen,
   };
-  const mockDb = {
+  const mockDb: Record<string, unknown> = {
     select: vi.fn().mockReturnValue(chainable),
     insert: vi.fn().mockReturnValue(chainable),
     update: vi.fn().mockReturnValue(chainable),
   };
+  mockDb.transaction = vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
   return {
     db: mockDb,
     and: vi.fn((...args: unknown[]) => ({ and: true, args })),
@@ -24,6 +35,10 @@ vi.mock("@backspace/db", () => {
     usageSession: { id: "usage-session" },
     booking: { id: "booking-id" },
     eventAttendee: { id: "event-attendee-id" },
+    space: { id: "space" },
+    workspaceEvent: { id: "workspace-event" },
+    membership: { id: "membership" },
+    membershipPlan: { id: "membership-plan" },
     visitTypeEnum: {},
     billingResponsibilityEnum: {},
     visitStatusEnum: {},
@@ -39,6 +54,8 @@ vi.stubGlobal("crypto", {
   randomUUID: () => "test-uuid-0000-0000",
 });
 
+import { db } from "@backspace/db";
+
 import {
   checkInWalkIn,
   checkInMember,
@@ -47,7 +64,22 @@ import {
   checkInEventAttendee,
 } from "./check-in";
 
+function resetMockDb() {
+  vi.mocked(db.select).mockClear();
+  vi.mocked(db.insert).mockClear();
+  vi.mocked(db.update).mockClear();
+  vi.mocked(db.transaction as never).mockClear();
+  mockDbState.selectResult = [];
+  mockDbState.selectCalls = 0;
+}
+
+function mockDbSelect(rows: unknown[]) {
+  mockDbState.selectResult = rows;
+}
+
 describe("checkInWalkIn", () => {
+  beforeEach(() => resetMockDb());
+
   it("rejects unknown branch", async () => {
     await expect(
       checkInWalkIn(
@@ -66,7 +98,7 @@ describe("checkInWalkIn", () => {
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 
-  it("rejects duplicate active visit", async () => {
+  it("rejects duplicate active visit (seed)", async () => {
     await expect(
       checkInWalkIn(
         { branchId: "seed-branch-main", personId: "seed-person-walkin" },
@@ -75,7 +107,24 @@ describe("checkInWalkIn", () => {
     ).rejects.toMatchObject({ code: "CONFLICT" });
   });
 
-  it("rejects unavailable space", async () => {
+  it("rejects duplicate active visit (DB-backed)", async () => {
+    mockDbSelect([
+      {
+        id: "db-visit-1",
+        branchId: "seed-branch-main",
+        personId: "seed-person-host",
+        status: "active",
+      },
+    ]);
+    await expect(
+      checkInWalkIn(
+        { branchId: "seed-branch-main", personId: "seed-person-host" },
+        "seed-user-cashier",
+      ),
+    ).rejects.toMatchObject({ code: "CONFLICT" });
+  });
+
+  it("rejects unavailable space (seed)", async () => {
     await expect(
       checkInWalkIn(
         {
@@ -88,7 +137,7 @@ describe("checkInWalkIn", () => {
     ).rejects.toMatchObject({ code: "CONFLICT" });
   });
 
-  it("rejects blocked space", async () => {
+  it("rejects blocked space (seed)", async () => {
     await expect(
       checkInWalkIn(
         {
@@ -100,9 +149,25 @@ describe("checkInWalkIn", () => {
       ),
     ).rejects.toMatchObject({ code: "CONFLICT" });
   });
+
+  it("rejects occupied space via DB (DB-backed)", async () => {
+    mockDbSelect([{ id: "seed-space-desk-4", name: "Desk B1", branchId: "seed-branch-main" }]);
+    await expect(
+      checkInWalkIn(
+        {
+          branchId: "seed-branch-main",
+          personId: "seed-person-host",
+          spaceId: "seed-space-desk-4",
+        },
+        "seed-user-cashier",
+      ),
+    ).rejects.toMatchObject({ code: "CONFLICT" });
+  });
 });
 
 describe("checkInMember", () => {
+  beforeEach(() => resetMockDb());
+
   it("rejects unknown branch", async () => {
     await expect(
       checkInMember(
@@ -117,6 +182,7 @@ describe("checkInMember", () => {
   });
 
   it("rejects unknown membership", async () => {
+    mockDbSelect([]);
     await expect(
       checkInMember(
         {
@@ -130,6 +196,7 @@ describe("checkInMember", () => {
   });
 
   it("rejects membership that belongs to another person", async () => {
+    mockDbSelect([]);
     await expect(
       checkInMember(
         {
@@ -144,6 +211,8 @@ describe("checkInMember", () => {
 });
 
 describe("checkInBooking", () => {
+  beforeEach(() => resetMockDb());
+
   it("rejects unknown booking", async () => {
     await expect(
       checkInBooking(
@@ -170,9 +239,21 @@ describe("checkInBooking", () => {
       ),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
+
+  it("rejects cross-branch booking (DB-backed)", async () => {
+    mockDbSelect([]);
+    await expect(
+      checkInBooking(
+        { branchId: "seed-branch-main", bookingId: "seed-booking-confirmed" },
+        "seed-user-cashier",
+      ),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
 });
 
 describe("checkInHostedGuest", () => {
+  beforeEach(() => resetMockDb());
+
   it("rejects unknown branch", async () => {
     await expect(
       checkInHostedGuest(
@@ -214,6 +295,8 @@ describe("checkInHostedGuest", () => {
 });
 
 describe("checkInEventAttendee", () => {
+  beforeEach(() => resetMockDb());
+
   it("rejects unknown branch", async () => {
     await expect(
       checkInEventAttendee(
@@ -277,6 +360,62 @@ describe("checkInEventAttendee", () => {
         "seed-user-cashier",
       ),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+});
+
+describe("audit metadata", () => {
+  beforeEach(() => resetMockDb());
+
+  it("does not write audit on validation failure", async () => {
+    const { writeAuditLog: mockedAudit } = await import("../audit/audit");
+    await expect(
+      checkInWalkIn(
+        { branchId: "seed-branch-unknown", personId: "seed-person-walkin" },
+        "seed-user-cashier",
+      ),
+    ).rejects.toThrow();
+    expect(mockedAudit).not.toHaveBeenCalled();
+  });
+
+  it("does not write audit on DB-backed validation failure", async () => {
+    const { writeAuditLog: mockedAudit } = await import("../audit/audit");
+    mockDbSelect([
+      {
+        id: "db-visit",
+        branchId: "seed-branch-main",
+        personId: "seed-person-host",
+        status: "active",
+      },
+    ]);
+    await expect(
+      checkInWalkIn(
+        { branchId: "seed-branch-main", personId: "seed-person-host" },
+        "seed-user-cashier",
+      ),
+    ).rejects.toThrow();
+    expect(mockedAudit).not.toHaveBeenCalled();
+  });
+});
+
+describe("no partial writes", () => {
+  beforeEach(() => resetMockDb());
+
+  it("does not call insert after DB-backed duplicate visit rejection", async () => {
+    mockDbSelect([
+      {
+        id: "db-active",
+        branchId: "seed-branch-main",
+        personId: "seed-person-host",
+        status: "active",
+      },
+    ]);
+    await expect(
+      checkInWalkIn(
+        { branchId: "seed-branch-main", personId: "seed-person-host" },
+        "seed-user-cashier",
+      ),
+    ).rejects.toThrow();
+    expect(db.insert).not.toHaveBeenCalled();
   });
 });
 
