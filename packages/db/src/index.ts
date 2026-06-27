@@ -15,6 +15,7 @@ export { role, permission, rolePermission, staffProfile, staffBranchAccess } fro
 export { branch, space } from "./schema/workspace";
 export { auditLog, approvalRequest } from "./schema/audit";
 export { booking } from "./schema/bookings";
+export { customerAccount } from "./schema/people";
 export { charge, invoice, payment, invoiceItem, chargeTypeEnum } from "./schema/billing";
 export { eventAttendee, workspaceEvent } from "./schema/events";
 export { membership, membershipPlan } from "./schema/memberships";

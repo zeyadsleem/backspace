@@ -1,6 +1,7 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
 
 import { checkInRouter } from "./check-in";
+import { chargesRouter } from "./charges";
 import { staffRouter } from "./staff";
 import { spacesRouter } from "./spaces";
 import { todayRouter } from "./today";
@@ -17,6 +18,7 @@ export const appRouter = router({
     };
   }),
   checkIn: checkInRouter,
+  charges: chargesRouter,
   spaces: spacesRouter,
   staff: staffRouter,
   today: todayRouter,
