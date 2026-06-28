@@ -88,6 +88,7 @@ function resetMockDb() {
   vi.mocked(db.select).mockClear();
   vi.mocked(db.insert).mockClear();
   vi.mocked(db.update).mockClear();
+  vi.mocked(db.transaction as never).mockClear();
   mockWriteAuditLog.mockClear();
   mockDbState.setQueue([]);
 }
@@ -372,6 +373,7 @@ describe("addCharge", () => {
       const result = await addCharge(validInput());
       expect(result.chargeId).toBeDefined();
       expect(typeof result.chargeId).toBe("string");
+      expect(db.transaction).toHaveBeenCalledTimes(1);
       expect(db.insert).toHaveBeenCalledTimes(1);
     });
 
@@ -460,14 +462,14 @@ describe("addCharge", () => {
       ]);
       await addCharge(validInput());
       expect(mockWriteAuditLog).toHaveBeenCalledTimes(1);
-      expect(mockWriteAuditLog).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: "charge.create",
-          branchId: "branch-main",
-          entityType: "charge",
-          actorUserId: "staff-user-1",
-        }),
-      );
+      const auditCall = mockWriteAuditLog.mock.calls[0][0];
+      expect(auditCall).toMatchObject({
+        action: "charge.create",
+        branchId: "branch-main",
+        entityType: "charge",
+        actorUserId: "staff-user-1",
+        entityId: expect.any(String),
+      });
     });
 
     it("audit metadata includes target type and id", async () => {
@@ -504,6 +506,24 @@ describe("addCharge", () => {
       mockDbState.setQueue([[]]);
       await expect(addCharge(validInput())).rejects.toThrow();
       expect(mockWriteAuditLog).not.toHaveBeenCalled();
+    });
+
+    it("rejects if audit write fails inside transaction (no partial write)", async () => {
+      mockDbState.setQueue([
+        [
+          {
+            id: "visit-active",
+            branchId: "branch-main",
+            status: "active",
+            personId: "p1",
+            visitType: "walk_in",
+            billingResponsibility: "visitor",
+          },
+        ],
+      ]);
+      mockWriteAuditLog.mockRejectedValueOnce(new Error("Audit write failed"));
+      await expect(addCharge(validInput())).rejects.toThrow("Audit write failed");
+      expect(db.transaction).toHaveBeenCalledTimes(1);
     });
   });
 });

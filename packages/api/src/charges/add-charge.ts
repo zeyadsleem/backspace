@@ -225,44 +225,49 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
 
   const chargeId = generateId();
 
-  await db.insert(charge).values({
-    id: chargeId,
-    visitId: visitIdForCharge,
-    usageSessionId: usageSessionIdForCharge,
-    eventId: eventIdForCharge,
-    hostAccountId: hostAccountIdForCharge,
-    invoiceId: null,
-    type: input.type,
-    label: input.label,
-    quantity: input.quantity,
-    amountCents: input.amountCents,
-    currency: input.currency,
-    billingResponsibility: input.billingResponsibility,
-    reason: input.reason ?? null,
-  });
+  await db.transaction(async (tx) => {
+    await tx.insert(charge).values({
+      id: chargeId,
+      visitId: visitIdForCharge,
+      usageSessionId: usageSessionIdForCharge,
+      eventId: eventIdForCharge,
+      hostAccountId: hostAccountIdForCharge,
+      invoiceId: null,
+      type: input.type,
+      label: input.label,
+      quantity: input.quantity,
+      amountCents: input.amountCents,
+      currency: input.currency,
+      billingResponsibility: input.billingResponsibility,
+      reason: input.reason ?? null,
+    });
 
-  const metadata: Record<string, unknown> = {
-    targetType: input.targetType,
-    targetId: input.targetId,
-    amountCents: input.amountCents,
-    currency: input.currency,
-    quantity: input.quantity,
-    billingResponsibility: input.billingResponsibility,
-  };
-  if (input.reason) metadata.reason = input.reason;
-  if (visitIdForCharge) metadata.visitId = visitIdForCharge;
-  if (usageSessionIdForCharge) metadata.usageSessionId = usageSessionIdForCharge;
-  if (eventIdForCharge) metadata.eventId = eventIdForCharge;
-  if (hostAccountIdForCharge) metadata.hostAccountId = hostAccountIdForCharge;
+    const metadata: Record<string, unknown> = {
+      targetType: input.targetType,
+      targetId: input.targetId,
+      amountCents: input.amountCents,
+      currency: input.currency,
+      quantity: input.quantity,
+      billingResponsibility: input.billingResponsibility,
+    };
+    if (input.reason) metadata.reason = input.reason;
+    if (visitIdForCharge) metadata.visitId = visitIdForCharge;
+    if (usageSessionIdForCharge) metadata.usageSessionId = usageSessionIdForCharge;
+    if (eventIdForCharge) metadata.eventId = eventIdForCharge;
+    if (hostAccountIdForCharge) metadata.hostAccountId = hostAccountIdForCharge;
 
-  await writeAuditLog({
-    id: generateId(),
-    branchId: input.branchId,
-    actorUserId: input.staffActorUserId,
-    action: "charge.create",
-    entityType: "charge",
-    entityId: chargeId,
-    metadata: JSON.stringify(metadata),
+    await writeAuditLog(
+      {
+        id: generateId(),
+        branchId: input.branchId,
+        actorUserId: input.staffActorUserId,
+        action: "charge.create",
+        entityType: "charge",
+        entityId: chargeId,
+        metadata: JSON.stringify(metadata),
+      },
+      tx,
+    );
   });
 
   return { chargeId };
