@@ -331,7 +331,7 @@ function buildActions(permissions: string[]): VisitDetailAction[] {
       "Visit unblocking is out of scope until persistent status updates ship.",
     ),
     unsupported("checkout", "Checkout", "Checkout finalization is out of scope for #10."),
-    unsupported("add_charge", "Add charge", "Add-charge mutation is out of scope for #10."),
+    enabled("add_charge", "Add charge", hasPermission(permissions, PERMISSIONS.CHARGE_ADD)),
     unsupported("record_payment", "Record payment", "Payment recording is out of scope for #10."),
     unsupported("check_in", "Check in", "Check-in creation is out of scope for #10."),
   ];
@@ -343,6 +343,14 @@ function unsupported(
   reason: string,
 ): VisitDetailAction {
   return { id, label, supported: false, enabled: false, reason };
+}
+
+function enabled(
+  id: VisitDetailAction["id"],
+  label: string,
+  isEnabled: boolean,
+): VisitDetailAction {
+  return { id, label, supported: true, enabled: isEnabled };
 }
 
 function timelineForVisit(visit: SeedVisit) {

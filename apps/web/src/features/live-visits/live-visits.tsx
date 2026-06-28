@@ -17,7 +17,46 @@ import {
   CardTitle,
 } from "@backspace/ui/components/card";
 import { Input } from "@backspace/ui/components/input";
+import { Label } from "@backspace/ui/components/label";
 import { Skeleton } from "@backspace/ui/components/skeleton";
+
+const CHARGE_TYPES = [
+  "product",
+  "service",
+  "fee",
+  "discount",
+  "complimentary",
+  "adjustment",
+] as const;
+const BILLING_RESPONSIBILITIES = [
+  "visitor",
+  "host",
+  "company",
+  "event",
+  "subscription",
+  "complimentary",
+  "pay_later",
+] as const;
+
+export type AddChargeInput = {
+  branchId: string;
+  targetType: "visit";
+  targetId: string;
+  type: (typeof CHARGE_TYPES)[number];
+  label: string;
+  quantity: number;
+  amountCents: number;
+  currency: "EGP" | "USD";
+  billingResponsibility: (typeof BILLING_RESPONSIBILITIES)[number];
+  reason?: string;
+};
+
+export type AddChargeState = {
+  isPending: boolean;
+  data?: { chargeId: string } | null;
+  error: { message: string } | null;
+  reset: () => void;
+};
 
 export type LiveVisitFilterState = {
   query: string;
@@ -98,11 +137,15 @@ export function LiveVisits({
   selectedVisitId,
   selectedVisitDetail,
   onSelectVisit,
+  addChargeState,
+  onAddCharge,
 }: {
   overview: LiveVisitsOverview;
   selectedVisitId: string | null;
   selectedVisitDetail: VisitDetail | null;
   onSelectVisit?: (visitId: string | null) => void;
+  addChargeState?: AddChargeState;
+  onAddCharge?: (input: AddChargeInput) => void;
 }) {
   const [filters, setFilters] = useState<LiveVisitFilterState>({
     query: "",
@@ -180,7 +223,13 @@ export function LiveVisits({
       )}
 
       {selectedVisitDetail && (
-        <VisitDetailDrawer detail={selectedVisitDetail} onClose={() => onSelectVisit?.(null)} />
+        <VisitDetailDrawer
+          branchId={overview.branch.id}
+          detail={selectedVisitDetail}
+          onClose={() => onSelectVisit?.(null)}
+          onAddCharge={onAddCharge}
+          addChargeState={addChargeState}
+        />
       )}
     </div>
   );
@@ -269,7 +318,38 @@ function VisitRow({
   );
 }
 
-function VisitDetailDrawer({ detail, onClose }: { detail: VisitDetail; onClose: () => void }) {
+function VisitDetailDrawer({
+  branchId,
+  detail,
+  onClose,
+  addChargeState,
+  onAddCharge,
+}: {
+  branchId: string;
+  detail: VisitDetail;
+  onClose: () => void;
+  addChargeState?: AddChargeState;
+  onAddCharge?: (input: AddChargeInput) => void;
+}) {
+  const addChargeAction = detail.actions.find((a) => a.id === "add_charge");
+  const [showAddCharge, setShowAddCharge] = useState(false);
+
+  if (showAddCharge) {
+    return (
+      <AddChargeFormView
+        branchId={branchId}
+        detail={detail}
+        onClose={onClose}
+        onBack={() => {
+          addChargeState?.reset();
+          setShowAddCharge(false);
+        }}
+        addChargeState={addChargeState}
+        onAddCharge={onAddCharge}
+      />
+    );
+  }
+
   return (
     <aside
       className="fixed inset-y-0 right-0 flex w-full max-w-xl flex-col gap-4 overflow-auto border-l bg-background p-6 shadow-xl"
@@ -312,10 +392,23 @@ function VisitDetailDrawer({ detail, onClose }: { detail: VisitDetail; onClose: 
         items={detail.charges.map((charge) => `${charge.label}: ${charge.formattedAmount}`)}
         empty="No visible charges."
       />
-      <DetailSection
-        title="Actions"
-        items={detail.actions.map((action) => `${action.label}: ${getActionCopy(action)}`)}
-      />
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium">Actions</h3>
+          {addChargeAction?.supported && addChargeAction.enabled && (
+            <Button type="button" size="sm" onClick={() => setShowAddCharge(true)}>
+              Add charge
+            </Button>
+          )}
+        </div>
+        <ul className="flex flex-col gap-1 text-sm">
+          {detail.actions.map((action) => (
+            <li key={action.id}>
+              {action.label}: {getActionCopy(action)}
+            </li>
+          ))}
+        </ul>
+      </div>
       {!detail.sections.audit.allowed && (
         <p className="text-sm text-muted-foreground">{detail.sections.audit.reason}</p>
       )}
@@ -326,6 +419,210 @@ function VisitDetailDrawer({ detail, onClose }: { detail: VisitDetail; onClose: 
       />
     </aside>
   );
+}
+
+function AddChargeFormView({
+  branchId,
+  detail,
+  onClose,
+  onBack,
+  addChargeState,
+  onAddCharge,
+}: {
+  branchId: string;
+  detail: VisitDetail;
+  onClose: () => void;
+  onBack: () => void;
+  addChargeState?: AddChargeState;
+  onAddCharge?: (input: AddChargeInput) => void;
+}) {
+  const [chargeType, setChargeType] = useState<string>("product");
+  const [label, setLabel] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [amountCents, setAmountCents] = useState(0);
+  const [billingResp, setBillingResp] = useState(detail.billing.responsibility.value);
+  const [reason, setReason] = useState("");
+
+  const requiresReason = ["discount", "complimentary", "adjustment"].includes(chargeType);
+  const isSuccess = addChargeState?.data?.chargeId;
+
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!onAddCharge) return;
+    onAddCharge({
+      branchId,
+      targetType: "visit",
+      targetId: detail.visit.id,
+      type: chargeType as AddChargeInput["type"],
+      label,
+      quantity,
+      amountCents,
+      currency: "EGP",
+      billingResponsibility: billingResp as AddChargeInput["billingResponsibility"],
+      reason: requiresReason ? reason : undefined,
+    });
+  }
+
+  if (isSuccess) {
+    return (
+      <aside
+        className="fixed inset-y-0 right-0 flex w-full max-w-xl flex-col gap-4 overflow-auto border-l bg-background p-6 shadow-xl"
+        aria-label="Add charge drawer"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-muted-foreground">Add charge</p>
+            <h2 className="text-xl font-semibold">{detail.identity.person.displayName}</h2>
+          </div>
+          <Button type="button" variant="outline" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Charge added</CardTitle>
+            <CardDescription>
+              {label} — {formatMoney(amountCents * quantity)}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            <p className="text-sm">The charge has been added successfully.</p>
+            <Button type="button" onClick={onBack}>
+              Add another
+            </Button>
+          </CardContent>
+        </Card>
+      </aside>
+    );
+  }
+
+  return (
+    <aside
+      className="fixed inset-y-0 right-0 flex w-full max-w-xl flex-col gap-4 overflow-auto border-l bg-background p-6 shadow-xl"
+      aria-label="Add charge drawer"
+    >
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-muted-foreground">Add charge</p>
+          <h2 className="text-xl font-semibold">{detail.identity.person.displayName}</h2>
+          <p className="text-sm text-muted-foreground">
+            Target: Visit · {detail.billing.responsibility.label}
+          </p>
+        </div>
+        <Button type="button" variant="outline" onClick={onClose}>
+          Close
+        </Button>
+      </div>
+
+      {addChargeState?.error && (
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm text-destructive">{addChargeState.error.message}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="charge-type">Type</Label>
+          <select
+            id="charge-type"
+            className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm"
+            value={chargeType}
+            onChange={(e) => setChargeType(e.target.value)}
+          >
+            {CHARGE_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t.charAt(0).toUpperCase() + t.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="charge-label">Label</Label>
+          <Input
+            id="charge-label"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="e.g. Bottled Water"
+            required
+          />
+        </div>
+
+        <div className="flex gap-4">
+          <div className="flex flex-1 flex-col gap-2">
+            <Label htmlFor="charge-quantity">Qty</Label>
+            <Input
+              id="charge-quantity"
+              type="number"
+              min={1}
+              value={quantity}
+              onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
+            />
+          </div>
+          <div className="flex flex-1 flex-col gap-2">
+            <Label htmlFor="charge-amount">Amount (cents)</Label>
+            <Input
+              id="charge-amount"
+              type="number"
+              min={0}
+              value={amountCents}
+              onChange={(e) => setAmountCents(Math.max(0, Number(e.target.value)))}
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-muted-foreground">
+            Total: {formatMoney(amountCents * quantity)}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="charge-billing">Billing responsibility</Label>
+          <select
+            id="charge-billing"
+            className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm"
+            value={billingResp}
+            onChange={(e) => setBillingResp(e.target.value)}
+          >
+            {BILLING_RESPONSIBILITIES.map((r) => (
+              <option key={r} value={r}>
+                {r.charAt(0).toUpperCase() + r.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {requiresReason && (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="charge-reason">Reason</Label>
+            <Input
+              id="charge-reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Required for discounts, comps, adjustments"
+              required
+            />
+          </div>
+        )}
+
+        <div className="flex gap-3">
+          <Button type="button" variant="outline" onClick={onBack}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={addChargeState?.isPending}>
+            {addChargeState?.isPending ? "Adding..." : "Add charge"}
+          </Button>
+        </div>
+      </form>
+    </aside>
+  );
+}
+
+function formatMoney(cents: number): string {
+  return `${(cents / 100).toFixed(2)} EGP`;
 }
 
 function DetailSection({
