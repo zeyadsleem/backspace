@@ -330,9 +330,18 @@ function buildActions(permissions: string[]): VisitDetailAction[] {
       "Unblock",
       "Visit unblocking is out of scope until persistent status updates ship.",
     ),
-    unsupported("checkout", "Checkout", "Checkout finalization is out of scope for #10."),
+    enabled(
+      "checkout",
+      "Checkout",
+      hasPermission(permissions, PERMISSIONS.CHECKOUT_PREVIEW) ||
+        hasPermission(permissions, PERMISSIONS.CHECKOUT_FINALIZE),
+    ),
     enabled("add_charge", "Add charge", hasPermission(permissions, PERMISSIONS.CHARGE_ADD)),
-    unsupported("record_payment", "Record payment", "Payment recording is out of scope for #10."),
+    enabled(
+      "record_payment",
+      "Record payment",
+      hasPermission(permissions, PERMISSIONS.PAYMENT_RECORD),
+    ),
     unsupported("check_in", "Check in", "Check-in creation is out of scope for #10."),
   ];
 }
