@@ -3,10 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { mockDbState, mockWriteAuditLog } = vi.hoisted(() => {
   let selectQueue: unknown[][] = [];
   let queueIndex = 0;
+  let insertValues: unknown[] = [];
   const auditLog = vi.fn().mockResolvedValue(undefined);
   return {
     mockWriteAuditLog: auditLog,
     mockDbState: {
+      get insertValues() {
+        return insertValues;
+      },
       get selectResult() {
         if (queueIndex < selectQueue.length) {
           return selectQueue[queueIndex];
@@ -20,6 +24,9 @@ const { mockDbState, mockWriteAuditLog } = vi.hoisted(() => {
       setQueue: (results: unknown[][]) => {
         selectQueue = [...results];
         queueIndex = 0;
+      },
+      clearWrites: () => {
+        insertValues = [];
       },
       advance: () => {
         const result = queueIndex < selectQueue.length ? selectQueue[queueIndex] : [];
@@ -38,8 +45,12 @@ vi.mock("@backspace/db", () => {
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
-    values: vi.fn().mockReturnThis(),
+    values: vi.fn((value: unknown) => {
+      mockDbState.insertValues.push(value);
+      return chainable;
+    }),
     set: vi.fn().mockReturnThis(),
+    // oxlint-disable-next-line unicorn/no-thenable -- Drizzle query builders are awaitable.
     then: chainableThen,
     catch: vi.fn(),
   };
@@ -91,6 +102,7 @@ function resetMockDb() {
   vi.mocked(db.transaction as never).mockClear();
   mockWriteAuditLog.mockClear();
   mockDbState.setQueue([]);
+  mockDbState.clearWrites();
 }
 
 function validInput() {
@@ -445,6 +457,18 @@ describe("addCharge", () => {
         type: "service",
       });
       expect(result.chargeId).toBeDefined();
+      expect(mockDbState.insertValues[0]).toMatchObject({
+        visitId: null,
+        usageSessionId: "session-active",
+        eventId: null,
+        hostAccountId: null,
+        invoiceId: null,
+      });
+
+      const auditCall = mockWriteAuditLog.mock.calls[0][0];
+      const metadata = JSON.parse(auditCall.metadata);
+      expect(metadata.visitId).toBe("visit-active");
+      expect(metadata.usageSessionId).toBe("session-active");
     });
 
     it("writes audit on success", async () => {

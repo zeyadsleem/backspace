@@ -3,10 +3,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { mockDbState, mockWriteAuditLog } = vi.hoisted(() => {
   let selectQueue: unknown[][] = [];
   let queueIndex = 0;
+  let insertValues: unknown[] = [];
+  let updateSets: unknown[] = [];
   const auditLog = vi.fn().mockResolvedValue(undefined);
   return {
     mockWriteAuditLog: auditLog,
     mockDbState: {
+      get insertValues() {
+        return insertValues;
+      },
+      get updateSets() {
+        return updateSets;
+      },
       get selectResult() {
         if (queueIndex < selectQueue.length) {
           return selectQueue[queueIndex];
@@ -20,6 +28,10 @@ const { mockDbState, mockWriteAuditLog } = vi.hoisted(() => {
       setQueue: (results: unknown[][]) => {
         selectQueue = [...results];
         queueIndex = 0;
+      },
+      clearWrites: () => {
+        insertValues = [];
+        updateSets = [];
       },
       advance: () => {
         const result = queueIndex < selectQueue.length ? selectQueue[queueIndex] : [];
@@ -38,8 +50,16 @@ vi.mock("@backspace/db", () => {
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
-    values: vi.fn().mockReturnThis(),
-    set: vi.fn().mockReturnThis(),
+    values: vi.fn((value: unknown) => {
+      mockDbState.insertValues.push(value);
+      return chainable;
+    }),
+    set: vi.fn((value: unknown) => {
+      mockDbState.updateSets.push(value);
+      return chainable;
+    }),
+    returning: vi.fn().mockReturnThis(),
+    // oxlint-disable-next-line unicorn/no-thenable -- Drizzle query builders are awaitable.
     then: chainableThen,
     catch: vi.fn(),
   };
@@ -53,10 +73,21 @@ vi.mock("@backspace/db", () => {
     db: mockDb,
     and: vi.fn((...args: unknown[]) => ({ and: true, args })),
     eq: vi.fn((a: unknown, b: unknown) => ({ eq: true, a, b })),
+    inArray: vi.fn((a: unknown, b: unknown) => ({ inArray: true, a, b })),
     isNull: vi.fn((col: unknown) => ({ isNull: true, col })),
-    charge: { id: "charge" },
-    visit: { id: "visit" },
-    usageSession: { id: "usage-session" },
+    or: vi.fn((...args: unknown[]) => ({ or: true, args })),
+    charge: {
+      id: "charge.id",
+      visitId: "charge.visitId",
+      usageSessionId: "charge.usageSessionId",
+      invoiceId: "charge.invoiceId",
+    },
+    visit: { id: "visit.id", branchId: "visit.branchId", status: "visit.status" },
+    usageSession: {
+      id: "usage-session.id",
+      visitId: "usage-session.visitId",
+      status: "usage-session.status",
+    },
     invoice: { id: "invoice" },
     invoiceItem: { id: "invoice-item" },
     payment: { id: "payment" },
@@ -84,7 +115,7 @@ vi.mock("../audit/audit", () => ({
   writeAuditLog: mockWriteAuditLog,
 }));
 
-import { db } from "@backspace/db";
+import { db, inArray, or } from "@backspace/db";
 import { previewCheckout, finalizeCheckout } from "./checkout";
 
 function resetMockDb() {
@@ -92,8 +123,11 @@ function resetMockDb() {
   vi.mocked(db.insert).mockClear();
   vi.mocked(db.update).mockClear();
   vi.mocked(db.transaction as never).mockClear();
+  vi.mocked(inArray).mockClear();
+  vi.mocked(or).mockClear();
   mockWriteAuditLog.mockClear();
   mockDbState.setQueue([]);
+  mockDbState.clearWrites();
 }
 
 function activeVisit() {
@@ -115,8 +149,47 @@ function activeVisit() {
   };
 }
 
-function branches() {
-  return [{ id: "branch-main", name: "Downtown Hub", timezone: "Africa/Cairo", currency: "EGP" }];
+function chargeRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "c1",
+    visitId: "visit-active",
+    label: "Water",
+    type: "product",
+    quantity: 1,
+    amountCents: 1000,
+    currency: "EGP",
+    billingResponsibility: "visitor",
+    reason: null,
+    invoiceId: null,
+    usageSessionId: null,
+    eventId: null,
+    hostAccountId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  };
+}
+
+function sessionRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "session-1",
+    visitId: "visit-active",
+    spaceId: "space-1",
+    status: "active",
+    startedAt: new Date(),
+    endedAt: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    ...overrides,
+  };
+}
+
+function insertedRows() {
+  return mockDbState.insertValues as Record<string, unknown>[];
+}
+
+function updateSets() {
+  return mockDbState.updateSets as Record<string, unknown>[];
 }
 
 describe("previewCheckout", () => {
@@ -171,6 +244,36 @@ describe("previewCheckout", () => {
     const result = await previewCheckout({ branchId: "branch-main", visitId: "visit-active" });
     expect(result.lineItems).toHaveLength(1);
     expect(result.lineItems[0]).toMatchObject({ label: "Water", amountCents: 2000 });
+  });
+
+  it("collects usage-session-targeted charges for active sessions owned by the visit", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [
+        chargeRow({
+          id: "session-charge",
+          visitId: null,
+          usageSessionId: "session-1",
+          label: "Desk usage",
+          type: "service",
+          amountCents: 5000,
+        }),
+      ],
+      [sessionRow()],
+    ]);
+
+    const result = await previewCheckout({ branchId: "branch-main", visitId: "visit-active" });
+
+    expect(result.lineItems).toEqual([
+      expect.objectContaining({
+        chargeId: "session-charge",
+        label: "Desk usage",
+        amountCents: 5000,
+      }),
+    ]);
+    expect(inArray).toHaveBeenCalled();
+    expect(or).toHaveBeenCalled();
   });
 
   it("calculates totals using integer minor units", async () => {
@@ -359,7 +462,7 @@ describe("finalizeCheckout", () => {
         },
       ],
       [],
-      [],
+      [activeVisit()],
     ]);
     const result = await finalizeCheckout({
       branchId: "branch-main",
@@ -371,6 +474,29 @@ describe("finalizeCheckout", () => {
     expect(result.paymentIds).toHaveLength(1);
     expect(result.endedSessionIds).toBeDefined();
     expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(insertedRows()[0]).toMatchObject({ status: "paid" });
+  });
+
+  it("rejects if the visit is no longer active when finalization claims it", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [chargeRow()],
+      [],
+      [],
+    ]);
+
+    await expect(
+      finalizeCheckout({
+        branchId: "branch-main",
+        visitId: "visit-active",
+        staffActorUserId: "staff-user-1",
+        payments: [{ responsibility: "visitor", method: "cash", amountCents: 1000 }],
+      }),
+    ).rejects.toMatchObject({ code: "CONFLICT" });
+
+    expect(db.insert).not.toHaveBeenCalled();
+    expect(mockWriteAuditLog).not.toHaveBeenCalled();
   });
 
   it("rejects payment amount mismatch", async () => {
@@ -397,7 +523,7 @@ describe("finalizeCheckout", () => {
         },
       ],
       [],
-      [],
+      [activeVisit()],
     ]);
     await expect(
       finalizeCheckout({
@@ -433,7 +559,7 @@ describe("finalizeCheckout", () => {
         },
       ],
       [],
-      [],
+      [activeVisit()],
     ]);
     const result = await finalizeCheckout({
       branchId: "branch-main",
@@ -442,6 +568,79 @@ describe("finalizeCheckout", () => {
     });
     expect(result.invoiceIds).toHaveLength(1);
     expect(result.paymentIds).toHaveLength(0);
+    expect(insertedRows()[0]).toMatchObject({ status: "finalized" });
+  });
+
+  it("finalizes pay-later and complimentary invoices without leaving them as draft", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [
+        chargeRow({
+          id: "pay-later-charge",
+          billingResponsibility: "pay_later",
+          amountCents: 3000,
+        }),
+        chargeRow({
+          id: "complimentary-charge",
+          type: "complimentary",
+          billingResponsibility: "complimentary",
+          amountCents: 0,
+        }),
+      ],
+      [],
+      [activeVisit()],
+    ]);
+
+    const result = await finalizeCheckout({
+      branchId: "branch-main",
+      visitId: "visit-active",
+      staffActorUserId: "staff-user-1",
+    });
+
+    expect(result.invoiceIds).toHaveLength(2);
+    expect(insertedRows()[0]).toMatchObject({ status: "finalized", totalCents: 3000 });
+    expect(insertedRows()[2]).toMatchObject({ status: "finalized", totalCents: 0 });
+  });
+
+  it("invoices and links usage-session-targeted charges", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [
+        chargeRow({
+          id: "session-charge",
+          visitId: null,
+          usageSessionId: "session-1",
+          label: "Desk usage",
+          type: "service",
+          amountCents: 5000,
+        }),
+      ],
+      [sessionRow()],
+      [activeVisit()],
+    ]);
+
+    const result = await finalizeCheckout({
+      branchId: "branch-main",
+      visitId: "visit-active",
+      staffActorUserId: "staff-user-1",
+      payments: [{ responsibility: "visitor", method: "cash", amountCents: 5000 }],
+    });
+
+    expect(result.invoiceIds).toHaveLength(1);
+    expect(insertedRows()).toContainEqual(
+      expect.objectContaining({ chargeId: "session-charge", label: "Desk usage" }),
+    );
+    expect(updateSets()).toContainEqual(
+      expect.objectContaining({
+        invoiceId: expect.any(String),
+        visitId: null,
+        usageSessionId: null,
+        eventId: null,
+        hostAccountId: null,
+      }),
+    );
   });
 
   it("ends active usage sessions", async () => {
@@ -479,6 +678,7 @@ describe("finalizeCheckout", () => {
           updatedAt: new Date(),
         },
       ],
+      [activeVisit()],
     ]);
     const result = await finalizeCheckout({
       branchId: "branch-main",
@@ -513,7 +713,7 @@ describe("finalizeCheckout", () => {
         },
       ],
       [],
-      [],
+      [activeVisit()],
     ]);
     await finalizeCheckout({
       branchId: "branch-main",

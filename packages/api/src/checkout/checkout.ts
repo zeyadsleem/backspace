@@ -7,9 +7,11 @@ import {
   charge,
   db,
   eq,
+  inArray,
   invoice,
   invoiceItem,
   isNull,
+  or,
   payment,
   usageSession,
   visit,
@@ -205,10 +207,20 @@ async function fetchBranch(branchId: string): Promise<BranchRow> {
 }
 
 async function fetchUninvoicedCharges(visitId: string): Promise<ChargeRow[]> {
+  const activeSessionIds = db
+    .select({ id: usageSession.id })
+    .from(usageSession)
+    .where(and(eq(usageSession.visitId, visitId), eq(usageSession.status, "active")));
+
   return db
     .select()
     .from(charge)
-    .where(and(eq(charge.visitId, visitId), isNull(charge.invoiceId)));
+    .where(
+      and(
+        or(eq(charge.visitId, visitId), inArray(charge.usageSessionId, activeSessionIds)),
+        isNull(charge.invoiceId),
+      ),
+    );
 }
 
 async function fetchActiveSessions(visitId: string): Promise<SessionRow[]> {
@@ -220,7 +232,6 @@ async function fetchActiveSessions(visitId: string): Promise<SessionRow[]> {
 
 function buildResponsibilityGroups(
   charges: ChargeRow[],
-  currency: string,
   visitRow: VisitRow,
 ): CheckoutResponsibilityGroup[] {
   const groups = new Map<
@@ -328,6 +339,16 @@ function computeTotals(
   };
 }
 
+function invoiceStatusForGroup(
+  group: CheckoutResponsibilityGroup,
+  paymentInput: CheckoutPaymentInput | undefined,
+): "finalized" | "paid" {
+  if (paymentInput && paymentInput.amountCents >= group.totalCents) {
+    return "paid";
+  }
+  return "finalized";
+}
+
 export async function previewCheckout(input: CheckoutPreviewInput): Promise<CheckoutPreviewResult> {
   const visitRow = await fetchVisit(input.branchId, input.visitId);
   assertVisitEligible(visitRow);
@@ -348,7 +369,7 @@ export async function previewCheckout(input: CheckoutPreviewInput): Promise<Chec
     currency: c.currency,
   }));
 
-  const responsibilityGroups = buildResponsibilityGroups(charges, currency, visitRow);
+  const responsibilityGroups = buildResponsibilityGroups(charges, visitRow);
   const totals = computeTotals(responsibilityGroups, currency);
 
   const warnings: string[] = [];
@@ -384,7 +405,7 @@ export async function finalizeCheckout(
   const charges = await fetchUninvoicedCharges(input.visitId);
   const sessions = await fetchActiveSessions(input.visitId);
 
-  const responsibilityGroups = buildResponsibilityGroups(charges, currency, visitRow);
+  const responsibilityGroups = buildResponsibilityGroups(charges, visitRow);
   const totals = computeTotals(responsibilityGroups, currency);
 
   const paymentsByResponsibility = new Map<string, CheckoutPaymentInput>();
@@ -414,24 +435,45 @@ export async function finalizeCheckout(
   const paymentIds: string[] = [];
 
   await db.transaction(async (tx) => {
+    const checkedOutAt = new Date();
+    const claimedVisits = await tx
+      .update(visit)
+      .set({ status: "checked_out", checkedOutAt })
+      .where(
+        and(
+          eq(visit.id, input.visitId),
+          eq(visit.branchId, input.branchId),
+          eq(visit.status, "active"),
+        ),
+      )
+      .returning({ id: visit.id });
+
+    if (claimedVisits.length === 0) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "Visit is no longer active — checkout may already be finalized",
+      });
+    }
+
     for (const group of responsibilityGroups) {
       const groupCharges = charges.filter((c) => c.billingResponsibility === group.responsibility);
       if (groupCharges.length === 0) continue;
 
       const invoiceId = id();
       invoiceIds.push(invoiceId);
+      const payInput = paymentsByResponsibility.get(group.responsibility);
 
       await tx.insert(invoice).values({
         id: invoiceId,
         billToPersonId: group.billToPersonId,
         billToAccountId: group.billToAccountId,
-        status: "draft",
+        status: invoiceStatusForGroup(group, payInput),
         subtotalCents: group.subtotalCents,
         discountCents: group.discountCents,
         taxCents: group.taxCents,
         totalCents: group.totalCents,
         currency,
-        finalizedAt: new Date(),
+        finalizedAt: checkedOutAt,
       });
 
       for (const c of groupCharges) {
@@ -446,10 +488,18 @@ export async function finalizeCheckout(
           currency: c.currency,
         });
 
-        await tx.update(charge).set({ invoiceId }).where(eq(charge.id, c.id));
+        await tx
+          .update(charge)
+          .set({
+            invoiceId,
+            visitId: null,
+            usageSessionId: null,
+            eventId: null,
+            hostAccountId: null,
+          })
+          .where(eq(charge.id, c.id));
       }
 
-      const payInput = paymentsByResponsibility.get(group.responsibility);
       if (payInput && payInput.amountCents > 0) {
         const paymentId = id();
         paymentIds.push(paymentId);
@@ -474,8 +524,6 @@ export async function finalizeCheckout(
           reference: payInput.reference ?? null,
           recordedAt: new Date(),
         });
-
-        await tx.update(invoice).set({ status: "paid" }).where(eq(invoice.id, invoiceId));
       }
     }
 
@@ -489,11 +537,6 @@ export async function finalizeCheckout(
         .set({ status: "ended", endedAt: new Date() })
         .where(eq(usageSession.id, session.id));
     }
-
-    await tx
-      .update(visit)
-      .set({ status: "checked_out", checkedOutAt: new Date() })
-      .where(eq(visit.id, input.visitId));
 
     const auditMetadata: Record<string, unknown> = {
       invoiceIds,

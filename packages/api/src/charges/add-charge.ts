@@ -11,8 +11,6 @@ import {
   usageSession,
   workspaceEvent,
   billingResponsibilityEnum,
-  visitStatusEnum,
-  usageSessionStatusEnum,
 } from "@backspace/db";
 import { writeAuditLog } from "../audit/audit";
 import { BILLING_RESPONSIBILITY } from "../domain/domain";
@@ -147,6 +145,7 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
   validateInput(input);
 
   let visitIdForCharge: string | null = null;
+  let auditVisitId: string | null = null;
   let usageSessionIdForCharge: string | null = null;
   let eventIdForCharge: string | null = null;
   let hostAccountIdForCharge: string | null = null;
@@ -165,6 +164,7 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
         });
       }
       visitIdForCharge = visitRow.id;
+      auditVisitId = visitRow.id;
       break;
     }
     case "usage_session": {
@@ -191,7 +191,7 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
           message: `Usage session is ${sessionRow.status} — charges can only be added to active sessions`,
         });
       }
-      visitIdForCharge = parentVisit.id;
+      auditVisitId = parentVisit.id;
       usageSessionIdForCharge = sessionRow.id;
       break;
     }
@@ -251,7 +251,7 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
       billingResponsibility: input.billingResponsibility,
     };
     if (input.reason) metadata.reason = input.reason;
-    if (visitIdForCharge) metadata.visitId = visitIdForCharge;
+    if (auditVisitId) metadata.visitId = auditVisitId;
     if (usageSessionIdForCharge) metadata.usageSessionId = usageSessionIdForCharge;
     if (eventIdForCharge) metadata.eventId = eventIdForCharge;
     if (hostAccountIdForCharge) metadata.hostAccountId = hostAccountIdForCharge;
