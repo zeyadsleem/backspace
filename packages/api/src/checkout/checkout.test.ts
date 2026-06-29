@@ -91,6 +91,12 @@ vi.mock("@backspace/db", () => {
     invoice: { id: "invoice" },
     invoiceItem: { id: "invoice-item" },
     payment: { id: "payment" },
+    shift: {
+      id: "shift.id",
+      branchId: "shift.branchId",
+      openedByUserId: "shift.openedByUserId",
+      status: "shift.status",
+    },
     branch: { id: "branch" },
     chargeTypeEnum: {
       enumValues: ["product", "service", "fee", "discount", "complimentary", "adjustment"],
@@ -180,6 +186,20 @@ function sessionRow(overrides: Record<string, unknown> = {}) {
     endedAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
+    ...overrides,
+  };
+}
+
+function shiftRow(overrides: Record<string, unknown> = {}) {
+  return {
+    id: "shift-open",
+    branchId: "branch-main",
+    openedByUserId: "staff-user-1",
+    status: "open",
+    expectedCashCents: 0,
+    actualCashCents: null,
+    openedAt: new Date(),
+    closedAt: null,
     ...overrides,
   };
 }
@@ -463,6 +483,8 @@ describe("finalizeCheckout", () => {
         },
       ],
       [],
+      [shiftRow()],
+      [shiftRow()],
     ]);
     const result = await finalizeCheckout({
       branchId: "branch-main",
@@ -475,6 +497,74 @@ describe("finalizeCheckout", () => {
     expect(result.endedSessionIds).toBeDefined();
     expect(db.transaction).toHaveBeenCalledTimes(1);
     expect(insertedRows()[0]).toMatchObject({ status: "paid" });
+    expect(insertedRows()).toContainEqual(expect.objectContaining({ shiftId: "shift-open" }));
+  });
+
+  it("rejects cash payment when the staff user has no open shift", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
+      [chargeRow()],
+      [],
+      [],
+    ]);
+
+    await expect(
+      finalizeCheckout({
+        branchId: "branch-main",
+        visitId: "visit-active",
+        staffActorUserId: "staff-user-1",
+        payments: [{ responsibility: "visitor", method: "cash", amountCents: 1000 }],
+      }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+    expect(insertedRows()).toHaveLength(0);
+    expect(mockWriteAuditLog).not.toHaveBeenCalled();
+  });
+
+  it("does not require an open shift for non-cash payments", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
+      [chargeRow()],
+      [],
+    ]);
+
+    const result = await finalizeCheckout({
+      branchId: "branch-main",
+      visitId: "visit-active",
+      staffActorUserId: "staff-user-1",
+      payments: [{ responsibility: "visitor", method: "card_terminal", amountCents: 1000 }],
+    });
+
+    expect(result.paymentIds).toHaveLength(1);
+    expect(insertedRows()).toContainEqual(expect.objectContaining({ shiftId: null }));
+  });
+
+  it("rejects cash payment if the open shift closes before checkout can lock it", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
+      [chargeRow()],
+      [],
+      [shiftRow()],
+      [],
+    ]);
+
+    await expect(
+      finalizeCheckout({
+        branchId: "branch-main",
+        visitId: "visit-active",
+        staffActorUserId: "staff-user-1",
+        payments: [{ responsibility: "visitor", method: "cash", amountCents: 1000 }],
+      }),
+    ).rejects.toMatchObject({ code: "CONFLICT" });
+
+    expect(insertedRows()).toHaveLength(0);
+    expect(mockWriteAuditLog).not.toHaveBeenCalled();
   });
 
   it("rejects if the visit is no longer active when finalization claims it", async () => {
@@ -510,7 +600,7 @@ describe("finalizeCheckout", () => {
       branchId: "branch-main",
       visitId: "visit-active",
       staffActorUserId: "staff-user-1",
-      payments: [{ responsibility: "visitor", method: "cash", amountCents: 1000 }],
+      payments: [{ responsibility: "visitor", method: "card_terminal", amountCents: 1000 }],
     });
 
     const firstClaimOrder = vi.mocked(db.update).mock.invocationCallOrder[0];
@@ -644,7 +734,7 @@ describe("finalizeCheckout", () => {
       branchId: "branch-main",
       visitId: "visit-active",
       staffActorUserId: "staff-user-1",
-      payments: [{ responsibility: "visitor", method: "cash", amountCents: 5000 }],
+      payments: [{ responsibility: "visitor", method: "card_terminal", amountCents: 5000 }],
     });
 
     expect(result.invoiceIds).toHaveLength(1);
@@ -703,7 +793,7 @@ describe("finalizeCheckout", () => {
       branchId: "branch-main",
       visitId: "visit-active",
       staffActorUserId: "staff-user-1",
-      payments: [{ responsibility: "visitor", method: "cash", amountCents: 1000 }],
+      payments: [{ responsibility: "visitor", method: "card_terminal", amountCents: 1000 }],
     });
     expect(result.endedSessionIds).toContain("session-1");
   });
@@ -738,7 +828,7 @@ describe("finalizeCheckout", () => {
       branchId: "branch-main",
       visitId: "visit-active",
       staffActorUserId: "staff-user-1",
-      payments: [{ responsibility: "visitor", method: "cash", amountCents: 1000 }],
+      payments: [{ responsibility: "visitor", method: "card_terminal", amountCents: 1000 }],
     });
     expect(mockWriteAuditLog).toHaveBeenCalledTimes(1);
     const auditCall = mockWriteAuditLog.mock.calls[0][0];

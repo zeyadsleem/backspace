@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Bell, ChevronDown, Command, LogOut, Search, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
+import { useState } from "react";
 
 import UserMenu from "@/components/user-menu";
+import { Badge } from "@backspace/ui/components/badge";
 import { Button } from "@backspace/ui/components/button";
 import {
   Card,
@@ -12,6 +14,7 @@ import {
   CardTitle,
 } from "@backspace/ui/components/card";
 import { Input } from "@backspace/ui/components/input";
+import { Label } from "@backspace/ui/components/label";
 import { cn } from "@backspace/ui/lib/utils";
 
 import { PermissionGate } from "./permissions";
@@ -26,12 +29,51 @@ import type { StaffShellContext, StaffShellProfile } from "./shell-context";
 import { getVisibleNavigationGroups } from "./staff-navigation";
 import { staffQuickActions } from "./staff-quick-actions";
 
+export type StaffShiftSummary = {
+  status: "open" | "closed" | "none";
+  shift: {
+    id: string;
+    branchId: string;
+    openedByUserId: string;
+    closedByUserId: string | null;
+    status: string;
+    openedAt: Date | string;
+    closedAt: Date | string | null;
+    expectedCashCents: number;
+    actualCashCents: number | null;
+    differenceCents: number | null;
+    currency: string;
+    notes: string | null;
+  } | null;
+  expectedCashCents: number;
+  cashPaymentCount: number;
+  actualCashCents: number | null;
+  differenceCents: number | null;
+  warnings: string[];
+  blockers: string[];
+};
+
+export type StaffShiftActionState = {
+  isPending: boolean;
+  error: string | null;
+};
+
 export function StaffShell({
   children,
+  isShiftLoading = false,
+  onCloseShift,
+  onOpenShift,
+  shiftActionState = { isPending: false, error: null },
+  shiftSummary,
   staffProfile,
   userName,
 }: {
   children: ReactNode;
+  isShiftLoading?: boolean;
+  onCloseShift?: (actualCashCents: number) => void;
+  onOpenShift?: () => void;
+  shiftActionState?: StaffShiftActionState;
+  shiftSummary?: StaffShiftSummary | null;
   staffProfile?: StaffShellProfile | null;
   userName?: string | null;
 }) {
@@ -41,7 +83,15 @@ export function StaffShell({
     <div className="grid min-h-svh bg-background text-foreground md:grid-cols-[17rem_1fr]">
       <StaffSidebar permissions={context.permissions} />
       <div className="grid min-w-0 grid-rows-[auto_1fr]">
-        <StaffTopbar context={context} userName={userName} />
+        <StaffTopbar
+          context={context}
+          isShiftLoading={isShiftLoading}
+          onCloseShift={onCloseShift}
+          onOpenShift={onOpenShift}
+          shiftActionState={shiftActionState}
+          shiftSummary={shiftSummary}
+          userName={userName}
+        />
         <main className="min-w-0 bg-muted/20 p-4 md:p-6">{children}</main>
       </div>
     </div>
@@ -112,17 +162,33 @@ function StaffSidebar({ permissions }: { permissions: StaffShellContext["permiss
 
 function StaffTopbar({
   context,
+  isShiftLoading,
+  onCloseShift,
+  onOpenShift,
+  shiftActionState,
+  shiftSummary,
   userName,
 }: {
   context: StaffShellContext;
+  isShiftLoading: boolean;
+  onCloseShift?: (actualCashCents: number) => void;
+  onOpenShift?: () => void;
+  shiftActionState: StaffShiftActionState;
+  shiftSummary?: StaffShiftSummary | null;
   userName?: string | null;
 }) {
+  const [isCloseShiftRequested, setIsCloseShiftRequested] = useState(false);
+
   return (
     <header className="sticky top-0 z-10 border-b bg-background/95 px-4 py-3 backdrop-blur md:px-6">
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
           <BranchSelector context={context} />
-          <ShiftStatusBadge context={context} />
+          <ShiftStatusBadge
+            context={context}
+            isLoading={isShiftLoading}
+            shiftSummary={shiftSummary}
+          />
           <div className="hidden items-center gap-2 rounded-md border bg-muted/40 px-3 py-2 text-sm text-muted-foreground md:flex md:min-w-64 lg:min-w-80">
             <Search aria-hidden="true" />
             <Input
@@ -137,7 +203,11 @@ function StaffTopbar({
           </div>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto">
-          <QuickActions permissions={context.permissions} />
+          <QuickActions
+            permissions={context.permissions}
+            onCloseShiftRequest={() => setIsCloseShiftRequested(true)}
+            onOpenShift={onOpenShift}
+          />
           <Button aria-label="Notifications" size="icon" variant="outline">
             <Bell aria-hidden="true" />
           </Button>
@@ -150,6 +220,15 @@ function StaffTopbar({
           <UserMenu />
         </div>
       </div>
+      <ShiftControlPanel
+        isLoading={isShiftLoading}
+        isCloseRequested={isCloseShiftRequested}
+        permissions={context.permissions}
+        shiftActionState={shiftActionState}
+        shiftSummary={shiftSummary}
+        onCloseShift={onCloseShift}
+        onOpenShift={onOpenShift}
+      />
     </header>
   );
 }
@@ -171,16 +250,166 @@ function BranchSelector({ context }: { context: StaffShellContext }) {
   );
 }
 
-function ShiftStatusBadge({ context }: { context: StaffShellContext }) {
+function ShiftStatusBadge({
+  context,
+  isLoading,
+  shiftSummary,
+}: {
+  context: StaffShellContext;
+  isLoading: boolean;
+  shiftSummary?: StaffShiftSummary | null;
+}) {
+  const status = shiftSummary?.status ?? context.activeShift.status;
+  const label = isLoading
+    ? "Checking shift..."
+    : shiftSummary
+      ? shiftSummary.status === "open"
+        ? "Open shift"
+        : shiftSummary.status === "closed"
+          ? "Closed shift"
+          : "No active shift"
+      : getActiveShiftLabel(context.activeShift);
+
   return (
     <div className="flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-sm">
-      <span className="size-2 rounded-full bg-primary" />
-      <span>{getActiveShiftLabel(context.activeShift)}</span>
+      <span
+        className={cn(
+          "size-2 rounded-full",
+          status === "open" ? "bg-primary" : "bg-muted-foreground",
+        )}
+      />
+      <span>{label}</span>
     </div>
   );
 }
 
-function QuickActions({ permissions }: { permissions: StaffShellContext["permissions"] }) {
+function ShiftControlPanel({
+  isLoading,
+  isCloseRequested,
+  onCloseShift,
+  onOpenShift,
+  permissions,
+  shiftActionState,
+  shiftSummary,
+}: {
+  isLoading: boolean;
+  isCloseRequested: boolean;
+  onCloseShift?: (actualCashCents: number) => void;
+  onOpenShift?: () => void;
+  permissions: StaffShellContext["permissions"];
+  shiftActionState: StaffShiftActionState;
+  shiftSummary?: StaffShiftSummary | null;
+}) {
+  const [actualCash, setActualCash] = useState("");
+  const [isConfirmingClose, setIsConfirmingClose] = useState(false);
+  const hasOpenShift = shiftSummary?.status === "open";
+  const parsedActualCash = Number(actualCash || 0);
+  const actualCashCents = Math.round(parsedActualCash * 100);
+  const canClose = Number.isFinite(actualCashCents) && actualCashCents >= 0;
+  const shouldConfirmClose = isConfirmingClose || isCloseRequested;
+  const differenceCents = actualCashCents - (shiftSummary?.expectedCashCents ?? 0);
+
+  return (
+    <div className="mt-3 grid gap-3 rounded-2xl border bg-card/70 p-3 text-sm lg:grid-cols-[1fr_auto] lg:items-center">
+      <div className="grid gap-2 md:grid-cols-3">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Cash control
+          </p>
+          <p className="font-medium">
+            {isLoading ? "Checking shift..." : hasOpenShift ? "Open shift" : "No active shift"}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Expected cash</p>
+          <p className="font-medium">{formatMoney(shiftSummary?.expectedCashCents ?? 0)}</p>
+        </div>
+        <div>
+          <p className="text-xs text-muted-foreground">Cash payments</p>
+          <p className="font-medium">{shiftSummary?.cashPaymentCount ?? 0} cash payments</p>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 md:flex-row md:items-end">
+        {hasOpenShift ? (
+          <PermissionGate permissions={permissions} required="shift:close" fallback={null}>
+            <div className="flex flex-col gap-1">
+              <Label htmlFor="actual-cash-cents">Actual drawer cash</Label>
+              <Input
+                id="actual-cash-cents"
+                inputMode="decimal"
+                placeholder="0.00"
+                value={actualCash}
+                onChange={(event) => setActualCash(event.target.value)}
+              />
+            </div>
+            <Button
+              type="button"
+              disabled={shiftActionState.isPending || !canClose}
+              onClick={() => {
+                if (!shouldConfirmClose) {
+                  setIsConfirmingClose(true);
+                  return;
+                }
+                onCloseShift?.(actualCashCents);
+              }}
+            >
+              {shouldConfirmClose ? "Confirm close shift" : "Review close"}
+            </Button>
+          </PermissionGate>
+        ) : (
+          <PermissionGate permissions={permissions} required="shift:open" fallback={null}>
+            <Button type="button" disabled={shiftActionState.isPending} onClick={onOpenShift}>
+              Open shift
+            </Button>
+          </PermissionGate>
+        )}
+      </div>
+
+      {hasOpenShift && shouldConfirmClose ? (
+        <div className="rounded-xl border bg-background p-3 text-sm md:col-span-2">
+          <p className="font-medium">Confirm drawer close</p>
+          <p className="text-muted-foreground">
+            Difference: {formatMoney(differenceCents)}. Closing records the actual cash and audit
+            trail for manager review.
+          </p>
+        </div>
+      ) : null}
+
+      {(shiftSummary?.blockers.length ?? 0) > 0 ? (
+        <div className="md:col-span-2">
+          {shiftSummary?.blockers.map((blocker) => (
+            <p className="text-sm text-destructive" key={blocker}>
+              {blocker}
+            </p>
+          ))}
+        </div>
+      ) : null}
+      {(shiftSummary?.warnings.length ?? 0) > 0 ? (
+        <div className="md:col-span-2">
+          {shiftSummary?.warnings.map((warning) => (
+            <Badge key={warning} variant="outline">
+              {warning}
+            </Badge>
+          ))}
+        </div>
+      ) : null}
+      {shiftActionState.error ? (
+        <p className="text-sm text-destructive md:col-span-2">{shiftActionState.error}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function QuickActions({
+  onCloseShiftRequest,
+  onOpenShift,
+  permissions,
+}: {
+  onCloseShiftRequest?: () => void;
+  onOpenShift?: () => void;
+  permissions: StaffShellContext["permissions"];
+}) {
   const navigate = useNavigate();
 
   return (
@@ -204,6 +433,8 @@ function QuickActions({ permissions }: { permissions: StaffShellContext["permiss
               variant="outline"
               onClick={() => {
                 if (action.href) navigate({ to: action.href });
+                if (action.label === "Open shift") onOpenShift?.();
+                if (action.label === "Close shift") onCloseShiftRequest?.();
               }}
             >
               {action.label}
@@ -213,6 +444,14 @@ function QuickActions({ permissions }: { permissions: StaffShellContext["permiss
       </div>
     </div>
   );
+}
+
+function formatMoney(cents: number): string {
+  const abs = Math.abs(cents);
+  const whole = Math.floor(abs / 100);
+  const frac = abs % 100;
+  const sign = cents < 0 ? "-" : "";
+  return `${sign}${whole}.${frac.toString().padStart(2, "0")} EGP`;
 }
 
 export function StaffShellLanding() {

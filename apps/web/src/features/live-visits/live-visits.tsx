@@ -21,6 +21,7 @@ import { Label } from "@backspace/ui/components/label";
 import { Skeleton } from "@backspace/ui/components/skeleton";
 
 import type { CheckoutState } from "./checkout-panel";
+import type { CashControlState } from "./checkout-panel";
 import { CheckoutPanel } from "./checkout-panel";
 
 const CHARGE_TYPES = [
@@ -149,6 +150,7 @@ export function LiveVisits({
   onOpenCheckout,
   onCloseCheckout,
   onFinalizeCheckout,
+  cashControl,
 }: {
   overview: LiveVisitsOverview;
   selectedVisitId: string | null;
@@ -163,6 +165,7 @@ export function LiveVisits({
   onOpenCheckout?: () => void;
   onCloseCheckout?: () => void;
   onFinalizeCheckout?: () => void;
+  cashControl?: CashControlState | null;
 }) {
   const [filters, setFilters] = useState<LiveVisitFilterState>({
     query: "",
@@ -243,6 +246,7 @@ export function LiveVisits({
         <CheckoutPanel
           personName={selectedVisitDetail?.identity.person.displayName ?? "Unknown"}
           checkoutState={checkoutState}
+          cashControl={cashControl}
           selectedMethod={checkoutMethod ?? ""}
           onSelectMethod={onSelectCheckoutMethod ?? (() => {})}
           onFinalize={onFinalizeCheckout ?? (() => {})}

@@ -13,6 +13,7 @@ import {
   isNull,
   or,
   payment,
+  shift,
   usageSession,
   visit,
 } from "@backspace/db";
@@ -139,6 +140,14 @@ interface SessionRow {
   status: string;
   startedAt: Date;
   endedAt: Date | null;
+}
+
+interface ShiftRow {
+  id: string;
+  branchId: string;
+  openedByUserId: string;
+  status: string;
+  expectedCashCents: number;
 }
 
 const OUTCOME_PAYABLE = "payable" as const;
@@ -349,6 +358,51 @@ function invoiceStatusForGroup(
   return "finalized";
 }
 
+function requiresCashShift(paymentInput: CheckoutPaymentInput | undefined): boolean {
+  return paymentInput?.method === "cash" && paymentInput.amountCents > 0;
+}
+
+async function lockOpenCashShift(
+  tx: Pick<typeof db, "select" | "update">,
+  input: CheckoutFinalizeInput,
+): Promise<string> {
+  const [openShift] = (await tx
+    .select()
+    .from(shift)
+    .where(
+      and(
+        eq(shift.branchId, input.branchId),
+        eq(shift.openedByUserId, input.staffActorUserId),
+        eq(shift.status, "open"),
+      ),
+    )
+    .limit(1)) as ShiftRow[];
+
+  if (!openShift) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Cash payments require an open shift for this branch",
+    });
+  }
+
+  const lockedShifts = await tx
+    .update(shift)
+    .set({ expectedCashCents: openShift.expectedCashCents })
+    .where(
+      and(eq(shift.id, openShift.id), eq(shift.branchId, input.branchId), eq(shift.status, "open")),
+    )
+    .returning({ id: shift.id });
+
+  if (lockedShifts.length === 0) {
+    throw new TRPCError({
+      code: "CONFLICT",
+      message: "Cash shift is no longer open — retry after opening a shift",
+    });
+  }
+
+  return openShift.id;
+}
+
 export async function previewCheckout(input: CheckoutPreviewInput): Promise<CheckoutPreviewResult> {
   const visitRow = await fetchVisit(input.branchId, input.visitId);
   assertVisitEligible(visitRow);
@@ -474,6 +528,15 @@ export async function finalizeCheckout(
       }
     }
 
+    let cashShiftId: string | null = null;
+    for (const group of responsibilityGroups) {
+      const payInput = paymentsByResponsibility.get(group.responsibility);
+      if (requiresCashShift(payInput)) {
+        cashShiftId = await lockOpenCashShift(tx, input);
+        break;
+      }
+    }
+
     for (const group of responsibilityGroups) {
       const groupCharges = charges.filter((c) => c.billingResponsibility === group.responsibility);
       if (groupCharges.length === 0) continue;
@@ -541,6 +604,7 @@ export async function finalizeCheckout(
           amountCents: payInput.amountCents,
           currency,
           reference: payInput.reference ?? null,
+          shiftId: payInput.method === "cash" ? cashShiftId : null,
           recordedAt: new Date(),
         });
       }
@@ -569,6 +633,9 @@ export async function finalizeCheckout(
     };
     if (paymentIds.length > 0) {
       auditMetadata.paymentIds = paymentIds;
+    }
+    if (cashShiftId) {
+      auditMetadata.cashShiftId = cashShiftId;
     }
 
     await writeAuditLog(

@@ -13,6 +13,7 @@ export const db = createDb();
 
 export { role, permission, rolePermission, staffProfile, staffBranchAccess } from "./schema/staff";
 export { branch, space } from "./schema/workspace";
+export { shift } from "./schema/operations";
 export { auditLog, approvalRequest } from "./schema/audit";
 export { booking } from "./schema/bookings";
 export { customerAccount } from "./schema/people";

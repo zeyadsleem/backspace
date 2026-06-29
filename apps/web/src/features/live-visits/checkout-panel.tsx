@@ -68,6 +68,13 @@ export type CheckoutState = {
   finalizeResult: CheckoutFinalizeResult | null;
 };
 
+export type CashControlState = {
+  status: "open" | "closed" | "none";
+  shiftId?: string;
+  expectedCashCents: number;
+  cashPaymentCount: number;
+};
+
 const PAYMENT_METHODS = [
   { value: "cash", label: "Cash" },
   { value: "card_terminal", label: "Card Terminal" },
@@ -108,6 +115,7 @@ function outcomeBadge(outcome: string): {
 }
 
 export function CheckoutPanel({
+  cashControl,
   personName,
   checkoutState,
   selectedMethod,
@@ -115,6 +123,7 @@ export function CheckoutPanel({
   onFinalize,
   onClose,
 }: {
+  cashControl?: CashControlState | null;
   personName: string;
   checkoutState: CheckoutState;
   selectedMethod: string;
@@ -213,6 +222,8 @@ export function CheckoutPanel({
   const needsPayment = preview.totals.amountDueNowCents > 0;
   const isZeroDue = preview.totals.totalCents === 0;
   const hasSessions = preview.activeSessions.length > 0;
+  const cashSelected = selectedMethod === "cash";
+  const cashBlocked = cashSelected && cashControl?.status !== "open";
 
   return (
     <aside
@@ -363,6 +374,28 @@ export function CheckoutPanel({
                 ))}
               </select>
             </div>
+            {cashSelected ? (
+              cashControl?.status === "open" ? (
+                <Card>
+                  <CardContent className="flex flex-col gap-1 p-4 text-sm">
+                    <p className="font-medium">Cash will post to open shift</p>
+                    <p className="text-muted-foreground">
+                      {fmt(cashControl.expectedCashCents)} expected · {cashControl.cashPaymentCount}{" "}
+                      cash payments
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent className="flex flex-col gap-1 p-4 text-sm">
+                    <p className="font-medium text-destructive">Cash requires an open shift</p>
+                    <p className="text-muted-foreground">
+                      Open a shift before finalizing cash checkout.
+                    </p>
+                  </CardContent>
+                </Card>
+              )
+            ) : null}
           </CardContent>
         </Card>
       )}
@@ -383,7 +416,10 @@ export function CheckoutPanel({
           type="button"
           onClick={onFinalize}
           disabled={
-            isFinalizing || preview.blockers.length > 0 || (needsPayment && !selectedMethod)
+            isFinalizing ||
+            preview.blockers.length > 0 ||
+            (needsPayment && !selectedMethod) ||
+            cashBlocked
           }
         >
           {isFinalizing

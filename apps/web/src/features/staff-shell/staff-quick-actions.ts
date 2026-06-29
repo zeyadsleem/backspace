@@ -39,13 +39,13 @@ export const staffQuickActions: StaffQuickAction[] = [
   },
   {
     description: "Open a cashier or reception shift for this branch.",
-    disabled: true,
+    disabled: false,
     label: "Open shift",
     requiredPermission: PERMISSIONS.SHIFT_OPEN,
   },
   {
     description: "Close the active shift after cash and audit checks.",
-    disabled: true,
+    disabled: false,
     label: "Close shift",
     requiredPermission: PERMISSIONS.SHIFT_CLOSE,
   },
