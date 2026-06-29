@@ -3,10 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const { mockDbState, mockWriteAuditLog } = vi.hoisted(() => {
   let selectQueue: unknown[][] = [];
   let queueIndex = 0;
+  let insertValues: unknown[] = [];
   const auditLog = vi.fn().mockResolvedValue(undefined);
   return {
     mockWriteAuditLog: auditLog,
     mockDbState: {
+      get insertValues() {
+        return insertValues;
+      },
       get selectResult() {
         if (queueIndex < selectQueue.length) {
           return selectQueue[queueIndex];
@@ -20,6 +24,9 @@ const { mockDbState, mockWriteAuditLog } = vi.hoisted(() => {
       setQueue: (results: unknown[][]) => {
         selectQueue = [...results];
         queueIndex = 0;
+      },
+      clearWrites: () => {
+        insertValues = [];
       },
       advance: () => {
         const result = queueIndex < selectQueue.length ? selectQueue[queueIndex] : [];
@@ -38,8 +45,13 @@ vi.mock("@backspace/db", () => {
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
     limit: vi.fn().mockReturnThis(),
-    values: vi.fn().mockReturnThis(),
+    values: vi.fn((value: unknown) => {
+      mockDbState.insertValues.push(value);
+      return chainable;
+    }),
     set: vi.fn().mockReturnThis(),
+    returning: vi.fn().mockReturnThis(),
+    // oxlint-disable-next-line unicorn/no-thenable -- Drizzle query builders are awaitable.
     then: chainableThen,
     catch: vi.fn(),
   };
@@ -55,7 +67,7 @@ vi.mock("@backspace/db", () => {
     eq: vi.fn((a: unknown, b: unknown) => ({ eq: true, a, b })),
     charge: { id: "charge" },
     customerAccount: { id: "customer-account" },
-    visit: { id: "visit" },
+    visit: { id: "visit", branchId: "visit-branch-id", status: "visit-status" },
     usageSession: { id: "usage-session" },
     workspaceEvent: { id: "workspace-event" },
     chargeTypeEnum: {
@@ -91,6 +103,7 @@ function resetMockDb() {
   vi.mocked(db.transaction as never).mockClear();
   mockWriteAuditLog.mockClear();
   mockDbState.setQueue([]);
+  mockDbState.clearWrites();
 }
 
 function validInput() {
@@ -369,12 +382,74 @@ describe("addCharge", () => {
             billingResponsibility: "visitor",
           },
         ],
+        [
+          {
+            id: "visit-active",
+            branchId: "branch-main",
+            status: "active",
+            personId: "p1",
+            visitType: "walk_in",
+            billingResponsibility: "visitor",
+          },
+        ],
       ]);
       const result = await addCharge(validInput());
       expect(result.chargeId).toBeDefined();
       expect(typeof result.chargeId).toBe("string");
       expect(db.transaction).toHaveBeenCalledTimes(1);
       expect(db.insert).toHaveBeenCalledTimes(1);
+    });
+
+    it("locks the active visit before inserting a visit charge", async () => {
+      mockDbState.setQueue([
+        [
+          {
+            id: "visit-active",
+            branchId: "branch-main",
+            status: "active",
+            personId: "p1",
+            visitType: "walk_in",
+            billingResponsibility: "visitor",
+          },
+        ],
+        [
+          {
+            id: "visit-active",
+            branchId: "branch-main",
+            status: "active",
+            personId: "p1",
+            visitType: "walk_in",
+            billingResponsibility: "visitor",
+          },
+        ],
+      ]);
+
+      await addCharge(validInput());
+
+      const lockOrder = vi.mocked(db.update).mock.invocationCallOrder[0];
+      const insertOrder = vi.mocked(db.insert).mock.invocationCallOrder[0];
+      expect(lockOrder).toBeLessThan(insertOrder);
+    });
+
+    it("does not insert if the visit is no longer active when locked", async () => {
+      mockDbState.setQueue([
+        [
+          {
+            id: "visit-active",
+            branchId: "branch-main",
+            status: "active",
+            personId: "p1",
+            visitType: "walk_in",
+            billingResponsibility: "visitor",
+          },
+        ],
+        [],
+      ]);
+
+      await expect(addCharge(validInput())).rejects.toMatchObject({ code: "CONFLICT" });
+
+      expect(db.insert).not.toHaveBeenCalled();
+      expect(mockWriteAuditLog).not.toHaveBeenCalled();
     });
 
     it("creates charge successfully for a valid event target", async () => {
@@ -437,6 +512,16 @@ describe("addCharge", () => {
             billingResponsibility: "visitor",
           },
         ],
+        [
+          {
+            id: "visit-active",
+            branchId: "branch-main",
+            status: "active",
+            personId: "p1",
+            visitType: "walk_in",
+            billingResponsibility: "visitor",
+          },
+        ],
       ]);
       const result = await addCharge({
         ...validInput(),
@@ -445,10 +530,32 @@ describe("addCharge", () => {
         type: "service",
       });
       expect(result.chargeId).toBeDefined();
+      expect(mockDbState.insertValues[0]).toMatchObject({
+        visitId: null,
+        usageSessionId: "session-active",
+        eventId: null,
+        hostAccountId: null,
+        invoiceId: null,
+      });
+
+      const auditCall = mockWriteAuditLog.mock.calls[0][0];
+      const metadata = JSON.parse(auditCall.metadata);
+      expect(metadata.visitId).toBe("visit-active");
+      expect(metadata.usageSessionId).toBe("session-active");
     });
 
     it("writes audit on success", async () => {
       mockDbState.setQueue([
+        [
+          {
+            id: "visit-active",
+            branchId: "branch-main",
+            status: "active",
+            personId: "p1",
+            visitType: "walk_in",
+            billingResponsibility: "visitor",
+          },
+        ],
         [
           {
             id: "visit-active",
@@ -474,6 +581,16 @@ describe("addCharge", () => {
 
     it("audit metadata includes target type and id", async () => {
       mockDbState.setQueue([
+        [
+          {
+            id: "visit-active",
+            branchId: "branch-main",
+            status: "active",
+            personId: "p1",
+            visitType: "walk_in",
+            billingResponsibility: "visitor",
+          },
+        ],
         [
           {
             id: "visit-active",
@@ -510,6 +627,16 @@ describe("addCharge", () => {
 
     it("rejects if audit write fails inside transaction (no partial write)", async () => {
       mockDbState.setQueue([
+        [
+          {
+            id: "visit-active",
+            branchId: "branch-main",
+            status: "active",
+            personId: "p1",
+            visitType: "walk_in",
+            billingResponsibility: "visitor",
+          },
+        ],
         [
           {
             id: "visit-active",

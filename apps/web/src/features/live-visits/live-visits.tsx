@@ -20,6 +20,9 @@ import { Input } from "@backspace/ui/components/input";
 import { Label } from "@backspace/ui/components/label";
 import { Skeleton } from "@backspace/ui/components/skeleton";
 
+import type { CheckoutState } from "./checkout-panel";
+import { CheckoutPanel } from "./checkout-panel";
+
 const CHARGE_TYPES = [
   "product",
   "service",
@@ -139,6 +142,13 @@ export function LiveVisits({
   onSelectVisit,
   addChargeState,
   onAddCharge,
+  showCheckoutView,
+  checkoutState,
+  checkoutMethod,
+  onSelectCheckoutMethod,
+  onOpenCheckout,
+  onCloseCheckout,
+  onFinalizeCheckout,
 }: {
   overview: LiveVisitsOverview;
   selectedVisitId: string | null;
@@ -146,6 +156,13 @@ export function LiveVisits({
   onSelectVisit?: (visitId: string | null) => void;
   addChargeState?: AddChargeState;
   onAddCharge?: (input: AddChargeInput) => void;
+  showCheckoutView?: boolean;
+  checkoutState?: CheckoutState;
+  checkoutMethod?: string;
+  onSelectCheckoutMethod?: (method: string) => void;
+  onOpenCheckout?: () => void;
+  onCloseCheckout?: () => void;
+  onFinalizeCheckout?: () => void;
 }) {
   const [filters, setFilters] = useState<LiveVisitFilterState>({
     query: "",
@@ -222,13 +239,25 @@ export function LiveVisits({
         </div>
       )}
 
-      {selectedVisitDetail && (
+      {showCheckoutView && checkoutState ? (
+        <CheckoutPanel
+          personName={selectedVisitDetail?.identity.person.displayName ?? "Unknown"}
+          checkoutState={checkoutState}
+          selectedMethod={checkoutMethod ?? ""}
+          onSelectMethod={onSelectCheckoutMethod ?? (() => {})}
+          onFinalize={onFinalizeCheckout ?? (() => {})}
+          onClose={onCloseCheckout ?? (() => {})}
+        />
+      ) : null}
+
+      {selectedVisitDetail && !showCheckoutView && (
         <VisitDetailDrawer
           branchId={overview.branch.id}
           detail={selectedVisitDetail}
           onClose={() => onSelectVisit?.(null)}
           onAddCharge={onAddCharge}
           addChargeState={addChargeState}
+          onOpenCheckout={onOpenCheckout}
         />
       )}
     </div>
@@ -324,14 +353,17 @@ function VisitDetailDrawer({
   onClose,
   addChargeState,
   onAddCharge,
+  onOpenCheckout,
 }: {
   branchId: string;
   detail: VisitDetail;
   onClose: () => void;
   addChargeState?: AddChargeState;
   onAddCharge?: (input: AddChargeInput) => void;
+  onOpenCheckout?: () => void;
 }) {
   const addChargeAction = detail.actions.find((a) => a.id === "add_charge");
+  const checkoutAction = detail.actions.find((a) => a.id === "checkout");
   const [showAddCharge, setShowAddCharge] = useState(false);
 
   if (showAddCharge) {
@@ -395,11 +427,18 @@ function VisitDetailDrawer({
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium">Actions</h3>
-          {addChargeAction?.supported && addChargeAction.enabled && (
-            <Button type="button" size="sm" onClick={() => setShowAddCharge(true)}>
-              Add charge
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {addChargeAction?.supported && addChargeAction.enabled && (
+              <Button type="button" size="sm" onClick={() => setShowAddCharge(true)}>
+                Add charge
+              </Button>
+            )}
+            {checkoutAction?.supported && checkoutAction.enabled && (
+              <Button type="button" size="sm" onClick={onOpenCheckout}>
+                Checkout
+              </Button>
+            )}
+          </div>
         </div>
         <ul className="flex flex-col gap-1 text-sm">
           {detail.actions.map((action) => (

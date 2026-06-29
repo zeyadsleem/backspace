@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import crypto from "node:crypto";
 
 import {
+  and,
   db,
   eq,
   charge,
@@ -11,8 +12,6 @@ import {
   usageSession,
   workspaceEvent,
   billingResponsibilityEnum,
-  visitStatusEnum,
-  usageSessionStatusEnum,
 } from "@backspace/db";
 import { writeAuditLog } from "../audit/audit";
 import { BILLING_RESPONSIBILITY } from "../domain/domain";
@@ -147,6 +146,8 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
   validateInput(input);
 
   let visitIdForCharge: string | null = null;
+  let auditVisitId: string | null = null;
+  let visitIdToLock: string | null = null;
   let usageSessionIdForCharge: string | null = null;
   let eventIdForCharge: string | null = null;
   let hostAccountIdForCharge: string | null = null;
@@ -165,6 +166,8 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
         });
       }
       visitIdForCharge = visitRow.id;
+      auditVisitId = visitRow.id;
+      visitIdToLock = visitRow.id;
       break;
     }
     case "usage_session": {
@@ -191,7 +194,8 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
           message: `Usage session is ${sessionRow.status} — charges can only be added to active sessions`,
         });
       }
-      visitIdForCharge = parentVisit.id;
+      auditVisitId = parentVisit.id;
+      visitIdToLock = parentVisit.id;
       usageSessionIdForCharge = sessionRow.id;
       break;
     }
@@ -226,6 +230,27 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
   const chargeId = generateId();
 
   await db.transaction(async (tx) => {
+    if (visitIdToLock) {
+      const lockedVisits = await tx
+        .update(visit)
+        .set({ updatedAt: new Date() })
+        .where(
+          and(
+            eq(visit.id, visitIdToLock),
+            eq(visit.branchId, input.branchId),
+            eq(visit.status, "active"),
+          ),
+        )
+        .returning({ id: visit.id });
+
+      if (lockedVisits.length === 0) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Visit is no longer active — charges can only be added to active visits",
+        });
+      }
+    }
+
     await tx.insert(charge).values({
       id: chargeId,
       visitId: visitIdForCharge,
@@ -251,7 +276,7 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
       billingResponsibility: input.billingResponsibility,
     };
     if (input.reason) metadata.reason = input.reason;
-    if (visitIdForCharge) metadata.visitId = visitIdForCharge;
+    if (auditVisitId) metadata.visitId = auditVisitId;
     if (usageSessionIdForCharge) metadata.usageSessionId = usageSessionIdForCharge;
     if (eventIdForCharge) metadata.eventId = eventIdForCharge;
     if (hostAccountIdForCharge) metadata.hostAccountId = hostAccountIdForCharge;

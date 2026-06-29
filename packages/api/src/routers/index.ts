@@ -1,9 +1,10 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
 
-import { checkInRouter } from "./check-in";
 import { chargesRouter } from "./charges";
-import { staffRouter } from "./staff";
+import { checkoutRouter } from "./checkout";
+import { checkInRouter } from "./check-in";
 import { spacesRouter } from "./spaces";
+import { staffRouter } from "./staff";
 import { todayRouter } from "./today";
 import { visitsRouter } from "./visits";
 
@@ -17,8 +18,9 @@ export const appRouter = router({
       user: ctx.session.user,
     };
   }),
-  checkIn: checkInRouter,
   charges: chargesRouter,
+  checkout: checkoutRouter,
+  checkIn: checkInRouter,
   spaces: spacesRouter,
   staff: staffRouter,
   today: todayRouter,
