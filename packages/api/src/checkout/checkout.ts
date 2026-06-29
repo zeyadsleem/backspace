@@ -402,37 +402,15 @@ export async function finalizeCheckout(
   const branchRow = await fetchBranch(input.branchId);
   const currency = branchCurrency(branchRow);
 
-  const charges = await fetchUninvoicedCharges(input.visitId);
-  const sessions = await fetchActiveSessions(input.visitId);
-
-  const responsibilityGroups = buildResponsibilityGroups(charges, visitRow);
-  const totals = computeTotals(responsibilityGroups, currency);
-
   const paymentsByResponsibility = new Map<string, CheckoutPaymentInput>();
   for (const p of input.payments ?? []) {
     paymentsByResponsibility.set(p.responsibility, p);
   }
 
-  for (const group of responsibilityGroups) {
-    if (group.outcome === "payable" || group.outcome === "host_account") {
-      const payment = paymentsByResponsibility.get(group.responsibility);
-      if (!payment) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Payment required for ${group.responsibility} group (${group.label})`,
-        });
-      }
-      if (payment.amountCents !== group.totalCents) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: `Payment amount mismatch for ${group.responsibility}: expected ${group.totalCents}, got ${payment.amountCents}`,
-        });
-      }
-    }
-  }
-
   const invoiceIds: string[] = [];
   const paymentIds: string[] = [];
+  const endedSessionIds: string[] = [];
+  const spaceIds: string[] = [];
 
   await db.transaction(async (tx) => {
     const checkedOutAt = new Date();
@@ -453,6 +431,47 @@ export async function finalizeCheckout(
         code: "CONFLICT",
         message: "Visit is no longer active — checkout may already be finalized",
       });
+    }
+
+    const activeSessionIds = tx
+      .select({ id: usageSession.id })
+      .from(usageSession)
+      .where(and(eq(usageSession.visitId, input.visitId), eq(usageSession.status, "active")));
+
+    const charges = await tx
+      .select()
+      .from(charge)
+      .where(
+        and(
+          or(eq(charge.visitId, input.visitId), inArray(charge.usageSessionId, activeSessionIds)),
+          isNull(charge.invoiceId),
+        ),
+      );
+
+    const sessions = await tx
+      .select()
+      .from(usageSession)
+      .where(and(eq(usageSession.visitId, input.visitId), eq(usageSession.status, "active")));
+
+    const responsibilityGroups = buildResponsibilityGroups(charges, visitRow);
+    const totals = computeTotals(responsibilityGroups, currency);
+
+    for (const group of responsibilityGroups) {
+      if (group.outcome === "payable" || group.outcome === "host_account") {
+        const payment = paymentsByResponsibility.get(group.responsibility);
+        if (!payment) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Payment required for ${group.responsibility} group (${group.label})`,
+          });
+        }
+        if (payment.amountCents !== group.totalCents) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Payment amount mismatch for ${group.responsibility}: expected ${group.totalCents}, got ${payment.amountCents}`,
+          });
+        }
+      }
     }
 
     for (const group of responsibilityGroups) {
@@ -527,8 +546,6 @@ export async function finalizeCheckout(
       }
     }
 
-    const endedSessionIds: string[] = [];
-    const spaceIds: string[] = [];
     for (const session of sessions) {
       endedSessionIds.push(session.id);
       spaceIds.push(session.spaceId);
@@ -580,7 +597,7 @@ export async function finalizeCheckout(
     visitId: visitRow.id,
     invoiceIds,
     paymentIds,
-    endedSessionIds: sessions.map((s) => s.id),
-    spaceIds: sessions.map((s) => s.spaceId),
+    endedSessionIds,
+    spaceIds,
   };
 }

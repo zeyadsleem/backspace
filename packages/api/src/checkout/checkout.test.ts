@@ -442,6 +442,7 @@ describe("finalizeCheckout", () => {
     mockDbState.setQueue([
       [activeVisit()],
       [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
       [
         {
           id: "c1",
@@ -462,7 +463,6 @@ describe("finalizeCheckout", () => {
         },
       ],
       [],
-      [activeVisit()],
     ]);
     const result = await finalizeCheckout({
       branchId: "branch-main",
@@ -481,8 +481,6 @@ describe("finalizeCheckout", () => {
     mockDbState.setQueue([
       [activeVisit()],
       [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
-      [chargeRow()],
-      [],
       [],
     ]);
 
@@ -499,10 +497,32 @@ describe("finalizeCheckout", () => {
     expect(mockWriteAuditLog).not.toHaveBeenCalled();
   });
 
+  it("claims the visit before collecting final charges", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
+      [chargeRow()],
+      [],
+    ]);
+
+    await finalizeCheckout({
+      branchId: "branch-main",
+      visitId: "visit-active",
+      staffActorUserId: "staff-user-1",
+      payments: [{ responsibility: "visitor", method: "cash", amountCents: 1000 }],
+    });
+
+    const firstClaimOrder = vi.mocked(db.update).mock.invocationCallOrder[0];
+    const firstFinalChargeSelectOrder = vi.mocked(db.select).mock.invocationCallOrder[2];
+    expect(firstClaimOrder).toBeLessThan(firstFinalChargeSelectOrder);
+  });
+
   it("rejects payment amount mismatch", async () => {
     mockDbState.setQueue([
       [activeVisit()],
       [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
       [
         {
           id: "c1",
@@ -523,7 +543,6 @@ describe("finalizeCheckout", () => {
         },
       ],
       [],
-      [activeVisit()],
     ]);
     await expect(
       finalizeCheckout({
@@ -539,6 +558,7 @@ describe("finalizeCheckout", () => {
     mockDbState.setQueue([
       [{ ...activeVisit(), billingResponsibility: "subscription" }],
       [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
       [
         {
           id: "c1",
@@ -559,7 +579,6 @@ describe("finalizeCheckout", () => {
         },
       ],
       [],
-      [activeVisit()],
     ]);
     const result = await finalizeCheckout({
       branchId: "branch-main",
@@ -575,6 +594,7 @@ describe("finalizeCheckout", () => {
     mockDbState.setQueue([
       [activeVisit()],
       [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
       [
         chargeRow({
           id: "pay-later-charge",
@@ -589,7 +609,6 @@ describe("finalizeCheckout", () => {
         }),
       ],
       [],
-      [activeVisit()],
     ]);
 
     const result = await finalizeCheckout({
@@ -607,6 +626,7 @@ describe("finalizeCheckout", () => {
     mockDbState.setQueue([
       [activeVisit()],
       [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
       [
         chargeRow({
           id: "session-charge",
@@ -618,7 +638,6 @@ describe("finalizeCheckout", () => {
         }),
       ],
       [sessionRow()],
-      [activeVisit()],
     ]);
 
     const result = await finalizeCheckout({
@@ -647,6 +666,7 @@ describe("finalizeCheckout", () => {
     mockDbState.setQueue([
       [activeVisit()],
       [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
       [
         {
           id: "c1",
@@ -678,7 +698,6 @@ describe("finalizeCheckout", () => {
           updatedAt: new Date(),
         },
       ],
-      [activeVisit()],
     ]);
     const result = await finalizeCheckout({
       branchId: "branch-main",
@@ -693,6 +712,7 @@ describe("finalizeCheckout", () => {
     mockDbState.setQueue([
       [activeVisit()],
       [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
       [
         {
           id: "c1",
@@ -713,7 +733,6 @@ describe("finalizeCheckout", () => {
         },
       ],
       [],
-      [activeVisit()],
     ]);
     await finalizeCheckout({
       branchId: "branch-main",
