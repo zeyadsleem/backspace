@@ -82,13 +82,14 @@ vi.mock("../audit/audit", () => ({
   writeAuditLog: mockWriteAuditLog,
 }));
 
-import { db } from "@backspace/db";
+import { db, eq, shift } from "@backspace/db";
 import { closeShift, getCurrentShift, openShift } from "./shifts";
 
 function resetMockDb() {
   vi.mocked(db.select).mockClear();
   vi.mocked(db.insert).mockClear();
   vi.mocked(db.update).mockClear();
+  vi.mocked(eq).mockClear();
   vi.mocked(db.transaction as never).mockClear();
   mockWriteAuditLog.mockClear();
   mockDbState.setQueue([]);
@@ -194,6 +195,7 @@ describe("shift service", () => {
     expect(updateSets()).toContainEqual(
       expect.objectContaining({ status: "closed", actualCashCents: 2800 }),
     );
+    expect(eq).toHaveBeenCalledWith(shift.openedByUserId, "staff-user-1");
     expect(mockWriteAuditLog).toHaveBeenCalledWith(
       expect.objectContaining({
         action: "shift.close",

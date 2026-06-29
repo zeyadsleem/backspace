@@ -223,6 +223,7 @@ export async function closeShift(input: CloseShiftInput): Promise<ShiftSummary> 
         and(
           eq(shift.id, input.shiftId),
           eq(shift.branchId, input.branchId),
+          eq(shift.openedByUserId, input.staffActorUserId),
           eq(shift.status, "open"),
         ),
       )

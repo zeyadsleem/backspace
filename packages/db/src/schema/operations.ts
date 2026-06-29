@@ -1,5 +1,14 @@
 import { sql } from "drizzle-orm";
-import { check, index, integer, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  check,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 import { user } from "./auth";
 import { branch, space } from "./workspace";
@@ -36,6 +45,9 @@ export const shift = pgTable(
   },
   (table) => [
     index("shift_branch_status_idx").on(table.branchId, table.status),
+    uniqueIndex("shift_open_staff_branch_unique_idx")
+      .on(table.branchId, table.openedByUserId)
+      .where(sql`${table.status} = 'open'`),
     check(
       "shift_non_negative_cash_check",
       sql`${table.expectedCashCents} >= 0 and (${table.actualCashCents} is null or ${table.actualCashCents} >= 0)`,
