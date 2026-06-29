@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import crypto from "node:crypto";
 
 import {
+  and,
   db,
   eq,
   charge,
@@ -146,6 +147,7 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
 
   let visitIdForCharge: string | null = null;
   let auditVisitId: string | null = null;
+  let visitIdToLock: string | null = null;
   let usageSessionIdForCharge: string | null = null;
   let eventIdForCharge: string | null = null;
   let hostAccountIdForCharge: string | null = null;
@@ -165,6 +167,7 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
       }
       visitIdForCharge = visitRow.id;
       auditVisitId = visitRow.id;
+      visitIdToLock = visitRow.id;
       break;
     }
     case "usage_session": {
@@ -192,6 +195,7 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
         });
       }
       auditVisitId = parentVisit.id;
+      visitIdToLock = parentVisit.id;
       usageSessionIdForCharge = sessionRow.id;
       break;
     }
@@ -226,6 +230,27 @@ export async function addCharge(input: AddChargeInput): Promise<AddChargeResult>
   const chargeId = generateId();
 
   await db.transaction(async (tx) => {
+    if (visitIdToLock) {
+      const lockedVisits = await tx
+        .update(visit)
+        .set({ updatedAt: new Date() })
+        .where(
+          and(
+            eq(visit.id, visitIdToLock),
+            eq(visit.branchId, input.branchId),
+            eq(visit.status, "active"),
+          ),
+        )
+        .returning({ id: visit.id });
+
+      if (lockedVisits.length === 0) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Visit is no longer active — charges can only be added to active visits",
+        });
+      }
+    }
+
     await tx.insert(charge).values({
       id: chargeId,
       visitId: visitIdForCharge,
