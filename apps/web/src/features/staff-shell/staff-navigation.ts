@@ -52,7 +52,6 @@ export const staffNavigationGroups: StaffNavigationGroup[] = [
         requiredPermission: PERMISSIONS.WORKSPACE_READ,
       },
       {
-        disabled: true,
         href: "/calendar",
         icon: CalendarDays,
         label: "Calendar",

@@ -516,6 +516,15 @@ export async function checkInBooking(
   const personId = bookingRow.personId;
   const spaceId = bookingRow.spaceId!;
 
+  // Enforce booking check-in window server-side
+  const now = new Date();
+  if (bookingRow.startsAt > now || bookingRow.endsAt < now) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "Booking window has not started or has ended",
+    });
+  }
+
   await validateNoActiveVisitDb(input.branchId, personId);
   validateNoActiveVisit(input.branchId, personId);
   await validateSpaceAvailableDb(input.branchId, spaceId);
@@ -525,6 +534,20 @@ export async function checkInBooking(
   const sessionId = crypto.randomUUID();
 
   await db.transaction(async (tx) => {
+    // Atomically claim the booking — only succeeds if still confirmed
+    const [claimed] = await tx
+      .update(bookingTable)
+      .set({ status: "checked_in" })
+      .where(and(eq(bookingTable.id, input.bookingId), eq(bookingTable.status, "confirmed")))
+      .returning();
+
+    if (!claimed) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "Booking could not be checked in — it may already be checked in or cancelled",
+      });
+    }
+
     await tx.insert(visit).values({
       id: visitId,
       branchId: input.branchId,
@@ -543,11 +566,6 @@ export async function checkInBooking(
       status: "active",
       startedAt: new Date(),
     });
-
-    await tx
-      .update(bookingTable)
-      .set({ status: "checked_in" })
-      .where(eq(bookingTable.id, input.bookingId));
 
     await writeAuditLog(
       {

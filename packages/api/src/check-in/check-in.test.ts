@@ -249,6 +249,69 @@ describe("checkInBooking", () => {
       ),
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
+
+  it("rejects future booking check-in with server-side time window check", async () => {
+    const futureRow = {
+      id: "seed-booking-confirmed",
+      personId: "seed-person-cashier",
+      spaceId: "seed-space-desk-4",
+      status: "confirmed",
+      branchId: "seed-branch-main",
+      startsAt: new Date(Date.now() + 86_400_000),
+      endsAt: new Date(Date.now() + 86_400_000 + 7_200_000),
+    };
+    mockDbSelect([futureRow]);
+    await expect(
+      checkInBooking(
+        { branchId: "seed-branch-main", bookingId: "seed-booking-confirmed" },
+        "seed-user-cashier",
+      ),
+    ).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+      message: expect.stringContaining("not started or has ended"),
+    });
+  });
+
+  it("rejects past booking check-in with server-side time window check", async () => {
+    const pastRow = {
+      id: "seed-booking-confirmed",
+      personId: "seed-person-cashier",
+      spaceId: "seed-space-desk-4",
+      status: "confirmed",
+      branchId: "seed-branch-main",
+      startsAt: new Date(Date.now() - 86_400_000),
+      endsAt: new Date(Date.now() - 7_200_000),
+    };
+    mockDbSelect([pastRow]);
+    await expect(
+      checkInBooking(
+        { branchId: "seed-branch-main", bookingId: "seed-booking-confirmed" },
+        "seed-user-cashier",
+      ),
+    ).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+      message: expect.stringContaining("not started or has ended"),
+    });
+  });
+
+  it("rejects double check-in when booking is already checked_in", async () => {
+    const checkedInRow = {
+      id: "seed-booking-confirmed",
+      personId: "seed-person-cashier",
+      spaceId: "seed-space-desk-4",
+      status: "checked_in",
+      branchId: "seed-branch-main",
+      startsAt: new Date(Date.now() - 3_600_000),
+      endsAt: new Date(Date.now() + 3_600_000),
+    };
+    mockDbSelect([checkedInRow]);
+    await expect(
+      checkInBooking(
+        { branchId: "seed-branch-main", bookingId: "seed-booking-confirmed" },
+        "seed-user-cashier",
+      ),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
 });
 
 describe("checkInHostedGuest", () => {
