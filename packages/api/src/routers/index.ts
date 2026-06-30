@@ -5,6 +5,7 @@ import { checkoutRouter } from "./checkout";
 import { checkInRouter } from "./check-in";
 import { spacesRouter } from "./spaces";
 import { staffRouter } from "./staff";
+import { shiftsRouter } from "./shifts";
 import { todayRouter } from "./today";
 import { visitsRouter } from "./visits";
 
@@ -23,6 +24,7 @@ export const appRouter = router({
   checkIn: checkInRouter,
   spaces: spacesRouter,
   staff: staffRouter,
+  shifts: shiftsRouter,
   today: todayRouter,
   visits: visitsRouter,
 });

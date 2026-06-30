@@ -36,6 +36,10 @@ function RouteComponent() {
     }),
     enabled: Boolean(selectedVisitId && showCheckoutView),
   });
+  const currentShift = useQuery({
+    ...trpc.shifts.current.queryOptions({ branchId }),
+    enabled: Boolean(staffProfile.data),
+  });
 
   const checkoutFinalize = useMutation(
     trpc.checkout.finalize.mutationOptions({
@@ -45,6 +49,7 @@ function RouteComponent() {
             trpc.visits.getDetail.queryOptions({ branchId, visitId: selectedVisitId }),
           );
         }
+        queryClient.invalidateQueries(trpc.shifts.current.queryOptions({ branchId }));
       },
     }),
   );
@@ -100,6 +105,7 @@ function RouteComponent() {
       (g) => g.outcome === "payable" || g.outcome === "host_account",
     );
     if (needsPayment.length > 0 && !selectedCheckoutMethod) return;
+    if (selectedCheckoutMethod === "cash" && currentShift.data?.status !== "open") return;
     const payments = needsPayment.map((g) => ({
       responsibility: g.responsibility,
       method: (selectedCheckoutMethod || "cash") as
@@ -151,6 +157,16 @@ function RouteComponent() {
       onOpenCheckout={handleOpenCheckout}
       onCloseCheckout={handleCloseCheckout}
       onFinalizeCheckout={handleFinalizeCheckout}
+      cashControl={
+        currentShift.data
+          ? {
+              status: currentShift.data.status,
+              shiftId: currentShift.data.shift?.id,
+              expectedCashCents: currentShift.data.expectedCashCents,
+              cashPaymentCount: currentShift.data.cashPaymentCount,
+            }
+          : null
+      }
     />
   );
 }

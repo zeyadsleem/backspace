@@ -1,8 +1,19 @@
+import type { ReactNode } from "react";
 import { renderToString } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { PERMISSIONS } from "@backspace/api/permissions/constants";
 
+vi.mock("@/components/user-menu", () => ({
+  default: () => <div>User menu</div>,
+}));
+
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ children }: { children: ReactNode }) => <a>{children}</a>,
+  useNavigate: () => () => {},
+}));
+
+import { StaffShell } from "./staff-shell";
 import { PermissionGate, hasPermission } from "./permissions";
 import {
   getActiveShiftLabel,
@@ -46,17 +57,18 @@ describe("staff operations shell registries", () => {
 
     expect(
       staffQuickActions
-        .filter(
-          (action) =>
-            action.label.startsWith("Add") ||
-            action.label.startsWith("Open") ||
-            action.label.startsWith("Close"),
-        )
+        .filter((action) => action.label.startsWith("Add"))
         .every((action) => action.disabled),
     ).toBe(true);
     expect(
       staffQuickActions
-        .filter((action) => action.label.startsWith("New") || action.label.startsWith("Check"))
+        .filter(
+          (action) =>
+            action.label.startsWith("New") ||
+            action.label.startsWith("Check") ||
+            action.label.startsWith("Open") ||
+            action.label.startsWith("Close"),
+        )
         .every((action) => !action.disabled),
     ).toBe(true);
     expect(staffQuickActions.map((action) => action.requiredPermission)).toEqual([
@@ -98,6 +110,71 @@ describe("staff operations shell registries", () => {
     expect(cashierContext.role).toBe("cashier");
     expect(cashierContext.permissions).toContain(PERMISSIONS.CHARGE_ADD);
     expect(cashierContext.permissions).not.toContain(PERMISSIONS.STAFF_MANAGE);
+  });
+
+  it("renders a cash-control panel for open shifts", () => {
+    const markup = renderToString(
+      <StaffShell
+        staffProfile={{ displayName: "Cashier A", roleName: "cashier" }}
+        shiftSummary={{
+          status: "open",
+          shift: {
+            id: "shift-open",
+            branchId: "seed-branch-main",
+            openedByUserId: "staff-user-1",
+            closedByUserId: null,
+            status: "open",
+            openedAt: new Date("2026-06-30T08:00:00Z"),
+            closedAt: null,
+            expectedCashCents: 3250,
+            actualCashCents: null,
+            differenceCents: null,
+            currency: "EGP",
+            notes: null,
+          },
+          expectedCashCents: 3250,
+          cashPaymentCount: 3,
+          actualCashCents: null,
+          differenceCents: null,
+          warnings: [],
+          blockers: [],
+        }}
+      >
+        <main>Child</main>
+      </StaffShell>,
+    );
+    const normalizedMarkup = markup.replaceAll("<!-- -->", "");
+
+    expect(normalizedMarkup).toContain("Cash control");
+    expect(normalizedMarkup).toContain("Expected cash");
+    expect(normalizedMarkup).toContain("32.50 EGP");
+    expect(normalizedMarkup).toContain("3 cash payments");
+    expect(normalizedMarkup).toContain("Actual drawer cash");
+    expect(normalizedMarkup).toContain("Review close");
+  });
+
+  it("renders a no-shift blocker and open-shift action", () => {
+    const markup = renderToString(
+      <StaffShell
+        staffProfile={{ displayName: "Cashier A", roleName: "cashier" }}
+        shiftSummary={{
+          status: "none",
+          shift: null,
+          expectedCashCents: 0,
+          cashPaymentCount: 0,
+          actualCashCents: null,
+          differenceCents: null,
+          warnings: ["No open shift for this branch."],
+          blockers: ["Open a shift before recording cash payments."],
+        }}
+      >
+        <main>Child</main>
+      </StaffShell>,
+    );
+
+    expect(markup).toContain("No active shift");
+    expect(markup).toContain("Open a shift before recording cash payments.");
+    expect(markup).toContain("Open shift");
   });
 });
 
