@@ -1,6 +1,18 @@
 import { TRPCError } from "@trpc/server";
 
-import { and, booking, db, eq, gte, lte, or, person, space, usageSession } from "@backspace/db";
+import {
+  and,
+  booking,
+  db,
+  eq,
+  gte,
+  lte,
+  or,
+  person,
+  space,
+  sql,
+  usageSession,
+} from "@backspace/db";
 
 import { writeAuditLog } from "../audit/audit";
 
@@ -81,6 +93,7 @@ export type CreateBookingInput = {
   currency?: string;
   notes?: string;
   staffActorUserId: string;
+  now?: Date;
 };
 
 export type BookingMutationInput = {
@@ -187,15 +200,18 @@ async function buildCalendarItem(input: {
 
   const canCheckIn =
     CHECK_IN_ELIGIBLE_STATUSES.has(bookingRow.status) &&
-    warnings.length === 0 &&
-    bookingRow.endsAt >= input.now;
+    bookingRow.startsAt <= input.now &&
+    bookingRow.endsAt >= input.now &&
+    warnings.length === 0;
   const disabledReason = !CHECK_IN_ELIGIBLE_STATUSES.has(bookingRow.status)
     ? `Booking status ${bookingRow.status.replaceAll("_", " ")} cannot be checked in`
-    : warnings.length > 0
-      ? "Resolve conflicts before check-in"
+    : bookingRow.startsAt > input.now
+      ? "Booking window has not started"
       : bookingRow.endsAt < input.now
         ? "Booking window has ended"
-        : null;
+        : warnings.length > 0
+          ? "Resolve conflicts before check-in"
+          : null;
 
   return {
     id: bookingRow.id,
@@ -221,7 +237,7 @@ async function buildCalendarItem(input: {
     warnings,
     actions: {
       canCheckIn,
-      canCancel: bookingRow.status === "confirmed" || bookingRow.status === "draft",
+      canCancel: bookingRow.status === "confirmed",
       canMarkNoShow: bookingRow.status === "confirmed" && bookingRow.startsAt <= input.now,
       disabledReason,
     },
@@ -294,6 +310,7 @@ async function assertNoCreateConflict(input: {
   spaceId: string;
   startsAt: Date;
   endsAt: Date;
+  now: Date;
 }): Promise<void> {
   const overlappingBookings = await fetchOverlappingBookings(input);
   if (overlappingBookings.length > 0) {
@@ -302,9 +319,13 @@ async function assertNoCreateConflict(input: {
       message: "Booking overlaps another active booking for this space",
     });
   }
-  const activeSessions = await fetchActiveSessionConflict(input.spaceId);
-  if (activeSessions.length > 0) {
-    throw new TRPCError({ code: "CONFLICT", message: "Space has an active usage session" });
+  // Only block active sessions for immediate/near-immediate bookings.
+  // Future bookings are not blocked by current occupancy (the session may end before the booking starts).
+  if (input.startsAt <= input.now) {
+    const activeSessions = await fetchActiveSessionConflict(input.spaceId);
+    if (activeSessions.length > 0) {
+      throw new TRPCError({ code: "CONFLICT", message: "Space has an active usage session" });
+    }
   }
 }
 
@@ -313,16 +334,23 @@ export async function createBooking(input: CreateBookingInput) {
   const depositCents = input.depositCents ?? 0;
   assertNonNegativeDeposit(depositCents);
   await assertSpaceBelongsToBranch(input.spaceId, input.branchId);
-  await assertNoCreateConflict({
-    spaceId: input.spaceId,
-    startsAt: input.startsAt,
-    endsAt: input.endsAt,
-  });
 
   const bookingId = crypto.randomUUID();
   let created: BookingRow | null = null;
 
   await db.transaction(async (tx) => {
+    // Per-space advisory lock prevents concurrent booking creation races.
+    // A DB exclusion constraint is preferred but not yet available (no migration infra).
+    // hashtext returns signed int4; pg_advisory_xact_lock accepts int8 via implicit cast.
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${input.spaceId}))`);
+
+    await assertNoCreateConflict({
+      spaceId: input.spaceId,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+      now: input.now ?? new Date(),
+    });
+
     const [row] = (await tx
       .insert(booking)
       .values({

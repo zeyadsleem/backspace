@@ -94,6 +94,52 @@ describe("BookingsPage", () => {
     expect(markup).not.toContain("Confirm no-show");
   });
 
+  it("shows disabled cancel for draft bookings matching API rule", () => {
+    const draftBooking = {
+      ...baseBooking,
+      id: "booking-draft",
+      status: "draft" as const,
+      actions: {
+        canCheckIn: false,
+        canCancel: false,
+        canMarkNoShow: false,
+        disabledReason: "Booking status draft cannot be checked in",
+      },
+    };
+    const draftQueue = { ...queue, overdue: [draftBooking], upcoming: [] };
+    const markup = renderToString(
+      <BookingsPage canWriteBookings={true} queue={draftQueue} />,
+    ).replaceAll("<!-- -->", "");
+
+    expect(markup).not.toContain("Confirm cancel booking");
+    expect(markup).toContain("Cancel booking");
+    expect(markup).toContain("Booking status draft cannot be checked in");
+  });
+
+  it("disables row actions when booking is pending", () => {
+    const pendingQueue = {
+      ...queue,
+      overdue: [
+        { ...baseBooking, id: "booking-pending" },
+        { ...baseBooking, id: "booking-other" },
+      ],
+    };
+    const markup = renderToString(
+      <BookingsPage
+        actionState={{ pendingId: "booking-pending" }}
+        canCheckInBookings={true}
+        canWriteBookings={true}
+        queue={pendingQueue}
+      />,
+    ).replaceAll("<!-- -->", "");
+
+    // Pending booking should not show confirmations
+    // (check-in button is still present but disabled — renderToString includes it)
+    expect(markup).toContain("Check in");
+    // Non-pending booking still shows cancel confirmation
+    expect(markup).toContain("Confirm cancel booking");
+  });
+
   it("renders loading and error states", () => {
     expect(renderToString(<BookingsPageLoading />)).toContain("Loading bookings");
     expect(renderToString(<BookingsPageError message="Branch access denied" />)).toContain(

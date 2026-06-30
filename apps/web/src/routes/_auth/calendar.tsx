@@ -56,6 +56,16 @@ function RouteComponent() {
     }),
   );
 
+  // Track the currently mutating booking so row-level actions can be disabled during pending
+  const pendingId =
+    checkIn.isPending && checkIn.variables?.bookingId
+      ? checkIn.variables.bookingId
+      : cancel.isPending && cancel.variables?.bookingId
+        ? cancel.variables.bookingId
+        : noShow.isPending && noShow.variables?.bookingId
+          ? noShow.variables.bookingId
+          : null;
+
   if (staffProfile.isLoading || queue.isLoading) return <BookingsPageLoading />;
   if (!canReadBookings) return <BookingsPageError message="Requires booking:read permission" />;
   if (queue.error) return <BookingsPageError message={queue.error.message} />;
@@ -64,7 +74,7 @@ function RouteComponent() {
   return (
     <BookingsPage
       actionState={{
-        pendingId: null,
+        pendingId,
         errorMessage: checkIn.error?.message ?? cancel.error?.message ?? noShow.error?.message,
       }}
       canCheckInBookings={canCheckInBookings}

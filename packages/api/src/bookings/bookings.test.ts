@@ -6,6 +6,7 @@ const { mockDbState, mockWriteAuditLog } = vi.hoisted(() => {
   let insertValues: unknown[] = [];
   let updateSets: unknown[] = [];
   const auditLog = vi.fn().mockResolvedValue(undefined);
+  const execute = vi.fn().mockResolvedValue(undefined);
   return {
     mockWriteAuditLog: auditLog,
     mockDbState: {
@@ -14,6 +15,9 @@ const { mockDbState, mockWriteAuditLog } = vi.hoisted(() => {
       },
       get updateSets() {
         return updateSets;
+      },
+      get execute() {
+        return execute;
       },
       setQueue: (results: unknown[][]) => {
         selectQueue = [...results];
@@ -58,6 +62,7 @@ vi.mock("@backspace/db", () => {
     select: vi.fn().mockReturnValue(chainable),
     insert: vi.fn().mockReturnValue(chainable),
     update: vi.fn().mockReturnValue(chainable),
+    execute: mockDbState.execute,
   };
   mockDb.transaction = vi.fn(async (fn: (tx: unknown) => Promise<unknown>) => fn(mockDb));
   return {
@@ -68,6 +73,11 @@ vi.mock("@backspace/db", () => {
     inArray: vi.fn((a: unknown, b: unknown) => ({ inArray: true, a, b })),
     lte: vi.fn((a: unknown, b: unknown) => ({ lte: true, a, b })),
     or: vi.fn((...args: unknown[]) => ({ or: true, args })),
+    sql: vi.fn((strings: TemplateStringsArray, ...values: unknown[]) => ({
+      sql: true,
+      strings,
+      values,
+    })),
     booking: {
       id: "booking.id",
       personId: "booking.personId",
@@ -183,6 +193,7 @@ describe("booking service", () => {
 
     const result = await getBookingCalendar({
       branchId: "branch-main",
+      now: new Date("2026-06-30T10:00:00Z"),
       rangeStart: new Date("2026-06-30T00:00:00Z"),
       rangeEnd: new Date("2026-06-30T23:59:59Z"),
     });
@@ -209,6 +220,7 @@ describe("booking service", () => {
 
     const result = await getBookingCalendar({
       branchId: "branch-main",
+      now: new Date("2026-06-30T10:00:00Z"),
       rangeStart: new Date("2026-06-30T00:00:00Z"),
       rangeEnd: new Date("2026-06-30T23:59:59Z"),
     });
@@ -268,6 +280,7 @@ describe("booking service", () => {
   });
 
   it("creates a confirmed booking transactionally and writes audit", async () => {
+    // fetchSpace → tx: execute(advisory lock) → fetchOverlappingBookings → fetchActiveSession → insert returning
     mockDbState.setQueue([[spaceRow()], [], [], [bookingRow({ id: "test-booking-id" })]]);
 
     const result = await createBooking({
@@ -278,10 +291,12 @@ describe("booking service", () => {
       endsAt: end,
       depositCents: 1000,
       staffActorUserId: "staff-user-1",
+      now: new Date("2026-06-30T10:00:00Z"),
     });
 
     expect(result.id).toBe("test-booking-id");
     expect(db.transaction).toHaveBeenCalledTimes(1);
+    expect(mockDbState.execute).toHaveBeenCalled();
     expect(insertedRows()[0]).toMatchObject({
       id: "test-booking-id",
       personId: "person-1",
@@ -331,6 +346,7 @@ describe("booking service", () => {
   });
 
   it("rejects create conflicts without audit", async () => {
+    // fetchSpace → tx: execute(lock) → fetchOverlappingBookings finds existing → throws
     mockDbState.setQueue([[spaceRow()], [bookingRow({ id: "existing" })]]);
 
     await expect(
@@ -341,6 +357,7 @@ describe("booking service", () => {
         startsAt: start,
         endsAt: end,
         staffActorUserId: "staff-user-1",
+        now: new Date("2026-06-30T10:00:00Z"),
       }),
     ).rejects.toMatchObject({ code: "CONFLICT" });
 
@@ -376,5 +393,98 @@ describe("booking service", () => {
     expect(updateSets()).toContainEqual(expect.objectContaining({ status: "cancelled" }));
     expect(updateSets()).toContainEqual(expect.objectContaining({ status: "no_show" }));
     expect(mockWriteAuditLog).toHaveBeenCalledTimes(2);
+  });
+
+  it("prevents check-in before the booking window starts", async () => {
+    mockDbState.setQueue([
+      [bookingRow({ startsAt: new Date("2026-06-30T12:00:00Z") })],
+      [spaceRow()],
+      [personRow()],
+      [],
+      [],
+    ]);
+
+    const result = await getBookingCalendar({
+      branchId: "branch-main",
+      now: new Date("2026-06-30T10:00:00Z"),
+      rangeStart: new Date("2026-06-30T00:00:00Z"),
+      rangeEnd: new Date("2026-06-30T23:59:59Z"),
+    });
+
+    expect(result.items[0]?.actions.canCheckIn).toBe(false);
+    expect(result.items[0]?.actions.disabledReason).toContain("not started");
+  });
+
+  it("prevents check-in after the booking window ends", async () => {
+    mockDbState.setQueue([
+      [bookingRow({ endsAt: new Date("2026-06-30T08:00:00Z") })],
+      [spaceRow()],
+      [personRow()],
+      [],
+      [],
+    ]);
+
+    const result = await getBookingCalendar({
+      branchId: "branch-main",
+      now: new Date("2026-06-30T10:00:00Z"),
+      rangeStart: new Date("2026-06-30T00:00:00Z"),
+      rangeEnd: new Date("2026-06-30T23:59:59Z"),
+    });
+
+    expect(result.items[0]?.actions.canCheckIn).toBe(false);
+    expect(result.items[0]?.actions.disabledReason).toContain("ended");
+  });
+
+  it("does not expose cancel action for draft bookings", async () => {
+    mockDbState.setQueue([[bookingRow({ status: "draft" })], [spaceRow()], [personRow()], [], []]);
+
+    const result = await getBookingCalendar({
+      branchId: "branch-main",
+      now: new Date("2026-06-30T10:00:00Z"),
+      rangeStart: new Date("2026-06-30T00:00:00Z"),
+      rangeEnd: new Date("2026-06-30T23:59:59Z"),
+    });
+
+    expect(result.items[0]?.actions.canCancel).toBe(false);
+  });
+
+  it("allows future booking creation despite current active session", async () => {
+    // fetchSpace → tx: execute(lock) → fetchOverlappingBookings → fetchActiveSession skipped
+    // (startsAt 14:00 > now 10:00, so active session is not a conflict)
+    mockDbState.setQueue([[spaceRow()], [], [bookingRow({ id: "test-booking-id" })]]);
+
+    const result = await createBooking({
+      branchId: "branch-main",
+      personId: "person-1",
+      spaceId: "space-1",
+      startsAt: new Date("2026-06-30T14:00:00Z"),
+      endsAt: new Date("2026-06-30T16:00:00Z"),
+      staffActorUserId: "staff-user-1",
+      now: new Date("2026-06-30T10:00:00Z"),
+    });
+
+    expect(result.id).toBe("test-booking-id");
+    expect(db.transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("blocks immediate booking creation when space has active session", async () => {
+    // fetchSpace → tx: execute(lock) → fetchOverlappingBookings → fetchActiveSession finds one → throws
+    mockDbState.setQueue([
+      [spaceRow()],
+      [],
+      [{ id: "session-1", spaceId: "space-1", status: "active" }],
+    ]);
+
+    await expect(
+      createBooking({
+        branchId: "branch-main",
+        personId: "person-1",
+        spaceId: "space-1",
+        startsAt: new Date("2026-06-30T10:00:00Z"),
+        endsAt: new Date("2026-06-30T12:00:00Z"),
+        staffActorUserId: "staff-user-1",
+        now: new Date("2026-06-30T10:00:00Z"),
+      }),
+    ).rejects.toMatchObject({ code: "CONFLICT" });
   });
 });
