@@ -1,5 +1,6 @@
 import { protectedProcedure, publicProcedure, router } from "../index";
 
+import { bookingsRouter } from "./bookings";
 import { chargesRouter } from "./charges";
 import { checkoutRouter } from "./checkout";
 import { checkInRouter } from "./check-in";
@@ -19,6 +20,7 @@ export const appRouter = router({
       user: ctx.session.user,
     };
   }),
+  bookings: bookingsRouter,
   charges: chargesRouter,
   checkout: checkoutRouter,
   checkIn: checkInRouter,
