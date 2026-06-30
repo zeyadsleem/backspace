@@ -22,6 +22,8 @@ function RouteComponent() {
   const branchId = shellContext.currentBranchId;
   const permissions = shellContext.permissions;
   const canReadBookings = hasPermission(permissions, PERMISSIONS.BOOKING_READ);
+  const canCheckInBookings = hasPermission(permissions, PERMISSIONS.BOOKING_CHECK_IN);
+  const canWriteBookings = hasPermission(permissions, PERMISSIONS.BOOKING_CREATE);
 
   const queueOptions = trpc.bookings.queue.queryOptions({ branchId });
   const queue = useQuery({ ...queueOptions, enabled: canReadBookings });
@@ -65,6 +67,8 @@ function RouteComponent() {
         pendingId: null,
         errorMessage: checkIn.error?.message ?? cancel.error?.message ?? noShow.error?.message,
       }}
+      canCheckInBookings={canCheckInBookings}
+      canWriteBookings={canWriteBookings}
       queue={queue.data}
       onCancel={(bookingId) => cancel.mutate({ branchId, bookingId })}
       onCheckIn={(bookingId) => checkIn.mutate({ branchId, bookingId })}

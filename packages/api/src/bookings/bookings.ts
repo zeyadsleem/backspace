@@ -59,6 +59,7 @@ export type BookingCalendarItem = {
 
 export type BookingCalendarInput = {
   branchId: string;
+  now?: Date;
   rangeStart: Date;
   rangeEnd: Date;
   status?: BookingStatus;
@@ -221,7 +222,7 @@ async function buildCalendarItem(input: {
     actions: {
       canCheckIn,
       canCancel: bookingRow.status === "confirmed" || bookingRow.status === "draft",
-      canMarkNoShow: bookingRow.status === "confirmed",
+      canMarkNoShow: bookingRow.status === "confirmed" && bookingRow.startsAt <= input.now,
       disabledReason,
     },
   };
@@ -229,6 +230,7 @@ async function buildCalendarItem(input: {
 
 export async function getBookingCalendar(input: BookingCalendarInput) {
   assertValidRange(input.rangeStart, input.rangeEnd);
+  const now = input.now ?? new Date();
   const rows = await db
     .select()
     .from(booking)
@@ -244,7 +246,7 @@ export async function getBookingCalendar(input: BookingCalendarInput) {
 
   const items: BookingCalendarItem[] = [];
   for (const bookingRow of rows as BookingRow[]) {
-    const item = await buildCalendarItem({ bookingRow, branchId: input.branchId, now: new Date() });
+    const item = await buildCalendarItem({ bookingRow, branchId: input.branchId, now });
     if (item) items.push(item);
   }
 
@@ -257,6 +259,7 @@ export async function getBookingQueue(input: BookingQueueInput) {
   const endOfDay = new Date(startOfDay.getTime() + 86_400_000 - 1);
   const calendar = await getBookingCalendar({
     branchId: input.branchId,
+    now,
     rangeStart: startOfDay,
     rangeEnd: endOfDay,
   });

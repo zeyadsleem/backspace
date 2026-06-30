@@ -248,6 +248,25 @@ describe("booking service", () => {
     expect(result.upcoming.map((item) => item.id)).toEqual(["upcoming"]);
   });
 
+  it("does not expose no-show action before the booking arrival window", async () => {
+    mockDbState.setQueue([
+      [bookingRow({ startsAt: new Date("2026-06-30T12:00:00Z") })],
+      [spaceRow()],
+      [personRow()],
+      [],
+      [],
+    ]);
+
+    const result = await getBookingCalendar({
+      branchId: "branch-main",
+      now: new Date("2026-06-30T10:00:00Z"),
+      rangeStart: new Date("2026-06-30T00:00:00Z"),
+      rangeEnd: new Date("2026-06-30T23:59:59Z"),
+    });
+
+    expect(result.items[0]?.actions.canMarkNoShow).toBe(false);
+  });
+
   it("creates a confirmed booking transactionally and writes audit", async () => {
     mockDbState.setQueue([[spaceRow()], [], [], [bookingRow({ id: "test-booking-id" })]]);
 

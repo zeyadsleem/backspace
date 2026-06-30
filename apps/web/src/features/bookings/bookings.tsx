@@ -51,12 +51,16 @@ export type BookingActionState = {
 export function BookingsPage({
   queue,
   actionState,
+  canCheckInBookings = true,
+  canWriteBookings = true,
   onCancel,
   onCheckIn,
   onMarkNoShow,
 }: {
   queue: BookingQueueData;
   actionState?: BookingActionState;
+  canCheckInBookings?: boolean;
+  canWriteBookings?: boolean;
   onCancel?: (bookingId: string) => void;
   onCheckIn?: (bookingId: string) => void;
   onMarkNoShow?: (bookingId: string) => void;
@@ -90,6 +94,8 @@ export function BookingsPage({
         <div className="flex flex-col gap-4">
           <BookingSection
             actionState={actionState}
+            canCheckInBookings={canCheckInBookings}
+            canWriteBookings={canWriteBookings}
             items={queue.overdue}
             onCancel={onCancel}
             onCheckIn={onCheckIn}
@@ -99,6 +105,8 @@ export function BookingsPage({
           />
           <BookingSection
             actionState={actionState}
+            canCheckInBookings={canCheckInBookings}
+            canWriteBookings={canWriteBookings}
             items={queue.upcoming}
             onCancel={onCancel}
             onCheckIn={onCheckIn}
@@ -119,6 +127,8 @@ export function BookingsPage({
 
 function BookingSection({
   actionState,
+  canCheckInBookings = true,
+  canWriteBookings = true,
   compact = false,
   items,
   onCancel,
@@ -128,6 +138,8 @@ function BookingSection({
   tone = "neutral",
 }: {
   actionState?: BookingActionState;
+  canCheckInBookings?: boolean;
+  canWriteBookings?: boolean;
   compact?: boolean;
   items: BookingCalendarItem[];
   onCancel?: (bookingId: string) => void;
@@ -163,6 +175,8 @@ function BookingSection({
               <BookingRow
                 key={item.id}
                 actionState={actionState}
+                canCheckInBookings={canCheckInBookings}
+                canWriteBookings={canWriteBookings}
                 compact={compact}
                 item={item}
                 onCancel={onCancel}
@@ -179,6 +193,8 @@ function BookingSection({
 
 function BookingRow({
   actionState,
+  canCheckInBookings,
+  canWriteBookings,
   compact,
   item,
   onCancel,
@@ -186,6 +202,8 @@ function BookingRow({
   onMarkNoShow,
 }: {
   actionState?: BookingActionState;
+  canCheckInBookings: boolean;
+  canWriteBookings: boolean;
   compact: boolean;
   item: BookingCalendarItem;
   onCancel?: (bookingId: string) => void;
@@ -193,6 +211,14 @@ function BookingRow({
   onMarkNoShow?: (bookingId: string) => void;
 }) {
   const pending = actionState?.pendingId === item.id;
+  const canCheckIn = item.actions.canCheckIn && canCheckInBookings;
+  const canCancel = item.actions.canCancel && canWriteBookings;
+  const canMarkNoShow = item.actions.canMarkNoShow && canWriteBookings;
+  const disabledReasons = [
+    !canCheckInBookings ? "Requires booking:check_in permission" : null,
+    !canWriteBookings ? "Requires booking:create permission" : null,
+    item.actions.disabledReason,
+  ].filter((reason): reason is string => Boolean(reason));
 
   return (
     <li className="rounded-2xl border border-border px-3 py-3">
@@ -213,14 +239,14 @@ function BookingRow({
           {!compact ? (
             <div className="flex flex-wrap gap-2">
               <Button
-                disabled={!item.actions.canCheckIn || pending}
+                disabled={!canCheckIn || pending}
                 onClick={() => onCheckIn?.(item.id)}
                 size="sm"
                 type="button"
               >
                 Check in
               </Button>
-              {item.actions.canCancel && !pending ? (
+              {canCancel && !pending ? (
                 <details className="basis-full rounded-2xl border border-border bg-muted/40 px-3 py-2 text-sm">
                   <summary className="cursor-pointer font-medium">Cancel booking</summary>
                   <div className="mt-2 flex flex-col gap-2 text-muted-foreground">
@@ -240,7 +266,7 @@ function BookingRow({
                   Cancel booking
                 </Button>
               )}
-              {item.actions.canMarkNoShow && !pending ? (
+              {canMarkNoShow && !pending ? (
                 <details className="basis-full rounded-2xl border border-border bg-muted/40 px-3 py-2 text-sm">
                   <summary className="cursor-pointer font-medium">Mark no-show</summary>
                   <div className="mt-2 flex flex-col gap-2 text-muted-foreground">
@@ -276,11 +302,14 @@ function BookingRow({
           </div>
         ) : null}
 
-        {item.actions.disabledReason ? (
-          <p className="rounded-2xl bg-muted px-3 py-2 text-sm text-muted-foreground">
-            {item.actions.disabledReason}
+        {disabledReasons.map((reason) => (
+          <p
+            key={`${item.id}-${reason}`}
+            className="rounded-2xl bg-muted px-3 py-2 text-sm text-muted-foreground"
+          >
+            {reason}
           </p>
-        ) : null}
+        ))}
       </div>
     </li>
   );

@@ -83,6 +83,17 @@ describe("BookingsPage", () => {
     expect(markup).toContain("Confirm no-show");
   });
 
+  it("hides mutation confirmations for read-only booking users", () => {
+    const markup = renderToString(
+      <BookingsPage canCheckInBookings={false} canWriteBookings={false} queue={queue} />,
+    ).replaceAll("<!-- -->", "");
+
+    expect(markup).toContain("Requires booking:check_in permission");
+    expect(markup).toContain("Requires booking:create permission");
+    expect(markup).not.toContain("Confirm cancel booking");
+    expect(markup).not.toContain("Confirm no-show");
+  });
+
   it("renders loading and error states", () => {
     expect(renderToString(<BookingsPageLoading />)).toContain("Loading bookings");
     expect(renderToString(<BookingsPageError message="Branch access denied" />)).toContain(
