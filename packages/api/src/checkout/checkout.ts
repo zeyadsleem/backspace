@@ -183,6 +183,24 @@ function branchCurrency(branch: BranchRow): string {
   return branch.currency ?? "EGP";
 }
 
+function assertSingleCurrency(charges: ChargeRow[], branchCurrency: string): void {
+  if (charges.length === 0) return;
+  const currencies = new Set(charges.map((c) => c.currency));
+  if (currencies.size > 1) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Mixed currencies in checkout: ${[...currencies].join(", ")}`,
+    });
+  }
+  const chargeCurrency = currencies.values().next().value as string;
+  if (chargeCurrency !== branchCurrency) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `Charge currency ${chargeCurrency} does not match branch currency ${branchCurrency}`,
+    });
+  }
+}
+
 async function fetchVisit(branchId: string, visitId: string): Promise<VisitRow> {
   const [row] = await db
     .select()
@@ -216,17 +234,17 @@ async function fetchBranch(branchId: string): Promise<BranchRow> {
 }
 
 async function fetchUninvoicedCharges(visitId: string): Promise<ChargeRow[]> {
-  const activeSessionIds = db
+  const visitSessionIds = db
     .select({ id: usageSession.id })
     .from(usageSession)
-    .where(and(eq(usageSession.visitId, visitId), eq(usageSession.status, "active")));
+    .where(eq(usageSession.visitId, visitId));
 
   return db
     .select()
     .from(charge)
     .where(
       and(
-        or(eq(charge.visitId, visitId), inArray(charge.usageSessionId, activeSessionIds)),
+        or(eq(charge.visitId, visitId), inArray(charge.usageSessionId, visitSessionIds)),
         isNull(charge.invoiceId),
       ),
     );
@@ -348,11 +366,23 @@ function computeTotals(
   };
 }
 
+const SETTLEMENT_METHODS = new Set([
+  "cash",
+  "card_terminal",
+  "wallet",
+  "bank_transfer",
+  "instapay",
+]);
+
 function invoiceStatusForGroup(
   group: CheckoutResponsibilityGroup,
   paymentInput: CheckoutPaymentInput | undefined,
 ): "finalized" | "paid" {
-  if (paymentInput && paymentInput.amountCents >= group.totalCents) {
+  if (
+    paymentInput &&
+    SETTLEMENT_METHODS.has(paymentInput.method) &&
+    paymentInput.amountCents >= group.totalCents
+  ) {
     return "paid";
   }
   return "finalized";
@@ -410,6 +440,7 @@ export async function previewCheckout(input: CheckoutPreviewInput): Promise<Chec
   const currency = branchCurrency(branchRow);
 
   const charges = await fetchUninvoicedCharges(input.visitId);
+  assertSingleCurrency(charges, currency);
   const sessions = await fetchActiveSessions(input.visitId);
 
   const lineItems: CheckoutLineItem[] = charges.map((c) => ({
@@ -487,20 +518,22 @@ export async function finalizeCheckout(
       });
     }
 
-    const activeSessionIds = tx
+    const visitSessionIds = tx
       .select({ id: usageSession.id })
       .from(usageSession)
-      .where(and(eq(usageSession.visitId, input.visitId), eq(usageSession.status, "active")));
+      .where(eq(usageSession.visitId, input.visitId));
 
     const charges = await tx
       .select()
       .from(charge)
       .where(
         and(
-          or(eq(charge.visitId, input.visitId), inArray(charge.usageSessionId, activeSessionIds)),
+          or(eq(charge.visitId, input.visitId), inArray(charge.usageSessionId, visitSessionIds)),
           isNull(charge.invoiceId),
         ),
       );
+
+    assertSingleCurrency(charges, currency);
 
     const sessions = await tx
       .select()
@@ -517,6 +550,12 @@ export async function finalizeCheckout(
           throw new TRPCError({
             code: "BAD_REQUEST",
             message: `Payment required for ${group.responsibility} group (${group.label})`,
+          });
+        }
+        if (payment.method === "mixed") {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Use multiple concrete payment records instead of method "mixed"`,
           });
         }
         if (payment.amountCents !== group.totalCents) {
