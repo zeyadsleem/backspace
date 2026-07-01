@@ -18,8 +18,8 @@ describe("getTodayOverview", () => {
     expect(overview.summary.occupancy.value).toBe("4/9");
     expect(overview.summary.occupancy.detail).toContain("44%");
     expect(overview.summary.upcomingBookings.value).toBe(2);
-    expect(overview.summary.openBills.value).toBe("310.00 EGP");
-    expect(overview.summary.openBills.amountMinor).toBe(31_000);
+    expect(overview.summary.openBills.value).toBe("300.00 EGP");
+    expect(overview.summary.openBills.amountMinor).toBe(30_000);
     expect(overview.summary.cleaning.value).toBe(3);
     expect(overview.summary.maintenance.value).toBe(1);
     expect(overview.summary.pendingApprovals.value).toBe(1);

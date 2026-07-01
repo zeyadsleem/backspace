@@ -266,7 +266,8 @@ function toDetailCharge(charge: SeedCharge) {
 }
 
 function signedAmount(charge: SeedCharge): number {
-  return charge.type === "discount" ? -charge.amountCents : charge.amountCents;
+  const unit = charge.type === "discount" ? -charge.amountCents : charge.amountCents;
+  return unit * charge.quantity;
 }
 
 function openInvoiceForCharges(charges: SeedCharge[]) {

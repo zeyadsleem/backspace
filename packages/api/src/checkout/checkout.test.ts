@@ -420,6 +420,61 @@ describe("previewCheckout", () => {
     expect(db.update).not.toHaveBeenCalled();
     expect(db.transaction).not.toHaveBeenCalled();
   });
+
+  it("collects usage-session-targeted charges for ended sessions", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [
+        chargeRow({
+          id: "ended-session-charge",
+          visitId: null,
+          usageSessionId: "session-ended",
+          label: "Past desk usage",
+          type: "service",
+          amountCents: 8000,
+        }),
+      ],
+      [sessionRow({ id: "session-ended", status: "ended", endedAt: new Date() })],
+    ]);
+
+    const result = await previewCheckout({ branchId: "branch-main", visitId: "visit-active" });
+
+    expect(result.lineItems).toEqual([
+      expect.objectContaining({
+        chargeId: "ended-session-charge",
+        label: "Past desk usage",
+        amountCents: 8000,
+      }),
+    ]);
+  });
+
+  it("rejects mixed currencies", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [
+        chargeRow({ id: "c-egp", currency: "EGP", amountCents: 1000 }),
+        chargeRow({ id: "c-usd", currency: "USD", amountCents: 500 }),
+      ],
+      [],
+    ]);
+    await expect(
+      previewCheckout({ branchId: "branch-main", visitId: "visit-active" }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("rejects charge currency not matching branch currency", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [chargeRow({ id: "c-usd", currency: "USD", amountCents: 500 })],
+      [],
+    ]);
+    await expect(
+      previewCheckout({ branchId: "branch-main", visitId: "visit-active" }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
 });
 
 describe("finalizeCheckout", () => {
@@ -796,6 +851,106 @@ describe("finalizeCheckout", () => {
       payments: [{ responsibility: "visitor", method: "card_terminal", amountCents: 1000 }],
     });
     expect(result.endedSessionIds).toContain("session-1");
+  });
+
+  it("collects usage-session-targeted charges for ended sessions during finalize", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
+      [
+        chargeRow({
+          id: "ended-session-charge",
+          visitId: null,
+          usageSessionId: "session-ended",
+          label: "Past desk usage",
+          type: "service",
+          amountCents: 8000,
+        }),
+      ],
+      [sessionRow({ id: "session-ended", status: "ended", endedAt: new Date() })],
+    ]);
+
+    const result = await finalizeCheckout({
+      branchId: "branch-main",
+      visitId: "visit-active",
+      staffActorUserId: "staff-user-1",
+      payments: [{ responsibility: "visitor", method: "card_terminal", amountCents: 8000 }],
+    });
+
+    expect(result.invoiceIds).toHaveLength(1);
+    expect(insertedRows()).toContainEqual(
+      expect.objectContaining({ chargeId: "ended-session-charge" }),
+    );
+  });
+
+  it("does not mark invoice paid for non-settlement payment methods", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
+      [chargeRow()],
+      [],
+    ]);
+
+    const result = await finalizeCheckout({
+      branchId: "branch-main",
+      visitId: "visit-active",
+      staffActorUserId: "staff-user-1",
+      payments: [{ responsibility: "visitor", method: "pay_later", amountCents: 1000 }],
+    });
+
+    expect(result.invoiceIds).toHaveLength(1);
+    expect(insertedRows()[0]).toMatchObject({ status: "finalized" });
+  });
+
+  it("rejects method mixed for payable checkout", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
+      [chargeRow()],
+      [],
+    ]);
+
+    await expect(
+      finalizeCheckout({
+        branchId: "branch-main",
+        visitId: "visit-active",
+        staffActorUserId: "staff-user-1",
+        payments: [{ responsibility: "visitor", method: "mixed", amountCents: 1000 }],
+      }),
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+
+    expect(insertedRows()).toHaveLength(0);
+  });
+
+  it("accepts split settlement with two concrete payment methods across responsibility groups", async () => {
+    mockDbState.setQueue([
+      [activeVisit()],
+      [{ id: "branch-main", name: "Downtown", timezone: "Africa/Cairo", currency: "EGP" }],
+      [activeVisit()],
+      [
+        chargeRow({ id: "c-visitor", billingResponsibility: "visitor", amountCents: 2000 }),
+        chargeRow({ id: "c-host", billingResponsibility: "host", amountCents: 5000 }),
+      ],
+      [],
+      [shiftRow()],
+      [shiftRow()],
+    ]);
+
+    const result = await finalizeCheckout({
+      branchId: "branch-main",
+      visitId: "visit-active",
+      staffActorUserId: "staff-user-1",
+      payments: [
+        { responsibility: "visitor", method: "cash", amountCents: 2000 },
+        { responsibility: "host", method: "card_terminal", amountCents: 5000 },
+      ],
+    });
+
+    expect(result.invoiceIds).toHaveLength(2);
+    expect(result.paymentIds).toHaveLength(2);
   });
 
   it("writes audit on success", async () => {
