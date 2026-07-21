@@ -1,0 +1,37 @@
+{
+  "name": "backspace",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "check-types": "turbo run check-types",
+    "dev:web": "turbo run dev -F web",
+    "dev:server": "turbo run dev -F server",
+    "db:push": "turbo run db:push -F @backspace/db",
+    "db:studio": "turbo run db:studio -F @backspace/db",
+    "db:generate": "turbo run db:generate -F @backspace/db",
+    "db:migrate": "turbo run db:migrate -F @backspace/db",
+    "db:local": "turbo run db:local -F @backspace/db",
+    "check": "oxlint && oxfmt --write"
+  },
+  "dependencies": {
+    "@backspace/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@backspace/config": "workspace:*",
+    "@types/node": "^22.13.14",
+    "lefthook": "^2.1.9",
+    "oxfmt": "^0.57.0",
+    "oxlint": "^1.72.0",
+    "turbo": "^2.10.2",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@11.15.0"
+}
